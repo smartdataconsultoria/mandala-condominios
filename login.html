@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CondoGest | Acesse sua conta</title>
+  <title>Edifício Mandala | Acesse sua conta</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
     :root {
       --bg-dark:     #0a0e1a;
@@ -32,14 +32,13 @@
       background: var(--bg-dark);
     }
 
-    /* fundo geométrico animado */
     body::before {
       content: '';
       position: fixed;
       inset: 0;
       background:
-        radial-gradient(ellipse at 20% 30%, rgba(245,166,35,0.07) 0%, transparent 55%),
-        radial-gradient(ellipse at 80% 70%, rgba(79,142,247,0.06) 0%, transparent 50%);
+        radial-gradient(ellipse at 20% 30%, rgba(245,166,35,0.08) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 70%, rgba(79,142,247,0.05) 0%, transparent 50%);
       z-index: 0;
       pointer-events: none;
     }
@@ -49,14 +48,13 @@
       position: fixed;
       inset: 0;
       background-image:
-        linear-gradient(rgba(245,166,35,0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(245,166,35,0.035) 1px, transparent 1px);
+        linear-gradient(rgba(245,166,35,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,166,35,0.03) 1px, transparent 1px);
       background-size: 44px 44px;
       z-index: 0;
       pointer-events: none;
     }
 
-    /* ─── CARD ────────────────────────────────────────────────────── */
     .card {
       background: rgba(17, 24, 39, 0.92);
       backdrop-filter: blur(16px);
@@ -68,7 +66,7 @@
       max-width: 430px;
       position: relative;
       z-index: 1;
-      box-shadow: 0 28px 72px rgba(0,0,0,0.65), 0 0 0 1px rgba(245,166,35,0.06);
+      box-shadow: 0 28px 72px rgba(0,0,0,0.65), 0 0 0 1px rgba(245,166,35,0.05);
       animation: slideUp 0.5s cubic-bezier(.22,.68,0,1.2);
     }
 
@@ -77,15 +75,14 @@
       to   { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    /* ─── LOGO ────────────────────────────────────────────────────── */
     .logo-area {
       text-align: center;
-      margin-bottom: 32px;
+      margin-bottom: 36px;
     }
 
     .logo-icon {
-      width: 66px;
-      height: 66px;
+      width: 68px;
+      height: 68px;
       background: linear-gradient(135deg, var(--accent), var(--accent-dark));
       border-radius: 18px;
       display: inline-flex;
@@ -105,24 +102,42 @@
       pointer-events: none;
     }
 
-    .logo-icon svg { width: 34px; height: 34px; fill: #fff; }
+    /* ícone: prédio estilizado */
+    .logo-icon svg { width: 36px; height: 36px; }
 
     .logo-area h1 {
-      font-size: 26px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: -0.4px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
       margin-bottom: 4px;
     }
 
-    .logo-area h1 span { color: var(--accent); }
+    .logo-area h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
 
     .logo-area p {
       font-size: 13px;
       color: var(--text-muted);
+      margin-top: 5px;
     }
 
-    /* ─── PERFIL SELETOR ──────────────────────────────────────────── */
+    /* ── PERFIL ─────────────────────────────── */
+    .perfil-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 8px;
+    }
+
     .perfil-wrap {
       display: flex;
       gap: 8px;
@@ -144,28 +159,10 @@
       transition: all 0.2s;
     }
 
-    .perfil-btn:hover {
-      border-color: rgba(245,166,35,0.3);
-      color: var(--text);
-    }
+    .perfil-btn:hover { border-color: rgba(245,166,35,0.3); color: var(--text); }
+    .perfil-btn.ativo { border-color: var(--accent); background: rgba(245,166,35,0.08); color: var(--accent); }
 
-    .perfil-btn.ativo {
-      border-color: var(--accent);
-      background: rgba(245,166,35,0.08);
-      color: var(--accent);
-    }
-
-    .perfil-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-      display: block;
-    }
-
-    /* ─── CAMPOS ──────────────────────────────────────────────────── */
+    /* ── CAMPOS ──────────────────────────────── */
     .field { margin-bottom: 18px; }
 
     .field label {
@@ -224,7 +221,6 @@
     }
     .toggle-pwd:hover { color: var(--accent); }
 
-    /* ─── BOTÃO ───────────────────────────────────────────────────── */
     .btn-login {
       width: 100%;
       padding: 14px;
@@ -240,10 +236,9 @@
     }
 
     .btn-login:hover  { opacity: 0.93; transform: translateY(-1px); box-shadow: 0 8px 28px rgba(245,166,35,0.45); }
-    .btn-login:active { transform: translateY(0); box-shadow: 0 4px 12px rgba(245,166,35,0.3); }
+    .btn-login:active { transform: translateY(0); }
     .btn-login:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-    /* ─── MENSAGENS ───────────────────────────────────────────────── */
     .msg-box {
       border-radius: 8px;
       font-size: 13px;
@@ -251,22 +246,13 @@
       margin-bottom: 14px;
       display: none;
     }
-    .msg-error {
-      background: rgba(224,85,85,0.10);
-      border: 1px solid rgba(224,85,85,0.28);
-      color: #f08080;
-    }
-    .msg-success {
-      background: rgba(52,201,126,0.10);
-      border: 1px solid rgba(52,201,126,0.28);
-      color: #5ddb9a;
-    }
+    .msg-error   { background: rgba(224,85,85,0.10); border: 1px solid rgba(224,85,85,0.28); color: #f08080; }
+    .msg-success { background: rgba(52,201,126,0.10); border: 1px solid rgba(52,201,126,0.28); color: #5ddb9a; }
 
-    /* ─── RODAPÉ ──────────────────────────────────────────────────── */
     .footer-brand {
       text-align: center;
       margin-top: 28px;
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-muted);
     }
     .footer-brand strong { color: var(--accent); }
@@ -281,13 +267,6 @@
       cursor: pointer;
     }
     .link-voltar:hover { text-decoration: underline; }
-
-    /* ─── DIVISOR ─────────────────────────────────────────────────── */
-    .divider {
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(245,166,35,0.15), transparent);
-      margin: 24px 0;
-    }
   </style>
 </head>
 <body>
@@ -296,21 +275,25 @@
 <div class="card" id="cardLogin">
   <div class="logo-area">
     <div class="logo-icon">
-      <!-- ícone: prédio/condomínio -->
-      <svg viewBox="0 0 32 32">
-        <rect x="4" y="10" width="24" height="18" rx="2"/>
-        <polygon points="2,12 16,3 30,12"/>
-        <rect x="9" y="15" width="5" height="5" rx="1" fill="rgba(0,0,0,0.2)"/>
-        <rect x="18" y="15" width="5" height="5" rx="1" fill="rgba(0,0,0,0.2)"/>
-        <rect x="13" y="22" width="6" height="6" rx="1" fill="rgba(0,0,0,0.25)"/>
+      <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- prédio -->
+        <rect x="4" y="11" width="28" height="22" rx="2" fill="white" opacity="0.95"/>
+        <!-- telhado / topo triangular -->
+        <polygon points="2,13 18,3 34,13" fill="white"/>
+        <!-- janelas -->
+        <rect x="8"  y="16" width="5" height="5" rx="1" fill="#c47d0e" opacity="0.7"/>
+        <rect x="16" y="16" width="5" height="5" rx="1" fill="#c47d0e" opacity="0.7"/>
+        <rect x="24" y="16" width="5" height="5" rx="1" fill="#c47d0e" opacity="0.7"/>
+        <!-- porta -->
+        <rect x="14" y="24" width="8" height="9" rx="1.5" fill="#c47d0e" opacity="0.85"/>
       </svg>
     </div>
-    <h1>Condo<span>Gest</span></h1>
-    <p>Sistema de Gestão de Condomínio</p>
+    <h1>Edifício</h1>
+    <h2>Mandala</h2>
+    <p>Portal do Condômino</p>
   </div>
 
-  <!-- seletor de perfil -->
-  <span class="perfil-label">Acesso como</span>
+  <span class="perfil-label">Acessar como</span>
   <div class="perfil-wrap">
     <button class="perfil-btn ativo" id="p-sindico"   onclick="selecionarPerfil('sindico')">Síndico</button>
     <button class="perfil-btn"       id="p-conselho"  onclick="selecionarPerfil('conselho')">Conselho</button>
@@ -340,10 +323,10 @@
     </div>
   </div>
 
-  <button class="btn-login" id="btnLogin">Entrar no sistema</button>
+  <button class="btn-login" id="btnLogin">Entrar no portal</button>
 
   <div class="footer-brand">
-    <span style="font-size:11px;">Desenvolvido pela <strong>SmartData</strong> Consultoria</span>
+    Desenvolvido pela <strong>SmartData</strong> Consultoria
   </div>
 </div>
 
@@ -351,14 +334,15 @@
 <div class="card" id="cardRecovery" style="display:none;">
   <div class="logo-area">
     <div class="logo-icon">
-      <svg viewBox="0 0 32 32">
-        <rect x="4" y="10" width="24" height="18" rx="2"/>
-        <polygon points="2,12 16,3 30,12"/>
-        <rect x="13" y="22" width="6" height="6" rx="1" fill="rgba(0,0,0,0.25)"/>
+      <svg viewBox="0 0 36 36" fill="none">
+        <rect x="4" y="11" width="28" height="22" rx="2" fill="white" opacity="0.95"/>
+        <polygon points="2,13 18,3 34,13" fill="white"/>
+        <rect x="14" y="24" width="8" height="9" rx="1.5" fill="#c47d0e" opacity="0.85"/>
       </svg>
     </div>
-    <h1>Recuperar <span>Senha</span></h1>
-    <p>Enviaremos um link para seu e-mail</p>
+    <h1>Edifício</h1>
+    <h2>Mandala</h2>
+    <p>Recuperação de senha</p>
   </div>
 
   <div class="msg-box msg-error"   id="recoveryError"></div>
@@ -370,46 +354,35 @@
   </div>
 
   <button class="btn-login" id="btnRecovery">Enviar link de recuperação</button>
-
   <a class="link-voltar" id="linkVoltar">← Voltar ao login</a>
 
   <div class="footer-brand">
-    <span style="font-size:11px;">Desenvolvido pela <strong>SmartData</strong> Consultoria</span>
+    Desenvolvido pela <strong>SmartData</strong> Consultoria
   </div>
 </div>
 
 <script>
-  /* ── CONFIG SUPABASE ─────────────────────────────────────────────── */
-  // ⚠️ Substitua pelos valores do seu projeto Supabase para CondoGest
-  const SUPABASE_URL  = 'https://SEU_PROJETO.supabase.co';
-  const SUPABASE_ANON = 'SUA_ANON_KEY';
+  const SUPABASE_URL  = 'https://rbahvyejqybajnufftio.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiYWh2eWVqcXliYWpudWZmdGlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjA5MjIsImV4cCI6MjA4OTYzNjkyMn0.nUIo2CT3o41YL1TT8Hrp5kq-_ZS-bMMf-gvUMCEyYMw';
 
   const { createClient } = supabase;
   const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-  const cardLogin    = document.getElementById('cardLogin');
-  const cardRecovery = document.getElementById('cardRecovery');
-
-  // perfil selecionado (salvo para enviar ao dashboard)
   let perfilAtual = 'sindico';
 
   function selecionarPerfil(p) {
     perfilAtual = p;
-    ['sindico','conselho','condômino'].forEach(function(x){
-      document.getElementById('p-' + x).classList.toggle('ativo', x === p);
-    });
+    ['sindico','conselho','condômino'].forEach(x =>
+      document.getElementById('p-'+x).classList.toggle('ativo', x === p)
+    );
   }
 
-  /* ── TOGGLE SENHA ──────────────────────────────────────────────── */
   document.getElementById('togglePwd').addEventListener('click', () => {
     const inp = document.getElementById('senha');
     inp.type = inp.type === 'password' ? 'text' : 'password';
   });
 
-  /* ── LOGIN ─────────────────────────────────────────────────────── */
-  document.getElementById('senha').addEventListener('keydown', e => {
-    if (e.key === 'Enter') login();
-  });
+  document.getElementById('senha').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
   document.getElementById('btnLogin').addEventListener('click', login);
 
   async function login() {
@@ -421,39 +394,35 @@
     err.style.display = 'none';
     if (!email || !senha) { showMsg('loginError', 'Preencha e-mail e senha.'); return; }
 
-    btn.disabled    = true;
+    btn.disabled = true;
     btn.textContent = 'Entrando…';
 
-    const { data, error } = await sb.auth.signInWithPassword({ email, password: senha });
+    const { error } = await sb.auth.signInWithPassword({ email, password: senha });
 
     if (error) {
       showMsg('loginError', 'E-mail ou senha inválidos. Tente novamente.');
-      btn.disabled    = false;
-      btn.textContent = 'Entrar no sistema';
+      btn.disabled = false;
+      btn.textContent = 'Entrar no portal';
     } else {
-      // Guarda o perfil para uso no dashboard
-      sessionStorage.setItem('condo_perfil', perfilAtual);
-      window.location.href = 'dashboard-condo.html';
+      sessionStorage.setItem('mandala_perfil', perfilAtual);
+      window.location.href = 'dashboard.html';
     }
   }
 
-  /* ── ESQUECEU SENHA ────────────────────────────────────────────── */
   document.getElementById('linkEsqueci').addEventListener('click', () => {
-    cardLogin.style.display    = 'none';
-    cardRecovery.style.display = 'block';
+    document.getElementById('cardLogin').style.display    = 'none';
+    document.getElementById('cardRecovery').style.display = 'block';
   });
 
   document.getElementById('linkVoltar').addEventListener('click', () => {
-    cardRecovery.style.display = 'none';
-    cardLogin.style.display    = 'block';
+    document.getElementById('cardRecovery').style.display = 'none';
+    document.getElementById('cardLogin').style.display    = 'block';
     document.getElementById('recoveryEmail').value = '';
     document.getElementById('recoveryError').style.display   = 'none';
     document.getElementById('recoverySuccess').style.display = 'none';
   });
 
-  document.getElementById('recoveryEmail').addEventListener('keydown', e => {
-    if (e.key === 'Enter') enviarRecuperacao();
-  });
+  document.getElementById('recoveryEmail').addEventListener('keydown', e => { if(e.key==='Enter') enviarRecuperacao(); });
   document.getElementById('btnRecovery').addEventListener('click', enviarRecuperacao);
 
   async function enviarRecuperacao() {
@@ -465,14 +434,14 @@
 
     if (!email) { showMsg('recoveryError', 'Informe seu e-mail.'); return; }
 
-    btn.disabled    = true;
+    btn.disabled = true;
     btn.textContent = 'Enviando…';
 
     const { error } = await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/reset-senha.html'
+      redirectTo: 'https://mandala.smartdataconsultoria.com/reset-senha.html'
     });
 
-    btn.disabled    = false;
+    btn.disabled = false;
     btn.textContent = 'Enviar link de recuperação';
 
     if (error) {
@@ -489,10 +458,9 @@
     el.style.display = 'block';
   }
 
-  /* ── REDIRECIONAR SE JÁ LOGADO ─────────────────────────────────── */
   (async () => {
     const { data: { session } } = await sb.auth.getSession();
-    if (session) window.location.href = 'dashboard-condo.html';
+    if (session) window.location.href = 'dashboard.html';
   })();
 </script>
 </body>
