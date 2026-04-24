@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CondoGest | Acesse sua conta</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap');
+
+    :root {
+      --bg-dark:     #0a0e1a;
+      --bg-card:     #111827;
+      --bg-input:    #1a2235;
+      --border:      #1e2d45;
+      --accent:      #f5a623;
+      --accent-dark: #c47d0e;
+      --text:        #e8eaf0;
+      --text-muted:  #6b7a99;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      background: var(--bg-dark);
+    }
+
+    /* fundo geométrico animado */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 30%, rgba(245,166,35,0.07) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 70%, rgba(79,142,247,0.06) 0%, transparent 50%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(245,166,35,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,166,35,0.035) 1px, transparent 1px);
+      background-size: 44px 44px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ─── CARD ────────────────────────────────────────────────────── */
+    .card {
+      background: rgba(17, 24, 39, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(245,166,35,0.12);
+      border-radius: 22px;
+      padding: 48px 44px;
+      width: 100%;
+      max-width: 430px;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 28px 72px rgba(0,0,0,0.65), 0 0 0 1px rgba(245,166,35,0.06);
+      animation: slideUp 0.5s cubic-bezier(.22,.68,0,1.2);
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(28px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ─── LOGO ────────────────────────────────────────────────────── */
+    .logo-area {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo-icon {
+      width: 66px;
+      height: 66px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      border-radius: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      box-shadow: 0 8px 28px rgba(245,166,35,0.35);
+      position: relative;
+    }
+
+    .logo-icon::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 20px;
+      border: 1px solid rgba(245,166,35,0.2);
+      pointer-events: none;
+    }
+
+    .logo-icon svg { width: 34px; height: 34px; fill: #fff; }
+
+    .logo-area h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.4px;
+      margin-bottom: 4px;
+    }
+
+    .logo-area h1 span { color: var(--accent); }
+
+    .logo-area p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* ─── PERFIL SELETOR ──────────────────────────────────────────── */
+    .perfil-wrap {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .perfil-btn {
+      flex: 1;
+      padding: 9px 6px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(255,255,255,0.02);
+      color: var(--text-muted);
+      font-family: 'Poppins', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .perfil-btn:hover {
+      border-color: rgba(245,166,35,0.3);
+      color: var(--text);
+    }
+
+    .perfil-btn.ativo {
+      border-color: var(--accent);
+      background: rgba(245,166,35,0.08);
+      color: var(--accent);
+    }
+
+    .perfil-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    /* ─── CAMPOS ──────────────────────────────────────────────────── */
+    .field { margin-bottom: 18px; }
+
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .field-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .field-row label { margin-bottom: 0; }
+
+    .forgot { font-size: 12px; color: var(--accent); text-decoration: none; cursor: pointer; }
+    .forgot:hover { text-decoration: underline; }
+
+    .input-wrap { position: relative; }
+
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      background: rgba(26, 34, 53, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 16px;
+      font-size: 14px;
+      font-family: 'Poppins', sans-serif;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(245,166,35,0.12);
+    }
+
+    input::placeholder { color: var(--text-muted); }
+
+    .toggle-pwd {
+      position: absolute;
+      right: 14px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none;
+      cursor: pointer; color: var(--text-muted);
+      display: flex; align-items: center;
+      padding: 0; transition: color 0.2s;
+    }
+    .toggle-pwd:hover { color: var(--accent); }
+
+    /* ─── BOTÃO ───────────────────────────────────────────────────── */
+    .btn-login {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      font-size: 15px; font-weight: 600;
+      border: none; border-radius: 10px;
+      cursor: pointer; margin-top: 8px;
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 18px rgba(245,166,35,0.38);
+      letter-spacing: 0.2px;
+    }
+
+    .btn-login:hover  { opacity: 0.93; transform: translateY(-1px); box-shadow: 0 8px 28px rgba(245,166,35,0.45); }
+    .btn-login:active { transform: translateY(0); box-shadow: 0 4px 12px rgba(245,166,35,0.3); }
+    .btn-login:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ─── MENSAGENS ───────────────────────────────────────────────── */
+    .msg-box {
+      border-radius: 8px;
+      font-size: 13px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      display: none;
+    }
+    .msg-error {
+      background: rgba(224,85,85,0.10);
+      border: 1px solid rgba(224,85,85,0.28);
+      color: #f08080;
+    }
+    .msg-success {
+      background: rgba(52,201,126,0.10);
+      border: 1px solid rgba(52,201,126,0.28);
+      color: #5ddb9a;
+    }
+
+    /* ─── RODAPÉ ──────────────────────────────────────────────────── */
+    .footer-brand {
+      text-align: center;
+      margin-top: 28px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .footer-brand strong { color: var(--accent); }
+
+    .link-voltar {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      font-size: 13px;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .link-voltar:hover { text-decoration: underline; }
+
+    /* ─── DIVISOR ─────────────────────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(245,166,35,0.15), transparent);
+      margin: 24px 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- CARD LOGIN -->
+<div class="card" id="cardLogin">
+  <div class="logo-area">
+    <div class="logo-icon">
+      <!-- ícone: prédio/condomínio -->
+      <svg viewBox="0 0 32 32">
+        <rect x="4" y="10" width="24" height="18" rx="2"/>
+        <polygon points="2,12 16,3 30,12"/>
+        <rect x="9" y="15" width="5" height="5" rx="1" fill="rgba(0,0,0,0.2)"/>
+        <rect x="18" y="15" width="5" height="5" rx="1" fill="rgba(0,0,0,0.2)"/>
+        <rect x="13" y="22" width="6" height="6" rx="1" fill="rgba(0,0,0,0.25)"/>
+      </svg>
+    </div>
+    <h1>Condo<span>Gest</span></h1>
+    <p>Sistema de Gestão de Condomínio</p>
+  </div>
+
+  <!-- seletor de perfil -->
+  <span class="perfil-label">Acesso como</span>
+  <div class="perfil-wrap">
+    <button class="perfil-btn ativo" id="p-sindico"   onclick="selecionarPerfil('sindico')">Síndico</button>
+    <button class="perfil-btn"       id="p-conselho"  onclick="selecionarPerfil('conselho')">Conselho</button>
+    <button class="perfil-btn"       id="p-condômino" onclick="selecionarPerfil('condômino')">Condômino</button>
+  </div>
+
+  <div class="msg-box msg-error" id="loginError"></div>
+
+  <div class="field">
+    <label>E-mail</label>
+    <input type="email" id="email" placeholder="seu@email.com" autocomplete="email" />
+  </div>
+
+  <div class="field">
+    <div class="field-row">
+      <label>Senha</label>
+      <a class="forgot" id="linkEsqueci">Esqueceu sua senha?</a>
+    </div>
+    <div class="input-wrap">
+      <input type="password" id="senha" placeholder="••••••••" autocomplete="current-password" />
+      <button class="toggle-pwd" id="togglePwd" type="button">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <button class="btn-login" id="btnLogin">Entrar no sistema</button>
+
+  <div class="footer-brand">
+    <span style="font-size:11px;">Desenvolvido pela <strong>SmartData</strong> Consultoria</span>
+  </div>
+</div>
+
+<!-- CARD RECUPERAR SENHA -->
+<div class="card" id="cardRecovery" style="display:none;">
+  <div class="logo-area">
+    <div class="logo-icon">
+      <svg viewBox="0 0 32 32">
+        <rect x="4" y="10" width="24" height="18" rx="2"/>
+        <polygon points="2,12 16,3 30,12"/>
+        <rect x="13" y="22" width="6" height="6" rx="1" fill="rgba(0,0,0,0.25)"/>
+      </svg>
+    </div>
+    <h1>Recuperar <span>Senha</span></h1>
+    <p>Enviaremos um link para seu e-mail</p>
+  </div>
+
+  <div class="msg-box msg-error"   id="recoveryError"></div>
+  <div class="msg-box msg-success" id="recoverySuccess"></div>
+
+  <div class="field">
+    <label>E-mail</label>
+    <input type="email" id="recoveryEmail" placeholder="seu@email.com" />
+  </div>
+
+  <button class="btn-login" id="btnRecovery">Enviar link de recuperação</button>
+
+  <a class="link-voltar" id="linkVoltar">← Voltar ao login</a>
+
+  <div class="footer-brand">
+    <span style="font-size:11px;">Desenvolvido pela <strong>SmartData</strong> Consultoria</span>
+  </div>
+</div>
+
+<script>
+  /* ── CONFIG SUPABASE ─────────────────────────────────────────────── */
+  // ⚠️ Substitua pelos valores do seu projeto Supabase para CondoGest
+  const SUPABASE_URL  = 'https://SEU_PROJETO.supabase.co';
+  const SUPABASE_ANON = 'SUA_ANON_KEY';
+
+  const { createClient } = supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  const cardLogin    = document.getElementById('cardLogin');
+  const cardRecovery = document.getElementById('cardRecovery');
+
+  // perfil selecionado (salvo para enviar ao dashboard)
+  let perfilAtual = 'sindico';
+
+  function selecionarPerfil(p) {
+    perfilAtual = p;
+    ['sindico','conselho','condômino'].forEach(function(x){
+      document.getElementById('p-' + x).classList.toggle('ativo', x === p);
+    });
+  }
+
+  /* ── TOGGLE SENHA ──────────────────────────────────────────────── */
+  document.getElementById('togglePwd').addEventListener('click', () => {
+    const inp = document.getElementById('senha');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  });
+
+  /* ── LOGIN ─────────────────────────────────────────────────────── */
+  document.getElementById('senha').addEventListener('keydown', e => {
+    if (e.key === 'Enter') login();
+  });
+  document.getElementById('btnLogin').addEventListener('click', login);
+
+  async function login() {
+    const email = document.getElementById('email').value.trim();
+    const senha = document.getElementById('senha').value;
+    const btn   = document.getElementById('btnLogin');
+    const err   = document.getElementById('loginError');
+
+    err.style.display = 'none';
+    if (!email || !senha) { showMsg('loginError', 'Preencha e-mail e senha.'); return; }
+
+    btn.disabled    = true;
+    btn.textContent = 'Entrando…';
+
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: senha });
+
+    if (error) {
+      showMsg('loginError', 'E-mail ou senha inválidos. Tente novamente.');
+      btn.disabled    = false;
+      btn.textContent = 'Entrar no sistema';
+    } else {
+      // Guarda o perfil para uso no dashboard
+      sessionStorage.setItem('condo_perfil', perfilAtual);
+      window.location.href = 'dashboard-condo.html';
+    }
+  }
+
+  /* ── ESQUECEU SENHA ────────────────────────────────────────────── */
+  document.getElementById('linkEsqueci').addEventListener('click', () => {
+    cardLogin.style.display    = 'none';
+    cardRecovery.style.display = 'block';
+  });
+
+  document.getElementById('linkVoltar').addEventListener('click', () => {
+    cardRecovery.style.display = 'none';
+    cardLogin.style.display    = 'block';
+    document.getElementById('recoveryEmail').value = '';
+    document.getElementById('recoveryError').style.display   = 'none';
+    document.getElementById('recoverySuccess').style.display = 'none';
+  });
+
+  document.getElementById('recoveryEmail').addEventListener('keydown', e => {
+    if (e.key === 'Enter') enviarRecuperacao();
+  });
+  document.getElementById('btnRecovery').addEventListener('click', enviarRecuperacao);
+
+  async function enviarRecuperacao() {
+    const email = document.getElementById('recoveryEmail').value.trim();
+    const btn   = document.getElementById('btnRecovery');
+
+    document.getElementById('recoveryError').style.display   = 'none';
+    document.getElementById('recoverySuccess').style.display = 'none';
+
+    if (!email) { showMsg('recoveryError', 'Informe seu e-mail.'); return; }
+
+    btn.disabled    = true;
+    btn.textContent = 'Enviando…';
+
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/reset-senha.html'
+    });
+
+    btn.disabled    = false;
+    btn.textContent = 'Enviar link de recuperação';
+
+    if (error) {
+      showMsg('recoveryError', 'Erro ao enviar. Verifique o e-mail e tente novamente.');
+    } else {
+      document.getElementById('recoverySuccess').textContent = 'Link enviado! Verifique sua caixa de entrada.';
+      document.getElementById('recoverySuccess').style.display = 'block';
+    }
+  }
+
+  function showMsg(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent  = msg;
+    el.style.display = 'block';
+  }
+
+  /* ── REDIRECIONAR SE JÁ LOGADO ─────────────────────────────────── */
+  (async () => {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) window.location.href = 'dashboard-condo.html';
+  })();
+</script>
+</body>
+</html>
