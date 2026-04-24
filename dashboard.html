@@ -1104,12 +1104,16 @@ function irParaLogin(){
   window.location.href='login.html';
 }
 
+function atualizarLoading(msg){
+  var el = document.querySelector('.loading-nome');
+  if(el) el.textContent = msg;
+}
+
 window.addEventListener('load', function(){
-  // Timeout de segurança: se em 8s não carregou, redireciona para login
   var timeout = setTimeout(function(){
-    console.warn('Timeout de sessão — redirecionando para login');
+    console.warn('Timeout — redirecionando para login');
     irParaLogin();
-  }, 8000);
+  }, 10000);
 
   iniciarApp().then(function(){
     clearTimeout(timeout);
@@ -1121,46 +1125,60 @@ window.addEventListener('load', function(){
 });
 
 async function iniciarApp(){
+  atualizarLoading('Verificando sessão...');
+
   var sessionData = null;
 
-  // Tenta obter sessão existente primeiro (mais rápido)
   try {
     var r1 = await sb.auth.getSession();
-    if(r1.data && r1.data.session) sessionData = r1.data.session;
-  } catch(e){ console.warn('getSession erro:', e); }
-
-  // Se não encontrou, tenta refresh
-  if(!sessionData || !sessionData.access_token){
-    try {
-      var r2 = await sb.auth.refreshSession();
-      if(!r2.error && r2.data && r2.data.session) sessionData = r2.data.session;
-    } catch(e){ console.warn('refreshSession erro:', e); }
+    console.log('getSession resultado:', r1.data?.session?.user?.email || 'sem sessão');
+    if(r1.data && r1.data.session && r1.data.session.access_token){
+      sessionData = r1.data.session;
+    }
+  } catch(e){
+    console.warn('getSession erro:', e);
   }
 
-  // Sem sessão válida → login
-  if(!sessionData || !sessionData.access_token){
+  if(!sessionData){
+    console.log('Sem sessão — redirecionando para login');
     irParaLogin();
     return;
   }
 
-  usr = { email: sessionData.user.email, token: sessionData.access_token, _nome: '', _unidade: '' };
-  perfil = sessionStorage.getItem('mandala_perfil') || 'condômino';
+  atualizarLoading('Carregando portal...');
 
-  // Buscar dados do morador (não bloqueia o carregamento se falhar)
+  usr = {
+    email: sessionData.user.email,
+    token: sessionData.access_token,
+    _nome: '',
+    _unidade: ''
+  };
+
+  perfil = sessionStorage.getItem('mandala_perfil') || 'sindico';
+
+  // Se for o admin, já define como síndico
+  if(usr.email === ADMIN_EMAIL || usr.email === 'admrafaelcavalcanti@gmail.com'){
+    perfil = 'sindico';
+  }
+
+  // Buscar dados do morador (não bloqueia se falhar)
   try {
     var mRes = await fetch(
-      SB_URL+'/rest/v1/usuarios_portal?select=nome,unidade,perfil&email=eq.'+encodeURIComponent(usr.email),
-      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer '+usr.token } }
+      SB_URL + '/rest/v1/usuarios_portal?select=nome,unidade,perfil&email=eq.' + encodeURIComponent(usr.email),
+      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + usr.token } }
     );
     if(mRes.ok){
       var mArr = await mRes.json();
+      console.log('Dados morador:', mArr);
       if(mArr && mArr[0]){
         usr._nome    = mArr[0].nome    || '';
         usr._unidade = mArr[0].unidade || '';
         if(mArr[0].perfil) perfil = mArr[0].perfil;
       }
     }
-  } catch(e){ console.warn('Dados do morador não encontrados:', e); }
+  } catch(e){
+    console.warn('Dados morador erro (não crítico):', e);
+  }
 
   // Mostrar app
   mostrarApp();
@@ -1169,12 +1187,14 @@ async function iniciarApp(){
   document.getElementById('topEmail').textContent = usr.email;
   var perfilLabels = { sindico:'🏠 Síndico', conselho:'⚖️ Conselho', condômino:'👤 Condômino' };
   document.getElementById('topPerfil').textContent = perfilLabels[perfil] || perfil;
+
   if(usr._unidade){
     var tu = document.getElementById('topUnidade');
     tu.textContent = 'Unidade ' + usr._unidade;
     tu.style.display = '';
   }
-  if(perfil === 'sindico' || usr.email === ADMIN_EMAIL){
+
+  if(perfil === 'sindico' || usr.email === ADMIN_EMAIL || usr.email === 'admrafaelcavalcanti@gmail.com'){
     document.getElementById('btnAdmin').style.display = '';
   }
 
