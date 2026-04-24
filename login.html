@@ -397,15 +397,38 @@
     btn.disabled = true;
     btn.textContent = 'Entrando…';
 
-    const { error } = await sb.auth.signInWithPassword({ email, password: senha });
+    try {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password: senha });
 
-    if (error) {
-      showMsg('loginError', 'E-mail ou senha inválidos. Tente novamente.');
+      if (error) {
+        console.error('Erro login:', error.message);
+        showMsg('loginError', 'E-mail ou senha inválidos. Tente novamente.');
+        btn.disabled = false;
+        btn.textContent = 'Entrar no portal';
+        return;
+      }
+
+      if (!data || !data.session) {
+        showMsg('loginError', 'Sessão não criada. Tente novamente.');
+        btn.disabled = false;
+        btn.textContent = 'Entrar no portal';
+        return;
+      }
+
+      // Sessão criada com sucesso
+      sessionStorage.setItem('mandala_perfil', perfilAtual);
+      btn.textContent = 'Redirecionando…';
+
+      // Pequeno delay para garantir que a sessão foi salva
+      setTimeout(function() {
+        window.location.href = 'dashboard.html';
+      }, 500);
+
+    } catch(e) {
+      console.error('Exceção login:', e);
+      showMsg('loginError', 'Erro de conexão. Tente novamente.');
       btn.disabled = false;
       btn.textContent = 'Entrar no portal';
-    } else {
-      sessionStorage.setItem('mandala_perfil', perfilAtual);
-      window.location.href = 'dashboard.html';
     }
   }
 
