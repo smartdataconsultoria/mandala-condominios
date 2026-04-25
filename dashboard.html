@@ -1088,8 +1088,8 @@ async function salvarMeta(){
 }
 
 async function sair(){
-  await sb.auth.signOut();
-  window.location.href='login.html';
+  try{ for(var i=localStorage.length-1;i>=0;i--){var k=localStorage.key(i);if(k&&k.indexOf("supabase")!==-1)localStorage.removeItem(k);} if(window.sb) await window.sb.auth.signOut(); }catch(e){}
+  window.location.href="login.html";
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1109,37 +1109,43 @@ function atualizarLoading(msg){
   if(el) el.textContent = msg;
 }
 
-window.addEventListener('load', function(){
-  var timeout = setTimeout(function(){
-    console.warn('Timeout — redirecionando para login');
-    irParaLogin();
-  }, 10000);
-
-  iniciarApp().then(function(){
-    clearTimeout(timeout);
-  }).catch(function(e){
-    clearTimeout(timeout);
-    console.error('Erro ao iniciar:', e);
-    irParaLogin();
-  });
-});
-
+// ── INIT ROBUSTO ─────────────────────────────────────────
+// Verifica sessão diretamente via REST sem depender do SDK
 async function iniciarApp(){
-  atualizarLoading('Verificando sessão...');
+  atualizarLoading('Verificando acesso...');
 
-  var sessionData = null;
+  // Pega token do localStorage do Supabase (chave padrão)
+  var token = null;
+  var email = null;
 
   try {
-    var r1 = await sb.auth.getSession();
-    console.log('getSession resultado:', r1.data?.session?.user?.email || 'sem sessão');
-    if(r1.data && r1.data.session && r1.data.session.access_token){
-      sessionData = r1.data.session;
+    // Supabase salva a sessão com esta chave no localStorage
+    for(var i=0; i<localStorage.length; i++){
+      var k = localStorage.key(i);
+      if(k && k.indexOf('supabase') !== -1 && k.indexOf('auth-token') !== -1){
+        var val = JSON.parse(localStorage.getItem(k));
+        if(val && val.access_token){
+          token = val.access_token;
+          email = val.user && val.user.email;
+          break;
+        }
+      }
+    }
+
+    // Fallback: tenta via SDK se disponível
+    if(!token && window.supabase){
+      var sb2 = supabase.createClient(SB_URL, SB_KEY);
+      var r = await sb2.auth.getSession();
+      if(r.data && r.data.session){
+        token = r.data.session.access_token;
+        email = r.data.session.user.email;
+      }
     }
   } catch(e){
-    console.warn('getSession erro:', e);
+    console.warn('Erro ao verificar sessão:', e);
   }
 
-  if(!sessionData){
+  if(!token || !email){
     console.log('Sem sessão — redirecionando para login');
     irParaLogin();
     return;
@@ -1147,29 +1153,21 @@ async function iniciarApp(){
 
   atualizarLoading('Carregando portal...');
 
-  usr = {
-    email: sessionData.user.email,
-    token: sessionData.access_token,
-    _nome: '',
-    _unidade: ''
-  };
-
+  usr = { email: email, token: token, _nome: '', _unidade: '' };
   perfil = sessionStorage.getItem('mandala_perfil') || 'sindico';
 
-  // Se for o admin, já define como síndico
   if(usr.email === ADMIN_EMAIL || usr.email === 'admrafaelcavalcanti@gmail.com'){
     perfil = 'sindico';
   }
 
-  // Buscar dados do morador (não bloqueia se falhar)
+  // Buscar dados do morador via REST puro (sem SDK)
   try {
     var mRes = await fetch(
       SB_URL + '/rest/v1/usuarios_portal?select=nome,unidade,perfil&email=eq.' + encodeURIComponent(usr.email),
-      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + usr.token } }
+      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token } }
     );
     if(mRes.ok){
       var mArr = await mRes.json();
-      console.log('Dados morador:', mArr);
       if(mArr && mArr[0]){
         usr._nome    = mArr[0].nome    || '';
         usr._unidade = mArr[0].unidade || '';
@@ -1177,13 +1175,16 @@ async function iniciarApp(){
       }
     }
   } catch(e){
-    console.warn('Dados morador erro (não crítico):', e);
+    console.warn('Dados morador (não crítico):', e);
   }
 
-  // Mostrar app
+  // Inicializa SDK para uso posterior (logout etc)
+  if(window.supabase && !window.sb){
+    window.sb = supabase.createClient(SB_URL, SB_KEY);
+  }
+
   mostrarApp();
 
-  // Topbar
   document.getElementById('topEmail').textContent = usr.email;
   var perfilLabels = { sindico:'🏠 Síndico', conselho:'⚖️ Conselho', condômino:'👤 Condômino' };
   document.getElementById('topPerfil').textContent = perfilLabels[perfil] || perfil;
@@ -1201,6 +1202,22 @@ async function iniciarApp(){
   buildSidebar();
   navegar('dashboard');
 }
+
+// Dispara assim que o DOM estiver pronto — não espera o CDN
+document.addEventListener('DOMContentLoaded', function(){
+  var timeout = setTimeout(function(){
+    console.warn('Timeout — indo para login');
+    irParaLogin();
+  }, 12000);
+
+  iniciarApp().then(function(){
+    clearTimeout(timeout);
+  }).catch(function(e){
+    clearTimeout(timeout);
+    console.error('Erro crítico:', e);
+    irParaLogin();
+  });
+});
 </script>
 </body>
 </html>
