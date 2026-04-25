@@ -336,12 +336,36 @@ function fecharViewer(){document.getElementById('viewer').style.display='none';d
 // ── SESSÃO via chave própria ─────────────────────────────
 function getSessao(){
   try{
+    // 1. Tenta chave própria do portal Mandala
     var s=localStorage.getItem('mandala_session');
-    if(!s) return null;
-    var sess=JSON.parse(s);
-    if(!sess||!sess.access_token) return null;
-    if(sess.expires_at && sess.expires_at < Math.floor(Date.now()/1000)) return null;
-    return sess;
+    if(s){
+      var sess=JSON.parse(s);
+      if(sess&&sess.access_token){
+        if(!sess.expires_at || sess.expires_at > Math.floor(Date.now()/1000)){
+          return sess;
+        }
+      }
+    }
+    // 2. Fallback: tenta chave nativa do Supabase
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(k&&(k.indexOf('supabase.auth.token')!==-1||k.indexOf('sb-rbahvyejqybajnufftio-auth-token')!==-1)){
+        var raw=localStorage.getItem(k);
+        if(raw){
+          var obj=JSON.parse(raw);
+          var token=obj.access_token||(obj.currentSession&&obj.currentSession.access_token);
+          var user=obj.user||(obj.currentSession&&obj.currentSession.user);
+          var exp=obj.expires_at||(obj.currentSession&&obj.currentSession.expires_at);
+          if(token&&user&&(!exp||exp>Math.floor(Date.now()/1000))){
+            // Salva no formato do portal para próximas visitas
+            var normalizado={access_token:token,refresh_token:obj.refresh_token,expires_at:exp,user:user};
+            localStorage.setItem('mandala_session',JSON.stringify(normalizado));
+            return normalizado;
+          }
+        }
+      }
+    }
+    return null;
   }catch(e){return null;}
 }
 
@@ -361,7 +385,7 @@ document.addEventListener('DOMContentLoaded', function(){
     _unidade: ''
   };
 
-  perfil = sessionStorage.getItem('mandala_perfil') || 'sindico';
+  perfil = sessionStorage.getItem('mandala_perfil') || localStorage.getItem('mandala_perfil') || 'sindico';
   if(ADMINS.indexOf(usr.email) !== -1) perfil = 'sindico';
 
   ldMsg('Carregando portal...');
@@ -411,6 +435,8 @@ function mostrarApp(){
 // ── SAIR ─────────────────────────────────────────────────
 function sair(){
   localStorage.removeItem('mandala_session');
+  localStorage.removeItem('mandala_perfil');
+  localStorage.removeItem('sb-rbahvyejqybajnufftio-auth-token');
   sessionStorage.removeItem('mandala_perfil');
   window.location.href='login.html';
 }
