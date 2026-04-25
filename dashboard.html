@@ -388,7 +388,7 @@ window.onload = function(){
   mostrarApp();
   fetch(SB_URL+'/rest/v1/usuarios_portal?select=nome,unidade,perfil&email=eq.'+encodeURIComponent(usr.email),{
     headers:{'apikey':SB_KEY,'Authorization':'Bearer '+usr.token}
-  }).then(function(r){return r.ok?r.json()[];}).then(function(a){
+  }).then(function(r){return r.ok?r.json():[];}).then(function(a){
     if(a&&a[0]){
       if(a[0].nome) usr._nome=a[0].nome;
       if(a[0].unidade){usr._unidade=a[0].unidade;var t=document.getElementById('topUnidade');if(t){t.textContent='Unidade '+a[0].unidade;t.style.display='';}}
