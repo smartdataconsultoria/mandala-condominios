@@ -3,289 +3,60 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Edifício Mandala | Acesse sua conta</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>Edifício Mandala | Login</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
-    :root {
-      --bg-dark:     #0a0e1a;
-      --bg-card:     #111827;
-      --bg-input:    #1a2235;
-      --border:      #1e2d45;
-      --accent:      #f5a623;
-      --accent-dark: #c47d0e;
-      --text:        #e8eaf0;
-      --text-muted:  #6b7a99;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Poppins', sans-serif;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      position: relative;
-      background: var(--bg-dark);
-    }
-
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(ellipse at 20% 30%, rgba(245,166,35,0.08) 0%, transparent 55%),
-        radial-gradient(ellipse at 80% 70%, rgba(79,142,247,0.05) 0%, transparent 50%);
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(245,166,35,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(245,166,35,0.03) 1px, transparent 1px);
-      background-size: 44px 44px;
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    .card {
-      background: rgba(17, 24, 39, 0.92);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(245,166,35,0.12);
-      border-radius: 22px;
-      padding: 48px 44px;
-      width: 100%;
-      max-width: 430px;
-      position: relative;
-      z-index: 1;
-      box-shadow: 0 28px 72px rgba(0,0,0,0.65), 0 0 0 1px rgba(245,166,35,0.05);
-      animation: slideUp 0.5s cubic-bezier(.22,.68,0,1.2);
-    }
-
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(28px) scale(0.98); }
-      to   { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    .logo-area {
-      text-align: center;
-      margin-bottom: 36px;
-    }
-
-    .logo-icon {
-      width: 68px;
-      height: 68px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-      border-radius: 18px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 18px;
-      box-shadow: 0 8px 28px rgba(245,166,35,0.35);
-      position: relative;
-    }
-
-    .logo-icon::after {
-      content: '';
-      position: absolute;
-      inset: -3px;
-      border-radius: 20px;
-      border: 1px solid rgba(245,166,35,0.2);
-      pointer-events: none;
-    }
-
-    /* ícone: prédio estilizado */
-    .logo-icon svg { width: 36px; height: 36px; }
-
-    .logo-area h1 {
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 4px;
-    }
-
-    .logo-area h2 {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: -0.3px;
-    }
-
-    .logo-area p {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-top: 5px;
-    }
-
-    /* ── PERFIL ─────────────────────────────── */
-    .perfil-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      display: block;
-      margin-bottom: 8px;
-    }
-
-    .perfil-wrap {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 24px;
-    }
-
-    .perfil-btn {
-      flex: 1;
-      padding: 9px 6px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: rgba(255,255,255,0.02);
-      color: var(--text-muted);
-      font-family: 'Poppins', sans-serif;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.2s;
-    }
-
-    .perfil-btn:hover { border-color: rgba(245,166,35,0.3); color: var(--text); }
-    .perfil-btn.ativo { border-color: var(--accent); background: rgba(245,166,35,0.08); color: var(--accent); }
-
-    /* ── CAMPOS ──────────────────────────────── */
-    .field { margin-bottom: 18px; }
-
-    .field label {
-      display: block;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-    }
-
-    .field-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-    .field-row label { margin-bottom: 0; }
-
-    .forgot { font-size: 12px; color: var(--accent); text-decoration: none; cursor: pointer; }
-    .forgot:hover { text-decoration: underline; }
-
-    .input-wrap { position: relative; }
-
-    input[type="email"],
-    input[type="password"],
-    input[type="text"] {
-      width: 100%;
-      background: rgba(26, 34, 53, 0.85);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 13px 16px;
-      font-size: 14px;
-      font-family: 'Poppins', sans-serif;
-      color: var(--text);
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(245,166,35,0.12);
-    }
-
-    input::placeholder { color: var(--text-muted); }
-
-    .toggle-pwd {
-      position: absolute;
-      right: 14px; top: 50%;
-      transform: translateY(-50%);
-      background: none; border: none;
-      cursor: pointer; color: var(--text-muted);
-      display: flex; align-items: center;
-      padding: 0; transition: color 0.2s;
-    }
-    .toggle-pwd:hover { color: var(--accent); }
-
-    .btn-login {
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-      color: #fff;
-      font-family: 'Poppins', sans-serif;
-      font-size: 15px; font-weight: 600;
-      border: none; border-radius: 10px;
-      cursor: pointer; margin-top: 8px;
-      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
-      box-shadow: 0 4px 18px rgba(245,166,35,0.38);
-      letter-spacing: 0.2px;
-    }
-
-    .btn-login:hover  { opacity: 0.93; transform: translateY(-1px); box-shadow: 0 8px 28px rgba(245,166,35,0.45); }
-    .btn-login:active { transform: translateY(0); }
-    .btn-login:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-    .msg-box {
-      border-radius: 8px;
-      font-size: 13px;
-      padding: 10px 14px;
-      margin-bottom: 14px;
-      display: none;
-    }
-    .msg-error   { background: rgba(224,85,85,0.10); border: 1px solid rgba(224,85,85,0.28); color: #f08080; }
-    .msg-success { background: rgba(52,201,126,0.10); border: 1px solid rgba(52,201,126,0.28); color: #5ddb9a; }
-
-    .footer-brand {
-      text-align: center;
-      margin-top: 28px;
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-    .footer-brand strong { color: var(--accent); }
-
-    .link-voltar {
-      display: block;
-      text-align: center;
-      margin-top: 20px;
-      font-size: 13px;
-      color: var(--accent);
-      text-decoration: none;
-      cursor: pointer;
-    }
-    .link-voltar:hover { text-decoration: underline; }
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Poppins',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0a0e1a;position:relative}
+    body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(245,166,35,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(245,166,35,.03) 1px,transparent 1px);background-size:44px 44px;pointer-events:none}
+    .card{background:rgba(17,24,39,.95);border:1px solid rgba(245,166,35,.15);border-radius:20px;padding:48px 44px;width:100%;max-width:420px;position:relative;z-index:1;box-shadow:0 24px 64px rgba(0,0,0,.6);animation:up .4s ease}
+    @keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .logo{text-align:center;margin-bottom:32px}
+    .logo-box{width:64px;height:64px;background:linear-gradient(135deg,#f5a623,#c47d0e);border-radius:16px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(245,166,35,.35)}
+    .logo-box svg{width:34px;height:34px}
+    .logo h1{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#f5a623;margin-bottom:4px}
+    .logo h2{font-size:22px;font-weight:700;color:#f1f5f9}
+    .logo p{font-size:13px;color:#6b7a99;margin-top:4px}
+    .perfis{display:flex;gap:8px;margin-bottom:22px}
+    .perfil{flex:1;padding:8px 4px;border:1px solid #1e2d45;border-radius:8px;background:transparent;color:#6b7a99;font-family:'Poppins',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s}
+    .perfil:hover{border-color:rgba(245,166,35,.3);color:#e8eaf0}
+    .perfil.on{border-color:#f5a623;background:rgba(245,166,35,.08);color:#f5a623}
+    .label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6b7a99;display:block;margin-bottom:7px}
+    .field{margin-bottom:16px}
+    .field-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+    .field-row .label{margin-bottom:0}
+    .forgot{font-size:12px;color:#f5a623;cursor:pointer;text-decoration:none}
+    .forgot:hover{text-decoration:underline}
+    .wrap{position:relative}
+    input{width:100%;background:rgba(26,34,53,.9);border:1px solid #1e2d45;border-radius:10px;padding:13px 16px;font-size:14px;font-family:'Poppins',sans-serif;color:#e8eaf0;outline:none;transition:border .2s}
+    input:focus{border-color:#f5a623;box-shadow:0 0 0 3px rgba(245,166,35,.12)}
+    input::placeholder{color:#6b7a99}
+    .eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#6b7a99;padding:0;display:flex}
+    .eye:hover{color:#f5a623}
+    .btn{width:100%;padding:14px;background:linear-gradient(135deg,#f5a623,#c47d0e);color:#fff;font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;border:none;border-radius:10px;cursor:pointer;margin-top:8px;box-shadow:0 4px 16px rgba(245,166,35,.38);transition:all .2s}
+    .btn:hover{opacity:.92;transform:translateY(-1px)}
+    .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    .erro{background:rgba(224,85,85,.1);border:1px solid rgba(224,85,85,.28);color:#f08080;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
+    .suc{background:rgba(52,201,126,.1);border:1px solid rgba(52,201,126,.28);color:#5ddb9a;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
+    .footer{text-align:center;margin-top:24px;font-size:11px;color:#6b7a99}
+    .footer strong{color:#f5a623}
+    .back{display:block;text-align:center;margin-top:16px;font-size:13px;color:#f5a623;cursor:pointer}
+    .back:hover{text-decoration:underline}
   </style>
 </head>
 <body>
 
-<!-- CARD LOGIN -->
+<!-- LOGIN -->
 <div class="card" id="cardLogin">
-  <div class="logo-area">
-    <div class="logo-icon">
-      <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- prédio -->
-        <rect x="4" y="11" width="28" height="22" rx="2" fill="white" opacity="0.95"/>
-        <!-- telhado / topo triangular -->
+  <div class="logo">
+    <div class="logo-box">
+      <svg viewBox="0 0 36 36" fill="none">
+        <rect x="4" y="11" width="28" height="22" rx="2" fill="white" opacity=".95"/>
         <polygon points="2,13 18,3 34,13" fill="white"/>
-        <!-- janelas -->
-        <rect x="8"  y="16" width="5" height="5" rx="1" fill="#c47d0e" opacity="0.7"/>
-        <rect x="16" y="16" width="5" height="5" rx="1" fill="#c47d0e" opacity="0.7"/>
-        <rect x="24" y="16" width="5" height="5" rx="1" fill="#c47d0e" opacity="0.7"/>
-        <!-- porta -->
-        <rect x="14" y="24" width="8" height="9" rx="1.5" fill="#c47d0e" opacity="0.85"/>
+        <rect x="8" y="16" width="5" height="5" rx="1" fill="#c47d0e" opacity=".7"/>
+        <rect x="16" y="16" width="5" height="5" rx="1" fill="#c47d0e" opacity=".7"/>
+        <rect x="24" y="16" width="5" height="5" rx="1" fill="#c47d0e" opacity=".7"/>
+        <rect x="14" y="24" width="8" height="9" rx="1.5" fill="#c47d0e" opacity=".85"/>
       </svg>
     </div>
     <h1>Edifício</h1>
@@ -293,51 +64,48 @@
     <p>Portal do Condômino</p>
   </div>
 
-  <span class="perfil-label">Acessar como</span>
-  <div class="perfil-wrap">
-    <button class="perfil-btn ativo" id="p-sindico"   onclick="selecionarPerfil('sindico')">Síndico</button>
-    <button class="perfil-btn"       id="p-conselho"  onclick="selecionarPerfil('conselho')">Conselho</button>
-    <button class="perfil-btn"       id="p-condômino" onclick="selecionarPerfil('condômino')">Condômino</button>
+  <span class="label">Acessar como</span>
+  <div class="perfis">
+    <button class="perfil on" id="p0" onclick="setPerfil('sindico',0)">Síndico</button>
+    <button class="perfil"    id="p1" onclick="setPerfil('conselho',1)">Conselho</button>
+    <button class="perfil"    id="p2" onclick="setPerfil('condômino',2)">Condômino</button>
   </div>
 
-  <div class="msg-box msg-error" id="loginError"></div>
+  <div class="erro" id="errLogin"></div>
 
   <div class="field">
-    <label>E-mail</label>
-    <input type="email" id="email" placeholder="seu@email.com" autocomplete="email" />
+    <label class="label">E-mail</label>
+    <input type="email" id="email" placeholder="seu@email.com" autocomplete="email"/>
   </div>
 
   <div class="field">
     <div class="field-row">
-      <label>Senha</label>
-      <a class="forgot" id="linkEsqueci">Esqueceu sua senha?</a>
+      <label class="label">Senha</label>
+      <a class="forgot" onclick="showRecovery()">Esqueceu a senha?</a>
     </div>
-    <div class="input-wrap">
-      <input type="password" id="senha" placeholder="••••••••" autocomplete="current-password" />
-      <button class="toggle-pwd" id="togglePwd" type="button">
+    <div class="wrap">
+      <input type="password" id="senha" placeholder="••••••••" autocomplete="current-password"/>
+      <button class="eye" onclick="toggleSenha()" type="button">
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-          <circle cx="12" cy="12" r="3"/>
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
         </svg>
       </button>
     </div>
   </div>
 
-  <button class="btn-login" id="btnLogin">Entrar no portal</button>
+  <button class="btn" id="btnLogin" onclick="fazerLogin()">Entrar no portal</button>
 
-  <div class="footer-brand">
-    Desenvolvido pela <strong>SmartData</strong> Consultoria
-  </div>
+  <div class="footer">Desenvolvido pela <strong>SmartData</strong> Consultoria</div>
 </div>
 
-<!-- CARD RECUPERAR SENHA -->
-<div class="card" id="cardRecovery" style="display:none;">
-  <div class="logo-area">
-    <div class="logo-icon">
+<!-- RECUPERAR SENHA -->
+<div class="card" id="cardRecovery" style="display:none">
+  <div class="logo">
+    <div class="logo-box">
       <svg viewBox="0 0 36 36" fill="none">
-        <rect x="4" y="11" width="28" height="22" rx="2" fill="white" opacity="0.95"/>
+        <rect x="4" y="11" width="28" height="22" rx="2" fill="white" opacity=".95"/>
         <polygon points="2,13 18,3 34,13" fill="white"/>
-        <rect x="14" y="24" width="8" height="9" rx="1.5" fill="#c47d0e" opacity="0.85"/>
+        <rect x="14" y="24" width="8" height="9" rx="1.5" fill="#c47d0e" opacity=".85"/>
       </svg>
     </div>
     <h1>Edifício</h1>
@@ -345,146 +113,135 @@
     <p>Recuperação de senha</p>
   </div>
 
-  <div class="msg-box msg-error"   id="recoveryError"></div>
-  <div class="msg-box msg-success" id="recoverySuccess"></div>
+  <div class="erro" id="errRec"></div>
+  <div class="suc"  id="sucRec"></div>
 
   <div class="field">
-    <label>E-mail</label>
-    <input type="email" id="recoveryEmail" placeholder="seu@email.com" />
+    <label class="label">E-mail</label>
+    <input type="email" id="recEmail" placeholder="seu@email.com"/>
   </div>
 
-  <button class="btn-login" id="btnRecovery">Enviar link de recuperação</button>
-  <a class="link-voltar" id="linkVoltar">← Voltar ao login</a>
+  <button class="btn" id="btnRec" onclick="enviarRecuperacao()">Enviar link de recuperação</button>
+  <a class="back" onclick="showLogin()">← Voltar ao login</a>
 
-  <div class="footer-brand">
-    Desenvolvido pela <strong>SmartData</strong> Consultoria
-  </div>
+  <div class="footer">Desenvolvido pela <strong>SmartData</strong> Consultoria</div>
 </div>
 
 <script>
-  const SUPABASE_URL  = 'https://rbahvyejqybajnufftio.supabase.co';
-  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiYWh2eWVqcXliYWpudWZmdGlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjA5MjIsImV4cCI6MjA4OTYzNjkyMn0.nUIo2CT3o41YL1TT8Hrp5kq-_ZS-bMMf-gvUMCEyYMw';
+// ── CONFIG ──────────────────────────────────────────────
+var SB_URL  = 'https://rbahvyejqybajnufftio.supabase.co';
+var SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiYWh2eWVqcXliYWpudWZmdGlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjA5MjIsImV4cCI6MjA4OTYzNjkyMn0.nUIo2CT3o41YL1TT8Hrp5kq-_ZS-bMMf-gvUMCEyYMw';
 
-  const { createClient } = supabase;
-  const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+var perfilAtual = 'sindico';
 
-  let perfilAtual = 'sindico';
+function setPerfil(p, idx){
+  perfilAtual = p;
+  [0,1,2].forEach(function(i){ document.getElementById('p'+i).classList.toggle('on', i===idx); });
+}
 
-  function selecionarPerfil(p) {
-    perfilAtual = p;
-    ['sindico','conselho','condômino'].forEach(x =>
-      document.getElementById('p-'+x).classList.toggle('ativo', x === p)
-    );
-  }
+function toggleSenha(){
+  var i = document.getElementById('senha');
+  i.type = i.type==='password' ? 'text' : 'password';
+}
 
-  document.getElementById('togglePwd').addEventListener('click', () => {
-    const inp = document.getElementById('senha');
-    inp.type = inp.type === 'password' ? 'text' : 'password';
-  });
+function showRecovery(){ document.getElementById('cardLogin').style.display='none'; document.getElementById('cardRecovery').style.display=''; }
+function showLogin(){ document.getElementById('cardRecovery').style.display='none'; document.getElementById('cardLogin').style.display=''; }
 
-  document.getElementById('senha').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
-  document.getElementById('btnLogin').addEventListener('click', login);
+function showErr(id, msg){ var e=document.getElementById(id); e.textContent=msg; e.style.display='block'; }
+function hideErr(id){ document.getElementById(id).style.display='none'; }
 
-  async function login() {
-    const email = document.getElementById('email').value.trim();
-    const senha = document.getElementById('senha').value;
-    const btn   = document.getElementById('btnLogin');
-    const err   = document.getElementById('loginError');
+document.getElementById('senha').addEventListener('keydown', function(e){ if(e.key==='Enter') fazerLogin(); });
 
-    err.style.display = 'none';
-    if (!email || !senha) { showMsg('loginError', 'Preencha e-mail e senha.'); return; }
+// ── LOGIN via REST puro ──────────────────────────────────
+async function fazerLogin(){
+  var email = document.getElementById('email').value.trim();
+  var senha = document.getElementById('senha').value;
+  var btn   = document.getElementById('btnLogin');
 
-    btn.disabled = true;
-    btn.textContent = 'Entrando…';
+  hideErr('errLogin');
+  if(!email||!senha){ showErr('errLogin','Preencha e-mail e senha.'); return; }
 
-    try {
-      const { data, error } = await sb.auth.signInWithPassword({ email, password: senha });
+  btn.disabled = true;
+  btn.textContent = 'Entrando…';
 
-      if (error) {
-        console.error('Erro login:', error.message);
-        showMsg('loginError', 'E-mail ou senha inválidos. Tente novamente.');
-        btn.disabled = false;
-        btn.textContent = 'Entrar no portal';
-        return;
-      }
-
-      if (!data || !data.session) {
-        showMsg('loginError', 'Sessão não criada. Tente novamente.');
-        btn.disabled = false;
-        btn.textContent = 'Entrar no portal';
-        return;
-      }
-
-      // Sessão criada com sucesso
-      sessionStorage.setItem('mandala_perfil', perfilAtual);
-      btn.textContent = 'Redirecionando…';
-
-      // Pequeno delay para garantir que a sessão foi salva
-      setTimeout(function() {
-        window.location.href = 'dashboard.html';
-      }, 500);
-
-    } catch(e) {
-      console.error('Exceção login:', e);
-      showMsg('loginError', 'Erro de conexão. Tente novamente.');
-      btn.disabled = false;
-      btn.textContent = 'Entrar no portal';
-    }
-  }
-
-  document.getElementById('linkEsqueci').addEventListener('click', () => {
-    document.getElementById('cardLogin').style.display    = 'none';
-    document.getElementById('cardRecovery').style.display = 'block';
-  });
-
-  document.getElementById('linkVoltar').addEventListener('click', () => {
-    document.getElementById('cardRecovery').style.display = 'none';
-    document.getElementById('cardLogin').style.display    = 'block';
-    document.getElementById('recoveryEmail').value = '';
-    document.getElementById('recoveryError').style.display   = 'none';
-    document.getElementById('recoverySuccess').style.display = 'none';
-  });
-
-  document.getElementById('recoveryEmail').addEventListener('keydown', e => { if(e.key==='Enter') enviarRecuperacao(); });
-  document.getElementById('btnRecovery').addEventListener('click', enviarRecuperacao);
-
-  async function enviarRecuperacao() {
-    const email = document.getElementById('recoveryEmail').value.trim();
-    const btn   = document.getElementById('btnRecovery');
-
-    document.getElementById('recoveryError').style.display   = 'none';
-    document.getElementById('recoverySuccess').style.display = 'none';
-
-    if (!email) { showMsg('recoveryError', 'Informe seu e-mail.'); return; }
-
-    btn.disabled = true;
-    btn.textContent = 'Enviando…';
-
-    const { error } = await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://mandala.smartdataconsultoria.com/reset-senha.html'
+  try {
+    var res = await fetch(SB_URL + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SB_ANON
+      },
+      body: JSON.stringify({ email: email, password: senha })
     });
 
-    btn.disabled = false;
-    btn.textContent = 'Enviar link de recuperação';
+    var data = await res.json();
 
-    if (error) {
-      showMsg('recoveryError', 'Erro ao enviar. Verifique o e-mail e tente novamente.');
-    } else {
-      document.getElementById('recoverySuccess').textContent = 'Link enviado! Verifique sua caixa de entrada.';
-      document.getElementById('recoverySuccess').style.display = 'block';
+    if(!res.ok || !data.access_token){
+      showErr('errLogin', 'E-mail ou senha inválidos.');
+      btn.disabled = false;
+      btn.textContent = 'Entrar no portal';
+      return;
     }
+
+    // Salva sessão no localStorage manualmente
+    var sessao = {
+      access_token:  data.access_token,
+      refresh_token: data.refresh_token,
+      expires_at:    Math.floor(Date.now()/1000) + data.expires_in,
+      token_type:    'bearer',
+      user:          data.user
+    };
+    localStorage.setItem('mandala_session', JSON.stringify(sessao));
+    sessionStorage.setItem('mandala_perfil', perfilAtual);
+
+    btn.textContent = 'Redirecionando…';
+    setTimeout(function(){ window.location.href = 'dashboard.html'; }, 300);
+
+  } catch(e) {
+    showErr('errLogin', 'Erro de conexão. Tente novamente.');
+    btn.disabled = false;
+    btn.textContent = 'Entrar no portal';
+  }
+}
+
+// ── RECUPERAR SENHA ──────────────────────────────────────
+async function enviarRecuperacao(){
+  var email = document.getElementById('recEmail').value.trim();
+  var btn   = document.getElementById('btnRec');
+
+  hideErr('errRec');
+  document.getElementById('sucRec').style.display='none';
+  if(!email){ showErr('errRec','Informe seu e-mail.'); return; }
+
+  btn.disabled=true; btn.textContent='Enviando…';
+
+  try {
+    await fetch(SB_URL+'/auth/v1/recover', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SB_ANON},
+      body: JSON.stringify({ email: email })
+    });
+    document.getElementById('sucRec').textContent='Link enviado! Verifique sua caixa de entrada.';
+    document.getElementById('sucRec').style.display='block';
+  } catch(e){
+    showErr('errRec','Erro ao enviar. Tente novamente.');
   }
 
-  function showMsg(id, msg) {
-    const el = document.getElementById(id);
-    el.textContent  = msg;
-    el.style.display = 'block';
-  }
+  btn.disabled=false; btn.textContent='Enviar link de recuperação';
+}
 
-  (async () => {
-    const { data: { session } } = await sb.auth.getSession();
-    if (session) window.location.href = 'dashboard.html';
-  })();
+// ── VERIFICA SE JÁ ESTÁ LOGADO ───────────────────────────
+(function(){
+  try {
+    var s = localStorage.getItem('mandala_session');
+    if(s){
+      var sess = JSON.parse(s);
+      if(sess && sess.access_token && sess.expires_at > Math.floor(Date.now()/1000)){
+        window.location.href = 'dashboard.html';
+      }
+    }
+  } catch(e){}
+})();
 </script>
 </body>
 </html>
