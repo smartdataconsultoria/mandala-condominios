@@ -358,7 +358,8 @@ async function excluir(id){
 async function carregar(){
   var mes = String(mesAtual+1).padStart(2,'0');
   var dataIni = anoAtual+'-'+mes+'-01';
-  var dataFim = anoAtual+'-'+mes+'-31';
+  var ultimoDia = new Date(anoAtual, mesAtual+1, 0).getDate();
+  var dataFim = anoAtual+'-'+mes+'-'+String(ultimoDia).padStart(2,'0');
 
   try {
     var url = SB_URL+'/rest/v1/condo_transacoes?select=*,condo_categorias(id,nome,icone,cor),condo_contas(id,nome,icone)&empresa=eq.'+EMPRESA+'&data=gte.'+dataIni+'&data=lte.'+dataFim+'&order=data.desc,created_at.desc';
