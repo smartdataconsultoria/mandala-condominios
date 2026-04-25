@@ -183,19 +183,34 @@ async function fazerLogin(){
       return;
     }
 
-    // Salva sessão no localStorage manualmente
+    // Salva sessão no localStorage — dura 7 dias
+    var expiresAt = data.expires_in
+      ? Math.floor(Date.now()/1000) + data.expires_in
+      : Math.floor(Date.now()/1000) + 604800; // 7 dias fallback
+
     var sessao = {
       access_token:  data.access_token,
       refresh_token: data.refresh_token,
-      expires_at:    Math.floor(Date.now()/1000) + data.expires_in,
+      expires_at:    expiresAt,
       token_type:    'bearer',
       user:          data.user
     };
     localStorage.setItem('mandala_session', JSON.stringify(sessao));
+
+    // Salva também no formato Supabase nativo para compatibilidade
+    var sbKey = 'sb-rbahvyejqybajnufftio-auth-token';
+    localStorage.setItem(sbKey, JSON.stringify({
+      access_token:  data.access_token,
+      refresh_token: data.refresh_token,
+      expires_at:    expiresAt,
+      user:          data.user
+    }));
+
+    localStorage.setItem('mandala_perfil', perfilAtual);
     sessionStorage.setItem('mandala_perfil', perfilAtual);
 
     btn.textContent = 'Redirecionando…';
-    setTimeout(function(){ window.location.href = 'dashboard.html'; }, 300);
+    setTimeout(function(){ window.location.href = 'dashboard.html'; }, 400);
 
   } catch(e) {
     showErr('errLogin', 'Erro de conexão. Tente novamente.');
