@@ -371,12 +371,43 @@ function getSessao(){
 
 // ── INIT ─────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function(){
-  var sess = getSessao();
-  if(!sess){
-    ldMsg('Redirecionando...');
-    setTimeout(function(){ window.location.href='login.html'; }, 500);
+  console.log('[Mandala] DOMContentLoaded - iniciando...');
+
+  // Lê sessão direto do localStorage sem função intermediária
+  var sessRaw = null;
+  try { sessRaw = localStorage.getItem('mandala_session'); } catch(e){ console.error('[Mandala] localStorage bloqueado:', e); }
+
+  console.log('[Mandala] mandala_session raw:', sessRaw ? 'ENCONTRADO ('+sessRaw.length+' chars)' : 'VAZIO');
+
+  if(!sessRaw){
+    console.log('[Mandala] Sem sessão - redirecionando para login');
+    ldMsg('Sem sessão...');
+    setTimeout(function(){ window.location.href='login.html'; }, 800);
     return;
   }
+
+  var sess = null;
+  try { sess = JSON.parse(sessRaw); } catch(e){ console.error('[Mandala] Erro ao parsear sessão:', e); }
+
+  if(!sess || !sess.access_token){
+    console.log('[Mandala] Sessão inválida - redirecionando');
+    ldMsg('Sessão inválida...');
+    setTimeout(function(){ window.location.href='login.html'; }, 800);
+    return;
+  }
+
+  // Verifica expiração
+  var agora = Math.floor(Date.now()/1000);
+  if(sess.expires_at && sess.expires_at < agora){
+    console.log('[Mandala] Sessão expirada em', new Date(sess.expires_at*1000).toLocaleString());
+    ldMsg('Sessão expirada...');
+    localStorage.removeItem('mandala_session');
+    setTimeout(function(){ window.location.href='login.html'; }, 800);
+    return;
+  }
+
+  console.log('[Mandala] Sessão OK - user:', sess.user && sess.user.email);
+  ldMsg('Carregando portal...');
 
   usr = {
     email: sess.user.email,
@@ -385,31 +416,33 @@ document.addEventListener('DOMContentLoaded', function(){
     _unidade: ''
   };
 
-  perfil = sessionStorage.getItem('mandala_perfil') || localStorage.getItem('mandala_perfil') || 'sindico';
+  perfil = localStorage.getItem('mandala_perfil') || sessionStorage.getItem('mandala_perfil') || 'sindico';
   if(ADMINS.indexOf(usr.email) !== -1) perfil = 'sindico';
 
-  ldMsg('Carregando portal...');
+  console.log('[Mandala] Perfil:', perfil);
 
   // Busca dados adicionais sem bloquear
   fetch(SB_URL+'/rest/v1/usuarios_portal?select=nome,unidade,perfil&email=eq.'+encodeURIComponent(usr.email), {
     headers:{'apikey':SB_KEY,'Authorization':'Bearer '+usr.token}
-  }).then(function(r){return r.ok?r.json():[];})
+  }).then(function(r){ return r.ok?r.json():[]; })
   .then(function(arr){
+    console.log('[Mandala] Dados do morador:', arr);
     if(arr&&arr[0]){
       if(arr[0].nome)    usr._nome    = arr[0].nome;
       if(arr[0].unidade) usr._unidade = arr[0].unidade;
       if(arr[0].perfil && ADMINS.indexOf(usr.email)===-1) perfil = arr[0].perfil;
     }
-  }).catch(function(){}).finally(function(){
-    mostrarApp();
-  });
+  }).catch(function(e){ console.warn('[Mandala] Dados morador erro (não crítico):', e); })
+  .finally(function(){ mostrarApp(); });
 
-  // Timeout: mostra app mesmo se fetch travar
+  // Timeout de segurança
   setTimeout(function(){
-    if(document.getElementById('tela-loading').style.display !== 'none'){
+    var loading = document.getElementById('tela-loading');
+    if(loading && loading.style.display !== 'none'){
+      console.log('[Mandala] Timeout atingido - mostrando app');
       mostrarApp();
     }
-  }, 3000);
+  }, 4000);
 });
 
 function mostrarApp(){
