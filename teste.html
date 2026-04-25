@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Diagnóstico Mandala</title>
+<style>
+body{font-family:monospace;background:#0a0e1a;color:#f1f5f9;padding:30px;font-size:13px}
+h2{color:#f5a623;margin-bottom:16px}
+.ok{color:#34c97e}.err{color:#ef6060}.warn{color:#f5a623}
+.box{background:#111827;border:1px solid rgba(245,166,35,.2);border-radius:10px;padding:16px;margin-bottom:16px}
+button{background:linear-gradient(135deg,#f5a623,#c47d0e);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;margin:6px 4px;font-family:monospace}
+input{background:#1a2235;border:1px solid rgba(245,166,35,.2);border-radius:6px;color:#f1f5f9;padding:8px 12px;font-size:13px;width:260px;margin:4px}
+pre{white-space:pre-wrap;word-break:break-all;font-size:11px;line-height:1.6}
+</style>
+</head>
+<body>
+<h2>🔍 Diagnóstico do Portal Mandala</h2>
+
+<div class="box">
+  <b>1. LocalStorage funcionando?</b><br>
+  <span id="ls-test"></span>
+</div>
+
+<div class="box">
+  <b>2. Sessão salva no LocalStorage:</b>
+  <pre id="ls-content"></pre>
+</div>
+
+<div class="box">
+  <b>3. Testar login direto:</b><br>
+  <input type="email" id="t-email" placeholder="E-mail" value="admrafaelcavalcanti@gmail.com"/><br>
+  <input type="password" id="t-senha" placeholder="Senha"/><br>
+  <button onclick="testarLogin()">Testar Login</button>
+  <pre id="login-result"></pre>
+</div>
+
+<div class="box">
+  <b>4. Ações:</b><br>
+  <button onclick="limparTudo()">🗑 Limpar localStorage</button>
+  <button onclick="irDashboard()">→ Ir para Dashboard</button>
+  <button onclick="location.reload()">↺ Recarregar</button>
+</div>
+
+<script>
+var SB_URL  = 'https://rbahvyejqybajnufftio.supabase.co';
+var SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiYWh2eWVqcXliYWpudWZmdGlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjA5MjIsImV4cCI6MjA4OTYzNjkyMn0.nUIo2CT3o41YL1TT8Hrp5kq-_ZS-bMMf-gvUMCEyYMw';
+
+// TESTE 1: LocalStorage
+try {
+  localStorage.setItem('_teste', '1');
+  var v = localStorage.getItem('_teste');
+  localStorage.removeItem('_teste');
+  document.getElementById('ls-test').innerHTML = v==='1'
+    ? '<span class="ok">✅ LocalStorage funcionando normalmente</span>'
+    : '<span class="err">❌ LocalStorage leitura falhou</span>';
+} catch(e) {
+  document.getElementById('ls-test').innerHTML = '<span class="err">❌ LocalStorage BLOQUEADO: '+e.message+'</span>';
+}
+
+// TESTE 2: Mostrar conteúdo
+function mostrarLS() {
+  var items = {};
+  for(var i=0;i<localStorage.length;i++){
+    var k = localStorage.key(i);
+    try { items[k] = JSON.parse(localStorage.getItem(k)); }
+    catch(e) { items[k] = localStorage.getItem(k); }
+  }
+  var html = localStorage.length === 0
+    ? '<span class="warn">⚠️ LocalStorage VAZIO — nenhuma sessão salva</span>'
+    : JSON.stringify(items, null, 2);
+  document.getElementById('ls-content').innerHTML = html;
+}
+mostrarLS();
+
+// TESTE 3: Login
+async function testarLogin() {
+  var email = document.getElementById('t-email').value.trim();
+  var senha = document.getElementById('t-senha').value;
+  var el = document.getElementById('login-result');
+
+  if(!email||!senha){ el.innerHTML='<span class="warn">Preencha e-mail e senha</span>'; return; }
+
+  el.innerHTML = 'Conectando ao Supabase...';
+
+  try {
+    var res = await fetch(SB_URL+'/auth/v1/token?grant_type=password', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SB_ANON},
+      body: JSON.stringify({email:email, password:senha})
+    });
+
+    var data = await res.json();
+    el.innerHTML = '<span class="ok">Status HTTP: '+res.status+'</span>\n\n';
+
+    if(!res.ok || !data.access_token) {
+      el.innerHTML += '<span class="err">❌ Login falhou: '+JSON.stringify(data)+'</span>';
+      return;
+    }
+
+    el.innerHTML += '<span class="ok">✅ Login OK! Token recebido.</span>\n';
+    el.innerHTML += 'User: '+data.user.email+'\n';
+    el.innerHTML += 'expires_in: '+data.expires_in+'s\n\n';
+
+    // Salva sessão
+    var expiresAt = Math.floor(Date.now()/1000) + (data.expires_in || 604800);
+    var sessao = {
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      expires_at: expiresAt,
+      user: data.user
+    };
+
+    try {
+      localStorage.setItem('mandala_session', JSON.stringify(sessao));
+      localStorage.setItem('mandala_perfil', 'sindico');
+      var check = localStorage.getItem('mandala_session');
+      if(check) {
+        el.innerHTML += '<span class="ok">✅ Sessão salva no localStorage!</span>\n';
+        el.innerHTML += 'Expires at: '+new Date(expiresAt*1000).toLocaleString('pt-BR')+'\n\n';
+        el.innerHTML += '<b>Clique em "Ir para Dashboard" para testar →</b>';
+        mostrarLS();
+      } else {
+        el.innerHTML += '<span class="err">❌ localStorage.setItem falhou silenciosamente</span>';
+      }
+    } catch(e2) {
+      el.innerHTML += '<span class="err">❌ Erro ao salvar no localStorage: '+e2.message+'</span>';
+    }
+
+  } catch(e) {
+    el.innerHTML = '<span class="err">❌ Erro de rede: '+e.message+'</span>';
+  }
+}
+
+function limparTudo() {
+  localStorage.clear();
+  sessionStorage.clear();
+  mostrarLS();
+  document.getElementById('login-result').innerHTML = '<span class="warn">LocalStorage limpo.</span>';
+}
+
+function irDashboard() {
+  window.location.href = 'dashboard.html';
+}
+</script>
+</body>
+</html>
