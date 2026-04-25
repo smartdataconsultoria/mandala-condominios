@@ -499,7 +499,7 @@ function buildSidebar(){
         +'<span style="font-size:10px;color:rgba(245,166,35,.5);font-weight:700">↗</span>'
         +'</a>';
     } else {
-      html+='<button class="sb-item" id="sb-'+item.id+'" onclick="navegar(''+item.id+'')">'
+      html+='<button class="sb-item" id="sb-'+item.id+'" onclick="navegar(\''+item.id+'\')">'
         +'<span style="display:flex;align-items:center;gap:8px"><span style="font-size:14px">'+item.ic+'</span>'+esc(item.lb)+'</span>'
         +(item.badge?'<span class="sb-badge">'+item.badge+'</span>':'<span class="sb-dot"></span>')+'</button>';
     }
