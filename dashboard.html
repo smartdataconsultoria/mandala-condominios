@@ -463,10 +463,18 @@ var NAVS={
 function buildSidebar(){
   var nav=NAVS[perfil]||NAVS['condômino'],html='';
   nav.forEach(function(item){
-    if(item.sec){html+='<div class="sb-sec">'+item.sec+'</div>';}
-    else{html+='<button class="sb-item" id="sb-'+item.id+'" onclick="navegar(\''+item.id+'\')">'
-      +'<span style="display:flex;align-items:center;gap:8px"><span style="font-size:14px">'+item.ic+'</span>'+esc(item.lb)+'</span>'
-      +(item.badge?'<span class="sb-badge">'+item.badge+'</span>':'<span class="sb-dot"></span>')+'</button>';}
+    if(item.sec){
+      html+='<div class="sb-sec">'+item.sec+'</div>';
+    } else if(item.href){
+      html+='<a href="'+item.href+'" class="sb-item" style="text-decoration:none;display:flex;align-items:center;justify-content:space-between">'
+        +'<span style="display:flex;align-items:center;gap:8px"><span style="font-size:14px">'+item.ic+'</span>'+esc(item.lb)+'</span>'
+        +'<span style="font-size:10px;color:rgba(245,166,35,.5);font-weight:700">↗</span>'
+        +'</a>';
+    } else {
+      html+='<button class="sb-item" id="sb-'+item.id+'" onclick="navegar(''+item.id+'')">'
+        +'<span style="display:flex;align-items:center;gap:8px"><span style="font-size:14px">'+item.ic+'</span>'+esc(item.lb)+'</span>'
+        +(item.badge?'<span class="sb-badge">'+item.badge+'</span>':'<span class="sb-dot"></span>')+'</button>';
+    }
   });
   document.getElementById('sbMenu').innerHTML=html;
 }
