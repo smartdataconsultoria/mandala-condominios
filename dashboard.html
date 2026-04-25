@@ -9,12 +9,13 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:#f1f5f9}
 #tela-loading{position:fixed;inset:0;background:#0a0e1a;display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:14px}
+#tela-loading[hidden],.hidden#tela-loading{display:none!important}
 .ld-sub{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#f5a623}
 .ld-nome{font-size:22px;font-weight:800;color:#f1f5f9}
 .ld-msg{font-size:12px;color:#6b7a99;margin-top:4px}
 .spinner{width:34px;height:34px;border:3px solid rgba(245,166,35,.15);border-top-color:#f5a623;border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-#tela-app{display:none;height:100vh;flex-direction:column}
+#tela-app{display:none;min-height:100vh;flex-direction:column}
 .topbar{height:62px;background:#0a0e1a;border-bottom:1px solid rgba(245,166,35,.1);padding:0 28px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .t-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
 .t-logo-icon{width:34px;height:34px;background:linear-gradient(135deg,#f5a623,#c47d0e);border-radius:9px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(245,166,35,.3)}
@@ -421,48 +422,67 @@ document.addEventListener('DOMContentLoaded', function(){
 
   console.log('[Mandala] Perfil:', perfil);
 
-  // Busca dados adicionais sem bloquear
-  fetch(SB_URL+'/rest/v1/usuarios_portal?select=nome,unidade,perfil&email=eq.'+encodeURIComponent(usr.email), {
-    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+usr.token}
-  }).then(function(r){ return r.ok?r.json():[]; })
-  .then(function(arr){
-    console.log('[Mandala] Dados do morador:', arr);
-    if(arr&&arr[0]){
-      if(arr[0].nome)    usr._nome    = arr[0].nome;
-      if(arr[0].unidade) usr._unidade = arr[0].unidade;
-      if(arr[0].perfil && ADMINS.indexOf(usr.email)===-1) perfil = arr[0].perfil;
-    }
-  }).catch(function(e){ console.warn('[Mandala] Dados morador erro (não crítico):', e); })
-  .finally(function(){ mostrarApp(); });
+  // Mostra o app imediatamente — não espera o fetch
+  mostrarApp();
 
-  // Timeout de segurança
-  setTimeout(function(){
-    var loading = document.getElementById('tela-loading');
-    if(loading && loading.style.display !== 'none'){
-      console.log('[Mandala] Timeout atingido - mostrando app');
-      mostrarApp();
-    }
-  }, 4000);
+  // Busca dados adicionais em background (não bloqueia)
+  try {
+    fetch(SB_URL+'/rest/v1/usuarios_portal?select=nome,unidade,perfil&email=eq.'+encodeURIComponent(usr.email), {
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+usr.token}
+    }).then(function(r){ return r.ok?r.json():[]; })
+    .then(function(arr){
+      console.log('[Mandala] Dados do morador:', arr);
+      if(arr&&arr[0]){
+        if(arr[0].nome)    { usr._nome    = arr[0].nome; }
+        if(arr[0].unidade) { usr._unidade = arr[0].unidade; }
+        if(arr[0].perfil && ADMINS.indexOf(usr.email)===-1) perfil = arr[0].perfil;
+        // Atualiza topbar se necessário
+        if(arr[0].unidade){
+          var tu=document.getElementById('topUnidade');
+          if(tu){ tu.textContent='Unidade '+arr[0].unidade; tu.style.display=''; }
+        }
+      }
+    }).catch(function(e){ console.warn('[Mandala] Dados morador (não crítico):', e); });
+  } catch(e) {
+    console.warn('[Mandala] Fetch falhou:', e);
+  }
 });
 
 function mostrarApp(){
-  document.getElementById('tela-loading').style.display = 'none';
-  document.getElementById('tela-app').style.display = 'flex';
-
-  document.getElementById('topEmail').textContent = usr.email;
-  var pLabels = {sindico:'🏠 Síndico', conselho:'⚖️ Conselho', 'condômino':'👤 Condômino'};
-  document.getElementById('topPerfil').textContent = pLabels[perfil]||perfil;
-
-  if(usr._unidade){
-    var tu=document.getElementById('topUnidade');
-    tu.textContent='Unidade '+usr._unidade;
-    tu.style.display='';
+  console.log('[Mandala] mostrarApp() chamado');
+  
+  // Esconde loading de todas as formas possíveis
+  var loading = document.getElementById('tela-loading');
+  if(loading){
+    loading.style.cssText = 'display:none!important';
+    loading.setAttribute('hidden','');
+    loading.classList.add('hidden');
   }
-  if(ADMINS.indexOf(usr.email)!==-1 || perfil==='sindico'){
-    document.getElementById('btnAdmin').style.display='';
+  
+  // Mostra app
+  var app = document.getElementById('tela-app');
+  if(app){
+    app.style.cssText = 'display:flex!important;flex-direction:column';
   }
-  buildSidebar();
-  navegar('dashboard');
+
+  try {
+    document.getElementById('topEmail').textContent = usr.email;
+    var pLabels = {sindico:'🏠 Síndico', conselho:'⚖️ Conselho', 'condômino':'👤 Condômino'};
+    document.getElementById('topPerfil').textContent = pLabels[perfil]||perfil;
+    if(usr._unidade){
+      var tu=document.getElementById('topUnidade');
+      tu.textContent='Unidade '+usr._unidade;
+      tu.style.display='';
+    }
+    if(ADMINS.indexOf(usr.email)!==-1 || perfil==='sindico'){
+      document.getElementById('btnAdmin').style.display='';
+    }
+    buildSidebar();
+    navegar('dashboard');
+    console.log('[Mandala] App carregado com sucesso!');
+  } catch(e) {
+    console.error('[Mandala] Erro em mostrarApp:', e);
+  }
 }
 
 // ── SAIR ─────────────────────────────────────────────────
@@ -854,6 +874,25 @@ function pgBoletos(cont){
   +`<div class="card"><div class="ct">Histórico</div>`
   +bols.map(function(b){return '<div class="bi"><div style="font-size:20px;width:34px;text-align:center">'+b.ic+'</div><div style="flex:1"><div class="br2">'+b.rf+' — '+b.ds+'</div><div class="bd">Vencimento: '+b.vc+'</div></div><div><div class="bv"><span class="bvl">'+b.st+'</span>'+brl(b.vl)+'</div><span class="badge '+b.bd+'" style="float:right;margin-top:4px">'+b.st+'</span></div>'+(b.st==='Em aberto'?'<button class="btn-s" style="margin-left:12px" onclick="toast(\'Abrindo 2ª via...\')">2ª Via</button>':'<button class="btn-s" style="margin-left:12px" onclick="toast(\'Baixando...\')">Comprovante</button>')+'</div>';}).join('')+'</div>';
 }
+</script>
+<script>
+// Garante que o loading sempre desaparece após 5s
+window.addEventListener('load', function(){
+  setTimeout(function(){
+    var l = document.getElementById('tela-loading');
+    var a = document.getElementById('tela-app');
+    if(l && l.style.display !== 'none' && (!a || a.style.display === 'none')){
+      console.warn('[Mandala] Forçando ocultação do loading por timeout global');
+      if(usr && usr.email){
+        // Tem usuário — mostra o app
+        mostrarApp();
+      } else {
+        // Sem usuário — vai para login
+        window.location.href = 'login.html';
+      }
+    }
+  }, 5000);
+});
 </script>
 </body>
 </html>
