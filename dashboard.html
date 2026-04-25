@@ -371,82 +371,31 @@ function getSessao(){
 }
 
 // ── INIT ─────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', function(){
-  console.log('[Mandala] DOMContentLoaded - iniciando...');
-
-  // Lê sessão direto do localStorage sem função intermediária
-  var sessRaw = null;
-  try { sessRaw = localStorage.getItem('mandala_session'); } catch(e){ console.error('[Mandala] localStorage bloqueado:', e); }
-
-  console.log('[Mandala] mandala_session raw:', sessRaw ? 'ENCONTRADO ('+sessRaw.length+' chars)' : 'VAZIO');
-
-  if(!sessRaw){
-    console.log('[Mandala] Sem sessão - redirecionando para login');
-    ldMsg('Sem sessão...');
-    setTimeout(function(){ window.location.href='login.html'; }, 800);
-    return;
-  }
-
-  var sess = null;
-  try { sess = JSON.parse(sessRaw); } catch(e){ console.error('[Mandala] Erro ao parsear sessão:', e); }
-
-  if(!sess || !sess.access_token){
-    console.log('[Mandala] Sessão inválida - redirecionando');
-    ldMsg('Sessão inválida...');
-    setTimeout(function(){ window.location.href='login.html'; }, 800);
-    return;
-  }
-
-  // Verifica expiração
-  var agora = Math.floor(Date.now()/1000);
-  if(sess.expires_at && sess.expires_at < agora){
-    console.log('[Mandala] Sessão expirada em', new Date(sess.expires_at*1000).toLocaleString());
-    ldMsg('Sessão expirada...');
+window.onload = function(){
+  var sessRaw = localStorage.getItem('mandala_session');
+  if(!sessRaw){ window.location.href='login.html'; return; }
+  var sess;
+  try{ sess=JSON.parse(sessRaw); }catch(e){ window.location.href='login.html'; return; }
+  if(!sess||!sess.access_token){ window.location.href='login.html'; return; }
+  if(sess.expires_at && sess.expires_at < Math.floor(Date.now()/1000)){
     localStorage.removeItem('mandala_session');
-    setTimeout(function(){ window.location.href='login.html'; }, 800);
+    window.location.href='login.html';
     return;
   }
-
-  console.log('[Mandala] Sessão OK - user:', sess.user && sess.user.email);
-  ldMsg('Carregando portal...');
-
-  usr = {
-    email: sess.user.email,
-    token: sess.access_token,
-    _nome: (sess.user.user_metadata && sess.user.user_metadata.full_name) || '',
-    _unidade: ''
-  };
-
-  perfil = localStorage.getItem('mandala_perfil') || sessionStorage.getItem('mandala_perfil') || 'sindico';
-  if(ADMINS.indexOf(usr.email) !== -1) perfil = 'sindico';
-
-  console.log('[Mandala] Perfil:', perfil);
-
-  // Mostra o app imediatamente — não espera o fetch
+  usr = { email:sess.user.email, token:sess.access_token, _nome:'', _unidade:'' };
+  perfil = localStorage.getItem('mandala_perfil') || 'sindico';
+  if(ADMINS.indexOf(usr.email)!==-1) perfil='sindico';
   mostrarApp();
-
-  // Busca dados adicionais em background (não bloqueia)
-  try {
-    fetch(SB_URL+'/rest/v1/usuarios_portal?select=nome,unidade,perfil&email=eq.'+encodeURIComponent(usr.email), {
-      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+usr.token}
-    }).then(function(r){ return r.ok?r.json():[]; })
-    .then(function(arr){
-      console.log('[Mandala] Dados do morador:', arr);
-      if(arr&&arr[0]){
-        if(arr[0].nome)    { usr._nome    = arr[0].nome; }
-        if(arr[0].unidade) { usr._unidade = arr[0].unidade; }
-        if(arr[0].perfil && ADMINS.indexOf(usr.email)===-1) perfil = arr[0].perfil;
-        // Atualiza topbar se necessário
-        if(arr[0].unidade){
-          var tu=document.getElementById('topUnidade');
-          if(tu){ tu.textContent='Unidade '+arr[0].unidade; tu.style.display=''; }
-        }
-      }
-    }).catch(function(e){ console.warn('[Mandala] Dados morador (não crítico):', e); });
-  } catch(e) {
-    console.warn('[Mandala] Fetch falhou:', e);
-  }
-});
+  fetch(SB_URL+'/rest/v1/usuarios_portal?select=nome,unidade,perfil&email=eq.'+encodeURIComponent(usr.email),{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+usr.token}
+  }).then(function(r){return r.ok?r.json()[];}).then(function(a){
+    if(a&&a[0]){
+      if(a[0].nome) usr._nome=a[0].nome;
+      if(a[0].unidade){usr._unidade=a[0].unidade;var t=document.getElementById('topUnidade');if(t){t.textContent='Unidade '+a[0].unidade;t.style.display='';}}
+      if(a[0].perfil&&ADMINS.indexOf(usr.email)===-1){perfil=a[0].perfil;}
+    }
+  }).catch(function(){});
+};
 
 function mostrarApp(){
   console.log('[Mandala] mostrarApp() chamado');
