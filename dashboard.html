@@ -418,17 +418,45 @@ function sair(){
 // ── SIDEBAR ───────────────────────────────────────────────
 var NAVS={
   sindico:[
-    {sec:'Principal'},{id:'dashboard',ic:'◎',lb:'Dashboard'},{id:'financeiro',ic:'$',lb:'Financeiro'},{id:'metas',ic:'◈',lb:'Metas & Projetos'},
-    {sec:'Gestão'},{id:'documentos',ic:'▤',lb:'Documentos'},{id:'calendario',ic:'◷',lb:'Calendário'},{id:'comunicados',ic:'◎',lb:'Comunicados'},{id:'mensagens',ic:'✉',lb:'Fale com Síndico',badge:2},{id:'boletos',ic:'◫',lb:'Boletos & Taxas'}
+    {sec:'Principal'},
+    {id:'dashboard',ic:'◎',lb:'Dashboard'},
+    {id:'financeiro',ic:'$',lb:'Financeiro'},
+    {id:'metas',ic:'◈',lb:'Metas & Projetos'},
+    {sec:'Financeiro Avançado'},
+    {id:'transacoes',ic:'↕',lb:'Transações',href:'transacoes.html'},
+    {id:'orcamento',ic:'◩',lb:'Orçamento',href:'orcamento.html'},
+    {id:'categorias',ic:'🏷',lb:'Categorias & Contas',href:'categorias.html'},
+    {sec:'Gestão'},
+    {id:'documentos',ic:'▤',lb:'Documentos'},
+    {id:'calendario',ic:'◷',lb:'Calendário'},
+    {id:'comunicados',ic:'◎',lb:'Comunicados'},
+    {id:'mensagens',ic:'✉',lb:'Fale com Síndico',badge:2},
+    {id:'boletos',ic:'◫',lb:'Boletos & Taxas'}
   ],
   conselho:[
-    {sec:'Principal'},{id:'dashboard',ic:'◎',lb:'Dashboard'},{id:'financeiro',ic:'$',lb:'Prestação de Contas'},
-    {sec:'Consultas'},{id:'documentos',ic:'▤',lb:'Documentos'},{id:'comunicados',ic:'◎',lb:'Comunicados'},{id:'metas',ic:'◈',lb:'Metas & Projetos'},{id:'calendario',ic:'◷',lb:'Calendário'}
+    {sec:'Principal'},
+    {id:'dashboard',ic:'◎',lb:'Dashboard'},
+    {id:'financeiro',ic:'$',lb:'Prestação de Contas'},
+    {sec:'Financeiro'},
+    {id:'transacoes',ic:'↕',lb:'Transações',href:'transacoes.html'},
+    {id:'orcamento',ic:'◩',lb:'Orçamento',href:'orcamento.html'},
+    {sec:'Consultas'},
+    {id:'documentos',ic:'▤',lb:'Documentos'},
+    {id:'comunicados',ic:'◎',lb:'Comunicados'},
+    {id:'metas',ic:'◈',lb:'Metas & Projetos'},
+    {id:'calendario',ic:'◷',lb:'Calendário'}
   ],
   'condômino':[
-    {sec:'Principal'},{id:'dashboard',ic:'◎',lb:'Início'},
-    {sec:'Minha Unidade'},{id:'boletos',ic:'◫',lb:'Meus Boletos'},{id:'metas',ic:'◈',lb:'Metas do Condomínio'},
-    {sec:'Condomínio'},{id:'documentos',ic:'▤',lb:'Documentos'},{id:'calendario',ic:'◷',lb:'Calendário'},{id:'comunicados',ic:'◎',lb:'Comunicados'},{id:'mensagens',ic:'✉',lb:'Fale com Síndico'}
+    {sec:'Principal'},
+    {id:'dashboard',ic:'◎',lb:'Início'},
+    {sec:'Minha Unidade'},
+    {id:'boletos',ic:'◫',lb:'Meus Boletos'},
+    {id:'metas',ic:'◈',lb:'Metas do Condomínio'},
+    {sec:'Condomínio'},
+    {id:'documentos',ic:'▤',lb:'Documentos'},
+    {id:'calendario',ic:'◷',lb:'Calendário'},
+    {id:'comunicados',ic:'◎',lb:'Comunicados'},
+    {id:'mensagens',ic:'✉',lb:'Fale com Síndico'}
   ]
 };
 
@@ -622,6 +650,23 @@ function pgDashboard(cont){
           </div>
         </div>
       </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px" id="quickAccess">
+      <a href="transacoes.html" style="text-decoration:none;display:flex;align-items:center;gap:12px;background:#111827;border:1px solid rgba(245,166,35,.1);border-radius:12px;padding:16px;transition:all .2s;cursor:pointer" onmouseover="this.style.borderColor='rgba(245,166,35,.35)'" onmouseout="this.style.borderColor='rgba(245,166,35,.1)'">
+        <div style="width:42px;height:42px;border-radius:10px;background:rgba(245,166,35,.1);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">↕</div>
+        <div><div style="font-size:14px;font-weight:600;color:#f1f5f9">Transações</div><div style="font-size:12px;color:rgba(241,245,249,.35);margin-top:2px">Lançar receitas e despesas</div></div>
+        <span style="margin-left:auto;font-size:11px;color:#f5a623">↗</span>
+      </a>
+      <a href="orcamento.html" style="text-decoration:none;display:flex;align-items:center;gap:12px;background:#111827;border:1px solid rgba(245,166,35,.1);border-radius:12px;padding:16px;transition:all .2s;cursor:pointer" onmouseover="this.style.borderColor='rgba(245,166,35,.35)'" onmouseout="this.style.borderColor='rgba(245,166,35,.1)'">
+        <div style="width:42px;height:42px;border-radius:10px;background:rgba(52,201,126,.1);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">◩</div>
+        <div><div style="font-size:14px;font-weight:600;color:#f1f5f9">Orçamento</div><div style="font-size:12px;color:rgba(241,245,249,.35);margin-top:2px">Previsto vs realizado</div></div>
+        <span style="margin-left:auto;font-size:11px;color:#f5a623">↗</span>
+      </a>
+      <a href="categorias.html" style="text-decoration:none;display:flex;align-items:center;gap:12px;background:#111827;border:1px solid rgba(245,166,35,.1);border-radius:12px;padding:16px;transition:all .2s;cursor:pointer" onmouseover="this.style.borderColor='rgba(245,166,35,.35)'" onmouseout="this.style.borderColor='rgba(245,166,35,.1)'">
+        <div style="width:42px;height:42px;border-radius:10px;background:rgba(110,168,247,.1);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🏷</div>
+        <div><div style="font-size:14px;font-weight:600;color:#f1f5f9">Categorias</div><div style="font-size:12px;color:rgba(241,245,249,.35);margin-top:2px">Categorias e contas</div></div>
+        <span style="margin-left:auto;font-size:11px;color:#f5a623">↗</span>
+      </a>
     </div>
     <div style="font-size:17px;font-weight:700;color:#f1f5f9;margin-bottom:6px">Dashboards disponíveis</div>
     <div style="font-size:13px;color:rgba(241,245,249,.3);margin-bottom:18px">Relatórios Power BI do condomínio</div>
