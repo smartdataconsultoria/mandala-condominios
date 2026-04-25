@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edifício Mandala | Orçamento</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:#f1f5f9}
+.topbar{height:62px;background:#0a0e1a;border-bottom:1px solid rgba(245,166,35,.1);padding:0 28px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:100}
+.t-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.t-logo-icon{width:34px;height:34px;background:linear-gradient(135deg,#f5a623,#c47d0e);border-radius:9px;display:flex;align-items:center;justify-content:center}
+.t-logo-icon svg{width:20px;height:20px}
+.t-logo-nome{display:flex;flex-direction:column;line-height:1.1}
+.t-logo-sub{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#f5a623}
+.t-logo-main{font-size:16px;font-weight:800;color:#f1f5f9}
+.t-right{display:flex;align-items:center;gap:10px}
+.t-nav{display:flex;gap:4px}
+.t-nav a{font-size:13px;color:rgba(241,245,249,.45);text-decoration:none;padding:6px 12px;border-radius:7px;transition:all .2s}
+.t-nav a:hover{color:#f1f5f9;background:rgba(245,166,35,.06)}
+.t-nav a.on{color:#f5a623;background:rgba(245,166,35,.1);font-weight:600}
+.t-sair{background:transparent;border:1px solid rgba(241,245,249,.1);border-radius:8px;color:rgba(241,245,249,.4);padding:6px 14px;font-size:12px;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s}
+.t-sair:hover{border-color:#ef4444;color:#ef4444}
+.main{max-width:1100px;margin:0 auto;padding:36px 28px}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:16px}
+.page-title{font-size:26px;font-weight:700;color:#f1f5f9}
+.page-sub{font-size:13px;color:rgba(241,245,249,.35);margin-top:3px}
+/* NAV MES */
+.mes-nav{display:flex;align-items:center;gap:10px}
+.mes-nav button{background:#111827;border:1px solid rgba(245,166,35,.12);border-radius:8px;color:#f5a623;width:34px;height:34px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.mes-nav button:hover{background:rgba(245,166,35,.1)}
+.mes-label{font-size:15px;font-weight:600;color:#f1f5f9;min-width:130px;text-align:center}
+.tabs-wrap{display:flex;gap:8px;margin-bottom:28px;background:rgba(245,166,35,.03);border:1px solid rgba(245,166,35,.07);border-radius:12px;padding:4px;width:fit-content}
+.tab{padding:9px 20px;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;color:rgba(241,245,249,.4);border:none;background:none;font-family:'Poppins',sans-serif;transition:all .2s}
+.tab:hover{color:rgba(241,245,249,.8)}
+.tab.on{background:rgba(245,166,35,.12);color:#f5a623;font-weight:600}
+.section{display:none}.section.on{display:block}
+/* RESUMO */
+.resumo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.rc{background:#111827;border:1px solid rgba(245,166,35,.08);border-radius:14px;padding:18px 20px}
+.rc-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:rgba(241,245,249,.3);margin-bottom:8px}
+.rc-val{font-size:22px;font-weight:700;color:#f1f5f9}
+.rc-val.g{color:#34c97e}.rc-val.r{color:#ef6060}.rc-val.o{color:#f5a623}
+.rc-sub{font-size:12px;color:rgba(241,245,249,.3);margin-top:4px}
+/* LINHAS ORÇAMENTO */
+.orc-section{margin-bottom:28px}
+.orc-tipo-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(245,166,35,.06)}
+.orc-tipo-label{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:#f1f5f9}
+.tipo-dot{width:8px;height:8px;border-radius:50%}
+.btn-add-orc{display:flex;align-items:center;gap:6px;background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);color:#f5a623;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s}
+.btn-add-orc:hover{background:rgba(245,166,35,.18)}
+.orc-row{background:#111827;border:1px solid rgba(245,166,35,.07);border-radius:12px;padding:16px 20px;margin-bottom:10px;display:grid;grid-template-columns:200px 1fr 120px 120px 70px;align-items:center;gap:16px;transition:all .2s}
+.orc-row:hover{border-color:rgba(245,166,35,.2)}
+.orc-cat{display:flex;align-items:center;gap:8px}
+.orc-cat-icon{font-size:18px}
+.orc-cat-name{font-size:13px;font-weight:500;color:#f1f5f9}
+.orc-bar-wrap{position:relative}
+.orc-bar-bg{height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
+.orc-bar-fill{height:100%;border-radius:4px;transition:width .5s}
+.orc-bar-info{display:flex;justify-content:space-between;font-size:11px;color:rgba(241,245,249,.35);margin-top:4px}
+.orc-prev{text-align:right}
+.orc-prev-lbl{font-size:10px;color:rgba(241,245,249,.3);margin-bottom:2px}
+.orc-prev-val{font-size:14px;font-weight:600;color:#f1f5f9}
+.orc-real-lbl{font-size:10px;color:rgba(241,245,249,.3);margin-bottom:2px}
+.orc-real-val{font-size:14px;font-weight:600}
+.orc-pct{font-size:13px;font-weight:700;text-align:center}
+.orc-actions{display:flex;gap:4px;justify-content:flex-end}
+.btn-ico{background:none;border:none;color:rgba(241,245,249,.3);cursor:pointer;padding:5px;border-radius:6px;transition:all .2s;font-size:14px}
+.btn-ico:hover{color:#f5a623;background:rgba(245,166,35,.1)}
+.btn-ico.del:hover{color:#ef6060;background:rgba(239,96,96,.1)}
+/* ANUAL */
+.ano-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:24px}
+.mes-card{background:#111827;border:1px solid rgba(245,166,35,.07);border-radius:12px;padding:14px;text-align:center;cursor:pointer;transition:all .2s}
+.mes-card:hover{border-color:rgba(245,166,35,.25)}
+.mes-card.atual{border-color:#f5a623;background:rgba(245,166,35,.06)}
+.mes-card-nome{font-size:12px;font-weight:500;color:rgba(241,245,249,.5);margin-bottom:8px}
+.mes-card-rec{font-size:13px;font-weight:600;color:#34c97e;margin-bottom:2px}
+.mes-card-des{font-size:13px;font-weight:600;color:#ef6060;margin-bottom:6px}
+.mes-card-bal{font-size:12px;font-weight:700;padding:3px 8px;border-radius:20px;display:inline-block}
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;display:none;align-items:center;justify-content:center}
+.overlay.on{display:flex}
+.modal{background:#111827;border:1px solid rgba(245,166,35,.15);border-radius:18px;padding:32px;width:90%;max-width:440px;animation:mup .25s ease}
+@keyframes mup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.modal-title{font-size:17px;font-weight:700;color:#f1f5f9;margin-bottom:24px}
+.fr{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.fr label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:rgba(241,245,249,.3)}
+.fr input,.fr select{background:#0a0e1a;border:1px solid rgba(245,166,35,.12);border-radius:8px;color:#f1f5f9;padding:10px 14px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;transition:border .2s;width:100%}
+.fr input:focus,.fr select:focus{border-color:rgba(245,166,35,.4)}
+.fr select option{background:#111827}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+.btn-cancel{background:transparent;border:1px solid rgba(241,245,249,.1);color:rgba(241,245,249,.45);border-radius:8px;padding:10px 20px;font-size:13px;cursor:pointer;font-family:'Poppins',sans-serif}
+.btn-cancel:hover{border-color:rgba(241,245,249,.25);color:rgba(241,245,249,.8)}
+.btn-save{background:linear-gradient(135deg,#f5a623,#c47d0e);color:white;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;box-shadow:0 4px 12px rgba(245,166,35,.3)}
+.btn-save:hover{opacity:.9}
+#toast{position:fixed;bottom:24px;right:24px;background:#1a2235;border:1px solid rgba(245,166,35,.25);color:#f1f5f9;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none}
+#toast.on{opacity:1;transform:translateY(0)}
+#toast.ok{border-color:rgba(52,201,126,.3);color:#34c97e}
+#toast.err{border-color:rgba(239,68,68,.3);color:#ef4444}
+#loading{position:fixed;inset:0;background:#0a0e1a;display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:14px}
+.sp{width:34px;height:34px;border:3px solid rgba(245,166,35,.15);border-top-color:#f5a623;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:900px){.resumo-grid{grid-template-columns:1fr 1fr}.orc-row{grid-template-columns:1fr 1fr;gap:10px}.ano-grid{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#f5a623">Edifício</div>
+  <div style="font-size:20px;font-weight:800;color:#f1f5f9;margin-top:-8px">Mandala</div>
+  <div class="sp" style="margin-top:6px"></div>
+</div>
+
+<div id="app" style="display:none;flex-direction:column;min-height:100vh">
+<div class="topbar">
+  <a class="t-logo" href="dashboard.html">
+    <div class="t-logo-icon"><svg viewBox="0 0 36 36" fill="none"><rect x="4" y="11" width="28" height="22" rx="2" fill="white" opacity=".95"/><polygon points="2,13 18,3 34,13" fill="white"/><rect x="14" y="24" width="8" height="9" rx="1.5" fill="#c47d0e" opacity=".9"/></svg></div>
+    <div class="t-logo-nome"><span class="t-logo-sub">Edifício</span><span class="t-logo-main">Mandala</span></div>
+  </a>
+  <nav class="t-nav">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="transacoes.html">Transações</a>
+    <a href="categorias.html">Categorias</a>
+    <a href="orcamento.html" class="on">Orçamento</a>
+  </nav>
+  <div class="t-right">
+    <span id="topEmail" style="font-size:11px;color:rgba(241,245,249,.28)"></span>
+    <button class="t-sair" onclick="sair()">↩ Sair</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-header">
+    <div><div class="page-title">Orçamento</div><div class="page-sub">Planejamento e acompanhamento financeiro do Edifício Mandala</div></div>
+    <div class="mes-nav">
+      <button onclick="mudarMes(-1)">‹</button>
+      <span class="mes-label" id="mesLabel">Abril 2026</span>
+      <button onclick="mudarMes(1)">›</button>
+    </div>
+  </div>
+
+  <div class="tabs-wrap">
+    <button class="tab on" onclick="showTab('mensal',this)">📅 Mensal</button>
+    <button class="tab"    onclick="showTab('anual',this)">📊 Visão Anual</button>
+  </div>
+
+  <!-- MENSAL -->
+  <div class="section on" id="sec-mensal">
+    <div class="resumo-grid">
+      <div class="rc"><div class="rc-lbl">Receitas Previstas</div><div class="rc-val g" id="rRecPrev">R$ 0,00</div><div class="rc-sub">Orçado para o mês</div></div>
+      <div class="rc"><div class="rc-lbl">Receitas Realizadas</div><div class="rc-val g" id="rRecReal">R$ 0,00</div><div class="rc-sub">Lançado no mês</div></div>
+      <div class="rc"><div class="rc-lbl">Despesas Previstas</div><div class="rc-val r" id="rDesPrev">R$ 0,00</div><div class="rc-sub">Orçado para o mês</div></div>
+      <div class="rc"><div class="rc-lbl">Despesas Realizadas</div><div class="rc-val r" id="rDesReal">R$ 0,00</div><div class="rc-sub" id="rDesPct">—</div></div>
+    </div>
+    <div id="orcMensal"></div>
+  </div>
+
+  <!-- ANUAL -->
+  <div class="section" id="sec-anual">
+    <div class="resumo-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="rc"><div class="rc-lbl">Total Receitas <span id="anoLabel">2026</span></div><div class="rc-val g" id="aRecTotal">R$ 0,00</div></div>
+      <div class="rc"><div class="rc-lbl">Total Despesas <span id="anoLabel2">2026</span></div><div class="rc-val r" id="aDesTotal">R$ 0,00</div></div>
+      <div class="rc"><div class="rc-lbl">Saldo Anual</div><div class="rc-val o" id="aSaldo">R$ 0,00</div></div>
+    </div>
+    <div class="ano-grid" id="anoGrid"></div>
+  </div>
+</div>
+</div>
+
+<!-- MODAL ORÇAMENTO -->
+<div class="overlay" id="modalOrc">
+  <div class="modal">
+    <div class="modal-title">Definir Orçamento</div>
+    <div class="fr"><label>Categoria</label><select id="oCat"><option value="">Selecionar...</option></select></div>
+    <div class="fr"><label>Valor Previsto (R$)</label><input type="number" id="oValor" placeholder="0,00" step="0.01" min="0"/></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="fecharModalOrc()">Cancelar</button>
+      <button class="btn-save" onclick="salvarOrc()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+var SB_URL = 'https://rbahvyejqybajnufftio.supabase.co';
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiYWh2eWVqcXliYWpudWZmdGlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjA5MjIsImV4cCI6MjA4OTYzNjkyMn0.nUIo2CT3o41YL1TT8Hrp5kq-_ZS-bMMf-gvUMCEyYMw';
+var EMPRESA='mandala';
+var usr=null,token=null;
+var categorias=[],orcamentos=[],transacoes=[];
+var mesAtual=new Date().getMonth(),anoAtual=new Date().getFullYear();
+var tipoOrc='despesa';
+var MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function brl(v){return 'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function toast(m,t){var e=document.getElementById('toast');e.textContent=m;e.className='on '+(t||'');clearTimeout(e._t);e._t=setTimeout(function(){e.className='';},3200);}
+function getSessao(){try{var s=localStorage.getItem('mandala_session');if(!s)return null;var ss=JSON.parse(s);if(!ss||!ss.access_token)return null;if(ss.expires_at&&ss.expires_at<Math.floor(Date.now()/1000))return null;return ss;}catch(e){return null;}}
+function sair(){localStorage.removeItem('mandala_session');window.location.href='login.html';}
+function showTab(tab,el){document.querySelectorAll('.section').forEach(function(s){s.classList.remove('on');});document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});document.getElementById('sec-'+tab).classList.add('on');el.classList.add('on');if(tab==='anual')renderAnual();}
+
+function mudarMes(d){
+  mesAtual+=d;
+  if(mesAtual>11){mesAtual=0;anoAtual++;}
+  if(mesAtual<0){mesAtual=11;anoAtual--;}
+  document.getElementById('mesLabel').textContent=MESES[mesAtual]+' '+anoAtual;
+  carregar();
+}
+
+async function carregar(){
+  var mes=mesAtual+1;
+  var dataIni=anoAtual+'-'+String(mes).padStart(2,'0')+'-01';
+  var dataFim=anoAtual+'-'+String(mes).padStart(2,'0')+'-31';
+  try{
+    var ro=await fetch(SB_URL+'/rest/v1/condo_orcamentos?select=*,condo_categorias(id,nome,icone,cor,tipo)&empresa=eq.'+EMPRESA+'&mes=eq.'+mes+'&ano=eq.'+anoAtual,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+token}});
+    orcamentos=ro.ok?await ro.json():[];
+    var rt=await fetch(SB_URL+'/rest/v1/condo_transacoes?select=tipo,valor,categoria_id&empresa=eq.'+EMPRESA+'&data=gte.'+dataIni+'&data=lte.'+dataFim,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+token}});
+    transacoes=rt.ok?await rt.json():[];
+    renderMensal();
+  }catch(e){console.error(e);}
+}
+
+function calcReal(catId,tipo){
+  return transacoes.filter(function(t){return t.tipo===tipo&&t.categoria_id===catId;}).reduce(function(acc,t){return acc+parseFloat(t.valor);},0);
+}
+
+function renderMensal(){
+  var recPrev=0,desPrev=0,recReal=0,desReal=0;
+  orcamentos.forEach(function(o){
+    var r=calcReal(o.categoria_id,o.condo_categorias?o.condo_categorias.tipo:'despesa');
+    if(o.condo_categorias&&o.condo_categorias.tipo==='receita'){recPrev+=parseFloat(o.valor_previsto);recReal+=r;}
+    else{desPrev+=parseFloat(o.valor_previsto);desReal+=r;}
+  });
+  // Também soma transações sem orçamento
+  transacoes.forEach(function(t){
+    var temOrc=orcamentos.some(function(o){return o.categoria_id===t.categoria_id;});
+    if(!temOrc){if(t.tipo==='receita')recReal+=parseFloat(t.valor);else desReal+=parseFloat(t.valor);}
+  });
+
+  document.getElementById('rRecPrev').textContent=brl(recPrev);
+  document.getElementById('rRecReal').textContent=brl(recReal);
+  document.getElementById('rDesPrev').textContent=brl(desPrev);
+  document.getElementById('rDesReal').textContent=brl(desReal);
+  var pctDes=desPrev>0?Math.round((desReal/desPrev)*100):0;
+  document.getElementById('rDesPct').textContent=pctDes+'% do previsto';
+
+  var desCats=categorias.filter(function(c){return c.tipo==='despesa';});
+  var recCats=categorias.filter(function(c){return c.tipo==='receita';});
+
+  function orcRow(cat){
+    var orc=orcamentos.find(function(o){return o.categoria_id===cat.id;});
+    var prev=orc?parseFloat(orc.valor_previsto):0;
+    var real=calcReal(cat.id,cat.tipo);
+    var pct=prev>0?Math.min(100,Math.round((real/prev)*100)):0;
+    var isOver=prev>0&&real>prev;
+    var barColor=isOver?'#ef6060':pct>75?'#f5a623':'#34c97e';
+    var pctColor=isOver?'#ef6060':pct>75?'#f5a623':'#34c97e';
+    if(!orc&&real===0)return '';
+    return '<div class="orc-row">'
+      +'<div class="orc-cat"><span class="orc-cat-icon">'+cat.icone+'</span><span class="orc-cat-name">'+cat.nome+'</span></div>'
+      +'<div class="orc-bar-wrap"><div class="orc-bar-bg"><div class="orc-bar-fill" style="width:'+pct+'%;background:'+barColor+'"></div></div>'
+        +'<div class="orc-bar-info"><span>Realizado: '+brl(real)+'</span><span>'+(prev>0?brl(prev)+' previsto':'Sem orçamento')+'</span></div>'
+      +'</div>'
+      +'<div class="orc-prev"><div class="orc-prev-lbl">Previsto</div><div class="orc-prev-val">'+(prev>0?brl(prev):'—')+'</div></div>'
+      +'<div><div class="orc-real-lbl">Realizado</div><div class="orc-real-val" style="color:'+barColor+'">'+brl(real)+'</div></div>'
+      +'<div class="orc-pct" style="color:'+pctColor+'">'+(prev>0?pct+'%':'—')+'</div>'
+      +'</div>';
+  }
+
+  var html='';
+  html+='<div class="orc-section">'
+    +'<div class="orc-tipo-title"><div class="orc-tipo-label"><span class="tipo-dot" style="background:#34c97e"></span>Receitas</div>'
+    +'<button class="btn-add-orc" onclick="abrirModalOrc(\'receita\')">+ Definir meta de receita</button></div>'
+    +recCats.map(orcRow).join('')+'</div>';
+  html+='<div class="orc-section">'
+    +'<div class="orc-tipo-title"><div class="orc-tipo-label"><span class="tipo-dot" style="background:#ef6060"></span>Despesas</div>'
+    +'<button class="btn-add-orc" onclick="abrirModalOrc(\'despesa\')">+ Definir orçamento</button></div>'
+    +desCats.map(orcRow).join('')+'</div>';
+
+  document.getElementById('orcMensal').innerHTML=html;
+}
+
+async function renderAnual(){
+  document.getElementById('anoLabel').textContent=anoAtual;
+  document.getElementById('anoLabel2').textContent=anoAtual;
+  try{
+    var r=await fetch(SB_URL+'/rest/v1/condo_transacoes?select=tipo,valor,data&empresa=eq.'+EMPRESA+'&data=gte.'+anoAtual+'-01-01&data=lte.'+anoAtual+'-12-31',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+token}});
+    var tAnual=r.ok?await r.json():[];
+    var recTotal=0,desTotal=0;
+    var porMes=Array.from({length:12},function(){return {rec:0,des:0};});
+    tAnual.forEach(function(t){
+      var m=parseInt(t.data.split('-')[1])-1;
+      if(t.tipo==='receita'){porMes[m].rec+=parseFloat(t.valor);recTotal+=parseFloat(t.valor);}
+      else{porMes[m].des+=parseFloat(t.valor);desTotal+=parseFloat(t.valor);}
+    });
+    document.getElementById('aRecTotal').textContent=brl(recTotal);
+    document.getElementById('aDesTotal').textContent=brl(desTotal);
+    var saldo=recTotal-desTotal;
+    document.getElementById('aSaldo').textContent=brl(saldo);
+    document.getElementById('aSaldo').className='rc-val '+(saldo>=0?'g':'r');
+
+    document.getElementById('anoGrid').innerHTML=MESES.map(function(nm,i){
+      var bal=porMes[i].rec-porMes[i].des;
+      var isAtual=i===mesAtual;
+      return '<div class="mes-card'+(isAtual?' atual':'')+'" onclick="irParaMes('+i+')">'
+        +'<div class="mes-card-nome">'+nm.substring(0,3)+'</div>'
+        +'<div class="mes-card-rec">+'+brl(porMes[i].rec)+'</div>'
+        +'<div class="mes-card-des">-'+brl(porMes[i].des)+'</div>'
+        +'<span class="mes-card-bal" style="background:rgba('+(bal>=0?'52,201,126':'239,96,96')+',.1);color:'+(bal>=0?'#34c97e':'#ef6060')+'">'+brl(bal)+'</span>'
+        +'</div>';
+    }).join('');
+  }catch(e){console.error(e);}
+}
+
+function irParaMes(m){
+  mesAtual=m;
+  document.getElementById('mesLabel').textContent=MESES[m]+' '+anoAtual;
+  showTab('mensal',document.querySelector('.tab'));
+  document.querySelectorAll('.tab')[0].classList.add('on');
+  carregar();
+}
+
+function abrirModalOrc(tipo){
+  tipoOrc=tipo;
+  var sel=document.getElementById('oCat');
+  sel.innerHTML='<option value="">Selecionar categoria...</option>';
+  categorias.filter(function(c){return c.tipo===tipo;}).forEach(function(c){
+    sel.innerHTML+='<option value="'+c.id+'">'+c.icone+' '+c.nome+'</option>';
+  });
+  document.getElementById('oValor').value='';
+  document.getElementById('modalOrc').classList.add('on');
+}
+function fecharModalOrc(){document.getElementById('modalOrc').classList.remove('on');}
+
+async function salvarOrc(){
+  var catId=document.getElementById('oCat').value;
+  var valor=parseFloat(document.getElementById('oValor').value);
+  if(!catId||!valor){toast('Selecione a categoria e informe o valor.','err');return;}
+  try{
+    var body={empresa:EMPRESA,categoria_id:parseInt(catId),mes:mesAtual+1,ano:anoAtual,valor_previsto:valor};
+    var r=await fetch(SB_URL+'/rest/v1/condo_orcamentos',{
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+token,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify(body)
+    });
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    toast('Orçamento salvo!','ok');fecharModalOrc();await carregar();
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+
+document.getElementById('modalOrc').addEventListener('click',function(e){if(e.target===this)fecharModalOrc();});
+
+document.addEventListener('DOMContentLoaded',async function(){
+  var sess=getSessao();if(!sess){window.location.href='login.html';return;}
+  usr=sess.user;token=sess.access_token;
+  document.getElementById('topEmail').textContent=usr.email;
+  document.getElementById('mesLabel').textContent=MESES[mesAtual]+' '+anoAtual;
+  try{
+    var rc=await fetch(SB_URL+'/rest/v1/condo_categorias?select=*&empresa=eq.'+EMPRESA+'&order=tipo,nome',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+token}});
+    categorias=rc.ok?await rc.json():[];
+  }catch(e){}
+  await carregar();
+  document.getElementById('loading').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('app').style.flexDirection='column';
+});
+</script>
+</body>
+</html>

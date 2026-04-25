@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edifício Mandala | Categorias & Contas</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:#f1f5f9}
+.topbar{height:62px;background:#0a0e1a;border-bottom:1px solid rgba(245,166,35,.1);padding:0 28px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:100}
+.t-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.t-logo-icon{width:34px;height:34px;background:linear-gradient(135deg,#f5a623,#c47d0e);border-radius:9px;display:flex;align-items:center;justify-content:center}
+.t-logo-icon svg{width:20px;height:20px}
+.t-logo-nome{display:flex;flex-direction:column;line-height:1.1}
+.t-logo-sub{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#f5a623}
+.t-logo-main{font-size:16px;font-weight:800;color:#f1f5f9}
+.t-right{display:flex;align-items:center;gap:10px}
+.t-nav{display:flex;gap:4px}
+.t-nav a{font-size:13px;color:rgba(241,245,249,.45);text-decoration:none;padding:6px 12px;border-radius:7px;transition:all .2s}
+.t-nav a:hover{color:#f1f5f9;background:rgba(245,166,35,.06)}
+.t-nav a.on{color:#f5a623;background:rgba(245,166,35,.1);font-weight:600}
+.t-sair{background:transparent;border:1px solid rgba(241,245,249,.1);border-radius:8px;color:rgba(241,245,249,.4);padding:6px 14px;font-size:12px;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s}
+.t-sair:hover{border-color:#ef4444;color:#ef4444}
+.main{max-width:1100px;margin:0 auto;padding:36px 28px}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+.page-title{font-size:26px;font-weight:700;color:#f1f5f9}
+.page-sub{font-size:13px;color:rgba(241,245,249,.35);margin-top:3px}
+.tabs-wrap{display:flex;gap:8px;margin-bottom:28px;background:rgba(245,166,35,.03);border:1px solid rgba(245,166,35,.07);border-radius:12px;padding:4px;width:fit-content}
+.tab{padding:9px 20px;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;color:rgba(241,245,249,.4);border:none;background:none;font-family:'Poppins',sans-serif;transition:all .2s}
+.tab:hover{color:rgba(241,245,249,.8)}
+.tab.on{background:rgba(245,166,35,.12);color:#f5a623;font-weight:600}
+.section{display:none}.section.on{display:block}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.section-title{font-size:16px;font-weight:600;color:#f1f5f9}
+.btn-add{display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,#f5a623,#c47d0e);color:white;border:none;border-radius:9px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;box-shadow:0 4px 12px rgba(245,166,35,.3);transition:all .2s}
+.btn-add:hover{opacity:.9}
+/* GRID CATEGORIAS */
+.cat-tipo{margin-bottom:32px}
+.cat-tipo-title{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:rgba(241,245,249,.3);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(245,166,35,.06)}
+.cat-tipo-title .tipo-dot{width:8px;height:8px;border-radius:50%}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.cat-card{background:#111827;border:1px solid rgba(245,166,35,.08);border-radius:12px;padding:16px;display:flex;align-items:center;gap:12px;transition:all .2s;cursor:pointer;position:relative}
+.cat-card:hover{border-color:rgba(245,166,35,.28);transform:translateY(-1px)}
+.cat-icon-wrap{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.cat-name{font-size:14px;font-weight:500;color:#f1f5f9;flex:1}
+.cat-tipo-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;margin-top:3px}
+.cat-actions{display:flex;gap:4px;margin-left:auto}
+.btn-ico{background:none;border:none;color:rgba(241,245,249,.3);cursor:pointer;padding:5px;border-radius:6px;transition:all .2s;font-size:14px}
+.btn-ico:hover.edit{color:#f5a623;background:rgba(245,166,35,.1)}
+.btn-ico:hover.del{color:#ef6060;background:rgba(239,96,96,.1)}
+/* CONTAS */
+.conta-card{background:#111827;border:1px solid rgba(245,166,35,.08);border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:14px;margin-bottom:10px;transition:all .2s;cursor:pointer}
+.conta-card:hover{border-color:rgba(245,166,35,.28)}
+.conta-icon-wrap{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.conta-nome{font-size:14px;font-weight:600;color:#f1f5f9}
+.conta-banco{font-size:12px;color:rgba(241,245,249,.4);margin-top:2px}
+.conta-tipo{font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:rgba(245,166,35,.1);color:#f5a623;margin-top:4px;display:inline-block}
+.conta-saldo{margin-left:auto;text-align:right}
+.conta-saldo-lbl{font-size:11px;color:rgba(241,245,249,.3);margin-bottom:3px}
+.conta-saldo-val{font-size:16px;font-weight:700;color:#f5a623}
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;display:none;align-items:center;justify-content:center}
+.overlay.on{display:flex}
+.modal{background:#111827;border:1px solid rgba(245,166,35,.15);border-radius:18px;padding:32px;width:90%;max-width:460px;max-height:88vh;overflow-y:auto;animation:mup .25s ease}
+@keyframes mup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.modal-title{font-size:17px;font-weight:700;color:#f1f5f9;margin-bottom:24px}
+.fr{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.fr label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:rgba(241,245,249,.3)}
+.fr input,.fr select{background:#0a0e1a;border:1px solid rgba(245,166,35,.12);border-radius:8px;color:#f1f5f9;padding:10px 14px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;transition:border .2s;width:100%}
+.fr input:focus,.fr select:focus{border-color:rgba(245,166,35,.4)}
+.fr select option{background:#111827}
+.emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:6px}
+.emoji-opt{background:#0a0e1a;border:1px solid rgba(245,166,35,.1);border-radius:7px;padding:6px;font-size:18px;cursor:pointer;text-align:center;transition:all .2s}
+.emoji-opt:hover{border-color:rgba(245,166,35,.4);background:rgba(245,166,35,.08)}
+.emoji-opt.on{border-color:#f5a623;background:rgba(245,166,35,.15)}
+.cor-grid{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.cor-opt{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s}
+.cor-opt.on{border-color:white;transform:scale(1.15)}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+.btn-cancel{background:transparent;border:1px solid rgba(241,245,249,.1);color:rgba(241,245,249,.45);border-radius:8px;padding:10px 20px;font-size:13px;cursor:pointer;font-family:'Poppins',sans-serif}
+.btn-cancel:hover{border-color:rgba(241,245,249,.25);color:rgba(241,245,249,.8)}
+.btn-save{background:linear-gradient(135deg,#f5a623,#c47d0e);color:white;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;box-shadow:0 4px 12px rgba(245,166,35,.3)}
+.btn-save:hover{opacity:.9}
+#toast{position:fixed;bottom:24px;right:24px;background:#1a2235;border:1px solid rgba(245,166,35,.25);color:#f1f5f9;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none}
+#toast.on{opacity:1;transform:translateY(0)}
+#toast.ok{border-color:rgba(52,201,126,.3);color:#34c97e}
+#toast.err{border-color:rgba(239,68,68,.3);color:#ef4444}
+#loading{position:fixed;inset:0;background:#0a0e1a;display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:14px}
+.sp{width:34px;height:34px;border:3px solid rgba(245,166,35,.15);border-top-color:#f5a623;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#f5a623">Edifício</div>
+  <div style="font-size:20px;font-weight:800;color:#f1f5f9;margin-top:-8px">Mandala</div>
+  <div class="sp" style="margin-top:6px"></div>
+</div>
+
+<div id="app" style="display:none;flex-direction:column;min-height:100vh">
+<div class="topbar">
+  <a class="t-logo" href="dashboard.html">
+    <div class="t-logo-icon"><svg viewBox="0 0 36 36" fill="none"><rect x="4" y="11" width="28" height="22" rx="2" fill="white" opacity=".95"/><polygon points="2,13 18,3 34,13" fill="white"/><rect x="14" y="24" width="8" height="9" rx="1.5" fill="#c47d0e" opacity=".9"/></svg></div>
+    <div class="t-logo-nome"><span class="t-logo-sub">Edifício</span><span class="t-logo-main">Mandala</span></div>
+  </a>
+  <nav class="t-nav">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="transacoes.html">Transações</a>
+    <a href="categorias.html" class="on">Categorias</a>
+    <a href="orcamento.html">Orçamento</a>
+  </nav>
+  <div class="t-right">
+    <span id="topEmail" style="font-size:11px;color:rgba(241,245,249,.28)"></span>
+    <button class="t-sair" onclick="sair()">↩ Sair</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-header">
+    <div><div class="page-title">Categorias & Contas</div><div class="page-sub">Organize as categorias de receitas, despesas e contas bancárias</div></div>
+  </div>
+
+  <div class="tabs-wrap">
+    <button class="tab on" onclick="showTab('categorias',this)">🏷️ Categorias</button>
+    <button class="tab"    onclick="showTab('contas',this)">🏦 Contas</button>
+  </div>
+
+  <!-- CATEGORIAS -->
+  <div class="section on" id="sec-categorias">
+    <div class="section-header">
+      <div class="section-title">Categorias cadastradas</div>
+      <button class="btn-add" onclick="abrirModalCat()">+ Nova Categoria</button>
+    </div>
+    <div id="catContainer"></div>
+  </div>
+
+  <!-- CONTAS -->
+  <div class="section" id="sec-contas">
+    <div class="section-header">
+      <div class="section-title">Contas cadastradas</div>
+      <button class="btn-add" onclick="abrirModalConta()">+ Nova Conta</button>
+    </div>
+    <div id="contaContainer"></div>
+  </div>
+</div>
+</div>
+
+<!-- MODAL CATEGORIA -->
+<div class="overlay" id="modalCat">
+  <div class="modal">
+    <div class="modal-title" id="modalCatTitulo">Nova Categoria</div>
+    <div class="fr"><label>Nome *</label><input type="text" id="cNome" placeholder="Ex: Manutenção"/></div>
+    <div class="fr"><label>Tipo *</label>
+      <select id="cTipo">
+        <option value="despesa">Despesa</option>
+        <option value="receita">Receita</option>
+      </select>
+    </div>
+    <div class="fr">
+      <label>Ícone</label>
+      <div class="emoji-grid" id="emojiGrid"></div>
+    </div>
+    <div class="fr">
+      <label>Cor</label>
+      <div class="cor-grid" id="corGrid"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="fecharModalCat()">Cancelar</button>
+      <button class="btn-save" onclick="salvarCat()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONTA -->
+<div class="overlay" id="modalConta">
+  <div class="modal">
+    <div class="modal-title" id="modalContaTitulo">Nova Conta</div>
+    <div class="fr"><label>Nome *</label><input type="text" id="coNome" placeholder="Ex: Conta Corrente BB"/></div>
+    <div class="fr"><label>Tipo</label>
+      <select id="coTipo">
+        <option value="corrente">Conta Corrente</option>
+        <option value="poupanca">Poupança</option>
+        <option value="caixa">Caixa Físico</option>
+        <option value="fundo_reserva">Fundo de Reserva</option>
+        <option value="investimento">Investimento</option>
+      </select>
+    </div>
+    <div class="fr"><label>Banco / Instituição</label><input type="text" id="coBanco" placeholder="Ex: Banco do Brasil"/></div>
+    <div class="fr"><label>Saldo Inicial (R$)</label><input type="number" id="coSaldo" placeholder="0,00" step="0.01" value="0"/></div>
+    <div class="fr">
+      <label>Ícone</label>
+      <div class="emoji-grid" id="emojiGridConta"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="fecharModalConta()">Cancelar</button>
+      <button class="btn-save" onclick="salvarConta()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+var SB_URL = 'https://rbahvyejqybajnufftio.supabase.co';
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiYWh2eWVqcXliYWpudWZmdGlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjA5MjIsImV4cCI6MjA4OTYzNjkyMn0.nUIo2CT3o41YL1TT8Hrp5kq-_ZS-bMMf-gvUMCEyYMw';
+var EMPRESA = 'mandala';
+var usr=null,token=null;
+var categorias=[],contas=[];
+var editCatId=null,editContaId=null;
+var iconeAtualCat='📦',corAtual='#f5a623',iconeAtualConta='🏦';
+
+var EMOJIS_CAT=['🏠','💰','🔒','🧹','🔧','⚡','💧','🔥','📋','🏗️','📄','📦','⚖️','➕','🌿','🚗','💡','🎯','🏊','🔑','📱','🖥️','🎪','🎨'];
+var EMOJIS_CONTA=['🏦','💰','💵','💳','🏧','📊','🏛️','💼','🪙','🏪'];
+var CORES=['#34c97e','#ef6060','#f5a623','#4f8ef7','#a78bfa','#fb923c','#facc15','#38bdf8','#f97316','#7c3aed','#94a3b8','#64748b','#ec4899','#06b6d4'];
+
+function toast(m,t){var e=document.getElementById('toast');e.textContent=m;e.className='on '+(t||'');clearTimeout(e._t);e._t=setTimeout(function(){e.className='';},3200);}
+function getSessao(){try{var s=localStorage.getItem('mandala_session');if(!s)return null;var ss=JSON.parse(s);if(!ss||!ss.access_token)return null;if(ss.expires_at&&ss.expires_at<Math.floor(Date.now()/1000))return null;return ss;}catch(e){return null;}}
+function sair(){localStorage.removeItem('mandala_session');window.location.href='login.html';}
+function showTab(tab,el){document.querySelectorAll('.section').forEach(function(s){s.classList.remove('on');});document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});document.getElementById('sec-'+tab).classList.add('on');el.classList.add('on');}
+
+function renderCategorias(){
+  var receitas=categorias.filter(function(c){return c.tipo==='receita';});
+  var despesas=categorias.filter(function(c){return c.tipo==='despesa';});
+  var html='';
+  [{tipo:'receita',lista:receitas,cor:'#34c97e',label:'Receitas'},{tipo:'despesa',lista:despesas,cor:'#ef6060',label:'Despesas'}].forEach(function(g){
+    html+='<div class="cat-tipo"><div class="cat-tipo-title"><span class="tipo-dot" style="background:'+g.cor+'"></span>'+g.label+' ('+g.lista.length+')</div>';
+    if(!g.lista.length){html+='<div style="color:rgba(241,245,249,.2);font-size:13px;padding:12px 0">Nenhuma categoria cadastrada.</div>';}
+    else{html+='<div class="cat-grid">'+g.lista.map(function(c){
+      return '<div class="cat-card">'
+        +'<div class="cat-icon-wrap" style="background:'+c.cor+'22">'+c.icone+'</div>'
+        +'<div style="flex:1"><div class="cat-name">'+c.nome+'</div></div>'
+        +'<div class="cat-actions">'
+          +'<button class="btn-ico edit" onclick="editarCat(\''+c.id+'\')" title="Editar">✏️</button>'
+          +'<button class="btn-ico del" onclick="excluirCat(\''+c.id+'\')" title="Excluir">🗑</button>'
+        +'</div></div>';
+    }).join('')+'</div>';}
+    html+='</div>';
+  });
+  document.getElementById('catContainer').innerHTML=html;
+}
+
+function renderContas(){
+  var html=contas.map(function(c){
+    return '<div class="conta-card">'
+      +'<div class="conta-icon-wrap" style="background:'+c.cor+'22">'+c.icone+'</div>'
+      +'<div style="flex:1"><div class="conta-nome">'+c.nome+'</div>'+(c.banco?'<div class="conta-banco">'+c.banco+'</div>':'')+'<span class="conta-tipo">'+({corrente:'Corrente',poupanca:'Poupança',caixa:'Caixa',fundo_reserva:'Fundo de Reserva',investimento:'Investimento'}[c.tipo]||c.tipo)+'</span></div>'
+      +'<div class="conta-saldo"><div class="conta-saldo-lbl">Saldo inicial</div><div class="conta-saldo-val">R$ '+Number(c.saldo_inicial||0).toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div></div>'
+      +'<div class="cat-actions" style="margin-left:16px">'
+        +'<button class="btn-ico edit" onclick="editarConta(\''+c.id+'\')" title="Editar">✏️</button>'
+        +'<button class="btn-ico del"  onclick="excluirConta(\''+c.id+'\')" title="Excluir">🗑</button>'
+      +'</div></div>';
+  }).join('');
+  document.getElementById('contaContainer').innerHTML=html||'<div style="color:rgba(241,245,249,.2);font-size:13px;padding:12px 0">Nenhuma conta cadastrada.</div>';
+}
+
+function buildEmojiGrid(gridId,emojis,atual,setter){
+  document.getElementById(gridId).innerHTML=emojis.map(function(e){
+    return '<div class="emoji-opt'+(e===atual?' on':'')+'" onclick="'+setter+'(\''+e+'\')">'+e+'</div>';
+  }).join('');
+}
+function buildCorGrid(){
+  document.getElementById('corGrid').innerHTML=CORES.map(function(c){
+    return '<div class="cor-opt'+(c===corAtual?' on':'')+'" style="background:'+c+'" onclick="setCor(\''+c+'\')"></div>';
+  }).join('');
+}
+function setIconeCat(e){iconeAtualCat=e;buildEmojiGrid('emojiGrid',EMOJIS_CAT,e,'setIconeCat');}
+function setIconeConta(e){iconeAtualConta=e;buildEmojiGrid('emojiGridConta',EMOJIS_CONTA,e,'setIconeConta');}
+function setCor(c){corAtual=c;buildCorGrid();}
+
+function abrirModalCat(cat){
+  editCatId=cat?cat.id:null;
+  iconeAtualCat=cat?cat.icone:'📦';
+  corAtual=cat?cat.cor:'#f5a623';
+  document.getElementById('modalCatTitulo').textContent=cat?'Editar Categoria':'Nova Categoria';
+  document.getElementById('cNome').value=cat?cat.nome:'';
+  document.getElementById('cTipo').value=cat?cat.tipo:'despesa';
+  buildEmojiGrid('emojiGrid',EMOJIS_CAT,iconeAtualCat,'setIconeCat');
+  buildCorGrid();
+  document.getElementById('modalCat').classList.add('on');
+}
+function fecharModalCat(){document.getElementById('modalCat').classList.remove('on');editCatId=null;}
+
+async function salvarCat(){
+  var nome=document.getElementById('cNome').value.trim();
+  var tipo=document.getElementById('cTipo').value;
+  if(!nome){toast('Informe o nome da categoria.','err');return;}
+  var body={empresa:EMPRESA,nome:nome,tipo:tipo,icone:iconeAtualCat,cor:corAtual};
+  try{
+    var url=SB_URL+'/rest/v1/condo_categorias';
+    var method='POST';
+    if(editCatId){url+='?id=eq.'+editCatId;method='PATCH';}
+    var r=await fetch(url,{method:method,headers:{'apikey':SB_KEY,'Authorization':'Bearer '+token,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(body)});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    toast(editCatId?'Categoria atualizada!':'Categoria criada!','ok');
+    fecharModalCat();await carregar();
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+
+function editarCat(id){var c=categorias.find(function(x){return x.id==id;});if(c)abrirModalCat(c);}
+
+async function excluirCat(id){
+  if(!confirm('Excluir esta categoria? Transações vinculadas perderão a categoria.'))return;
+  try{await fetch(SB_URL+'/rest/v1/condo_categorias?id=eq.'+id,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+token}});toast('Categoria excluída.','ok');await carregar();}
+  catch(e){toast('Erro ao excluir.','err');}
+}
+
+function abrirModalConta(conta){
+  editContaId=conta?conta.id:null;
+  iconeAtualConta=conta?conta.icone:'🏦';
+  document.getElementById('modalContaTitulo').textContent=conta?'Editar Conta':'Nova Conta';
+  document.getElementById('coNome').value=conta?conta.nome:'';
+  document.getElementById('coTipo').value=conta?conta.tipo:'corrente';
+  document.getElementById('coBanco').value=conta?(conta.banco||''):'';
+  document.getElementById('coSaldo').value=conta?conta.saldo_inicial:0;
+  buildEmojiGrid('emojiGridConta',EMOJIS_CONTA,iconeAtualConta,'setIconeConta');
+  document.getElementById('modalConta').classList.add('on');
+}
+function fecharModalConta(){document.getElementById('modalConta').classList.remove('on');editContaId=null;}
+
+async function salvarConta(){
+  var nome=document.getElementById('coNome').value.trim();
+  var tipo=document.getElementById('coTipo').value;
+  var banco=document.getElementById('coBanco').value.trim();
+  var saldo=parseFloat(document.getElementById('coSaldo').value||0);
+  if(!nome){toast('Informe o nome da conta.','err');return;}
+  var body={empresa:EMPRESA,nome:nome,tipo:tipo,banco:banco||null,saldo_inicial:saldo,icone:iconeAtualConta,cor:'#f5a623',ativa:true};
+  try{
+    var url=SB_URL+'/rest/v1/condo_contas';
+    var method='POST';
+    if(editContaId){url+='?id=eq.'+editContaId;method='PATCH';}
+    var r=await fetch(url,{method:method,headers:{'apikey':SB_KEY,'Authorization':'Bearer '+token,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(body)});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    toast(editContaId?'Conta atualizada!':'Conta criada!','ok');
+    fecharModalConta();await carregar();
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+function editarConta(id){var c=contas.find(function(x){return x.id==id;});if(c)abrirModalConta(c);}
+async function excluirConta(id){
+  if(!confirm('Excluir esta conta?'))return;
+  try{await fetch(SB_URL+'/rest/v1/condo_contas?id=eq.'+id,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+token}});toast('Conta excluída.','ok');await carregar();}
+  catch(e){toast('Erro ao excluir.','err');}
+}
+
+async function carregar(){
+  try{
+    var rc=await fetch(SB_URL+'/rest/v1/condo_categorias?select=*&empresa=eq.'+EMPRESA+'&order=tipo,nome',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+token}});
+    categorias=rc.ok?await rc.json():[];
+    var rco=await fetch(SB_URL+'/rest/v1/condo_contas?select=*&empresa=eq.'+EMPRESA+'&order=nome',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+token}});
+    contas=rco.ok?await rco.json():[];
+    renderCategorias();renderContas();
+  }catch(e){console.error(e);}
+}
+
+[document.getElementById('modalCat'),document.getElementById('modalConta')].forEach(function(m){m.addEventListener('click',function(e){if(e.target===this){this.classList.remove('on');}});});
+
+document.addEventListener('DOMContentLoaded',async function(){
+  var sess=getSessao();if(!sess){window.location.href='login.html';return;}
+  usr=sess.user;token=sess.access_token;
+  document.getElementById('topEmail').textContent=usr.email;
+  await carregar();
+  document.getElementById('loading').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('app').style.flexDirection='column';
+});
+</script>
+</body>
+</html>
