@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Moradores — Edifício Mandala</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#0f1117;color:#f1f5f9;min-height:100vh}
+
+/* NAV */
+nav{background:#1a1d27;border-bottom:1px solid #2a2d3e;padding:0 24px;display:flex;align-items:center;height:60px}
+.nav-brand{display:flex;align-items:center;gap:10px;margin-right:40px;text-decoration:none}
+.nav-logo{width:36px;height:36px;background:#f5a623;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.nav-brand-text{font-size:13px;font-weight:700;color:#f1f5f9;line-height:1.2}
+.nav-brand-text span{display:block;font-size:10px;color:#94a3b8;font-weight:400}
+.nav-links{display:flex;gap:4px}
+.nav-links a{color:#94a3b8;text-decoration:none;padding:8px 16px;border-radius:6px;font-size:14px;transition:.2s}
+.nav-links a:hover{background:#2a2d3e;color:#f1f5f9}
+.nav-links a.active{background:#f5a623;color:#0f1117;font-weight:600}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:16px}
+.nav-user{font-size:13px;color:#64748b}
+
+/* MAIN */
+main{max-width:1200px;margin:0 auto;padding:28px 24px}
+
+/* ALERT */
+.alert{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:20px;display:none}
+.alert.success{background:#052e1660;border:1px solid #22c55e40;color:#22c55e}
+.alert.error{background:#2d0a0a60;border:1px solid #ef444440;color:#ef4444}
+
+/* HEADER */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.page-title{font-size:24px;font-weight:700}
+.page-subtitle{font-size:13px;color:#64748b;margin-top:3px}
+.btn-new{background:#f5a623;color:#0f1117;border:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.2s}
+.btn-new:hover{background:#e09210;transform:translateY(-1px)}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stat{background:#1a1d27;border:1px solid #2a2d3e;border-radius:12px;padding:16px 18px}
+.stat-label{font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.stat-val{font-size:22px;font-weight:700;color:#f1f5f9}
+.stat-val.yellow{color:#f5a623}
+.stat-val.green{color:#22c55e}
+.stat-val.blue{color:#3b82f6}
+.stat-val.purple{color:#a855f7}
+
+/* BUSCA E FILTROS */
+.controls{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.search-box{flex:1;min-width:220px;position:relative}
+.search-box input{width:100%;background:#1a1d27;border:1px solid #2a2d3e;border-radius:8px;padding:9px 14px 9px 38px;color:#f1f5f9;font-size:14px;outline:none;transition:.2s}
+.search-box input:focus{border-color:#f5a623}
+.search-box::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px}
+.filter-select{background:#1a1d27;border:1px solid #2a2d3e;border-radius:8px;padding:9px 14px;color:#94a3b8;font-size:14px;outline:none;cursor:pointer;transition:.2s}
+.filter-select:focus{border-color:#f5a623}
+.filter-chip{background:#1a1d27;border:1px solid #2a2d3e;color:#94a3b8;padding:8px 16px;border-radius:20px;font-size:13px;cursor:pointer;transition:.2s}
+.filter-chip.active,.filter-chip:hover{background:#f5a623;border-color:#f5a623;color:#0f1117;font-weight:600}
+
+/* GRID DE CARDS */
+.moradores-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+
+/* CARD MORADOR */
+.morador-card{background:#1a1d27;border:1px solid #2a2d3e;border-radius:14px;overflow:hidden;transition:.2s;cursor:pointer}
+.morador-card:hover{border-color:#f5a62360;transform:translateY(-2px);box-shadow:0 8px 24px #00000040}
+.card-top{padding:18px 18px 14px;display:flex;align-items:flex-start;gap:14px}
+.avatar{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;flex-shrink:0;background:linear-gradient(135deg,#f5a623,#e09210)}
+.avatar img{width:100%;height:100%;object-fit:cover;border-radius:12px}
+.card-info{flex:1;min-width:0}
+.card-nome{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-apto{font-size:13px;color:#f5a623;font-weight:600;margin-top:2px}
+.card-tipo{font-size:11px;color:#64748b;margin-top:1px}
+.card-status{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.badge.ativo{background:#22c55e20;color:#22c55e}
+.badge.inativo{background:#64748b20;color:#64748b}
+.badge.proprietario{background:#f5a62320;color:#f5a623}
+.badge.inquilino{background:#3b82f620;color:#3b82f6}
+.badge.pet{background:#a855f720;color:#a855f7}
+.badge.veiculo{background:#06b6d420;color:#06b6d4}
+.card-divider{border:none;border-top:1px solid #2a2d3e20;margin:0 18px}
+.card-bottom{padding:12px 18px;display:flex;justify-content:space-between;align-items:center}
+.card-contato{font-size:12px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-actions{display:flex;gap:6px;flex-shrink:0}
+.btn-icon{background:none;border:1px solid #2a2d3e;border-radius:6px;padding:5px 9px;font-size:12px;cursor:pointer;transition:.2s;color:#94a3b8}
+.btn-icon:hover{background:#2a2d3e;color:#f1f5f9}
+.btn-icon.del:hover{background:#ef444420;color:#ef4444;border-color:#ef4444}
+.empty-state{text-align:center;padding:60px;color:#4a5568;grid-column:1/-1}
+.loading{text-align:center;padding:60px;color:#64748b;grid-column:1/-1}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:#00000090;display:none;align-items:flex-start;justify-content:center;z-index:999;overflow-y:auto;padding:20px 16px}
+.modal-bg.open{display:flex}
+.modal{background:#13161f;border:1px solid #2a2d3e;border-radius:16px;width:100%;max-width:760px;margin:auto}
+
+/* MODAL HEADER */
+.modal-header{padding:22px 24px 0;display:flex;align-items:center;gap:12px;border-bottom:1px solid #2a2d3e;padding-bottom:18px}
+.modal-title{font-size:18px;font-weight:700;flex:1}
+.modal-close{background:none;border:none;color:#64748b;font-size:22px;cursor:pointer;line-height:1;padding:2px 6px;border-radius:6px;transition:.2s}
+.modal-close:hover{background:#2a2d3e;color:#f1f5f9}
+
+/* ABAS DO MODAL */
+.modal-tabs{display:flex;gap:0;padding:0 24px;border-bottom:1px solid #2a2d3e;background:#0f1117}
+.modal-tab{padding:12px 18px;font-size:13px;font-weight:600;color:#64748b;cursor:pointer;border-bottom:2px solid transparent;transition:.2s;background:none;border-top:none;border-left:none;border-right:none}
+.modal-tab:hover{color:#f1f5f9}
+.modal-tab.active{color:#f5a623;border-bottom-color:#f5a623}
+
+/* MODAL BODY */
+.modal-body{padding:20px 24px}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* FORM */
+.section-title{font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;margin-top:20px;display:flex;align-items:center;gap:8px}
+.section-title:first-child{margin-top:0}
+.section-title::after{content:'';flex:1;height:1px;background:#2a2d3e}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;background:#0f1117;border:1px solid #2a2d3e;border-radius:8px;padding:10px 13px;color:#f1f5f9;font-size:14px;outline:none;transition:.2s;font-family:inherit}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#f5a623}
+.field select option{background:#1a1d27}
+.field textarea{resize:vertical;min-height:70px}
+.field-hint{font-size:11px;color:#4a5568;margin-top:4px}
+
+/* TOGGLE */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #2a2d3e20}
+.toggle-label{font-size:14px;color:#94a3b8;display:flex;align-items:center;gap:8px}
+.switch{position:relative;width:44px;height:24px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.switch .slider{position:absolute;inset:0;background:#2a2d3e;border-radius:24px;cursor:pointer;transition:.3s}
+.switch .slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:#64748b;border-radius:50%;transition:.3s}
+.switch input:checked+.slider{background:#f5a623}
+.switch input:checked+.slider::before{transform:translateX(20px);background:#fff}
+
+/* LISTA DINÂMICA (residentes e pets) */
+.lista-dinamica{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.lista-item{background:#0f1117;border:1px solid #2a2d3e;border-radius:10px;padding:14px;position:relative}
+.lista-item .remove-item{position:absolute;top:10px;right:10px;background:none;border:none;color:#ef4444;cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px;transition:.2s}
+.lista-item .remove-item:hover{background:#ef444420}
+.btn-add-item{background:none;border:1px dashed #2a2d3e;color:#64748b;width:100%;padding:10px;border-radius:8px;cursor:pointer;font-size:13px;transition:.2s;margin-top:8px}
+.btn-add-item:hover{border-color:#f5a623;color:#f5a623;background:#f5a62308}
+
+/* FOTO UPLOAD */
+.foto-upload{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.foto-preview{width:80px;height:80px;border-radius:12px;background:#2a2d3e;display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;flex-shrink:0;border:2px solid #2a2d3e}
+.foto-preview img{width:100%;height:100%;object-fit:cover}
+.foto-btn{background:none;border:1px solid #2a2d3e;color:#94a3b8;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;transition:.2s}
+.foto-btn:hover{background:#2a2d3e;color:#f1f5f9}
+input[type=file]#fFoto{display:none}
+
+/* MODAL FOOTER */
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;padding:18px 24px;border-top:1px solid #2a2d3e}
+.btn-cancel{background:none;border:1px solid #2a2d3e;color:#94a3b8;padding:10px 20px;border-radius:8px;font-size:14px;cursor:pointer;transition:.2s}
+.btn-cancel:hover{background:#2a2d3e}
+.btn-save{background:#f5a623;color:#0f1117;border:none;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:.2s}
+.btn-save:hover{background:#e09210}
+.btn-save:disabled{opacity:.5;cursor:not-allowed}
+
+/* MODAL DETALHE (visualização) */
+.detalhe-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.detalhe-item{padding:10px 0;border-bottom:1px solid #2a2d3e20}
+.detalhe-label{font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.detalhe-val{font-size:14px;color:#f1f5f9}
+.detalhe-val.empty{color:#4a5568;font-style:italic}
+.residente-card{background:#0f1117;border:1px solid #2a2d3e;border-radius:8px;padding:12px;margin-bottom:8px}
+.residente-nome{font-size:14px;font-weight:600}
+.residente-info{font-size:12px;color:#64748b;margin-top:2px}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="dashboard.html">
+    <div class="nav-logo">🏠</div>
+    <div class="nav-brand-text">EDIFÍCIO<br><span>Mandala</span></div>
+  </a>
+  <div class="nav-links">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="transacoes.html">Transações</a>
+    <a href="categorias.html">Categorias</a>
+    <a href="moradores.html" class="active">Moradores</a>
+    <a href="orcamento.html">Orçamento</a>
+  </div>
+  <div class="nav-right">
+    <span class="nav-user" id="navUser"></span>
+    <a href="login.html" style="color:#64748b;font-size:13px;text-decoration:none">⇤ Sair</a>
+  </div>
+</nav>
+
+<main>
+  <div class="alert" id="alert"></div>
+
+  <div class="page-header">
+    <div>
+      <div class="page-title">🏘 Moradores</div>
+      <div class="page-subtitle">Gerencie os moradores e proprietários do condomínio</div>
+    </div>
+    <button class="btn-new" onclick="abrirModal()">+ Cadastrar Morador</button>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat"><div class="stat-label">Total de Aptos</div><div class="stat-val yellow" id="statAptos">—</div></div>
+    <div class="stat"><div class="stat-label">Moradores Ativos</div><div class="stat-val green" id="statAtivos">—</div></div>
+    <div class="stat"><div class="stat-label">Proprietários</div><div class="stat-val blue" id="statProprietarios">—</div></div>
+    <div class="stat"><div class="stat-label">Inquilinos</div><div class="stat-val purple" id="statInquilinos">—</div></div>
+  </div>
+
+  <!-- CONTROLES -->
+  <div class="controls">
+    <div class="search-box">
+      <input type="text" id="busca" placeholder="Buscar por nome, apartamento, CPF..." oninput="renderCards()"/>
+    </div>
+    <button class="filter-chip active" onclick="setFiltro('todos',this)">Todos</button>
+    <button class="filter-chip" onclick="setFiltro('ativo',this)">✅ Ativos</button>
+    <button class="filter-chip" onclick="setFiltro('inativo',this)">🔴 Inativos</button>
+    <button class="filter-chip" onclick="setFiltro('proprietario',this)">🏠 Proprietários</button>
+    <button class="filter-chip" onclick="setFiltro('inquilino',this)">🔑 Inquilinos</button>
+    <select class="filter-select" id="filtroApto" onchange="renderCards()">
+      <option value="">Todos os aptos</option>
+    </select>
+  </div>
+
+  <!-- GRID -->
+  <div class="moradores-grid" id="moradoresGrid">
+    <div class="loading">⏳ Carregando moradores...</div>
+  </div>
+</main>
+
+<!-- ══════════ MODAL CADASTRO / EDIÇÃO ══════════ -->
+<div class="modal-bg" id="modalBg">
+<div class="modal">
+  <div class="modal-header">
+    <span style="font-size:22px">🏘</span>
+    <div class="modal-title" id="modalTitle">Cadastrar Morador</div>
+    <button class="modal-close" onclick="fecharModal()">✕</button>
+  </div>
+
+  <!-- ABAS -->
+  <div class="modal-tabs">
+    <button class="modal-tab active" onclick="setTab(0,this)">👤 Dados Pessoais</button>
+    <button class="modal-tab" onclick="setTab(1,this)">🏠 Apartamento</button>
+    <button class="modal-tab" onclick="setTab(2,this)">👨‍👩‍👧 Residentes</button>
+    <button class="modal-tab" onclick="setTab(3,this)">🚗 Veículo & Pets</button>
+    <button class="modal-tab" onclick="setTab(4,this)">📋 Extras</button>
+  </div>
+
+  <div class="modal-body">
+
+    <!-- ABA 0: DADOS PESSOAIS -->
+    <div class="tab-content active" id="tab0">
+      <!-- FOTO -->
+      <div class="foto-upload">
+        <div class="foto-preview" id="fotoPreview">👤</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:6px">Foto do Morador</div>
+          <button class="foto-btn" onclick="document.getElementById('fFoto').click()">📷 Escolher foto</button>
+          <input type="file" id="fFoto" accept="image/*" onchange="onFotoChange()"/>
+          <div style="font-size:11px;color:#4a5568;margin-top:4px">JPG, PNG • máx. 2MB</div>
+        </div>
+      </div>
+
+      <div class="section-title">Informações Pessoais</div>
+      <div class="field">
+        <label>Nome Completo *</label>
+        <input id="fNome" type="text" placeholder="Ex: João da Silva"/>
+      </div>
+      <div class="grid3">
+        <div class="field">
+          <label>CPF</label>
+          <input id="fCpf" type="text" placeholder="000.000.000-00" oninput="mascaraCpf(this)"/>
+        </div>
+        <div class="field">
+          <label>RG</label>
+          <input id="fRg" type="text" placeholder="0000000"/>
+        </div>
+        <div class="field">
+          <label>Data de Nascimento</label>
+          <input id="fNasc" type="date"/>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>E-mail</label>
+          <input id="fEmail" type="email" placeholder="email@exemplo.com"/>
+        </div>
+        <div class="field">
+          <label>Telefone Principal</label>
+          <input id="fTel" type="text" placeholder="(81) 99999-9999" oninput="mascaraTel(this)"/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Telefone Secundário</label>
+        <input id="fTel2" type="text" placeholder="(81) 99999-9999" oninput="mascaraTel(this)"/>
+      </div>
+    </div>
+
+    <!-- ABA 1: APARTAMENTO -->
+    <div class="tab-content" id="tab1">
+      <div class="section-title">Dados do Apartamento</div>
+      <div class="grid3">
+        <div class="field">
+          <label>Apartamento *</label>
+          <input id="fApto" type="text" placeholder="Ex: 101"/>
+        </div>
+        <div class="field">
+          <label>Bloco / Torre</label>
+          <input id="fBloco" type="text" placeholder="Ex: A"/>
+        </div>
+        <div class="field">
+          <label>Tipo de Ocupação</label>
+          <select id="fTipoOcup">
+            <option value="proprietario">Proprietário</option>
+            <option value="inquilino">Inquilino</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Data de Entrada</label>
+          <input id="fEntrada" type="date"/>
+        </div>
+        <div class="field">
+          <label>Data de Saída</label>
+          <input id="fSaida" type="date"/>
+          <div class="field-hint">Preencha apenas se o morador saiu</div>
+        </div>
+      </div>
+      <div class="section-title">Status</div>
+      <div class="toggle-row">
+        <span class="toggle-label">✅ Morador ativo (reside atualmente)</span>
+        <label class="switch">
+          <input type="checkbox" id="fAtivo" checked/>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- ABA 2: RESIDENTES -->
+    <div class="tab-content" id="tab2">
+      <div class="section-title">Pessoas que Residem no Apartamento</div>
+      <div style="font-size:13px;color:#64748b;margin-bottom:14px">
+        Além do responsável principal, quem mais mora neste apartamento?
+      </div>
+      <div class="lista-dinamica" id="listaResidentes"></div>
+      <button class="btn-add-item" onclick="addResidente()">+ Adicionar pessoa</button>
+    </div>
+
+    <!-- ABA 3: VEÍCULO & PETS -->
+    <div class="tab-content" id="tab3">
+      <div class="section-title">Veículo</div>
+      <div class="grid3">
+        <div class="field">
+          <label>Placa</label>
+          <input id="fPlaca" type="text" placeholder="ABC-1234" style="text-transform:uppercase"/>
+        </div>
+        <div class="field">
+          <label>Modelo</label>
+          <input id="fModelo" type="text" placeholder="Ex: Civic EXL"/>
+        </div>
+        <div class="field">
+          <label>Cor</label>
+          <input id="fCorVei" type="text" placeholder="Ex: Prata"/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Vaga de Garagem</label>
+        <input id="fVaga" type="text" placeholder="Ex: 15"/>
+      </div>
+
+      <div class="section-title">Pets / Animais de Estimação</div>
+      <div class="toggle-row" style="margin-bottom:10px">
+        <span class="toggle-label">🐾 Possui pet?</span>
+        <label class="switch">
+          <input type="checkbox" id="fTemPet" onchange="togglePets()"/>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div id="petsArea" style="display:none">
+        <div class="lista-dinamica" id="listaPets"></div>
+        <button class="btn-add-item" onclick="addPet()">+ Adicionar pet</button>
+      </div>
+    </div>
+
+    <!-- ABA 4: EXTRAS -->
+    <div class="tab-content" id="tab4">
+      <div class="section-title">Contato de Emergência</div>
+      <div class="grid3">
+        <div class="field">
+          <label>Nome</label>
+          <input id="fEmergNome" type="text" placeholder="Nome completo"/>
+        </div>
+        <div class="field">
+          <label>Telefone</label>
+          <input id="fEmergTel" type="text" placeholder="(81) 99999-9999" oninput="mascaraTel(this)"/>
+        </div>
+        <div class="field">
+          <label>Parentesco</label>
+          <select id="fEmergPar">
+            <option value="">Selecionar...</option>
+            <option>Cônjuge</option>
+            <option>Filho(a)</option>
+            <option>Pai / Mãe</option>
+            <option>Irmão/Irmã</option>
+            <option>Amigo(a)</option>
+            <option>Outro</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-title">Observações</div>
+      <div class="field">
+        <label>Observações Gerais</label>
+        <textarea id="fObs" placeholder="Informações adicionais relevantes sobre o morador ou apartamento..."></textarea>
+      </div>
+    </div>
+
+  </div><!-- /modal-body -->
+
+  <div class="modal-footer">
+    <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+    <button class="btn-save" id="btnSalvar" onclick="salvar()">💾 Salvar Morador</button>
+  </div>
+</div>
+</div>
+
+<script>
+// ── CONFIG ───────────────────────────────────────────────
+const SUPA_URL = 'https://rbahvyejqybajnufftio.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiYWh2eWVqcXliYWpudWZmdGlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjA5MjIsImV4cCI6MjA4OTYzNjkyMn0.nUIo2CT3o41YL1TT8Hrp5kq-_ZS-bMMf-gvUMCEyYMw';
+const EMPRESA  = 'mandala';
+
+let _moradores = [];
+let _filtro    = 'todos';
+let _editId    = null;
+let _fotoFile  = null;
+
+// ── AUTH ─────────────────────────────────────────────────
+function getToken(){
+  const k = Object.keys(localStorage).find(k=>k.includes('auth-token'));
+  if(!k) return null;
+  try{
+    const sess = JSON.parse(localStorage.getItem(k));
+    const token = sess?.access_token;
+    const exp   = sess?.expires_at;
+    if(!token) return null;
+    if(exp && Date.now()/1000 > exp) return null;
+    return token;
+  } catch{ return null; }
+}
+function hdrs(){
+  const tk = getToken();
+  return {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${tk||SUPA_KEY}`};
+}
+
+// ── UTILS ────────────────────────────────────────────────
+function showAlert(msg,type='success'){
+  const el=document.getElementById('alert');
+  el.textContent=msg; el.className=`alert ${type}`; el.style.display='block';
+  setTimeout(()=>el.style.display='none',4000);
+}
+function iniciais(nome){
+  if(!nome) return '?';
+  const p = nome.trim().split(' ');
+  return (p[0][0]+(p[1]?p[1][0]:'')).toUpperCase();
+}
+function mascaraCpf(el){
+  let v = el.value.replace(/\D/g,'').substring(0,11);
+  v = v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');
+  el.value = v;
+}
+function mascaraTel(el){
+  let v = el.value.replace(/\D/g,'').substring(0,11);
+  v = v.length > 10
+    ? v.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3')
+    : v.replace(/(\d{2})(\d{4})(\d{4})/,'($1) $2-$3');
+  el.value = v;
+}
+
+// ── LOAD ─────────────────────────────────────────────────
+async function loadMoradores(){
+  const res = await fetch(
+    `${SUPA_URL}/rest/v1/condo_moradores?empresa=eq.${EMPRESA}&order=apartamento,nome`,
+    {headers:hdrs()}
+  );
+  _moradores = res.ok ? await res.json() : [];
+  renderStats();
+  renderFiltroApto();
+  renderCards();
+}
+
+function renderStats(){
+  const ativos = _moradores.filter(m=>m.ativo);
+  const aptos  = [...new Set(_moradores.filter(m=>m.ativo).map(m=>m.apartamento))].length;
+  document.getElementById('statAptos').textContent        = aptos;
+  document.getElementById('statAtivos').textContent       = ativos.length;
+  document.getElementById('statProprietarios').textContent= ativos.filter(m=>m.tipo_ocupacao==='proprietario').length;
+  document.getElementById('statInquilinos').textContent   = ativos.filter(m=>m.tipo_ocupacao==='inquilino').length;
+}
+
+function renderFiltroApto(){
+  const aptos = [...new Set(_moradores.map(m=>m.apartamento))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+  const sel = document.getElementById('filtroApto');
+  sel.innerHTML = '<option value="">Todos os aptos</option>' +
+    aptos.map(a=>`<option value="${a}">Apto ${a}</option>`).join('');
+}
+
+function setFiltro(f,el){
+  _filtro = f;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderCards();
+}
+
+function renderCards(){
+  const busca    = document.getElementById('busca').value.toLowerCase();
+  const filtApto = document.getElementById('filtroApto').value;
+
+  let lista = _moradores.filter(m=>{
+    if(_filtro==='ativo'        && !m.ativo) return false;
+    if(_filtro==='inativo'      && m.ativo)  return false;
+    if(_filtro==='proprietario' && m.tipo_ocupacao!=='proprietario') return false;
+    if(_filtro==='inquilino'    && m.tipo_ocupacao!=='inquilino') return false;
+    if(filtApto && m.apartamento!==filtApto) return false;
+    if(busca && !(
+      m.nome?.toLowerCase().includes(busca) ||
+      m.apartamento?.toLowerCase().includes(busca) ||
+      m.cpf?.includes(busca) ||
+      m.email?.toLowerCase().includes(busca)
+    )) return false;
+    return true;
+  });
+
+  const grid = document.getElementById('moradoresGrid');
+  if(lista.length===0){
+    grid.innerHTML='<div class="empty-state">Nenhum morador encontrado.</div>';
+    return;
+  }
+
+  grid.innerHTML = lista.map(m=>{
+    const residentes = m.residentes || [];
+    const pets       = m.pets || [];
+    const tipoLabel  = m.tipo_ocupacao==='proprietario' ? 'Proprietário' : 'Inquilino';
+    const aptoLabel  = m.bloco ? `Apto ${m.apartamento} — Bloco ${m.bloco}` : `Apto ${m.apartamento}`;
+    const avatarBg   = m.tipo_ocupacao==='proprietario'
+      ? 'linear-gradient(135deg,#f5a623,#e09210)'
+      : 'linear-gradient(135deg,#3b82f6,#1d4ed8)';
+
+    return `<div class="morador-card" onclick="abrirModal(${m.id})">
+      <div class="card-top">
+        <div class="avatar" style="background:${avatarBg}">
+          ${m.foto_url ? `<img src="${m.foto_url}" alt="${m.nome}"/>` : iniciais(m.nome)}
+        </div>
+        <div class="card-info">
+          <div class="card-nome" title="${m.nome}">${m.nome}</div>
+          <div class="card-apto">📍 ${aptoLabel}</div>
+          <div class="card-tipo">${tipoLabel}${m.vaga_garagem ? ` • Vaga ${m.vaga_garagem}` : ''}</div>
+          <div class="card-status">
+            <span class="badge ${m.ativo?'ativo':'inativo'}">${m.ativo?'✓ Ativo':'Inativo'}</span>
+            <span class="badge ${m.tipo_ocupacao}">${tipoLabel}</span>
+            ${residentes.length>0?`<span class="badge" style="background:#2a2d3e;color:#94a3b8">👥 +${residentes.length}</span>`:''}
+            ${pets.length>0?`<span class="badge pet">🐾 ${pets.length} pet${pets.length>1?'s':''}</span>`:''}
+            ${m.veiculo_placa?`<span class="badge veiculo">🚗 ${m.veiculo_placa}</span>`:''}
+          </div>
+        </div>
+      </div>
+      <hr class="card-divider"/>
+      <div class="card-bottom">
+        <div class="card-contato">${m.telefone||m.email||'Sem contato'}</div>
+        <div class="card-actions" onclick="event.stopPropagation()">
+          <button class="btn-icon" onclick="abrirModal(${m.id})" title="Editar">✏</button>
+          <button class="btn-icon del" onclick="deletar(${m.id},'${m.nome.replace(/'/g,"\\'")}')">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── TABS DO MODAL ────────────────────────────────────────
+function setTab(idx, el){
+  document.querySelectorAll('.tab-content').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  document.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── MODAL ────────────────────────────────────────────────
+function abrirModal(id){
+  _editId   = id || null;
+  _fotoFile = null;
+  limparModal();
+  setTab(0, document.querySelectorAll('.modal-tab')[0]);
+
+  if(id){
+    const m = _moradores.find(m=>m.id===id);
+    if(m) preencherModal(m);
+    document.getElementById('modalTitle').textContent = 'Editar Morador';
+  } else {
+    document.getElementById('modalTitle').textContent = 'Cadastrar Morador';
+  }
+  document.getElementById('modalBg').classList.add('open');
+}
+
+function fecharModal(){
+  document.getElementById('modalBg').classList.remove('open');
+  _editId = null; _fotoFile = null;
+}
+
+function limparModal(){
+  ['fNome','fCpf','fRg','fEmail','fTel','fTel2','fApto','fBloco',
+   'fEntrada','fSaida','fPlaca','fModelo','fCorVei','fVaga',
+   'fEmergNome','fEmergTel','fObs','fNasc'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('fTipoOcup').value = 'proprietario';
+  document.getElementById('fEmergPar').value = '';
+  document.getElementById('fAtivo').checked  = true;
+  document.getElementById('fTemPet').checked = false;
+  document.getElementById('petsArea').style.display = 'none';
+  document.getElementById('listaResidentes').innerHTML = '';
+  document.getElementById('listaPets').innerHTML = '';
+  document.getElementById('fotoPreview').innerHTML = '👤';
+}
+
+function preencherModal(m){
+  const set = (id,v) => { const el=document.getElementById(id); if(el&&v!=null) el.value=v; };
+  set('fNome',m.nome); set('fCpf',m.cpf); set('fRg',m.rg);
+  set('fEmail',m.email); set('fTel',m.telefone); set('fTel2',m.telefone2);
+  set('fNasc',m.data_nascimento);
+  set('fApto',m.apartamento); set('fBloco',m.bloco);
+  set('fTipoOcup',m.tipo_ocupacao);
+  set('fEntrada',m.data_entrada); set('fSaida',m.data_saida);
+  set('fPlaca',m.veiculo_placa); set('fModelo',m.veiculo_modelo);
+  set('fCorVei',m.veiculo_cor); set('fVaga',m.vaga_garagem);
+  set('fEmergNome',m.contato_emerg_nome);
+  set('fEmergTel',m.contato_emerg_telefone);
+  set('fEmergPar',m.contato_emerg_parentesco);
+  set('fObs',m.observacao);
+  document.getElementById('fAtivo').checked = m.ativo !== false;
+  if(m.tem_pet){ document.getElementById('fTemPet').checked=true; document.getElementById('petsArea').style.display='block'; }
+  if(m.foto_url){ document.getElementById('fotoPreview').innerHTML=`<img src="${m.foto_url}" alt="${m.nome}"/>`; }
+
+  // Residentes
+  (m.residentes||[]).forEach(r=>addResidente(r));
+  // Pets
+  (m.pets||[]).forEach(p=>addPet(p));
+}
+
+// ── FOTO ─────────────────────────────────────────────────
+function onFotoChange(){
+  const file = document.getElementById('fFoto').files[0];
+  if(!file) return;
+  if(file.size>2*1024*1024){ showAlert('Foto muito grande. Máx 2MB.','error'); return; }
+  _fotoFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('fotoPreview').innerHTML = `<img src="${e.target.result}" alt="foto"/>`;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── RESIDENTES DINÂMICOS ─────────────────────────────────
+function addResidente(dados){
+  const id = Date.now() + Math.random();
+  const d  = dados || {};
+  const el = document.createElement('div');
+  el.className = 'lista-item';
+  el.dataset.rid = id;
+  el.innerHTML = `
+    <button class="remove-item" onclick="removeItem(this,'listaResidentes')">✕</button>
+    <div class="grid3">
+      <div class="field" style="margin:0"><label>Nome</label>
+        <input type="text" class="r-nome" placeholder="Nome completo" value="${d.nome||''}"/></div>
+      <div class="field" style="margin:0"><label>Parentesco</label>
+        <select class="r-par">
+          ${['Cônjuge','Filho(a)','Pai/Mãe','Irmão/Irmã','Avô/Avó','Neto(a)','Outro']
+            .map(p=>`<option${d.parentesco===p?' selected':''}>${p}</option>`).join('')}
+        </select></div>
+      <div class="field" style="margin:0"><label>CPF</label>
+        <input type="text" class="r-cpf" placeholder="000.000.000-00" value="${d.cpf||''}" oninput="mascaraCpf(this)"/></div>
+    </div>`;
+  document.getElementById('listaResidentes').appendChild(el);
+}
+
+// ── PETS DINÂMICOS ───────────────────────────────────────
+function togglePets(){
+  const on = document.getElementById('fTemPet').checked;
+  document.getElementById('petsArea').style.display = on ? 'block' : 'none';
+}
+
+function addPet(dados){
+  const d  = dados || {};
+  const el = document.createElement('div');
+  el.className = 'lista-item';
+  el.innerHTML = `
+    <button class="remove-item" onclick="removeItem(this,'listaPets')">✕</button>
+    <div class="grid3">
+      <div class="field" style="margin:0"><label>Nome do Pet</label>
+        <input type="text" class="p-nome" placeholder="Ex: Rex" value="${d.nome||''}"/></div>
+      <div class="field" style="margin:0"><label>Espécie</label>
+        <select class="p-esp">
+          ${['Cão','Gato','Ave','Peixe','Outro']
+            .map(e=>`<option${d.especie===e?' selected':''}>${e}</option>`).join('')}
+        </select></div>
+      <div class="field" style="margin:0"><label>Raça</label>
+        <input type="text" class="p-raca" placeholder="Ex: Labrador" value="${d.raca||''}"/></div>
+    </div>`;
+  document.getElementById('listaPets').appendChild(el);
+}
+
+function removeItem(btn, listaId){
+  btn.closest('.lista-item').remove();
+}
+
+// ── COLETAR RESIDENTES E PETS ────────────────────────────
+function coletarResidentes(){
+  return [...document.querySelectorAll('#listaResidentes .lista-item')].map(el=>({
+    nome:       el.querySelector('.r-nome')?.value?.trim()||'',
+    parentesco: el.querySelector('.r-par')?.value||'',
+    cpf:        el.querySelector('.r-cpf')?.value?.trim()||''
+  })).filter(r=>r.nome);
+}
+function coletarPets(){
+  return [...document.querySelectorAll('#listaPets .lista-item')].map(el=>({
+    nome:    el.querySelector('.p-nome')?.value?.trim()||'',
+    especie: el.querySelector('.p-esp')?.value||'',
+    raca:    el.querySelector('.p-raca')?.value?.trim()||''
+  })).filter(p=>p.nome);
+}
+
+// ── UPLOAD FOTO ───────────────────────────────────────────
+async function uploadFoto(file, moradorId){
+  const ext  = file.name.split('.').pop();
+  const path = `mandala/moradores/${moradorId}.${ext}`;
+  const res  = await fetch(`${SUPA_URL}/storage/v1/object/moradores-fotos/${path}`,{
+    method:'POST',
+    headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${getToken()||SUPA_KEY}`,'Content-Type':file.type},
+    body:file
+  });
+  return res.ok ? `${SUPA_URL}/storage/v1/object/public/moradores-fotos/${path}` : null;
+}
+
+// ── SALVAR ────────────────────────────────────────────────
+async function salvar(){
+  const nome = document.getElementById('fNome').value.trim();
+  const apto = document.getElementById('fApto').value.trim();
+  if(!nome){ showAlert('Informe o nome do morador.','error'); setTab(0,document.querySelectorAll('.modal-tab')[0]); return; }
+  if(!apto){ showAlert('Informe o número do apartamento.','error'); setTab(1,document.querySelectorAll('.modal-tab')[1]); return; }
+
+  const btn = document.getElementById('btnSalvar');
+  btn.disabled=true; btn.textContent='Salvando...';
+
+  const payload = {
+    empresa:              EMPRESA,
+    nome,
+    cpf:                  document.getElementById('fCpf').value.trim()||null,
+    rg:                   document.getElementById('fRg').value.trim()||null,
+    data_nascimento:      document.getElementById('fNasc').value||null,
+    email:                document.getElementById('fEmail').value.trim()||null,
+    telefone:             document.getElementById('fTel').value.trim()||null,
+    telefone2:            document.getElementById('fTel2').value.trim()||null,
+    apartamento:          apto,
+    bloco:                document.getElementById('fBloco').value.trim()||null,
+    tipo_ocupacao:        document.getElementById('fTipoOcup').value,
+    data_entrada:         document.getElementById('fEntrada').value||null,
+    data_saida:           document.getElementById('fSaida').value||null,
+    ativo:                document.getElementById('fAtivo').checked,
+    veiculo_placa:        document.getElementById('fPlaca').value.trim().toUpperCase()||null,
+    veiculo_modelo:       document.getElementById('fModelo').value.trim()||null,
+    veiculo_cor:          document.getElementById('fCorVei').value.trim()||null,
+    vaga_garagem:         document.getElementById('fVaga').value.trim()||null,
+    tem_pet:              document.getElementById('fTemPet').checked,
+    pets:                 coletarPets(),
+    residentes:           coletarResidentes(),
+    contato_emerg_nome:   document.getElementById('fEmergNome').value.trim()||null,
+    contato_emerg_telefone: document.getElementById('fEmergTel').value.trim()||null,
+    contato_emerg_parentesco: document.getElementById('fEmergPar').value||null,
+    observacao:           document.getElementById('fObs').value.trim()||null,
+  };
+
+  const h = hdrs();
+  let savedId = _editId;
+  try {
+    let res;
+    if(_editId){
+      res = await fetch(`${SUPA_URL}/rest/v1/condo_moradores?id=eq.${_editId}`,{
+        method:'PATCH', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)
+      });
+    } else {
+      res = await fetch(`${SUPA_URL}/rest/v1/condo_moradores`,{
+        method:'POST', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)
+      });
+      const json = await res.json();
+      const novo = Array.isArray(json)?json[0]:json;
+      savedId = novo?.id;
+    }
+
+    // Upload da foto
+    if(_fotoFile && savedId){
+      const url = await uploadFoto(_fotoFile, savedId);
+      if(url){
+        await fetch(`${SUPA_URL}/rest/v1/condo_moradores?id=eq.${savedId}`,{
+          method:'PATCH', headers:h, body:JSON.stringify({foto_url:url})
+        });
+      }
+    }
+
+    showAlert(_editId ? '✅ Morador atualizado!' : '✅ Morador cadastrado com sucesso!');
+    fecharModal();
+    await loadMoradores();
+  } catch(e){
+    showAlert('Erro ao salvar: '+e.message,'error');
+  }
+  btn.disabled=false; btn.textContent='💾 Salvar Morador';
+}
+
+// ── DELETAR ───────────────────────────────────────────────
+async function deletar(id, nome){
+  if(!confirm(`Excluir o morador "${nome}"?\nEsta ação não pode ser desfeita.`)) return;
+  const res = await fetch(
+    `${SUPA_URL}/rest/v1/condo_moradores?id=eq.${id}&empresa=eq.${EMPRESA}`,
+    {method:'DELETE', headers:{...hdrs(),'Prefer':'return=representation'}}
+  );
+  if(res.ok){ showAlert('Morador removido.'); await loadMoradores(); }
+  else showAlert('Erro ao remover.','error');
+}
+
+// ── FECHAR AO CLICAR FORA ────────────────────────────────
+document.getElementById('modalBg').addEventListener('click',e=>{
+  if(e.target===document.getElementById('modalBg')) fecharModal();
+});
+
+// ── INIT ─────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async ()=>{
+  const k = Object.keys(localStorage).find(k=>k.includes('auth-token'));
+  if(k){ try{ document.getElementById('navUser').textContent=JSON.parse(localStorage.getItem(k))?.user?.email||''; }catch{} }
+  await loadMoradores();
+});
+</script>
+</body>
+</html>
