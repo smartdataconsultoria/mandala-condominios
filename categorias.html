@@ -22,7 +22,28 @@
   .nav-user{font-size:13px;color:#64748b}
 
   /* MAIN */
-  main{max-width:900px;margin:0 auto;padding:32px 24px}
+  main{max-width:1200px;margin:0 auto;padding:32px 24px}
+
+  /* LAYOUT 2 COLUNAS */
+  .content-layout{display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:start}
+  @media(max-width:700px){.content-layout{grid-template-columns:1fr}}
+
+  /* SIDEBAR FILTRO */
+  .filter-sidebar{background:#1a1d27;border:1px solid #2a2d3e;border-radius:12px;padding:16px;position:sticky;top:20px}
+  .filter-sidebar h3{font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
+  .filter-tipo{display:flex;flex-direction:column;gap:4px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid #2a2d3e}
+  .filter-btn{background:none;border:none;color:#94a3b8;font-size:13px;padding:7px 12px;border-radius:7px;cursor:pointer;text-align:left;transition:.15s;display:flex;align-items:center;gap:8px;width:100%}
+  .filter-btn:hover{background:#2a2d3e;color:#f1f5f9}
+  .filter-btn.active{background:#f5a62320;color:#f5a623;font-weight:600}
+  .filter-btn .fbadge{margin-left:auto;background:#2a2d3e;color:#64748b;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
+  .filter-btn.active .fbadge{background:#f5a62330;color:#f5a623}
+  .filter-cats-list{display:flex;flex-direction:column;gap:2px;max-height:420px;overflow-y:auto}
+  .filter-cats-list::-webkit-scrollbar{width:4px}
+  .filter-cats-list::-webkit-scrollbar-track{background:transparent}
+  .filter-cats-list::-webkit-scrollbar-thumb{background:#2a2d3e;border-radius:4px}
+  .filter-cat-item{background:none;border:none;color:#94a3b8;font-size:12px;padding:6px 10px;border-radius:6px;cursor:pointer;text-align:left;transition:.15s;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .filter-cat-item:hover{background:#2a2d3e;color:#f1f5f9}
+  .filter-cat-item.active{background:#f5a62315;color:#f5a623;font-weight:600}
   h1{font-size:28px;font-weight:700;margin-bottom:6px}
   .subtitle{color:#64748b;font-size:14px;margin-bottom:28px}
 
@@ -142,7 +163,29 @@
       <span class="section-title">Categorias cadastradas</span>
       <button class="btn-new" onclick="openModal()">+ Nova Categoria</button>
     </div>
-    <div id="listaCategorias"><div class="loading">⏳ Carregando categorias...</div></div>
+    <div class="content-layout">
+      <!-- SIDEBAR -->
+      <div class="filter-sidebar">
+        <h3>Filtrar por tipo</h3>
+        <div class="filter-tipo">
+          <button class="filter-btn active" onclick="filtrar('todos')" id="fbTodos">
+            📋 Todos <span class="fbadge" id="fbTodosBadge">0</span>
+          </button>
+          <button class="filter-btn" onclick="filtrar('receita')" id="fbReceita">
+            <span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block"></span>
+            Receitas <span class="fbadge" id="fbReceitaBadge">0</span>
+          </button>
+          <button class="filter-btn" onclick="filtrar('despesa')" id="fbDespesa">
+            <span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block"></span>
+            Despesas <span class="fbadge" id="fbDespesaBadge">0</span>
+          </button>
+        </div>
+        <h3>Filtrar por categoria</h3>
+        <div class="filter-cats-list" id="filterCatsList"></div>
+      </div>
+      <!-- LISTA -->
+      <div id="listaCategorias"><div class="loading">⏳ Carregando categorias...</div></div>
+    </div>
   </div>
 
   <!-- TAB CONTAS -->
@@ -281,6 +324,11 @@ function showAlert(msg, type='success'){
   setTimeout(()=>el.style.display='none', 3500);
 }
 
+// ── ESTADO DE FILTRO ─────────────────────────────────────
+let _todosData = [];
+let _filtroTipo = 'todos';
+let _filtroCat  = null;
+
 // ── LOAD CATEGORIAS ──────────────────────────────────────
 async function loadCategorias(){
   const h = await headers();
@@ -298,63 +346,98 @@ async function loadCategorias(){
       </div>`;
     return;
   }
-
   if(!Array.isArray(data)){
-    const msg = (data && (data.message || data.hint)) || JSON.stringify(data);
+    const msg = (data && (data.message||data.hint)) || JSON.stringify(data);
     document.getElementById('listaCategorias').innerHTML =
       `<div style="background:#2d0a0a;border:1px solid #ef444440;border-radius:8px;padding:16px;color:#ef4444;font-size:13px;line-height:1.8">
-        <strong>❌ Erro ao carregar (HTTP ${res.status})</strong><br>
-        <span style="opacity:.75">${msg}</span><br><br>
-        <strong style="color:#f1f5f9">Se for RLS bloqueando, rode no SQL Editor:</strong><br>
-        <code style="background:#0f1117;padding:6px 10px;border-radius:6px;display:inline-block;margin-top:4px;color:#f5a623;font-size:12px">
-          ALTER TABLE condo_categorias DISABLE ROW LEVEL SECURITY;
-        </code>
+        <strong>❌ Erro HTTP ${res.status}</strong><br><span style="opacity:.75">${msg}</span>
       </div>`;
     return;
   }
+  _todosData  = data;
+  _filtroTipo = 'todos';
+  _filtroCat  = null;
+  buildSidebar(data);
+  renderLista(data);
+}
 
-  if(data.length===0){
-    document.getElementById('listaCategorias').innerHTML = renderEmpty();
+// ── SIDEBAR ───────────────────────────────────────────────
+function buildSidebar(data){
+  const nRec = data.filter(d=>d.tipo==='receita').length;
+  const nDes = data.filter(d=>d.tipo==='despesa').length;
+  document.getElementById('fbTodosBadge').textContent   = _todosData.length;
+  document.getElementById('fbReceitaBadge').textContent = _todosData.filter(d=>d.tipo==='receita').length;
+  document.getElementById('fbDespesaBadge').textContent = _todosData.filter(d=>d.tipo==='despesa').length;
+
+  const fonte = _filtroTipo==='todos' ? _todosData : _todosData.filter(d=>d.tipo===_filtroTipo);
+  const cats  = [...new Set(fonte.map(d=>d.categoria||'Geral'))].sort();
+  document.getElementById('filterCatsList').innerHTML = cats.map(cat=>{
+    const qtd   = fonte.filter(d=>(d.categoria||'Geral')===cat).length;
+    const ativo = _filtroCat===cat ? 'active' : '';
+    return `<button class="filter-cat-item ${ativo}" onclick="filtrarCat(this,'${cat.replace(/'/g,"\\'")}')">
+      📂 ${cat} <span style="float:right;opacity:.5">${qtd}</span>
+    </button>`;
+  }).join('');
+}
+
+function filtrar(tipo){
+  _filtroTipo = tipo;
+  _filtroCat  = null;
+  ['fbTodos','fbReceita','fbDespesa'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  ({todos:'fbTodos',receita:'fbReceita',despesa:'fbDespesa'})[tipo] &&
+    document.getElementById(({todos:'fbTodos',receita:'fbReceita',despesa:'fbDespesa'})[tipo]).classList.add('active');
+  buildSidebar(_todosData);
+  const fonte = tipo==='todos' ? _todosData : _todosData.filter(d=>d.tipo===tipo);
+  renderLista(fonte);
+}
+
+function filtrarCat(el, cat){
+  _filtroCat = (_filtroCat===cat) ? null : cat;
+  document.querySelectorAll('.filter-cat-item').forEach(b=>b.classList.remove('active'));
+  if(_filtroCat) el.classList.add('active');
+  let fonte = _filtroTipo==='todos' ? _todosData : _todosData.filter(d=>d.tipo===_filtroTipo);
+  if(_filtroCat) fonte = fonte.filter(d=>(d.categoria||'Geral')===_filtroCat);
+  renderLista(fonte);
+}
+
+function renderLista(data){
+  if(!data||data.length===0){
+    document.getElementById('listaCategorias').innerHTML =
+      `<div style="color:#4a5568;font-size:14px;text-align:center;padding:48px 24px">Nenhuma categoria para esse filtro.</div>`;
     return;
   }
-
-  // Agrupar: primeiro por tipo, depois por categoria
   const grupos = {};
-  data.forEach(c=>{
-    const t = c.tipo; // receita | despesa
-    const cat = c.categoria || 'Geral';
+  data.forEach(d=>{
+    const t   = d.tipo;
+    const cat = d.categoria||'Geral';
     if(!grupos[t]) grupos[t]={};
     if(!grupos[t][cat]) grupos[t][cat]=[];
-    grupos[t][cat].push(c);
+    grupos[t][cat].push(d);
   });
-
   let html = '';
-  const tipos = ['receita','despesa'];
-  tipos.forEach(tipo=>{
+  ['receita','despesa'].forEach(tipo=>{
     if(!grupos[tipo]) return;
-    const cats = grupos[tipo];
+    const cats       = grupos[tipo];
     const totalItems = Object.values(cats).flat().length;
     html += `<div class="tipo-group">
       <div class="tipo-label">
-        <div class="dot ${tipo}"></div>
-        ${tipo.toUpperCase()}S
+        <div class="dot ${tipo}"></div>${tipo.toUpperCase()}S
         <span class="count-badge">${totalItems}</span>
       </div>`;
-
-    Object.entries(cats).forEach(([catNome, items])=>{
+    Object.entries(cats).forEach(([catNome,items])=>{
       html += `<div class="cat-group">
         <div class="cat-group-header">📂 ${catNome} (${items.length})</div>`;
-      items.forEach(c=>{
-        const bg = c.cor ? c.cor+'22' : '#f5a62322';
+      items.forEach(d=>{
+        const bg = d.cor ? d.cor+'22' : '#f5a62322';
         html += `<div class="cat-card">
-          <div class="cat-icon" style="background:${bg}">${c.icone||'🏷'}</div>
+          <div class="cat-icon" style="background:${bg}">${d.icone||'🏷'}</div>
           <div class="cat-info">
-            <div class="cat-name">${c.nome}</div>
+            <div class="cat-name">${d.nome}</div>
             <div class="cat-sub">${catNome} · ${tipo}</div>
           </div>
           <div class="cat-actions">
-            <button class="btn-edit" onclick="editarCategoria(${c.id})">✏ Editar</button>
-            <button class="btn-del"  onclick="deletarCategoria(${c.id},'${c.nome.replace(/'/g,"\\'")}')">🗑</button>
+            <button class="btn-edit" onclick="editarCategoria(${d.id})">✏ Editar</button>
+            <button class="btn-del"  onclick="deletarCategoria(${d.id},'${d.nome.replace(/'/g,"\\'")}')">🗑</button>
           </div>
         </div>`;
       });
@@ -362,20 +445,13 @@ async function loadCategorias(){
     });
     html += `</div>`;
   });
-
   document.getElementById('listaCategorias').innerHTML = html;
 }
 
 function renderEmpty(){
-  return `<div class="tipo-group">
-    <div class="tipo-label"><div class="dot receita"></div>RECEITAS <span class="count-badge">0</span></div>
-    <div class="empty">Nenhuma categoria cadastrada.</div>
-  </div>
-  <div class="tipo-group">
-    <div class="tipo-label"><div class="dot despesa"></div>DESPESAS <span class="count-badge">0</span></div>
-    <div class="empty">Nenhuma categoria cadastrada.</div>
-  </div>`;
+  return `<div style="color:#4a5568;font-size:14px;text-align:center;padding:48px">Nenhuma categoria cadastrada.</div>`;
 }
+
 
 // ── MODAL CATEGORIA ──────────────────────────────────────
 function openModal(id){
