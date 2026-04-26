@@ -752,20 +752,15 @@ function limparModal(){
 function setTipo(tipo){
   _tipoAtual = tipo;
   const cfg = TIPO_CONFIG[tipo] || TIPO_CONFIG.despesa;
-  const isRec = tipo==='receita';
-
-  // Destacar botão correto no toggle
-  document.getElementById('btnRec').className = `tipo-btn ${isRec?'active rec':' rec'}`;
-  document.getElementById('btnDes').className = `tipo-btn ${!isRec?'active des':' des'}`;
 
   // Ícone e cor do header do modal
   const icon = document.getElementById('mIcone');
-  icon.textContent  = cfg.icon;
-  icon.style.background = cfg.bg;
-  icon.style.color  = cfg.cor;
-  icon.className    = 'modal-icon';
-
-  // (toggle removido — tipo é sempre fixo ao abrir pelo FAB)
+  if(icon){
+    icon.textContent      = cfg.icon;
+    icon.style.background = cfg.bg;
+    icon.style.color      = cfg.cor;
+    icon.className        = 'modal-icon';
+  }
 
   // Mostrar info extra para cartão
   const infoCartao = document.getElementById('infoCartao');
