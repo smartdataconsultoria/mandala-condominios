@@ -861,7 +861,7 @@ function toggleParcela(){
 
 function calcParcela(){
   const valStr = document.getElementById('fValor').value;
-  const val = parseFloat(valStr.replace(/\./g,'').replace(',','.'))||0;
+  const val = parseFloat(valStr.replace(/R\$\s*/g,'').replace(/\./g,'').replace(',','.'))||0;
   const n   = parseInt(document.getElementById('fParcelas').value)||2;
   const vparcela = val > 0 ? val/n : 0;
   document.getElementById('fValParcela').value = vparcela>0 ? 'R$ '+vparcela.toLocaleString('pt-BR',{minimumFractionDigits:2}) : '—';
@@ -952,7 +952,7 @@ async function uploadAnexo(file, transId){
 async function salvarLancamento(){
   const btn = document.getElementById('btnSalvar');
   const desc  = document.getElementById('fDesc').value.trim();
-  const valor = parseFloat((document.getElementById('fValor').value||'0').replace(/\./g,'').replace(',','.'))||0;
+  const valor = parseFloat((document.getElementById('fValor').value||'0').replace(/R\$\s*/g,'').replace(/\./g,'').replace(',','.'))||0;
   const data  = document.getElementById('fData').value;
   if(!desc){ showAlert('Informe a descrição.','error'); return; }
   if(!valor){ showAlert('Informe o valor.','error'); return; }
