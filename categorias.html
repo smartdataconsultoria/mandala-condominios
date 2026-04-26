@@ -114,8 +114,10 @@
   .btn-save:disabled{opacity:.5;cursor:not-allowed}
 
   /* CONTAS */
-  .conta-card{display:flex;align-items:center;gap:14px;padding:14px 16px;background:#1a1d27;border:1px solid #2a2d3e;border-radius:10px;margin-bottom:10px;transition:.15s;cursor:pointer}
+  .conta-card{display:flex;align-items:center;gap:14px;padding:14px 16px;background:#1a1d27;border:1px solid #2a2d3e;border-radius:10px;margin-bottom:10px;transition:.15s}
   .conta-card:hover{border-color:#f5a62360;background:#1e2130}
+  .conta-actions{display:flex;gap:8px;margin-left:16px;opacity:0;transition:.15s}
+  .conta-card:hover .conta-actions{opacity:1}
   .conta-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px}
   .conta-name{font-size:14px;font-weight:600}
   .conta-banco{font-size:12px;color:#64748b;margin-top:2px}
@@ -549,15 +551,19 @@ async function loadContas(){
     const bg = (c.cor||'#f5a623')+'22';
     const tipos = {corrente:'Conta Corrente',poupanca:'Poupança',caixa:'Caixa',fundo_reserva:'Fundo de Reserva'};
     const saldo = (c.saldo_inicial||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-    return `<div class="conta-card" onclick="editarConta(${c.id})">
+    return `<div class="conta-card">
       <div class="conta-icon" style="background:${bg}">${c.icone||'🏦'}</div>
-      <div>
+      <div style="flex:1">
         <div class="conta-name">${c.nome}</div>
         <div class="conta-banco">${c.banco||'—'}</div>
       </div>
       <div class="conta-saldo">
         <div class="conta-saldo-val">${saldo}</div>
         <div class="conta-tipo-badge">${tipos[c.tipo]||c.tipo}</div>
+      </div>
+      <div class="conta-actions">
+        <button class="btn-edit" onclick="editarConta(${c.id})">✏ Editar</button>
+        <button class="btn-del"  onclick="deletarConta(${c.id},'${c.nome.replace(/'/g,"\\'")}')">🗑</button>
       </div>
     </div>`;
   }).join('');
@@ -580,6 +586,17 @@ async function editarConta(id){
   document.getElementById('cIcone').value = c.icone||'';
   document.getElementById('cCor').value   = c.cor||'#f5a623';
   document.getElementById('modalConta').classList.add('open');
+}
+
+async function deletarConta(id, nome){
+  if(!confirm(`Excluir a conta "${nome}"?
+Atenção: esta ação não pode ser desfeita.`)) return;
+  const h = await headers();
+  const res = await fetch(`${SUPA_URL}/rest/v1/condo_contas?id=eq.${id}`,{
+    method:'DELETE', headers:{...h,'Prefer':'return=representation'}
+  });
+  if(res.ok){ showAlert('Conta removida.'); loadContas(); }
+  else showAlert('Erro ao remover conta.','error');
 }
 
 async function salvarConta(){
