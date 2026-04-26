@@ -1241,7 +1241,7 @@ async function executarDelete(){
         showAlert('Erro ao excluir série.','error');
       }
     } else {
-      // Excluir só este
+      // Excluir só este lançamento
       const res = await fetch(`${SUPA_URL}/rest/v1/condo_transacoes?id=eq.${_deleteId}&empresa=eq.${EMPRESA}`,{
         method:'DELETE', headers:h
       });
@@ -1250,14 +1250,17 @@ async function executarDelete(){
         showAlert('Lançamento removido.');
         fecharConfirm();
         await loadTransacoes();
-      } else if(body==='[]'||body===''){
+      } else if(body==='[]' || body===''){
         showAlert('⚠️ Não foi possível apagar. Verifique o RLS no Supabase.','error');
-    } else {
-      showAlert('Erro ao remover: ' + body, 'error');
+      } else {
+        showAlert('Erro ao remover: ' + body, 'error');
+      }
     }
   } catch(e){
     showAlert('Erro: ' + e.message, 'error');
   }
+  btn.disabled=false;
+  btn.textContent='🗑 Excluir';
 }
 
 // ── FECHAR MODAL FORA ────────────────────────────────────
