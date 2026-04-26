@@ -392,8 +392,8 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
         <div class="toggle-label">
           <span class="tlabel-icon">📋</span>
           <div>
-            <div style="font-weight:600;color:#f1f5f9">Parcelar</div>
-            <div style="font-size:12px;color:#4a5568">Dividir em múltiplas parcelas</div>
+            <div style="font-weight:600;color:#f1f5f9">📋 Parcelar</div>
+            <div style="font-size:12px;color:#64748b">Informe o valor TOTAL — será dividido pelas parcelas</div>
           </div>
         </div>
         <label class="switch">
@@ -446,8 +446,8 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
         <div class="toggle-label">
           <span class="tlabel-icon">🔄</span>
           <div>
-            <div style="font-weight:600;color:#f1f5f9">Despesa / Receita Fixa</div>
-            <div style="font-size:12px;color:#4a5568">Repete todo mês automaticamente</div>
+            <div style="font-weight:600;color:#f1f5f9">🔄 Despesa / Receita Fixa</div>
+            <div style="font-size:12px;color:#64748b">Mesmo valor lançado todo mês (não divide)</div>
           </div>
         </div>
         <label class="switch">
@@ -807,17 +807,31 @@ function setDataRapida(qual, el){
 function toggleParcela(){
   const on = document.getElementById('togParcela').checked;
   document.getElementById('parcelaBox').classList.toggle('show',on);
-  if(on){ document.getElementById('togFixo').checked=false; document.getElementById('recorrenteBox').classList.remove('show'); }
+  if(on){
+    // Desliga fixo
+    document.getElementById('togFixo').checked=false;
+    document.getElementById('recorrenteBox').classList.remove('show');
+    // Indica que o campo é valor TOTAL
+    document.getElementById('fValor').placeholder='Valor TOTAL (será dividido)';
+    const lbl = document.querySelector('label[for="fValor"]');
+    if(lbl) lbl.textContent='Valor Total (R$) *';
+  } else {
+    document.getElementById('fValor').placeholder='0,00';
+    const lbl = document.querySelector('label[for="fValor"]');
+    if(lbl) lbl.textContent='Valor (R$) *';
+  }
   calcParcela();
 }
 
 function calcParcela(){
-  const val = parseFloat(document.getElementById('fValor').value)||0;
+  const valStr = document.getElementById('fValor').value;
+  const val = parseFloat(valStr.replace(/\./g,'').replace(',','.'))||0;
   const n   = parseInt(document.getElementById('fParcelas').value)||2;
-  const vparcela = val/n;
-  document.getElementById('fValParcela').value = vparcela>0 ? fmt(vparcela) : '—';
-  document.getElementById('parcelaInfo').textContent =
-    `Será criado ${n} lançamento${n>1?'s':''}, cada um de ${fmt(vparcela)} por mês.`;
+  const vparcela = val > 0 ? val/n : 0;
+  document.getElementById('fValParcela').value = vparcela>0 ? 'R$ '+vparcela.toLocaleString('pt-BR',{minimumFractionDigits:2}) : '—';
+  document.getElementById('parcelaInfo').textContent = val > 0
+    ? `Total de ${fmt(val)} ÷ ${n}x = ${fmt(vparcela)} por parcela`
+    : 'Informe o valor total acima para calcular as parcelas.';
 }
 
 // Recalcular ao mudar valor
@@ -827,7 +841,11 @@ document.getElementById('fValor').addEventListener('input', ()=>{ if(document.ge
 function toggleFixo(){
   const on = document.getElementById('togFixo').checked;
   document.getElementById('recorrenteBox').classList.toggle('show',on);
-  if(on){ document.getElementById('togParcela').checked=false; document.getElementById('parcelaBox').classList.remove('show'); }
+  if(on){
+    // Desliga parcelado
+    document.getElementById('togParcela').checked=false;
+    document.getElementById('parcelaBox').classList.remove('show');
+  }
   atualizarFixoResumo();
 }
 
@@ -1062,10 +1080,19 @@ async function editarTransacao(id){
   document.getElementById('fConta').value  = t.conta_id||'';
   document.getElementById('fSit').value    = t.situacao||'pago';
   document.getElementById('fObs').value    = t.observacao||'';
-  if(t.recorrente){ document.getElementById('togFixo').checked=true; toggleFixo(); }
-  if(t.parcela_total){
+  // Fixo OU Parcelado — nunca os dois
+  if(t.recorrente && !t.parcela_total){
+    // É fixo (recorrente sem ser parcelado com valor dividido)
+    document.getElementById('togFixo').checked=true;
+    document.getElementById('togParcela').checked=false;
+    toggleFixo();
+  } else if(t.parcela_total){
+    // É parcelado — mostra nº de parcelas e valor TOTAL
     document.getElementById('togParcela').checked=true;
+    document.getElementById('togFixo').checked=false;
     document.getElementById('fParcelas').value=t.parcela_total;
+    // Valor no campo = valor desta parcela (o campo mostra valor por parcela)
+    // Mantém o valor da parcela no campo fValor
     toggleParcela();
   }
   if(t.anexo_url){
