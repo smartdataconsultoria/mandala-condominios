@@ -715,8 +715,9 @@ function renderTabela(){
     const tp    = t.tipo==='receita' ? 'rec' : 'des';
     const sit   = t.situacao||'pago';
     const sitLabel = {pago:'Pago',pendente:'Pendente',agendado:'Agendado'}[sit]||sit;
-    const parTag = t.parcela_total ? `<span class="parcela-tag">${t.parcela_atual||1}/${t.parcela_total}</span>` : '';
-    const fixaTag= t.recorrente    ? `<span class="fixa-tag">🔄</span>` : '';
+    const ehParcelado = t.parcela_total && !t.recorrente;
+    const parTag = ehParcelado ? `<span class="parcela-tag">${t.parcela_atual||1}/${t.parcela_total}</span>` : '';
+    const fixaTag= t.recorrente ? `<span class="fixa-tag">🔄</span>` : '';
     const pdfTag = t.anexo_url     ? `<span class="pdf-tag" onclick="event.stopPropagation();verPDF('${t.anexo_url}')" title="Ver comprovante">📎</span>` : '';
     return `<div class="table-row" onclick="editarTransacao(${t.id})">
       <div><div class="tipo-icon ${tp}">${t.tipo==='receita'?'↑':'↓'}</div></div>
@@ -1050,11 +1051,10 @@ async function salvarLancamento(){
 
         const payload = {
           ...basePayload,
-          data:          dataStr,
-          situacao:      sit,
-          recorrente:    true,
-          parcela_atual: i + 1,
-          parcela_total: nMeses,
+          data:       dataStr,
+          situacao:   sit,
+          recorrente: true,
+          // parcela_atual / parcela_total NÃO se aplicam a lançamento fixo
         };
         promises.push(
           fetch(`${SUPA_URL}/rest/v1/condo_transacoes`, {
