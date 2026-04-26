@@ -994,7 +994,9 @@ async function salvarLancamento(){
     conta_id:     document.getElementById('fConta').value||null,
     situacao:     document.getElementById('fSit').value,
     observacao:   document.getElementById('fObs').value.trim()||null,
-    recorrente:   fixo,
+    recorrente:   fixo,          // true só para fixo, false para avulso/parcelado
+    parcela_atual: null,         // garantido null no base — só parcelado sobrescreve
+    parcela_total: null,         // garantido null no base — só parcelado sobrescreve
     autor_email:  getToken() ? null : null
   };
 
@@ -1054,7 +1056,8 @@ async function salvarLancamento(){
           data:       dataStr,
           situacao:   sit,
           recorrente: true,
-          // parcela_atual / parcela_total NÃO se aplicam a lançamento fixo
+          parcela_atual: null,   // fixo nunca é parcelado
+          parcela_total: null,   // fixo nunca é parcelado
         };
         promises.push(
           fetch(`${SUPA_URL}/rest/v1/condo_transacoes`, {
