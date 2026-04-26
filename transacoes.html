@@ -29,7 +29,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 .page-title{font-size:24px;font-weight:700}
 
 /* FAB */
-.fab-wrap{position:fixed;right:32px;bottom:36px;z-index:900;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.fab-wrap{position:fixed;right:32px;bottom:36px;z-index:950;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
 .fab{width:56px;height:56px;border-radius:50%;background:#7c3aed;border:none;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 20px #7c3aed60;display:flex;align-items:center;justify-content:center;transition:.3s;position:relative;z-index:2}
 .fab:hover{background:#6d28d9;transform:scale(1.07)}
 .fab .fab-icon{transition:.4s;display:inline-block}
@@ -40,7 +40,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 .fab-item:hover{background:#2a2d3e;transform:translateX(-3px)}
 .fab-item-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .fab-item-label{font-size:14px;font-weight:600;color:#f1f5f9}
-.fab-overlay{position:fixed;inset:0;z-index:899;display:none}
+.fab-overlay{position:fixed;inset:0;z-index:940;display:none}
 .fab-overlay.open{display:block}
 
 /* MÊS NAV */
@@ -228,19 +228,19 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
   <div class="fab-overlay" id="fabOverlay" onclick="fecharFab()"></div>
   <div class="fab-wrap">
     <div class="fab-menu" id="fabMenu">
-      <div class="fab-item" onclick="fecharFab();abrirModal('despesa')">
+      <div class="fab-item" onclick="fabAbre('despesa')">
         <div class="fab-item-icon" style="background:#ef444420;color:#ef4444">↓</div>
         <span class="fab-item-label">Despesa</span>
       </div>
-      <div class="fab-item" onclick="fecharFab();abrirModal('receita')">
+      <div class="fab-item" onclick="fabAbre('receita')">
         <div class="fab-item-icon" style="background:#22c55e20;color:#22c55e">↑</div>
         <span class="fab-item-label">Receita</span>
       </div>
-      <div class="fab-item" onclick="fecharFab();abrirModal('cartao')">
+      <div class="fab-item" onclick="fabAbre('cartao')">
         <div class="fab-item-icon" style="background:#3b82f620;color:#3b82f6">💳</div>
         <span class="fab-item-label">Despesa cartão</span>
       </div>
-      <div class="fab-item" onclick="fecharFab();abrirModal('transferencia')">
+      <div class="fab-item" onclick="fabAbre('transferencia')">
         <div class="fab-item-icon" style="background:#f5a62320;color:#f5a623">⇄</div>
         <span class="fab-item-label">Transferência</span>
       </div>
@@ -1043,6 +1043,12 @@ document.getElementById('modalBg').addEventListener('click',e=>{
 });
 
 // ── FAB ──────────────────────────────────────────────────
+function fabAbre(tipo){
+  fecharFab();
+  // pequeno delay para garantir que o overlay fecha antes do modal abrir
+  setTimeout(()=>abrirModal(tipo), 50);
+}
+
 function toggleFab(){
   const btn  = document.getElementById('fabBtn');
   const menu = document.getElementById('fabMenu');
