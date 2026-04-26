@@ -238,7 +238,7 @@
 
 <script>
 // ── CONFIGURAÇÃO ─────────────────────────────────────────
-const SUPA_URL = 'https://tnaasnshthzyvbfxxerg.supabase.co';
+const SUPA_URL = 'https://rbahvyejqybajnufftio.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiYWh2eWVqcXliYWpudWZmdGlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjA5MjIsImV4cCI6MjA4OTYzNjkyMn0.nUIo2CT3o41YL1TT8Hrp5kq-_ZS-bMMf-gvUMCEyYMw'; // substitua pela sua anon key do Supabase
 const EMPRESA  = 'mandala';
 
@@ -284,13 +284,36 @@ function showAlert(msg, type='success'){
 // ── LOAD CATEGORIAS ──────────────────────────────────────
 async function loadCategorias(){
   const h = await headers();
-  const res = await fetch(
-    `${SUPA_URL}/rest/v1/condo_categorias?empresa=eq.${EMPRESA}&order=tipo,categoria,nome`,
-    {headers:h}
-  );
-  const data = await res.json();
+  let res, data;
+  try {
+    res = await fetch(
+      `${SUPA_URL}/rest/v1/condo_categorias?empresa=eq.${EMPRESA}&order=tipo,categoria,nome`,
+      {headers:h}
+    );
+    data = await res.json();
+  } catch(e) {
+    document.getElementById('listaCategorias').innerHTML =
+      `<div style="background:#2d0a0a;border:1px solid #ef444440;border-radius:8px;padding:16px;color:#ef4444;font-size:13px">
+        ❌ Erro de conexão: ${e.message}
+      </div>`;
+    return;
+  }
 
-  if(!Array.isArray(data)||data.length===0){
+  if(!Array.isArray(data)){
+    const msg = (data && (data.message || data.hint)) || JSON.stringify(data);
+    document.getElementById('listaCategorias').innerHTML =
+      `<div style="background:#2d0a0a;border:1px solid #ef444440;border-radius:8px;padding:16px;color:#ef4444;font-size:13px;line-height:1.8">
+        <strong>❌ Erro ao carregar (HTTP ${res.status})</strong><br>
+        <span style="opacity:.75">${msg}</span><br><br>
+        <strong style="color:#f1f5f9">Se for RLS bloqueando, rode no SQL Editor:</strong><br>
+        <code style="background:#0f1117;padding:6px 10px;border-radius:6px;display:inline-block;margin-top:4px;color:#f5a623;font-size:12px">
+          ALTER TABLE condo_categorias DISABLE ROW LEVEL SECURITY;
+        </code>
+      </div>`;
+    return;
+  }
+
+  if(data.length===0){
     document.getElementById('listaCategorias').innerHTML = renderEmpty();
     return;
   }
