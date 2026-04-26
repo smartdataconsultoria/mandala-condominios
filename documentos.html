@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Documentos — Edifício Mandala</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#0f1117;color:#f1f5f9;min-height:100vh}
+
+/* NAV */
+nav{background:#1a1d27;border-bottom:1px solid #2a2d3e;padding:0 24px;display:flex;align-items:center;height:60px}
+.nav-brand{display:flex;align-items:center;gap:10px;margin-right:40px;text-decoration:none}
+.nav-logo{width:36px;height:36px;background:#f5a623;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.nav-brand-text{font-size:13px;font-weight:700;color:#f1f5f9;line-height:1.2}
+.nav-brand-text span{display:block;font-size:10px;color:#94a3b8;font-weight:400}
+.nav-links{display:flex;gap:4px}
+.nav-links a{color:#94a3b8;text-decoration:none;padding:8px 16px;border-radius:6px;font-size:14px;transition:.2s}
+.nav-links a:hover{background:#2a2d3e;color:#f1f5f9}
+.nav-links a.active{background:#f5a623;color:#0f1117;font-weight:600}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:16px}
+.nav-user{font-size:13px;color:#64748b}
+
+/* MAIN */
+main{max-width:1200px;margin:0 auto;padding:28px 24px}
+
+/* ALERT */
+.alert{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:20px;display:none}
+.alert.success{background:#052e1660;border:1px solid #22c55e40;color:#22c55e}
+.alert.error{background:#2d0a0a60;border:1px solid #ef444440;color:#ef4444}
+
+/* HEADER */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:12px;flex-wrap:wrap}
+.page-title{font-size:24px;font-weight:700}
+.page-subtitle{font-size:13px;color:#64748b;margin-top:3px}
+.header-actions{display:flex;gap:10px}
+.btn-new{background:#f5a623;color:#0f1117;border:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.2s}
+.btn-new:hover{background:#e09210;transform:translateY(-1px)}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
+.stat{background:#1a1d27;border:1px solid #2a2d3e;border-radius:12px;padding:14px 16px;cursor:pointer;transition:.2s}
+.stat:hover{border-color:#f5a62340}
+.stat.active{border-color:#f5a623;background:#f5a62308}
+.stat-icon{font-size:22px;margin-bottom:6px}
+.stat-label{font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.stat-val{font-size:20px;font-weight:700}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:240px 1fr;gap:20px;align-items:start}
+
+/* SIDEBAR FILTROS */
+.sidebar{background:#1a1d27;border:1px solid #2a2d3e;border-radius:12px;padding:16px;position:sticky;top:20px}
+.sb-title{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+.sb-sep{height:1px;background:#2a2d3e;margin:14px 0}
+.cat-btn{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;background:none;border:none;border-radius:8px;color:#94a3b8;font-size:13px;cursor:pointer;text-align:left;transition:.15s;margin-bottom:2px}
+.cat-btn:hover{background:#2a2d3e;color:#f1f5f9}
+.cat-btn.active{background:#f5a62315;color:#f5a623;font-weight:600}
+.cat-btn .cat-icon{font-size:16px;width:22px;text-align:center}
+.cat-btn .cat-count{margin-left:auto;background:#2a2d3e;color:#64748b;font-size:10px;padding:2px 6px;border-radius:8px;font-weight:600}
+.cat-btn.active .cat-count{background:#f5a62325;color:#f5a623}
+
+/* BUSCA */
+.search-bar{display:flex;gap:10px;margin-bottom:16px}
+.search-box{flex:1;position:relative}
+.search-box input{width:100%;background:#1a1d27;border:1px solid #2a2d3e;border-radius:8px;padding:9px 14px 9px 38px;color:#f1f5f9;font-size:14px;outline:none;transition:.2s}
+.search-box input:focus{border-color:#f5a623}
+.search-box::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px}
+.sort-select{background:#1a1d27;border:1px solid #2a2d3e;border-radius:8px;padding:9px 14px;color:#94a3b8;font-size:13px;outline:none;cursor:pointer}
+
+/* DOCS GRID */
+.docs-grid{display:flex;flex-direction:column;gap:10px}
+
+/* DOC CARD */
+.doc-card{background:#1a1d27;border:1px solid #2a2d3e;border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:16px;transition:.2s;cursor:pointer}
+.doc-card:hover{border-color:#f5a62340;background:#1e2130}
+.doc-card.destaque{border-color:#f5a62340;background:#f5a62306}
+.doc-type-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.doc-info{flex:1;min-width:0}
+.doc-titulo{font-size:14px;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doc-meta{display:flex;align-items:center;gap:10px;margin-top:4px;flex-wrap:wrap}
+.doc-cat-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:600}
+.doc-date{font-size:12px;color:#64748b}
+.doc-desc{font-size:12px;color:#64748b;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:500px}
+.doc-prestador{font-size:12px;color:#94a3b8;margin-top:2px}
+.doc-valor{font-size:13px;font-weight:700;color:#22c55e;white-space:nowrap}
+.doc-validade{font-size:11px;padding:2px 8px;border-radius:6px;white-space:nowrap}
+.doc-validade.ok{background:#22c55e15;color:#22c55e}
+.doc-validade.warn{background:#f5a62315;color:#f5a623}
+.doc-validade.exp{background:#ef444415;color:#ef4444}
+.doc-actions{display:flex;gap:6px;flex-shrink:0}
+.btn-action{background:none;border:1px solid #2a2d3e;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:.2s;color:#94a3b8;white-space:nowrap}
+.btn-action:hover{background:#2a2d3e;color:#f1f5f9}
+.btn-action.primary{background:#f5a62315;border-color:#f5a62340;color:#f5a623}
+.btn-action.primary:hover{background:#f5a62325}
+.btn-action.del:hover{background:#ef444420;color:#ef4444;border-color:#ef4444}
+.empty-state{text-align:center;padding:60px 20px;color:#4a5568}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:#00000090;display:none;align-items:flex-start;justify-content:center;z-index:999;overflow-y:auto;padding:20px 16px}
+.modal-bg.open{display:flex}
+.modal{background:#13161f;border:1px solid #2a2d3e;border-radius:16px;width:100%;max-width:700px;margin:auto}
+.modal-header{padding:22px 24px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #2a2d3e}
+.modal-title{font-size:18px;font-weight:700;flex:1}
+.modal-close{background:none;border:none;color:#64748b;font-size:22px;cursor:pointer;padding:2px 6px;border-radius:6px;transition:.2s}
+.modal-close:hover{background:#2a2d3e;color:#f1f5f9}
+.modal-body{padding:20px 24px}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;padding:18px 24px;border-top:1px solid #2a2d3e}
+
+/* FORM */
+.sec-title{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin:18px 0 12px;display:flex;align-items:center;gap:8px}
+.sec-title::after{content:'';flex:1;height:1px;background:#2a2d3e}
+.sec-title:first-child{margin-top:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;background:#0f1117;border:1px solid #2a2d3e;border-radius:8px;padding:10px 13px;color:#f1f5f9;font-size:14px;outline:none;transition:.2s;font-family:inherit}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#f5a623}
+.field select option{background:#1a1d27}
+.field textarea{resize:vertical;min-height:80px}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #2a2d3e20;margin-bottom:6px}
+.toggle-label{font-size:14px;color:#94a3b8;display:flex;align-items:center;gap:8px}
+.switch{position:relative;width:44px;height:24px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.switch .slider{position:absolute;inset:0;background:#2a2d3e;border-radius:24px;cursor:pointer;transition:.3s}
+.switch .slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:#64748b;border-radius:50%;transition:.3s}
+.switch input:checked+.slider{background:#f5a623}
+.switch input:checked+.slider::before{transform:translateX(20px);background:#fff}
+
+/* UPLOAD */
+.upload-area{border:2px dashed #2a2d3e;border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:.25s;position:relative;background:#0f1117}
+.upload-area:hover,.upload-area.drag{border-color:#f5a623;background:#f5a62306}
+.upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-icon{font-size:36px;margin-bottom:10px}
+.upload-text{font-size:14px;color:#94a3b8}
+.upload-text strong{color:#f5a623}
+.upload-hint{font-size:11px;color:#4a5568;margin-top:4px}
+.file-preview{display:none;background:#0f1117;border:1px solid #2a2d3e;border-radius:10px;padding:14px 16px;align-items:center;gap:12px;margin-top:10px}
+.file-preview.show{display:flex}
+.file-type-icon{font-size:28px;flex-shrink:0}
+.file-info{flex:1;min-width:0}
+.file-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-size{font-size:11px;color:#64748b;margin-top:2px}
+.file-remove{background:none;border:none;color:#ef4444;font-size:18px;cursor:pointer;padding:2px 6px;border-radius:4px;transition:.2s;flex-shrink:0}
+.file-remove:hover{background:#ef444420}
+
+/* CAMPOS CONDICIONAIS */
+.cond-box{background:#0f1117;border:1px solid #2a2d3e;border-radius:10px;padding:16px;margin-top:12px;display:none}
+.cond-box.show{display:block}
+
+.btn-cancel{background:none;border:1px solid #2a2d3e;color:#94a3b8;padding:10px 20px;border-radius:8px;font-size:14px;cursor:pointer;transition:.2s}
+.btn-cancel:hover{background:#2a2d3e}
+.btn-save{background:#f5a623;color:#0f1117;border:none;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:.2s}
+.btn-save:hover{background:#e09210}
+.btn-save:disabled{opacity:.5;cursor:not-allowed}
+
+/* CORES POR CATEGORIA */
+.cat-ata{background:#3b82f615;color:#3b82f6}
+.cat-contrato{background:#f5a62315;color:#f5a623}
+.cat-nf{background:#22c55e15;color:#22c55e}
+.cat-comunicado{background:#a855f715;color:#a855f7}
+.cat-convencao{background:#06b6d415;color:#06b6d4}
+.cat-regimento{background:#64748b15;color:#64748b}
+.cat-financeiro{background:#22c55e15;color:#22c55e}
+.cat-outro{background:#2a2d3e;color:#94a3b8}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="dashboard.html">
+    <div class="nav-logo">🏠</div>
+    <div class="nav-brand-text">EDIFÍCIO<br><span>Mandala</span></div>
+  </a>
+  <div class="nav-links">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="transacoes.html">Transações</a>
+    <a href="moradores.html">Moradores</a>
+    <a href="documentos.html" class="active">Documentos</a>
+    <a href="categorias.html">Categorias</a>
+  </div>
+  <div class="nav-right">
+    <span class="nav-user" id="navUser"></span>
+    <a href="login.html" style="color:#64748b;font-size:13px;text-decoration:none">⇤ Sair</a>
+  </div>
+</nav>
+
+<main>
+  <div class="alert" id="alert"></div>
+
+  <div class="page-header">
+    <div>
+      <div class="page-title">📁 Documentos</div>
+      <div class="page-subtitle">Gestão de documentos, contratos e notas fiscais do condomínio</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-new" onclick="abrirModal()">+ Novo Documento</button>
+    </div>
+  </div>
+
+  <!-- STATS CLICÁVEIS -->
+  <div class="stats" id="statsBar">
+    <div class="stat active" onclick="filtrarCat('Todos',this)">
+      <div class="stat-icon">📂</div>
+      <div class="stat-label">Todos</div>
+      <div class="stat-val" id="stTodos">0</div>
+    </div>
+    <div class="stat" onclick="filtrarCat('Ata',this)">
+      <div class="stat-icon">📋</div>
+      <div class="stat-label">Atas</div>
+      <div class="stat-val" id="stAta">0</div>
+    </div>
+    <div class="stat" onclick="filtrarCat('Contrato',this)">
+      <div class="stat-icon">📝</div>
+      <div class="stat-label">Contratos</div>
+      <div class="stat-val" id="stContrato">0</div>
+    </div>
+    <div class="stat" onclick="filtrarCat('Nota Fiscal',this)">
+      <div class="stat-icon">🧾</div>
+      <div class="stat-label">Notas Fiscais</div>
+      <div class="stat-val" id="stNF">0</div>
+    </div>
+    <div class="stat" onclick="filtrarCat('Outros',this)">
+      <div class="stat-icon">📌</div>
+      <div class="stat-label">Outros</div>
+      <div class="stat-val" id="stOutros">0</div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sb-title">Categoria</div>
+      <button class="cat-btn active" id="sbTodos" onclick="filtrarCat('Todos',null,this)">
+        <span class="cat-icon">📂</span> Todos
+        <span class="cat-count" id="sbCTodos">0</span>
+      </button>
+      <button class="cat-btn" onclick="filtrarCat('Ata',null,this)">
+        <span class="cat-icon">📋</span> Atas
+        <span class="cat-count" id="sbCAta">0</span>
+      </button>
+      <button class="cat-btn" onclick="filtrarCat('Contrato',null,this)">
+        <span class="cat-icon">📝</span> Contratos
+        <span class="cat-count" id="sbCContrato">0</span>
+      </button>
+      <button class="cat-btn" onclick="filtrarCat('Nota Fiscal',null,this)">
+        <span class="cat-icon">🧾</span> Notas Fiscais
+        <span class="cat-count" id="sbCNF">0</span>
+      </button>
+      <button class="cat-btn" onclick="filtrarCat('Comunicado',null,this)">
+        <span class="cat-icon">📣</span> Comunicados
+        <span class="cat-count" id="sbCCom">0</span>
+      </button>
+      <button class="cat-btn" onclick="filtrarCat('Convenção',null,this)">
+        <span class="cat-icon">📖</span> Convenção
+        <span class="cat-count" id="sbCConv">0</span>
+      </button>
+      <button class="cat-btn" onclick="filtrarCat('Regimento',null,this)">
+        <span class="cat-icon">📜</span> Regimento
+        <span class="cat-count" id="sbCReg">0</span>
+      </button>
+      <button class="cat-btn" onclick="filtrarCat('Financeiro',null,this)">
+        <span class="cat-icon">💰</span> Financeiro
+        <span class="cat-count" id="sbCFin">0</span>
+      </button>
+      <button class="cat-btn" onclick="filtrarCat('Outro',null,this)">
+        <span class="cat-icon">📌</span> Outros
+        <span class="cat-count" id="sbCOut">0</span>
+      </button>
+
+      <div class="sb-sep"></div>
+      <div class="sb-title">Situação</div>
+      <button class="cat-btn" onclick="filtrarSit('publicado',this)">
+        <span class="cat-icon">✅</span> Publicados
+      </button>
+      <button class="cat-btn" onclick="filtrarSit('destaque',this)">
+        <span class="cat-icon">⭐</span> Destaques
+      </button>
+      <button class="cat-btn" onclick="filtrarSit('vencendo',this)">
+        <span class="cat-icon">⚠️</span> Vencendo (30d)
+      </button>
+      <button class="cat-btn" onclick="filtrarSit('vencido',this)">
+        <span class="cat-icon">🔴</span> Vencidos
+      </button>
+    </div>
+
+    <!-- CONTEÚDO -->
+    <div>
+      <div class="search-bar">
+        <div class="search-box">
+          <input type="text" id="busca" placeholder="Buscar por título, prestador, descrição..." oninput="renderDocs()"/>
+        </div>
+        <select class="sort-select" id="sortBy" onchange="renderDocs()">
+          <option value="data_desc">Mais recentes</option>
+          <option value="data_asc">Mais antigos</option>
+          <option value="titulo">Título A→Z</option>
+          <option value="categoria">Categoria</option>
+        </select>
+      </div>
+      <div class="docs-grid" id="docsGrid">
+        <div class="empty-state">⏳ Carregando documentos...</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ══════ MODAL ══════ -->
+<div class="modal-bg" id="modalBg">
+<div class="modal">
+  <div class="modal-header">
+    <span style="font-size:22px">📄</span>
+    <div class="modal-title" id="modalTitle">Novo Documento</div>
+    <button class="modal-close" onclick="fecharModal()">✕</button>
+  </div>
+  <div class="modal-body">
+
+    <!-- UPLOAD -->
+    <div class="sec-title">Arquivo</div>
+    <div class="upload-area" id="uploadArea"
+         ondragover="event.preventDefault();this.classList.add('drag')"
+         ondragleave="this.classList.remove('drag')"
+         ondrop="onDrop(event)">
+      <input type="file" id="fArquivo" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" onchange="onArquivoChange()"/>
+      <div class="upload-icon">📄</div>
+      <div class="upload-text">Arraste o arquivo ou <strong>clique para selecionar</strong></div>
+      <div class="upload-hint">PDF, Word, Excel, Imagem • máx. 20MB</div>
+    </div>
+    <div class="file-preview" id="filePreview">
+      <span class="file-type-icon" id="fileIcon">📄</span>
+      <div class="file-info">
+        <div class="file-name" id="fileName">arquivo.pdf</div>
+        <div class="file-size" id="fileSize">0 KB</div>
+      </div>
+      <button class="file-remove" onclick="removerArquivo()">✕</button>
+    </div>
+
+    <!-- IDENTIFICAÇÃO -->
+    <div class="sec-title">Identificação</div>
+    <div class="field">
+      <label>Título *</label>
+      <input id="fTitulo" type="text" placeholder="Ex: Ata da Assembleia Geral — Jun/2025"/>
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label>Categoria *</label>
+        <select id="fCategoria" onchange="onCatChange()">
+          <option value="">Selecionar...</option>
+          <option value="Ata">📋 Ata de Assembleia</option>
+          <option value="Contrato">📝 Contrato de Serviço</option>
+          <option value="Nota Fiscal">🧾 Nota Fiscal</option>
+          <option value="Comunicado">📣 Comunicado</option>
+          <option value="Convenção">📖 Convenção do Condomínio</option>
+          <option value="Regimento">📜 Regimento Interno</option>
+          <option value="Financeiro">💰 Documento Financeiro</option>
+          <option value="Outro">📌 Outro</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Subcategoria / Tipo</label>
+        <input id="fSub" type="text" placeholder="Ex: AGO, AGE, Manutenção..."/>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label>Data do Documento</label>
+        <input id="fData" type="date"/>
+      </div>
+      <div class="field">
+        <label>Data de Validade</label>
+        <input id="fValidade" type="date"/>
+        <div style="font-size:11px;color:#4a5568;margin-top:3px">Para contratos com vencimento</div>
+      </div>
+    </div>
+
+    <!-- CAMPOS CONDICIONAIS: CONTRATO / NF -->
+    <div class="cond-box" id="boxPrestador">
+      <div class="sec-title" style="margin-top:0">Prestador de Serviço</div>
+      <div class="grid3">
+        <div class="field" style="margin:0">
+          <label>Nome / Empresa</label>
+          <input id="fPrestNome" type="text" placeholder="Ex: Elevadores Silva Ltda"/>
+        </div>
+        <div class="field" style="margin:0">
+          <label>CNPJ / CPF</label>
+          <input id="fPrestCnpj" type="text" placeholder="00.000.000/0001-00"/>
+        </div>
+        <div class="field" style="margin:0">
+          <label>Serviço prestado</label>
+          <input id="fPrestServ" type="text" placeholder="Ex: Manutenção elevador"/>
+        </div>
+      </div>
+      <div class="field" style="margin-top:12px;margin-bottom:0">
+        <label>Valor (R$)</label>
+        <input id="fValor" type="number" step="0.01" min="0" placeholder="0,00" style="max-width:200px"/>
+      </div>
+    </div>
+
+    <!-- DESCRIÇÃO E OBS -->
+    <div class="sec-title">Descrição</div>
+    <div class="field">
+      <label>Descrição / Resumo</label>
+      <textarea id="fDesc" placeholder="Descreva brevemente o conteúdo do documento..."></textarea>
+    </div>
+    <div class="field">
+      <label>Observações internas</label>
+      <textarea id="fObs" placeholder="Notas internas (não visíveis para condôminos)..." style="min-height:60px"></textarea>
+    </div>
+
+    <!-- OPÇÕES -->
+    <div class="sec-title">Configurações</div>
+    <div class="toggle-row">
+      <span class="toggle-label">✅ Publicar (visível para condôminos)</span>
+      <label class="switch"><input type="checkbox" id="fPublicado" checked/><span class="slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <span class="toggle-label">⭐ Destacar no dashboard</span>
+      <label class="switch"><input type="checkbox" id="fDestaque"/><span class="slider"></span></label>
+    </div>
+
+  </div>
+  <div class="modal-footer">
+    <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+    <button class="btn-save" id="btnSalvar" onclick="salvar()">💾 Salvar Documento</button>
+  </div>
+</div>
+</div>
+
+<script>
+// ── CONFIG ───────────────────────────────────────────────
+const SUPA_URL = 'https://rbahvyejqybajnufftio.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiYWh2eWVqcXliYWpudWZmdGlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjA5MjIsImV4cCI6MjA4OTYzNjkyMn0.nUIo2CT3o41YL1TT8Hrp5kq-_ZS-bMMf-gvUMCEyYMw';
+const EMPRESA  = 'mandala';
+const BUCKET   = 'documentos-mandala';
+
+let _docs       = [];
+let _filtrocat  = 'Todos';
+let _filtrosit  = null;
+let _editId     = null;
+let _arquivo    = null;
+
+// ── AUTH ─────────────────────────────────────────────────
+function getToken(){
+  const k = Object.keys(localStorage).find(k=>k.includes('auth-token'));
+  if(!k) return null;
+  try{
+    const s = JSON.parse(localStorage.getItem(k));
+    if(s?.expires_at && Date.now()/1000 > s.expires_at) return null;
+    return s?.access_token||null;
+  }catch{ return null; }
+}
+function hdrs(extra={}){
+  const tk = getToken();
+  return {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${tk||SUPA_KEY}`,...extra};
+}
+
+// ── UTILS ────────────────────────────────────────────────
+function showAlert(msg,type='success'){
+  const el=document.getElementById('alert');
+  el.textContent=msg; el.className=`alert ${type}`; el.style.display='block';
+  setTimeout(()=>el.style.display='none',5000);
+}
+const fmt = v => v ? 'R$ '+parseFloat(v).toLocaleString('pt-BR',{minimumFractionDigits:2}) : null;
+const fmtDate = d => { if(!d) return null; const p=d.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; };
+const fmtSize = b => b > 1048576 ? (b/1048576).toFixed(1)+' MB' : (b/1024).toFixed(0)+' KB';
+
+const CAT_CONFIG = {
+  'Ata':         {icon:'📋', cls:'cat-ata',       label:'Ata'},
+  'Contrato':    {icon:'📝', cls:'cat-contrato',   label:'Contrato'},
+  'Nota Fiscal': {icon:'🧾', cls:'cat-nf',         label:'Nota Fiscal'},
+  'Comunicado':  {icon:'📣', cls:'cat-comunicado', label:'Comunicado'},
+  'Convenção':   {icon:'📖', cls:'cat-convencao',  label:'Convenção'},
+  'Regimento':   {icon:'📜', cls:'cat-regimento',  label:'Regimento'},
+  'Financeiro':  {icon:'💰', cls:'cat-financeiro', label:'Financeiro'},
+  'Outro':       {icon:'📌', cls:'cat-outro',      label:'Outro'},
+};
+const FILE_ICONS = {
+  'application/pdf':'📄','application/msword':'📝',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document':'📝',
+  'application/vnd.ms-excel':'📊',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':'📊',
+  'image/jpeg':'🖼','image/png':'🖼'
+};
+
+// ── VALIDADE ─────────────────────────────────────────────
+function statusValidade(dataStr){
+  if(!dataStr) return null;
+  const hoje  = new Date(); hoje.setHours(0,0,0,0);
+  const val   = new Date(dataStr);
+  const diff  = Math.ceil((val - hoje)/(1000*60*60*24));
+  if(diff < 0)  return {cls:'exp',  label:`Vencido há ${Math.abs(diff)}d`};
+  if(diff <= 30) return {cls:'warn', label:`Vence em ${diff}d`};
+  return {cls:'ok', label:`Válido até ${fmtDate(dataStr)}`};
+}
+
+// ── LOAD ─────────────────────────────────────────────────
+async function loadDocs(){
+  const res = await fetch(
+    `${SUPA_URL}/rest/v1/condo_documentos?empresa=eq.${EMPRESA}&order=created_at.desc`,
+    {headers:hdrs()}
+  );
+  if(!res.ok){ showAlert(`Erro ${res.status} ao carregar documentos`,'error'); return; }
+  _docs = await res.json();
+  renderStats();
+  renderSidebar();
+  renderDocs();
+}
+
+// ── STATS ────────────────────────────────────────────────
+function renderStats(){
+  document.getElementById('stTodos').textContent    = _docs.length;
+  document.getElementById('stAta').textContent      = _docs.filter(d=>d.categoria==='Ata').length;
+  document.getElementById('stContrato').textContent = _docs.filter(d=>d.categoria==='Contrato').length;
+  document.getElementById('stNF').textContent       = _docs.filter(d=>d.categoria==='Nota Fiscal').length;
+  document.getElementById('stOutros').textContent   = _docs.filter(d=>!['Ata','Contrato','Nota Fiscal'].includes(d.categoria)).length;
+}
+
+function renderSidebar(){
+  const cnt = cat => _docs.filter(d=>d.categoria===cat).length;
+  document.getElementById('sbCTodos').textContent   = _docs.length;
+  document.getElementById('sbCAta').textContent     = cnt('Ata');
+  document.getElementById('sbCContrato').textContent= cnt('Contrato');
+  document.getElementById('sbCNF').textContent      = cnt('Nota Fiscal');
+  document.getElementById('sbCCom').textContent     = cnt('Comunicado');
+  document.getElementById('sbCConv').textContent    = cnt('Convenção');
+  document.getElementById('sbCReg').textContent     = cnt('Regimento');
+  document.getElementById('sbCFin').textContent     = cnt('Financeiro');
+  document.getElementById('sbCOut').textContent     = cnt('Outro');
+}
+
+// ── FILTROS ───────────────────────────────────────────────
+function filtrarCat(cat, statEl, sbEl){
+  _filtrocat = cat; _filtrosit = null;
+  // highlight stats
+  if(statEl){ document.querySelectorAll('.stat').forEach(s=>s.classList.remove('active')); statEl.classList.add('active'); }
+  // highlight sidebar
+  if(sbEl){ document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active')); sbEl.classList.add('active'); }
+  renderDocs();
+}
+function filtrarSit(sit, el){
+  _filtrosit = sit; _filtrocat = 'Todos';
+  document.querySelectorAll('.stat,.cat-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderDocs();
+}
+
+// ── RENDER DOCS ───────────────────────────────────────────
+function renderDocs(){
+  const busca  = document.getElementById('busca').value.toLowerCase();
+  const sort   = document.getElementById('sortBy').value;
+  const hoje   = new Date(); hoje.setHours(0,0,0,0);
+  const em30   = new Date(hoje); em30.setDate(em30.getDate()+30);
+
+  let lista = _docs.filter(d=>{
+    if(_filtrosit==='publicado'  && !d.publicado) return false;
+    if(_filtrosit==='destaque'   && !d.destaque)  return false;
+    if(_filtrosit==='vencendo'){
+      if(!d.data_validade) return false;
+      const v = new Date(d.data_validade);
+      if(v < hoje || v > em30) return false;
+    }
+    if(_filtrosit==='vencido'){
+      if(!d.data_validade) return false;
+      if(new Date(d.data_validade) >= hoje) return false;
+    }
+    if(!_filtrosit && _filtrocat!=='Todos' && d.categoria!==_filtrocat) return false;
+    if(busca && !(
+      d.titulo?.toLowerCase().includes(busca) ||
+      d.descricao?.toLowerCase().includes(busca) ||
+      d.prestador_nome?.toLowerCase().includes(busca) ||
+      d.categoria?.toLowerCase().includes(busca)
+    )) return false;
+    return true;
+  });
+
+  // Ordenar
+  lista.sort((a,b)=>{
+    if(sort==='data_asc')  return (a.data_documento||a.created_at) > (b.data_documento||b.created_at) ? 1 : -1;
+    if(sort==='titulo')    return a.titulo.localeCompare(b.titulo);
+    if(sort==='categoria') return a.categoria.localeCompare(b.categoria);
+    return (b.data_documento||b.created_at) > (a.data_documento||a.created_at) ? 1 : -1;
+  });
+
+  // Destaques primeiro
+  lista.sort((a,b)=>(!b.destaque - !a.destaque));
+
+  const grid = document.getElementById('docsGrid');
+  if(!lista.length){
+    grid.innerHTML='<div class="empty-state">📭 Nenhum documento encontrado.</div>';
+    return;
+  }
+
+  grid.innerHTML = lista.map(d=>{
+    const cfg  = CAT_CONFIG[d.categoria] || CAT_CONFIG['Outro'];
+    const sv   = statusValidade(d.data_validade);
+    const bg   = {
+      'Ata':'#3b82f615','Contrato':'#f5a62315','Nota Fiscal':'#22c55e15',
+      'Comunicado':'#a855f715','Convenção':'#06b6d415','Regimento':'#64748b15',
+      'Financeiro':'#22c55e15','Outro':'#2a2d3e'
+    }[d.categoria]||'#2a2d3e';
+    return `<div class="doc-card${d.destaque?' destaque':''}" onclick="visualizar(${d.id})">
+      <div class="doc-type-icon" style="background:${bg}">${cfg.icon}</div>
+      <div class="doc-info">
+        <div class="doc-titulo">${d.titulo}${d.destaque?' ⭐':''}</div>
+        <div class="doc-meta">
+          <span class="doc-cat-badge ${cfg.cls}">${cfg.label}</span>
+          ${d.subcategoria?`<span style="font-size:11px;color:#64748b">${d.subcategoria}</span>`:''}
+          ${d.data_documento?`<span class="doc-date">📅 ${fmtDate(d.data_documento)}</span>`:''}
+          ${sv?`<span class="doc-validade ${sv.cls}">${sv.label}</span>`:''}
+          ${d.valor_contrato?`<span class="doc-valor">${fmt(d.valor_contrato)}</span>`:''}
+        </div>
+        ${d.prestador_nome?`<div class="doc-prestador">🏢 ${d.prestador_nome}${d.prestador_servico?' — '+d.prestador_servico:''}</div>`:''}
+        ${d.descricao?`<div class="doc-desc">${d.descricao}</div>`:''}
+      </div>
+      <div class="doc-actions" onclick="event.stopPropagation()">
+        ${d.arquivo_url?`<button class="btn-action primary" onclick="verArquivo('${d.arquivo_url}')">👁 Ver</button>
+          <a class="btn-action" href="${d.arquivo_url}" download="${d.arquivo_nome||'documento'}" style="text-decoration:none">⬇ Baixar</a>`:''}
+        <button class="btn-action" onclick="abrirModal(${d.id})">✏</button>
+        <button class="btn-action del" onclick="deletar(${d.id},'${(d.titulo||'').replace(/'/g,"\\'")}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── MODAL ────────────────────────────────────────────────
+function abrirModal(id){
+  _editId = id||null; _arquivo = null;
+  limparModal();
+  if(id){
+    const d = _docs.find(d=>d.id===id);
+    if(d) preencherModal(d);
+    document.getElementById('modalTitle').textContent='Editar Documento';
+  } else {
+    document.getElementById('modalTitle').textContent='Novo Documento';
+    // data padrão = hoje
+    document.getElementById('fData').value = new Date().toISOString().split('T')[0];
+  }
+  document.getElementById('modalBg').classList.add('open');
+}
+function fecharModal(){ document.getElementById('modalBg').classList.remove('open'); _editId=null; _arquivo=null; }
+
+function limparModal(){
+  ['fTitulo','fSub','fData','fValidade','fPrestNome','fPrestCnpj','fPrestServ','fValor','fDesc','fObs'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('fCategoria').value='';
+  document.getElementById('fPublicado').checked=true;
+  document.getElementById('fDestaque').checked=false;
+  document.getElementById('boxPrestador').classList.remove('show');
+  removerArquivo();
+}
+
+function preencherModal(d){
+  const set=(id,v)=>{const el=document.getElementById(id);if(el&&v!=null)el.value=v;};
+  set('fTitulo',d.titulo); set('fSub',d.subcategoria);
+  set('fCategoria',d.categoria); set('fData',d.data_documento);
+  set('fValidade',d.data_validade);
+  set('fPrestNome',d.prestador_nome); set('fPrestCnpj',d.prestador_cnpj);
+  set('fPrestServ',d.prestador_servico); set('fValor',d.valor_contrato);
+  set('fDesc',d.descricao); set('fObs',d.observacao);
+  document.getElementById('fPublicado').checked = d.publicado!==false;
+  document.getElementById('fDestaque').checked  = !!d.destaque;
+  onCatChange();
+  if(d.arquivo_url){
+    document.getElementById('uploadArea').style.display='none';
+    document.getElementById('fileIcon').textContent = FILE_ICONS[d.arquivo_tipo]||'📄';
+    document.getElementById('fileName').textContent = d.arquivo_nome||'arquivo';
+    document.getElementById('fileSize').textContent = d.arquivo_tamanho ? fmtSize(d.arquivo_tamanho) : 'Arquivo existente';
+    document.getElementById('filePreview').classList.add('show');
+  }
+}
+
+function onCatChange(){
+  const cat = document.getElementById('fCategoria').value;
+  const showPrest = ['Contrato','Nota Fiscal'].includes(cat);
+  document.getElementById('boxPrestador').classList.toggle('show', showPrest);
+}
+
+// ── UPLOAD ───────────────────────────────────────────────
+function onDrop(e){
+  e.preventDefault();
+  document.getElementById('uploadArea').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if(file) processarArquivo(file);
+}
+function onArquivoChange(){
+  const file = document.getElementById('fArquivo').files[0];
+  if(file) processarArquivo(file);
+}
+function processarArquivo(file){
+  if(file.size > 20*1024*1024){ showAlert('Arquivo muito grande. Máximo 20MB.','error'); return; }
+  _arquivo = file;
+  document.getElementById('uploadArea').style.display='none';
+  document.getElementById('fileIcon').textContent = FILE_ICONS[file.type]||'📎';
+  document.getElementById('fileName').textContent = file.name;
+  document.getElementById('fileSize').textContent = fmtSize(file.size);
+  document.getElementById('filePreview').classList.add('show');
+  // auto-preencher titulo se vazio
+  if(!document.getElementById('fTitulo').value){
+    document.getElementById('fTitulo').value = file.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' ');
+  }
+}
+function removerArquivo(){
+  _arquivo=null;
+  document.getElementById('fArquivo').value='';
+  document.getElementById('uploadArea').style.display='block';
+  document.getElementById('filePreview').classList.remove('show');
+}
+
+async function uploadArquivo(file, docId){
+  const ext  = file.name.split('.').pop();
+  const path = `mandala/${docId}_${Date.now()}.${ext}`;
+  const res  = await fetch(`${SUPA_URL}/storage/v1/object/${BUCKET}/${path}`,{
+    method:'POST',
+    headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${getToken()||SUPA_KEY}`,'Content-Type':file.type},
+    body:file
+  });
+  return res.ok
+    ? {url:`${SUPA_URL}/storage/v1/object/public/${BUCKET}/${path}`, path}
+    : null;
+}
+
+// ── SALVAR ────────────────────────────────────────────────
+async function salvar(){
+  const titulo = document.getElementById('fTitulo').value.trim();
+  const cat    = document.getElementById('fCategoria').value;
+  if(!titulo){ showAlert('Informe o título do documento.','error'); return; }
+  if(!cat)   { showAlert('Selecione a categoria.','error'); return; }
+
+  const btn = document.getElementById('btnSalvar');
+  btn.disabled=true; btn.textContent='Salvando...';
+
+  const payload = {
+    empresa:          EMPRESA,
+    titulo,
+    categoria:        cat,
+    subcategoria:     document.getElementById('fSub').value.trim()||null,
+    data_documento:   document.getElementById('fData').value||null,
+    data_validade:    document.getElementById('fValidade').value||null,
+    descricao:        document.getElementById('fDesc').value.trim()||null,
+    observacao:       document.getElementById('fObs').value.trim()||null,
+    prestador_nome:   document.getElementById('fPrestNome').value.trim()||null,
+    prestador_cnpj:   document.getElementById('fPrestCnpj').value.trim()||null,
+    prestador_servico:document.getElementById('fPrestServ').value.trim()||null,
+    valor_contrato:   parseFloat(document.getElementById('fValor').value)||null,
+    publicado:        document.getElementById('fPublicado').checked,
+    destaque:         document.getElementById('fDestaque').checked,
+    cadastrado_por:   getToken() ? 'sindico' : 'admin',
+    arquivo_nome:     _arquivo?.name||null,
+    arquivo_tipo:     _arquivo?.type||null,
+    arquivo_tamanho:  _arquivo?.size||null,
+  };
+
+  const h = hdrs();
+  let savedId = _editId;
+
+  try {
+    let res, json;
+    if(_editId){
+      res  = await fetch(`${SUPA_URL}/rest/v1/condo_documentos?id=eq.${_editId}`,{
+        method:'PATCH', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)
+      });
+      json = await res.json();
+    } else {
+      res  = await fetch(`${SUPA_URL}/rest/v1/condo_documentos`,{
+        method:'POST', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)
+      });
+      json = await res.json();
+      savedId = (Array.isArray(json)?json[0]:json)?.id;
+    }
+
+    if(!res.ok){
+      const msg = (Array.isArray(json)?json[0]:json)?.message || JSON.stringify(json);
+      showAlert(`❌ Erro ${res.status}: ${msg}`, 'error');
+      btn.disabled=false; btn.textContent='💾 Salvar Documento';
+      return;
+    }
+
+    // Upload do arquivo
+    if(_arquivo && savedId){
+      btn.textContent='Enviando arquivo...';
+      const up = await uploadArquivo(_arquivo, savedId);
+      if(up){
+        await fetch(`${SUPA_URL}/rest/v1/condo_documentos?id=eq.${savedId}`,{
+          method:'PATCH', headers:h,
+          body:JSON.stringify({arquivo_url:up.url, arquivo_nome:_arquivo.name})
+        });
+      } else {
+        showAlert('⚠️ Documento salvo, mas falha no upload do arquivo. Verifique o bucket no Supabase Storage.','error');
+      }
+    }
+
+    showAlert(_editId ? '✅ Documento atualizado!' : '✅ Documento cadastrado com sucesso!');
+    fecharModal();
+    await loadDocs();
+  } catch(e){
+    showAlert('❌ Erro: '+e.message,'error');
+  }
+  btn.disabled=false; btn.textContent='💾 Salvar Documento';
+}
+
+// ── VISUALIZAR / DELETAR ──────────────────────────────────
+function visualizar(id){
+  const d = _docs.find(d=>d.id===id);
+  if(d?.arquivo_url) verArquivo(d.arquivo_url);
+}
+function verArquivo(url){ window.open(url,'_blank'); }
+
+async function deletar(id, titulo){
+  if(!confirm(`Excluir "${titulo}"?\nEsta ação não pode ser desfeita.`)) return;
+  const res = await fetch(
+    `${SUPA_URL}/rest/v1/condo_documentos?id=eq.${id}&empresa=eq.${EMPRESA}`,
+    {method:'DELETE', headers:{...hdrs(),'Prefer':'return=representation'}}
+  );
+  if(res.ok){ showAlert('Documento removido.'); await loadDocs(); }
+  else showAlert('Erro ao remover.','error');
+}
+
+// ── FECHAR FORA ───────────────────────────────────────────
+document.getElementById('modalBg').addEventListener('click',e=>{
+  if(e.target===document.getElementById('modalBg')) fecharModal();
+});
+
+// ── INIT ─────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async ()=>{
+  const k = Object.keys(localStorage).find(k=>k.includes('auth-token'));
+  if(k){ try{ document.getElementById('navUser').textContent=JSON.parse(localStorage.getItem(k))?.user?.email||''; }catch{} }
+  await loadDocs();
+});
+</script>
+</body>
+</html>
