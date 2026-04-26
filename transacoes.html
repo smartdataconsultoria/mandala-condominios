@@ -460,8 +460,8 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
         <div class="grid2">
           <div class="field" style="margin-bottom:0">
             <label>Repetir por</label>
-            <select id="fRepetir">
-              <option value="0">Indefinidamente</option>
+            <select id="fRepetir" onchange="atualizarFixoResumo()">
+              <option value="0">Indefinidamente (12 meses)</option>
               <option value="3">3 meses</option>
               <option value="6">6 meses</option>
               <option value="12">12 meses</option>
@@ -474,7 +474,8 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
           </div>
         </div>
         <div class="parcela-info" style="border-left-color:#a855f7;margin-top:10px">
-          🔄 Um lançamento será gerado automaticamente a cada mês com a mesma descrição, valor e categoria.
+          🔄 Serão criados <strong id="fixoResumo">12 lançamentos</strong> — um por mês, no dia do vencimento.<br>
+          Status: <strong>Pago</strong> para meses já vencidos, <strong>Pendente</strong> para meses futuros.
         </div>
       </div>
     </div>
@@ -820,6 +821,14 @@ function toggleFixo(){
   const on = document.getElementById('togFixo').checked;
   document.getElementById('recorrenteBox').classList.toggle('show',on);
   if(on){ document.getElementById('togParcela').checked=false; document.getElementById('parcelaBox').classList.remove('show'); }
+  atualizarFixoResumo();
+}
+
+function atualizarFixoResumo(){
+  const el = document.getElementById('fixoResumo');
+  if(!el) return;
+  const n = parseInt(document.getElementById('fRepetir').value)||12;
+  el.textContent = `${n === 0 ? 12 : n} lançamentos`;
 }
 
 // ── SEÇÃO MAIS DETALHES ──────────────────────────────────
@@ -953,7 +962,54 @@ async function salvarLancamento(){
       const results = await Promise.all(promises);
       idsGerados = results.map(r=>r.id).filter(Boolean);
       showAlert(`${nParcelas} parcelas criadas com sucesso!`);
+    } else if(fixo){
+      // DESPESA/RECEITA FIXA: cria 1 lançamento por mês
+      // repetir: 0=indefinido→12 meses, ou o valor escolhido
+      const nMeses    = repetir > 0 ? repetir : 12;
+      const diaVencNum = diaVenc || new Date(data).getDate();
+      const hoje      = new Date();
+      hoje.setHours(0,0,0,0);
+      const promises  = [];
+
+      for(let i = 0; i < nMeses; i++){
+        // Calcular data de cada parcela fixa
+        const dataBase = new Date(data);
+        const ano  = dataBase.getFullYear();
+        const mes  = dataBase.getMonth() + i;
+        // Ajustar dia de vencimento (ex: dia 10 de cada mês)
+        const maxDia = new Date(ano, mes + 1, 0).getDate(); // último dia do mês
+        const diaFinal = Math.min(diaVencNum, maxDia);
+        const dataLanc = new Date(ano, mes, diaFinal);
+        const dataStr  = dataLanc.toISOString().split('T')[0];
+
+        // Situação: se a data já passou = pago, se ainda não chegou = pendente
+        const jaVenceu = dataLanc <= hoje;
+        const sit = i === 0
+          ? basePayload.situacao          // 1º mês: usa o que o usuário escolheu
+          : (jaVenceu ? 'pago' : 'pendente');
+
+        const payload = {
+          ...basePayload,
+          data:          dataStr,
+          situacao:      sit,
+          recorrente:    true,
+          parcela_atual: i + 1,
+          parcela_total: nMeses,
+        };
+        promises.push(
+          fetch(`${SUPA_URL}/rest/v1/condo_transacoes`, {
+            method:'POST',
+            headers:{...h,'Prefer':'return=representation'},
+            body: JSON.stringify(payload)
+          }).then(r=>r.json()).then(d=>Array.isArray(d)?d[0]:d)
+        );
+      }
+      const results = await Promise.all(promises);
+      idsGerados = results.map(r=>r?.id).filter(Boolean);
+      showAlert(`✅ ${nMeses} lançamentos fixos criados (${nMeses} meses)!`);
+
     } else {
+      // Lançamento avulso normal
       const payload = {...basePayload, data};
       const res = await fetch(`${SUPA_URL}/rest/v1/condo_transacoes`,{
         method:'POST', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)
@@ -961,7 +1017,7 @@ async function salvarLancamento(){
       const json = await res.json();
       const novo = Array.isArray(json)?json[0]:json;
       if(novo?.id) idsGerados = [novo.id];
-      showAlert(fixo ? 'Lançamento fixo criado!' : 'Lançamento salvo!');
+      showAlert('Lançamento salvo!');
     }
 
     // upload do anexo na primeira transação criada
