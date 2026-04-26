@@ -289,11 +289,19 @@ let editingId = null;
 let editingContaId = null;
 
 // ── AUTH ─────────────────────────────────────────────────
-async function getToken(){
+function getToken(){
+  // Busca o token de sessão e verifica se ainda é válido
   const stored = Object.keys(localStorage).find(k=>k.includes('auth-token'));
   if(!stored) return null;
-  try{ return JSON.parse(localStorage.getItem(stored))?.access_token||null; }
-  catch{ return null; }
+  try{
+    const sess = JSON.parse(localStorage.getItem(stored));
+    const token = sess?.access_token;
+    const exp   = sess?.expires_at; // timestamp em segundos
+    if(!token) return null;
+    // Se expirou, usa anon key (não propaga JWT expirado)
+    if(exp && Date.now()/1000 > exp) return null;
+    return token;
+  } catch{ return null; }
 }
 
 async function headers(){
