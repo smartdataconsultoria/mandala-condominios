@@ -546,7 +546,14 @@ let _anexoArquivo = null;
 function getToken(){
   const k = Object.keys(localStorage).find(k=>k.includes('auth-token'));
   if(!k) return null;
-  try{ return JSON.parse(localStorage.getItem(k))?.access_token||null; }catch{ return null; }
+  try{
+    const sess = JSON.parse(localStorage.getItem(k));
+    const token = sess?.access_token;
+    const exp   = sess?.expires_at;
+    if(!token) return null;
+    if(exp && Date.now()/1000 > exp) return null; // expirado → usa anon key
+    return token;
+  } catch{ return null; }
 }
 function hdrs(){
   const tk = getToken();
@@ -1081,9 +1088,30 @@ async function editarTransacao(id){
 // ── DELETAR ───────────────────────────────────────────────
 async function deletar(id){
   if(!confirm('Excluir este lançamento?')) return;
-  const res = await fetch(`${SUPA_URL}/rest/v1/condo_transacoes?id=eq.${id}`,{method:'DELETE',headers:hdrs()});
-  if(res.ok){ showAlert('Lançamento removido.'); await loadTransacoes(); }
-  else showAlert('Erro ao remover.','error');
+  const h = {...hdrs(), 'Prefer':'return=representation'};
+  try {
+    const res = await fetch(`${SUPA_URL}/rest/v1/condo_transacoes?id=eq.${id}&empresa=eq.${EMPRESA}`,{
+      method:'DELETE', headers:h
+    });
+    const body = await res.text();
+    // Supabase retorna 200 com array vazio se RLS bloqueou mas não deu erro de auth
+    // Retorna 204 No Content quando realmente apagou
+    if(res.status === 204 || (res.ok && body !== '[]' && body !== '')){
+      showAlert('Lançamento removido.');
+      await loadTransacoes();
+    } else if(body === '[]' || body === ''){
+      // RLS bloqueou silenciosamente — precisa de policy no Supabase
+      showAlert('⚠️ Não foi possível apagar. Rode o SQL abaixo no Supabase para liberar:', 'error');
+      console.warn('DELETE bloqueado pelo RLS. Rode no SQL Editor do Supabase:\n' +
+        'ALTER TABLE condo_transacoes DISABLE ROW LEVEL SECURITY;\n' +
+        '-- ou crie a policy:\n' +
+        "CREATE POLICY \"allow_delete\" ON condo_transacoes FOR DELETE USING (true);");
+    } else {
+      showAlert('Erro ao remover: ' + body, 'error');
+    }
+  } catch(e){
+    showAlert('Erro: ' + e.message, 'error');
+  }
 }
 
 // ── FECHAR MODAL FORA ────────────────────────────────────
