@@ -195,6 +195,27 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 .alert{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:20px;display:none}
 .alert.success{background:#052e1660;border:1px solid #22c55e40;color:#22c55e}
 .alert.error{background:#2d0a0a60;border:1px solid #ef444440;color:#ef4444}
+
+/* MODAL DE CONFIRMAÇÃO CUSTOMIZADO */
+.confirm-bg{position:fixed;inset:0;background:#00000080;display:none;align-items:center;justify-content:center;z-index:1100}
+.confirm-bg.open{display:flex}
+.confirm-box{background:#1a1d27;border:1px solid #2a2d3e;border-radius:14px;padding:28px 28px 22px;width:100%;max-width:420px;box-shadow:0 20px 60px #00000060}
+.confirm-icon{font-size:36px;text-align:center;margin-bottom:14px}
+.confirm-title{font-size:16px;font-weight:700;color:#f1f5f9;text-align:center;margin-bottom:8px}
+.confirm-desc{font-size:13px;color:#64748b;text-align:center;line-height:1.6;margin-bottom:20px}
+.confirm-opcoes{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.confirm-opt{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:#0f1117;border:2px solid #2a2d3e;border-radius:10px;cursor:pointer;transition:.2s;text-align:left;width:100%}
+.confirm-opt:hover{border-color:#f5a623;background:#f5a62308}
+.confirm-opt.selected{border-color:#f5a623;background:#f5a62312}
+.confirm-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px}
+.confirm-opt-label{font-size:14px;font-weight:700;color:#f1f5f9}
+.confirm-opt-sub{font-size:12px;color:#64748b;margin-top:2px}
+.confirm-footer{display:flex;gap:10px;justify-content:flex-end}
+.confirm-cancel-btn{background:none;border:1px solid #2a2d3e;color:#94a3b8;padding:9px 18px;border-radius:8px;font-size:14px;cursor:pointer;transition:.2s}
+.confirm-cancel-btn:hover{background:#2a2d3e}
+.confirm-del-btn{background:#ef4444;color:#fff;border:none;padding:9px 20px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:.2s}
+.confirm-del-btn:hover{background:#dc2626}
+.confirm-del-btn:disabled{opacity:.4;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -299,6 +320,20 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
     <div id="listaTransacoes"><div class="empty-state">⏳ Carregando...</div></div>
   </div>
 </main>
+
+<!-- ══════ MODAL CONFIRMAÇÃO EXCLUSÃO ══════ -->
+<div class="confirm-bg" id="confirmBg">
+<div class="confirm-box">
+  <div class="confirm-icon">🗑</div>
+  <div class="confirm-title" id="confirmTitle">Excluir lançamento?</div>
+  <div class="confirm-desc" id="confirmDesc">Esta ação não pode ser desfeita.</div>
+  <div class="confirm-opcoes" id="confirmOpcoes"></div>
+  <div class="confirm-footer">
+    <button class="confirm-cancel-btn" onclick="fecharConfirm()">Cancelar</button>
+    <button class="confirm-del-btn" id="confirmDelBtn" onclick="executarDelete()">🗑 Excluir</button>
+  </div>
+</div>
+</div>
 
 <!-- ══════════ MODAL ══════════ -->
 <div class="modal-bg" id="modalBg">
@@ -1113,26 +1148,110 @@ async function editarTransacao(id){
 }
 
 // ── DELETAR ───────────────────────────────────────────────
-async function deletar(id){
-  if(!confirm('Excluir este lançamento?')) return;
+// ── ESTADO DE EXCLUSÃO ───────────────────────────────────
+let _deleteId   = null;
+let _deleteOpt  = 'este'; // 'este' | 'todos'
+
+function deletar(id){
+  const t = _transacoes.find(t=>t.id===id);
+  if(!t) return;
+  _deleteId  = id;
+  _deleteOpt = 'este';
+
+  const ehParcelado = !!t.parcela_total;
+  const ehFixo      = !!t.recorrente && !t.parcela_total;
+  const temSeries   = ehParcelado || ehFixo;
+
+  document.getElementById('confirmTitle').textContent = 'Excluir lançamento?';
+
+  let desc = `<strong style="color:#f1f5f9">${t.descricao||'Lançamento'}</strong>`;
+  if(ehParcelado) desc += `<br><span style="color:#3b82f6">Parcela ${t.parcela_atual||'?'} de ${t.parcela_total}</span>`;
+  if(ehFixo)      desc += `<br><span style="color:#a855f7">🔄 Lançamento fixo (recorrente)</span>`;
+  document.getElementById('confirmDesc').innerHTML = desc;
+
+  const opcoes = document.getElementById('confirmOpcoes');
+  if(temSeries){
+    opcoes.style.display = 'flex';
+    opcoes.innerHTML = `
+      <button class="confirm-opt selected" id="optEste" onclick="selecionarOpt('este')">
+        <span class="confirm-opt-icon">📄</span>
+        <div>
+          <div class="confirm-opt-label">Somente este mês</div>
+          <div class="confirm-opt-sub">Exclui apenas o lançamento de ${t.data ? (() => { const p=t.data.split('-'); return p[1]+'/'+p[0]; })() : 'este mês'}</div>
+        </div>
+      </button>
+      <button class="confirm-opt" id="optTodos" onclick="selecionarOpt('todos')">
+        <span class="confirm-opt-icon">🗂</span>
+        <div>
+          <div class="confirm-opt-label">Todos os lançamentos da série</div>
+          <div class="confirm-opt-sub">${ehParcelado ? `Exclui todas as ${t.parcela_total} parcelas` : 'Exclui todos os meses desta recorrência'}</div>
+        </div>
+      </button>`;
+  } else {
+    opcoes.style.display = 'none';
+    opcoes.innerHTML = '';
+    document.getElementById('confirmDesc').innerHTML += '<br><span style="color:#64748b;font-size:12px">Esta ação não pode ser desfeita.</span>';
+  }
+
+  document.getElementById('confirmBg').classList.add('open');
+}
+
+function selecionarOpt(opt){
+  _deleteOpt = opt;
+  document.getElementById('optEste')?.classList.toggle('selected', opt==='este');
+  document.getElementById('optTodos')?.classList.toggle('selected', opt==='todos');
+}
+
+function fecharConfirm(){
+  document.getElementById('confirmBg').classList.remove('open');
+  _deleteId = null; _deleteOpt = 'este';
+}
+
+async function executarDelete(){
+  if(!_deleteId) return;
+  const btn = document.getElementById('confirmDelBtn');
+  btn.disabled=true; btn.textContent='Excluindo...';
+
+  const t = _transacoes.find(t=>t.id===_deleteId);
   const h = {...hdrs(), 'Prefer':'return=representation'};
+
   try {
-    const res = await fetch(`${SUPA_URL}/rest/v1/condo_transacoes?id=eq.${id}&empresa=eq.${EMPRESA}`,{
-      method:'DELETE', headers:h
-    });
-    const body = await res.text();
-    // Supabase retorna 200 com array vazio se RLS bloqueou mas não deu erro de auth
-    // Retorna 204 No Content quando realmente apagou
-    if(res.status === 204 || (res.ok && body !== '[]' && body !== '')){
-      showAlert('Lançamento removido.');
-      await loadTransacoes();
-    } else if(body === '[]' || body === ''){
-      // RLS bloqueou silenciosamente — precisa de policy no Supabase
-      showAlert('⚠️ Não foi possível apagar. Rode o SQL abaixo no Supabase para liberar:', 'error');
-      console.warn('DELETE bloqueado pelo RLS. Rode no SQL Editor do Supabase:\n' +
-        'ALTER TABLE condo_transacoes DISABLE ROW LEVEL SECURITY;\n' +
-        '-- ou crie a policy:\n' +
-        "CREATE POLICY \"allow_delete\" ON condo_transacoes FOR DELETE USING (true);");
+    if(_deleteOpt === 'todos' && t && (t.parcela_total || t.recorrente)){
+      // Buscar todos os lançamentos da mesma série
+      // Identificar pela descrição + empresa (mesma série = mesma descrição + tipo + recorrente/parcela)
+      const todos = _transacoes.filter(tr =>
+        tr.descricao === t.descricao &&
+        tr.tipo      === t.tipo      &&
+        tr.empresa   === t.empresa   &&
+        (tr.parcela_total === t.parcela_total || (tr.recorrente && t.recorrente))
+      );
+      // Buscar também nos meses não carregados pelo banco
+      const idsLocais = todos.map(tr=>tr.id);
+      // Deletar por descrição + tipo na mesma empresa (pega meses futuros também)
+      const descEnc = encodeURIComponent(t.descricao);
+      const res = await fetch(
+        `${SUPA_URL}/rest/v1/condo_transacoes?empresa=eq.${EMPRESA}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}`,
+        {method:'DELETE', headers:h}
+      );
+      if(res.ok || res.status===204){
+        showAlert(`✅ Série excluída — ${idsLocais.length}+ lançamentos removidos.`);
+        fecharConfirm();
+        await loadTransacoes();
+      } else {
+        showAlert('Erro ao excluir série.','error');
+      }
+    } else {
+      // Excluir só este
+      const res = await fetch(`${SUPA_URL}/rest/v1/condo_transacoes?id=eq.${_deleteId}&empresa=eq.${EMPRESA}`,{
+        method:'DELETE', headers:h
+      });
+      const body = await res.text();
+      if(res.status===204 || (res.ok && body!=='[]' && body!=='')){
+        showAlert('Lançamento removido.');
+        fecharConfirm();
+        await loadTransacoes();
+      } else if(body==='[]'||body===''){
+        showAlert('⚠️ Não foi possível apagar. Verifique o RLS no Supabase.','error');
     } else {
       showAlert('Erro ao remover: ' + body, 'error');
     }
@@ -1142,8 +1261,13 @@ async function deletar(id){
 }
 
 // ── FECHAR MODAL FORA ────────────────────────────────────
-// Modal só fecha pelo botão Cancelar ou X — não fecha ao clicar fora
+// Modal de lançamento só fecha pelo botão Cancelar ou X
 // document.getElementById('modalBg').addEventListener('click',...) removido intencionalmente
+
+// Modal de confirmação fecha ao clicar no fundo
+document.getElementById('confirmBg').addEventListener('click',e=>{
+  if(e.target===document.getElementById('confirmBg')) fecharConfirm();
+});
 
 // ── FAB ──────────────────────────────────────────────────
 function fabAbre(tipo){
