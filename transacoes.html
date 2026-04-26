@@ -100,7 +100,8 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 /* MODAL */
 .modal-bg{position:fixed;inset:0;background:#00000090;display:none;align-items:flex-start;justify-content:center;z-index:999;overflow-y:auto;padding:24px 16px}
 .modal-bg.open{display:flex}
-.modal{background:#13161f;border:1px solid #2a2d3e;border-radius:16px;width:100%;max-width:620px;margin:auto;overflow:hidden}
+.modal{background:#13161f;border:1px solid #2a2d3e;border-radius:16px;width:100%;max-width:620px;margin:auto;overflow:hidden;transition:max-width .3s ease}
+.modal.expandido{max-width:960px}
 
 /* MODAL HEADER */
 .modal-header{padding:20px 24px 0;display:flex;align-items:center;gap:12px}
@@ -111,16 +112,8 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 .modal-close{background:none;border:none;color:#64748b;font-size:20px;cursor:pointer;padding:4px;border-radius:6px;transition:.2s;line-height:1}
 .modal-close:hover{background:#2a2d3e;color:#f1f5f9}
 
-/* TIPO TOGGLE */
-/* tipo-toggle escondido quando vem do FAB com tipo fixo */
-.tipo-toggle{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#2a2d3e;border-radius:10px;overflow:hidden;margin:16px 24px 0}
-.tipo-toggle.hidden{display:none}
-.tipo-btn{background:#1a1d27;border:none;color:#64748b;padding:11px;font-size:14px;font-weight:600;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:7px}
-.tipo-btn.active.rec{background:#22c55e15;color:#22c55e}
-.tipo-btn.active.des{background:#ef444415;color:#ef4444}
-.tipo-btn:hover:not(.active){background:#2a2d3e;color:#f1f5f9}
-/* badge de tipo fixo (substitui o toggle quando vem do FAB) */
-.tipo-badge{display:none;align-items:center;gap:10px;margin:14px 24px 0;padding:10px 16px;border-radius:10px;font-size:14px;font-weight:700}
+/* TIPO BADGE — mostra o tipo escolhido no FAB */
+.tipo-badge{display:none;align-items:center;gap:10px;margin:14px 24px 0;padding:10px 16px;border-radius:10px;font-size:15px;font-weight:700}
 .tipo-badge.show{display:flex}
 .tipo-badge.des{background:#ef444415;color:#ef4444;border:1px solid #ef444425}
 .tipo-badge.rec{background:#22c55e15;color:#22c55e;border:1px solid #22c55e25}
@@ -183,13 +176,13 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 .secao-toggle:hover{color:#f5a623}
 .secao-toggle .secao-arrow{transition:.3s;font-size:12px}
 .secao-toggle.open .secao-arrow{transform:rotate(90deg)}
-/* Detalhes abre em 2 colunas ao lado */
-.secao-wrap{display:grid;grid-template-columns:1fr;transition:.3s}
-.secao-wrap.open{grid-template-columns:1fr 1fr;gap:0 24px}
-.secao-content{display:none;padding-top:12px}
-.secao-content.open{display:block}
-.secao-sidebar{display:none;padding-top:12px;border-left:1px solid #2a2d3e;padding-left:24px}
-.secao-sidebar.open{display:block}
+/* Detalhes abre em 2 colunas HORIZONTAIS */
+.secao-wrap{display:block}
+.secao-cols{display:none;gap:24px;padding-top:12px}
+.secao-cols.open{display:grid;grid-template-columns:1fr 1fr}
+.secao-col{min-width:0}
+.secao-col-sep{width:1px;background:#2a2d3e;margin-top:12px;display:none}
+.secao-cols.open ~ .secao-col-sep{display:block}
 
 /* FOOTER */
 .modal-footer{display:flex;gap:10px;justify-content:flex-end;padding:20px 24px;border-top:1px solid #2a2d3e;margin-top:20px}
@@ -320,11 +313,6 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
     <button class="modal-close" onclick="fecharModal()">✕</button>
   </div>
 
-  <!-- TIPO TOGGLE (só aparece quando o modal é genérico) -->
-  <div class="tipo-toggle" id="tipoToggle">
-    <button class="tipo-btn rec" id="btnRec" onclick="setTipo('receita')">↑ Receita</button>
-    <button class="tipo-btn active des" id="btnDes" onclick="setTipo('despesa')">↓ Despesa</button>
-  </div>
   <!-- BADGE FIXO (aparece quando vem de um tipo específico do FAB) -->
   <div class="tipo-badge" id="tipoBadge"></div>
 
@@ -495,44 +483,36 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 
     <!-- SEÇÃO: + DETALHES -->
     <div class="secao-toggle" id="secDetalhes" onclick="toggleSecao()">
-      <span class="secao-arrow">›</span> Mais detalhes
+      <span class="secao-arrow">›</span> <span id="secLabel">Mais detalhes</span>
     </div>
-    <div class="secao-wrap" id="secWrap">
-      <!-- COLUNA ESQUERDA: Observação -->
-      <div class="secao-content" id="secDetalhesContent">
-        <div class="field">
-          <label>Observação</label>
-          <textarea id="fObs" placeholder="Observações opcionais..."></textarea>
-        </div>
-        <div class="field">
-          <label>Situação do pagamento</label>
-          <select id="fSitDetalhe" style="display:none"></select>
-        </div>
-        <div style="font-size:12px;color:#4a5568;margin-top:4px">
-          💡 Preencha observações relevantes para este lançamento.
-        </div>
-      </div>
-      <!-- COLUNA DIREITA: Anexo -->
-      <div class="secao-sidebar" id="secSidebar">
-        <div class="field">
-          <label>📎 Comprovante (PDF / imagem)</label>
-          <div class="pdf-upload" id="pdfUploadArea">
-            <input type="file" id="fAnexo" accept=".pdf,.png,.jpg,.jpeg" onchange="onAnexoChange()"/>
-            <div class="pdf-upload-icon">📄</div>
-            <div class="pdf-upload-text">Arraste ou <strong>clique para selecionar</strong></div>
-            <div style="font-size:11px;color:#4a5568;margin-top:4px">PDF, PNG ou JPG até 5MB</div>
+    <div class="secao-wrap">
+      <div class="secao-cols" id="secCols">
+        <!-- COLUNA ESQUERDA: Observação -->
+        <div class="secao-col">
+          <div class="field">
+            <label>Observação</label>
+            <textarea id="fObs" placeholder="Observações opcionais..."></textarea>
           </div>
-          <div class="pdf-preview" id="pdfPreview">
-            <span class="pdf-preview-icon" id="pdfPreviewIcon">📄</span>
-            <div style="flex:1;overflow:hidden">
-              <div class="pdf-preview-name" id="pdfPreviewName">arquivo.pdf</div>
-              <div class="pdf-preview-size" id="pdfPreviewSize">0 KB</div>
+        </div>
+        <!-- COLUNA DIREITA: Anexo -->
+        <div class="secao-col" style="border-left:1px solid #2a2d3e;padding-left:20px">
+          <div class="field">
+            <label>📎 Comprovante (PDF / imagem)</label>
+            <div class="pdf-upload" id="pdfUploadArea">
+              <input type="file" id="fAnexo" accept=".pdf,.png,.jpg,.jpeg" onchange="onAnexoChange()"/>
+              <div class="pdf-upload-icon">📄</div>
+              <div class="pdf-upload-text">Arraste ou <strong>clique para selecionar</strong></div>
+              <div style="font-size:11px;color:#4a5568;margin-top:4px">PDF, PNG ou JPG • máx. 5MB</div>
             </div>
-            <button class="pdf-remove" onclick="removerAnexo()" title="Remover">✕</button>
+            <div class="pdf-preview" id="pdfPreview">
+              <span class="pdf-preview-icon" id="pdfPreviewIcon">📄</span>
+              <div style="flex:1;overflow:hidden">
+                <div class="pdf-preview-name" id="pdfPreviewName">arquivo.pdf</div>
+                <div class="pdf-preview-size" id="pdfPreviewSize">0 KB</div>
+              </div>
+              <button class="pdf-remove" onclick="removerAnexo()" title="Remover">✕</button>
+            </div>
           </div>
-        </div>
-        <div style="font-size:12px;color:#4a5568;margin-top:4px">
-          Formatos aceitos: PDF, PNG, JPG<br>Tamanho máximo: 5MB
         </div>
       </div>
     </div>
@@ -730,22 +710,11 @@ function abrirModal(tipo){
   document.getElementById('mTitulo').textContent = cfg.label;
   limparModal();
 
-  const toggle = document.getElementById('tipoToggle');
-  const badge  = document.getElementById('tipoBadge');
-  const tipoFixo = (tipo==='cartao'||tipo==='transferencia'||tipo==='despesa'||tipo==='receita');
-
-  if(tipoFixo){
-    // Tipo fixo: esconde toggle, mostra badge colorido
-    toggle.classList.add('hidden');
-    const clsMap = {despesa:'des',receita:'rec',cartao:'cartao',transferencia:'transf'};
-    const cls = clsMap[tipo]||'des';
-    badge.className = `tipo-badge show ${cls}`;
-    badge.innerHTML = `<span style="font-size:20px">${cfg.icon}</span> ${cfg.label}`;
-  } else {
-    toggle.classList.remove('hidden');
-    badge.className = 'tipo-badge';
-    badge.innerHTML = '';
-  }
+  const badge = document.getElementById('tipoBadge');
+  const clsMap = {despesa:'des',receita:'rec',cartao:'cartao',transferencia:'transf'};
+  const cls = clsMap[tipo]||'des';
+  badge.className = `tipo-badge show ${cls}`;
+  badge.innerHTML = `<span style="font-size:18px">${cfg.icon}</span> ${cfg.label}`;
 
   setTipo(_tipoAtual);
   setDataRapida('hoje', document.getElementById('dqHoje'));
@@ -771,15 +740,11 @@ function limparModal(){
   document.getElementById('parcelaInfo').textContent='Será criado 1 lançamento por parcela, totalizando 0 lançamentos.';
   removerAnexo();
   // fechar seção detalhes
-  document.getElementById('secWrap').classList.remove('open');
-  document.getElementById('secDetalhesContent').classList.remove('open');
-  document.getElementById('secSidebar').classList.remove('open');
+  document.getElementById('secCols').classList.remove('open');
   document.getElementById('secDetalhes').classList.remove('open');
-  const arr = document.querySelector('#secDetalhes .secao-arrow');
-  if(arr) arr.textContent = '›';
-  // resetar texto
-  const tog = document.getElementById('secDetalhes');
-  if(tog && tog.childNodes[1]) tog.childNodes[1].textContent = ' Mais detalhes';
+  document.querySelector('.modal').classList.remove('expandido');
+  const lbl = document.getElementById('secLabel');
+  if(lbl) lbl.textContent = 'Mais detalhes';
   // data rápida reset
   document.querySelectorAll('.dq-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('dqHoje').classList.add('active');
@@ -802,9 +767,7 @@ function setTipo(tipo){
   icon.style.color  = cfg.cor;
   icon.className    = 'modal-icon';
 
-  // Mostrar/esconder toggle de tipo apenas para despesa/receita genéricas
-  const showToggle = (tipo==='despesa'||tipo==='receita');
-  document.querySelector('.tipo-toggle').style.display = showToggle ? 'grid' : 'none';
+  // (toggle removido — tipo é sempre fixo ao abrir pelo FAB)
 
   // Mostrar info extra para cartão
   const infoCartao = document.getElementById('infoCartao');
@@ -868,25 +831,21 @@ function toggleFixo(){
 
 // ── SEÇÃO MAIS DETALHES ──────────────────────────────────
 function toggleSecao(){
-  const wrap    = document.getElementById('secWrap');
-  const content = document.getElementById('secDetalhesContent');
-  const sidebar = document.getElementById('secSidebar');
-  const toggle  = document.getElementById('secDetalhes');
-  const isOpen  = content.classList.contains('open');
+  const cols   = document.getElementById('secCols');
+  const toggle = document.getElementById('secDetalhes');
+  const label  = document.getElementById('secLabel');
+  const modal  = document.querySelector('.modal');
+  const isOpen = cols.classList.contains('open');
   if(isOpen){
-    wrap.classList.remove('open');
-    content.classList.remove('open');
-    sidebar.classList.remove('open');
+    cols.classList.remove('open');
     toggle.classList.remove('open');
-    toggle.querySelector('.secao-arrow').textContent = '›';
-    toggle.childNodes[1].textContent = ' Mais detalhes';
+    modal.classList.remove('expandido');
+    label.textContent = 'Mais detalhes';
   } else {
-    wrap.classList.add('open');
-    content.classList.add('open');
-    sidebar.classList.add('open');
+    cols.classList.add('open');
     toggle.classList.add('open');
-    toggle.querySelector('.secao-arrow').textContent = '›';
-    toggle.childNodes[1].textContent = ' Menos detalhes';
+    modal.classList.add('expandido');
+    label.textContent = 'Menos detalhes';
   }
 }
 
@@ -1061,10 +1020,11 @@ async function editarTransacao(id){
   }
   // abrir seção detalhes se tiver obs ou anexo
   if(t.observacao||t.anexo_url){
-    document.getElementById('secWrap').classList.add('open');
-    document.getElementById('secDetalhesContent').classList.add('open');
-    document.getElementById('secSidebar').classList.add('open');
+    document.getElementById('secCols').classList.add('open');
     document.getElementById('secDetalhes').classList.add('open');
+    document.querySelector('.modal').classList.add('expandido');
+    const lbl = document.getElementById('secLabel');
+    if(lbl) lbl.textContent = 'Menos detalhes';
   }
   document.getElementById('modalBg').classList.add('open');
 }
