@@ -431,7 +431,7 @@ main{max-width:1200px;margin:0 auto;padding:28px 24px}
       </div>
       <div class="field" style="margin-top:12px;margin-bottom:0">
         <label>Valor (R$)</label>
-        <input id="fValor" type="number" step="0.01" min="0" placeholder="0,00" style="max-width:200px"/>
+        <input id="fValor" type="text" placeholder="Ex: 1.500,00" oninput="mascaraValor(this)" style="max-width:200px"/>
       </div>
     </div>
 
@@ -441,7 +441,7 @@ main{max-width:1200px;margin:0 auto;padding:28px 24px}
       <div class="grid2">
         <div class="field" style="margin:0">
           <label>Valor estimado (R$)</label>
-          <input id="fPropValor" type="number" step="0.01" min="0" placeholder="0,00"/>
+          <input id="fPropValor" type="text" placeholder="Ex: 21.858,40" oninput="mascaraValor(this)"/>
         </div>
         <div class="field" style="margin:0">
           <label>Prazo para decisão</label>
@@ -535,6 +535,27 @@ main{max-width:1200px;margin:0 auto;padding:28px 24px}
 
 <script>
 // ── CONFIG ───────────────────────────────────────────────
+// Formatar valor em pt-BR enquanto digita
+function mascaraValor(el){
+  // Remove tudo exceto dígitos e vírgula
+  let v = el.value.replace(/[^\d,]/g,'');
+  // Garante no máximo 1 vírgula
+  const parts = v.split(',');
+  if(parts.length > 2) v = parts[0]+','+parts.slice(1).join('');
+  // Limita casas decimais a 2
+  if(parts[1]?.length > 2) v = parts[0]+','+parts[1].substring(0,2);
+  // Adiciona pontos de milhar na parte inteira
+  const intPart = (parts[0]||'').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  el.value = parts.length === 2 ? intPart+','+( parts[1]?.substring(0,2)||'' ) : intPart;
+}
+
+// Converter "21.858,40" → 21858.40 para salvar no banco
+function parseBR(v){
+  if(!v) return null;
+  const n = parseFloat(v.replace(/\./g,'').replace(',','.'));
+  return isNaN(n) ? null : n;
+}
+
 const SUPA_URL = 'https://rbahvyejqybajnufftio.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiYWh2eWVqcXliYWpudWZmdGlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjA5MjIsImV4cCI6MjA4OTYzNjkyMn0.nUIo2CT3o41YL1TT8Hrp5kq-_ZS-bMMf-gvUMCEyYMw';
 const EMPRESA  = 'mandala';
@@ -880,7 +901,7 @@ async function salvar(){
     prestador_nome:   document.getElementById('fPrestNome').value.trim()||null,
     prestador_cnpj:   document.getElementById('fPrestCnpj').value.trim()||null,
     prestador_servico:document.getElementById('fPrestServ').value.trim()||null,
-    valor_contrato:   parseFloat(document.getElementById('fValor').value)||null,
+    valor_contrato:   parseBR(document.getElementById('fValor').value)||null,
     publicado:        document.getElementById('fCategoria').value==='Proposta'
                         ? false  // proposta começa não publicada até aprovação
                         : document.getElementById('fPublicado').checked,
@@ -890,7 +911,7 @@ async function salvar(){
     arquivo_tipo:     _arquivo?.type||null,
     arquivo_tamanho:  _arquivo?.size||null,
     // Campos de proposta
-    prop_valor:        cat==='Proposta' ? (parseFloat(document.getElementById('fPropValor').value)||null) : null,
+    prop_valor:        cat==='Proposta' ? (parseBR(document.getElementById('fPropValor').value)||null) : null,
     prop_prazo_decisao:cat==='Proposta' ? (document.getElementById('fPropPrazo').value||null) : null,
     prop_justificativa:cat==='Proposta' ? (document.getElementById('fPropJustif').value.trim()||null) : null,
     aprovacao_status:  cat==='Proposta' && !_editId ? 'pendente' : undefined,
