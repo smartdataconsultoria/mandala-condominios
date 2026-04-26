@@ -36,12 +36,11 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 .fab.open .fab-icon{transform:rotate(45deg)}
 .fab-menu{display:flex;flex-direction:column;gap:6px;align-items:flex-end;opacity:0;pointer-events:none;transform:translateY(12px) scale(.95);transition:.25s cubic-bezier(.4,0,.2,1)}
 .fab-menu.open{opacity:1;pointer-events:all;transform:translateY(0) scale(1)}
-.fab-item{display:flex;align-items:center;gap:12px;background:#1e2130;border:1px solid #2a2d3e;border-radius:12px;padding:10px 18px 10px 14px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 16px #00000040;transition:.2s}
+.fab-item{display:flex;align-items:center;gap:12px;background:#1e2130;border:1px solid #2a2d3e;border-radius:12px;padding:10px 18px 10px 14px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 16px #00000040;transition:.2s;position:relative;z-index:952}
 .fab-item:hover{background:#2a2d3e;transform:translateX(-3px)}
 .fab-item-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .fab-item-label{font-size:14px;font-weight:600;color:#f1f5f9}
-.fab-overlay{position:fixed;inset:0;z-index:940;display:none}
-.fab-overlay.open{display:block}
+/* overlay removido — fechamento via document click */
 
 /* MÊS NAV */
 .mes-nav{display:flex;align-items:center;gap:16px;margin-bottom:20px}
@@ -225,27 +224,26 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
   </div>
 
   <!-- FAB flutuante -->
-  <div class="fab-overlay" id="fabOverlay" onclick="fecharFab()"></div>
-  <div class="fab-wrap">
+  <div class="fab-wrap" id="fabWrap">
     <div class="fab-menu" id="fabMenu">
-      <div class="fab-item" onclick="fabAbre('despesa')">
+      <div class="fab-item" onclick="event.stopPropagation();fabAbre('despesa')">
         <div class="fab-item-icon" style="background:#ef444420;color:#ef4444">↓</div>
         <span class="fab-item-label">Despesa</span>
       </div>
-      <div class="fab-item" onclick="fabAbre('receita')">
+      <div class="fab-item" onclick="event.stopPropagation();fabAbre('receita')">
         <div class="fab-item-icon" style="background:#22c55e20;color:#22c55e">↑</div>
         <span class="fab-item-label">Receita</span>
       </div>
-      <div class="fab-item" onclick="fabAbre('cartao')">
+      <div class="fab-item" onclick="event.stopPropagation();fabAbre('cartao')">
         <div class="fab-item-icon" style="background:#3b82f620;color:#3b82f6">💳</div>
         <span class="fab-item-label">Despesa cartão</span>
       </div>
-      <div class="fab-item" onclick="fabAbre('transferencia')">
+      <div class="fab-item" onclick="event.stopPropagation();fabAbre('transferencia')">
         <div class="fab-item-icon" style="background:#f5a62320;color:#f5a623">⇄</div>
         <span class="fab-item-label">Transferência</span>
       </div>
     </div>
-    <button class="fab" id="fabBtn" onclick="toggleFab()">
+    <button class="fab" id="fabBtn" onclick="toggleFab(event)">
       <span class="fab-icon">+</span>
     </button>
   </div>
@@ -1045,23 +1043,29 @@ document.getElementById('modalBg').addEventListener('click',e=>{
 // ── FAB ──────────────────────────────────────────────────
 function fabAbre(tipo){
   fecharFab();
-  // pequeno delay para garantir que o overlay fecha antes do modal abrir
-  setTimeout(()=>abrirModal(tipo), 50);
+  abrirModal(tipo);
 }
 
-function toggleFab(){
+function toggleFab(e){
+  e.stopPropagation();
   const btn  = document.getElementById('fabBtn');
   const menu = document.getElementById('fabMenu');
-  const ov   = document.getElementById('fabOverlay');
-  btn.classList.toggle('open');
-  menu.classList.toggle('open');
-  ov.classList.toggle('open');
+  const isOpen = menu.classList.contains('open');
+  if(isOpen){ fecharFab(); } else { btn.classList.add('open'); menu.classList.add('open'); }
 }
+
 function fecharFab(){
   document.getElementById('fabBtn').classList.remove('open');
   document.getElementById('fabMenu').classList.remove('open');
-  document.getElementById('fabOverlay').classList.remove('open');
 }
+
+// Fechar FAB ao clicar fora dele
+document.addEventListener('click', function(e){
+  const wrap = document.getElementById('fabWrap');
+  if(wrap && !wrap.contains(e.target)){
+    fecharFab();
+  }
+});
 
 // ── INIT ─────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded',async()=>{
