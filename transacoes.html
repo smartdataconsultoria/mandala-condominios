@@ -112,11 +112,20 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 .modal-close:hover{background:#2a2d3e;color:#f1f5f9}
 
 /* TIPO TOGGLE */
+/* tipo-toggle escondido quando vem do FAB com tipo fixo */
 .tipo-toggle{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#2a2d3e;border-radius:10px;overflow:hidden;margin:16px 24px 0}
+.tipo-toggle.hidden{display:none}
 .tipo-btn{background:#1a1d27;border:none;color:#64748b;padding:11px;font-size:14px;font-weight:600;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:7px}
 .tipo-btn.active.rec{background:#22c55e15;color:#22c55e}
 .tipo-btn.active.des{background:#ef444415;color:#ef4444}
 .tipo-btn:hover:not(.active){background:#2a2d3e;color:#f1f5f9}
+/* badge de tipo fixo (substitui o toggle quando vem do FAB) */
+.tipo-badge{display:none;align-items:center;gap:10px;margin:14px 24px 0;padding:10px 16px;border-radius:10px;font-size:14px;font-weight:700}
+.tipo-badge.show{display:flex}
+.tipo-badge.des{background:#ef444415;color:#ef4444;border:1px solid #ef444425}
+.tipo-badge.rec{background:#22c55e15;color:#22c55e;border:1px solid #22c55e25}
+.tipo-badge.cartao{background:#3b82f615;color:#3b82f6;border:1px solid #3b82f625}
+.tipo-badge.transf{background:#f5a62315;color:#f5a623;border:1px solid #f5a62325}
 
 /* MODAL BODY */
 .modal-body{padding:20px 24px 0}
@@ -171,11 +180,16 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 
 /* SEÇÃO AVANÇADO */
 .secao-toggle{display:flex;align-items:center;gap:8px;padding:14px 0 0;cursor:pointer;color:#64748b;font-size:13px;font-weight:600;user-select:none;border-top:1px solid #2a2d3e20;margin-top:4px}
-.secao-toggle:hover{color:#f1f5f9}
+.secao-toggle:hover{color:#f5a623}
 .secao-toggle .secao-arrow{transition:.3s;font-size:12px}
 .secao-toggle.open .secao-arrow{transform:rotate(90deg)}
+/* Detalhes abre em 2 colunas ao lado */
+.secao-wrap{display:grid;grid-template-columns:1fr;transition:.3s}
+.secao-wrap.open{grid-template-columns:1fr 1fr;gap:0 24px}
 .secao-content{display:none;padding-top:12px}
 .secao-content.open{display:block}
+.secao-sidebar{display:none;padding-top:12px;border-left:1px solid #2a2d3e;padding-left:24px}
+.secao-sidebar.open{display:block}
 
 /* FOOTER */
 .modal-footer{display:flex;gap:10px;justify-content:flex-end;padding:20px 24px;border-top:1px solid #2a2d3e;margin-top:20px}
@@ -306,11 +320,13 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
     <button class="modal-close" onclick="fecharModal()">✕</button>
   </div>
 
-  <!-- TIPO TOGGLE -->
-  <div class="tipo-toggle">
-    <button class="tipo-btn active rec" id="btnRec" onclick="setTipo('receita')">↑ Receita</button>
-    <button class="tipo-btn des" id="btnDes" onclick="setTipo('despesa')">↓ Despesa</button>
+  <!-- TIPO TOGGLE (só aparece quando o modal é genérico) -->
+  <div class="tipo-toggle" id="tipoToggle">
+    <button class="tipo-btn rec" id="btnRec" onclick="setTipo('receita')">↑ Receita</button>
+    <button class="tipo-btn active des" id="btnDes" onclick="setTipo('despesa')">↓ Despesa</button>
   </div>
+  <!-- BADGE FIXO (aparece quando vem de um tipo específico do FAB) -->
+  <div class="tipo-badge" id="tipoBadge"></div>
 
   <div class="modal-body">
 
@@ -478,33 +494,45 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
     </div>
 
     <!-- SEÇÃO: + DETALHES -->
-    <div class="secao-toggle" id="secDetalhes" onclick="toggleSecao('secDetalhesContent','secDetalhes')">
+    <div class="secao-toggle" id="secDetalhes" onclick="toggleSecao()">
       <span class="secao-arrow">›</span> Mais detalhes
     </div>
-    <div class="secao-content" id="secDetalhesContent">
-
-      <!-- OBSERVAÇÃO -->
-      <div class="field">
-        <label>Observação</label>
-        <textarea id="fObs" placeholder="Observações opcionais..."></textarea>
-      </div>
-
-      <!-- ANEXO PDF -->
-      <div class="field">
-        <label>📎 Anexar comprovante (PDF / imagem)</label>
-        <div class="pdf-upload" id="pdfUploadArea">
-          <input type="file" id="fAnexo" accept=".pdf,.png,.jpg,.jpeg" onchange="onAnexoChange()"/>
-          <div class="pdf-upload-icon">📄</div>
-          <div class="pdf-upload-text">Arraste o arquivo ou <strong>clique para selecionar</strong></div>
-          <div style="font-size:11px;color:#4a5568;margin-top:4px">PDF, PNG ou JPG até 5MB</div>
+    <div class="secao-wrap" id="secWrap">
+      <!-- COLUNA ESQUERDA: Observação -->
+      <div class="secao-content" id="secDetalhesContent">
+        <div class="field">
+          <label>Observação</label>
+          <textarea id="fObs" placeholder="Observações opcionais..."></textarea>
         </div>
-        <div class="pdf-preview" id="pdfPreview">
-          <span class="pdf-preview-icon" id="pdfPreviewIcon">📄</span>
-          <div style="flex:1;overflow:hidden">
-            <div class="pdf-preview-name" id="pdfPreviewName">arquivo.pdf</div>
-            <div class="pdf-preview-size" id="pdfPreviewSize">0 KB</div>
+        <div class="field">
+          <label>Situação do pagamento</label>
+          <select id="fSitDetalhe" style="display:none"></select>
+        </div>
+        <div style="font-size:12px;color:#4a5568;margin-top:4px">
+          💡 Preencha observações relevantes para este lançamento.
+        </div>
+      </div>
+      <!-- COLUNA DIREITA: Anexo -->
+      <div class="secao-sidebar" id="secSidebar">
+        <div class="field">
+          <label>📎 Comprovante (PDF / imagem)</label>
+          <div class="pdf-upload" id="pdfUploadArea">
+            <input type="file" id="fAnexo" accept=".pdf,.png,.jpg,.jpeg" onchange="onAnexoChange()"/>
+            <div class="pdf-upload-icon">📄</div>
+            <div class="pdf-upload-text">Arraste ou <strong>clique para selecionar</strong></div>
+            <div style="font-size:11px;color:#4a5568;margin-top:4px">PDF, PNG ou JPG até 5MB</div>
           </div>
-          <button class="pdf-remove" onclick="removerAnexo()" title="Remover">✕</button>
+          <div class="pdf-preview" id="pdfPreview">
+            <span class="pdf-preview-icon" id="pdfPreviewIcon">📄</span>
+            <div style="flex:1;overflow:hidden">
+              <div class="pdf-preview-name" id="pdfPreviewName">arquivo.pdf</div>
+              <div class="pdf-preview-size" id="pdfPreviewSize">0 KB</div>
+            </div>
+            <button class="pdf-remove" onclick="removerAnexo()" title="Remover">✕</button>
+          </div>
+        </div>
+        <div style="font-size:12px;color:#4a5568;margin-top:4px">
+          Formatos aceitos: PDF, PNG, JPG<br>Tamanho máximo: 5MB
         </div>
       </div>
     </div>
@@ -701,6 +729,24 @@ function abrirModal(tipo){
   const cfg = TIPO_CONFIG[_tipoAtual] || TIPO_CONFIG.despesa;
   document.getElementById('mTitulo').textContent = cfg.label;
   limparModal();
+
+  const toggle = document.getElementById('tipoToggle');
+  const badge  = document.getElementById('tipoBadge');
+  const tipoFixo = (tipo==='cartao'||tipo==='transferencia'||tipo==='despesa'||tipo==='receita');
+
+  if(tipoFixo){
+    // Tipo fixo: esconde toggle, mostra badge colorido
+    toggle.classList.add('hidden');
+    const clsMap = {despesa:'des',receita:'rec',cartao:'cartao',transferencia:'transf'};
+    const cls = clsMap[tipo]||'des';
+    badge.className = `tipo-badge show ${cls}`;
+    badge.innerHTML = `<span style="font-size:20px">${cfg.icon}</span> ${cfg.label}`;
+  } else {
+    toggle.classList.remove('hidden');
+    badge.className = 'tipo-badge';
+    badge.innerHTML = '';
+  }
+
   setTipo(_tipoAtual);
   setDataRapida('hoje', document.getElementById('dqHoje'));
   document.getElementById('modalBg').classList.add('open');
@@ -725,8 +771,15 @@ function limparModal(){
   document.getElementById('parcelaInfo').textContent='Será criado 1 lançamento por parcela, totalizando 0 lançamentos.';
   removerAnexo();
   // fechar seção detalhes
+  document.getElementById('secWrap').classList.remove('open');
   document.getElementById('secDetalhesContent').classList.remove('open');
+  document.getElementById('secSidebar').classList.remove('open');
   document.getElementById('secDetalhes').classList.remove('open');
+  const arr = document.querySelector('#secDetalhes .secao-arrow');
+  if(arr) arr.textContent = '›';
+  // resetar texto
+  const tog = document.getElementById('secDetalhes');
+  if(tog && tog.childNodes[1]) tog.childNodes[1].textContent = ' Mais detalhes';
   // data rápida reset
   document.querySelectorAll('.dq-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('dqHoje').classList.add('active');
@@ -814,9 +867,27 @@ function toggleFixo(){
 }
 
 // ── SEÇÃO MAIS DETALHES ──────────────────────────────────
-function toggleSecao(contentId, toggleId){
-  document.getElementById(contentId).classList.toggle('open');
-  document.getElementById(toggleId).classList.toggle('open');
+function toggleSecao(){
+  const wrap    = document.getElementById('secWrap');
+  const content = document.getElementById('secDetalhesContent');
+  const sidebar = document.getElementById('secSidebar');
+  const toggle  = document.getElementById('secDetalhes');
+  const isOpen  = content.classList.contains('open');
+  if(isOpen){
+    wrap.classList.remove('open');
+    content.classList.remove('open');
+    sidebar.classList.remove('open');
+    toggle.classList.remove('open');
+    toggle.querySelector('.secao-arrow').textContent = '›';
+    toggle.childNodes[1].textContent = ' Mais detalhes';
+  } else {
+    wrap.classList.add('open');
+    content.classList.add('open');
+    sidebar.classList.add('open');
+    toggle.classList.add('open');
+    toggle.querySelector('.secao-arrow').textContent = '›';
+    toggle.childNodes[1].textContent = ' Menos detalhes';
+  }
 }
 
 // ── ANEXO ────────────────────────────────────────────────
@@ -990,7 +1061,9 @@ async function editarTransacao(id){
   }
   // abrir seção detalhes se tiver obs ou anexo
   if(t.observacao||t.anexo_url){
+    document.getElementById('secWrap').classList.add('open');
     document.getElementById('secDetalhesContent').classList.add('open');
+    document.getElementById('secSidebar').classList.add('open');
     document.getElementById('secDetalhes').classList.add('open');
   }
   document.getElementById('modalBg').classList.add('open');
