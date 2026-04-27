@@ -1173,28 +1173,10 @@ function deletar(id){
   document.getElementById('confirmDesc').innerHTML = desc;
 
   const opcoes = document.getElementById('confirmOpcoes');
-  if(temSeries){
-    opcoes.style.display = 'flex';
-    opcoes.innerHTML = `
-      <button class="confirm-opt selected" id="optEste" onclick="selecionarOpt('este')">
-        <span class="confirm-opt-icon">📄</span>
-        <div>
-          <div class="confirm-opt-label">Somente este mês</div>
-          <div class="confirm-opt-sub">Exclui apenas o lançamento de ${t.data ? (() => { const p=t.data.split('-'); return p[1]+'/'+p[0]; })() : 'este mês'}</div>
-        </div>
-      </button>
-      <button class="confirm-opt" id="optTodos" onclick="selecionarOpt('todos')">
-        <span class="confirm-opt-icon">🗂</span>
-        <div>
-          <div class="confirm-opt-label">Todos os lançamentos da série</div>
-          <div class="confirm-opt-sub">${ehParcelado ? `Exclui todas as ${t.parcela_total} parcelas` : 'Exclui todos os meses desta recorrência'}</div>
-        </div>
-      </button>`;
-  } else {
-    opcoes.style.display = 'none';
-    opcoes.innerHTML = '';
-    document.getElementById('confirmDesc').innerHTML += '<br><span style="color:#64748b;font-size:12px">Esta ação não pode ser desfeita.</span>';
-  }
+  opcoes.style.display = 'none';
+  opcoes.innerHTML = '';
+  document.getElementById('confirmDesc').innerHTML += '<br><span style="color:#64748b;font-size:12px">Esta ação não pode ser desfeita.</span>';
+  _deleteOpt = 'este'; // sempre exclui somente este lançamento
 
   document.getElementById('confirmBg').classList.add('open');
 }
@@ -1220,24 +1202,18 @@ async function executarDelete(){
 
   try {
     if(_deleteOpt === 'todos' && t && (t.parcela_total || t.recorrente)){
-      // Buscar todos os lançamentos da mesma série
-      // Identificar pela descrição + empresa (mesma série = mesma descrição + tipo + recorrente/parcela)
-      const todos = _transacoes.filter(tr =>
-        tr.descricao === t.descricao &&
-        tr.tipo      === t.tipo      &&
-        tr.empresa   === t.empresa   &&
-        (tr.parcela_total === t.parcela_total || (tr.recorrente && t.recorrente))
-      );
-      // Buscar também nos meses não carregados pelo banco
-      const idsLocais = todos.map(tr=>tr.id);
-      // Deletar por descrição + tipo na mesma empresa (pega meses futuros também)
       const descEnc = encodeURIComponent(t.descricao);
-      const res = await fetch(
-        `${SUPA_URL}/rest/v1/condo_transacoes?empresa=eq.${EMPRESA}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}`,
-        {method:'DELETE', headers:h}
-      );
+      let url;
+      if(t.parcela_total){
+        // Parcelado: deleta todos com mesma descrição + parcela_total + tipo
+        url = `${SUPA_URL}/rest/v1/condo_transacoes?empresa=eq.${EMPRESA}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&parcela_total=eq.${t.parcela_total}`;
+      } else {
+        // Fixo: deleta apenas os que têm recorrente=true com mesma descrição + tipo
+        url = `${SUPA_URL}/rest/v1/condo_transacoes?empresa=eq.${EMPRESA}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&recorrente=eq.true`;
+      }
+      const res = await fetch(url, {method:'DELETE', headers:h});
       if(res.ok || res.status===204){
-        showAlert(`✅ Série excluída — ${idsLocais.length}+ lançamentos removidos.`);
+        showAlert('✅ Série excluída com sucesso.');
         fecharConfirm();
         await loadTransacoes();
       } else {
