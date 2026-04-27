@@ -766,6 +766,7 @@ function abrirModal(tipo){
 function fecharModal(){
   document.getElementById('modalBg').classList.remove('open');
   _editId=null; _anexoArquivo=null;
+  document.getElementById('btnSalvar').textContent = 'Salvar lançamento';
 }
 
 function limparModal(){
@@ -960,6 +961,39 @@ async function salvarLancamento(){
 
   btn.disabled=true; btn.textContent='Salvando...';
 
+  // ── EDIÇÃO: atualiza apenas este lançamento pelo id ──────
+  if(_editId){
+    const h = hdrs();
+    const patchPayload = {
+      descricao:    desc,
+      valor:        valor,
+      data:         data,
+      categoria_id: document.getElementById('fCat').value||null,
+      conta_id:     document.getElementById('fConta').value||null,
+      situacao:     document.getElementById('fSit').value,
+      observacao:   document.getElementById('fObs').value.trim()||null,
+    };
+    try {
+      const res = await fetch(`${SUPA_URL}/rest/v1/condo_transacoes?id=eq.${_editId}&empresa=eq.${EMPRESA}`,{
+        method:'PATCH',
+        headers:{...h,'Prefer':'return=representation'},
+        body: JSON.stringify(patchPayload)
+      });
+      if(res.ok || res.status===204){
+        showAlert('✅ Lançamento atualizado com sucesso!');
+        fecharModal();
+        await loadTransacoes();
+      } else {
+        const err = await res.text();
+        showAlert('Erro ao atualizar: ' + err, 'error');
+      }
+    } catch(e){
+      showAlert('Erro: ' + e.message, 'error');
+    }
+    btn.disabled=false; btn.textContent='Salvar lançamento';
+    return;
+  }
+
   // Transferência: cria 2 lançamentos (saída + entrada)
   if(_tipoAtual==='transferencia'){
     const origem  = document.getElementById('fContaOrigem').value;
@@ -1107,6 +1141,7 @@ async function editarTransacao(id){
   if(!t) return;
   _editId = id;
   document.getElementById('mTitulo').textContent = 'Editar Lançamento';
+  document.getElementById('btnSalvar').textContent = '💾 Atualizar lançamento';
   setTipo(t.tipo);
   document.getElementById('fData').value   = t.data;
   document.getElementById('fData').style.display='block';
