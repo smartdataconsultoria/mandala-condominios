@@ -284,7 +284,22 @@ input[type=file]#fFoto{display:none}
       <div class="grid2">
         <div class="field">
           <label>E-mail</label>
-          <input id="fEmail" type="email" placeholder="email@exemplo.com"/>
+          <input id="fEmail" type="email" placeholder="email@exemplo.com" oninput="verificarEmailAuth()"/>
+        </div>
+        <div class="field" style="margin-top:4px">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="fCriarAcesso" onchange="toggleCampoSenha()" style="width:16px;height:16px;accent-color:#f5a623"/>
+            <span style="font-size:13px;color:#f1f5f9;font-weight:600;text-transform:none;letter-spacing:0">🔑 Criar acesso ao portal para este morador</span>
+          </label>
+          <div id="statusAcessoPortal" style="margin-top:6px;font-size:12px;display:none"></div>
+        </div>
+        <div class="field" id="campoSenha" style="display:none">
+          <label>Senha Inicial para o Portal</label>
+          <div style="position:relative">
+            <input id="fSenha" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/>
+            <button type="button" onclick="toggleSenha()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#64748b;cursor:pointer;font-size:16px">👁</button>
+          </div>
+          <div style="font-size:11px;color:#64748b;margin-top:4px">Senha que o morador usará para acessar o portal</div>
         </div>
         <div class="field">
           <label>Telefone Principal</label>
@@ -430,6 +445,7 @@ input[type=file]#fFoto{display:none}
 // ── CONFIG ───────────────────────────────────────────────
 const SUPA_URL = 'https://rbahvyejqybajnufftio.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiYWh2eWVqcXliYWpudWZmdGlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjA5MjIsImV4cCI6MjA4OTYzNjkyMn0.nUIo2CT3o41YL1TT8Hrp5kq-_ZS-bMMf-gvUMCEyYMw';
+const SB_SVC   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiYWh2eWVqcXliYWpudWZmdGlvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDA2MDkyMiwiZXhwIjoyMDg5NjM2OTIyfQ.LSvsUoFXOeEclanyvPymI_StFQNLxglMTxfbo-Y8kbU';
 const EMPRESA  = 'mandala';
 
 let _moradores = [];
@@ -596,6 +612,8 @@ function abrirModal(id){
     const m = _moradores.find(m=>m.id===id);
     if(m) preencherModal(m);
     document.getElementById('modalTitle').textContent = 'Editar Morador';
+    // Verificar acesso ao portal se tem email
+    if(m?.email) setTimeout(()=>verificarEmailAuth(), 200);
   } else {
     document.getElementById('modalTitle').textContent = 'Cadastrar Morador';
   }
@@ -616,6 +634,15 @@ function limparModal(){
   document.getElementById('fTipoOcup').value = 'proprietario';
   document.getElementById('fEmergPar').value = '';
   document.getElementById('fAtivo').checked  = true;
+  // Reset campos de acesso ao portal
+  const chkAcesso = document.getElementById('fCriarAcesso');
+  if(chkAcesso){ chkAcesso.checked=false; chkAcesso.disabled=false; }
+  const campoSenha = document.getElementById('campoSenha');
+  if(campoSenha) campoSenha.style.display='none';
+  const fSenha = document.getElementById('fSenha');
+  if(fSenha) fSenha.value='';
+  const statusAcesso = document.getElementById('statusAcessoPortal');
+  if(statusAcesso) statusAcesso.style.display='none';
   document.getElementById('fTemPet').checked = false;
   document.getElementById('petsArea').style.display = 'none';
   document.getElementById('listaResidentes').innerHTML = '';
@@ -742,6 +769,99 @@ async function uploadFoto(file, moradorId){
 }
 
 // ── SALVAR ────────────────────────────────────────────────
+// ── ACESSO AO PORTAL ─────────────────────────────────────
+function toggleSenha(){
+  const inp = document.getElementById('fSenha');
+  inp.type = inp.type==='password' ? 'text' : 'password';
+}
+
+function toggleCampoSenha(){
+  const checked = document.getElementById('fCriarAcesso').checked;
+  const campo   = document.getElementById('campoSenha');
+  campo.style.display = checked ? 'block' : 'none';
+  if(!checked) document.getElementById('fSenha').value='';
+}
+
+async function verificarEmailAuth(){
+  const email  = document.getElementById('fEmail').value.trim();
+  const status = document.getElementById('statusAcessoPortal');
+  const chk    = document.getElementById('fCriarAcesso');
+  if(!status || !chk) return;
+  if(!email || !email.includes('@')){ status.style.display='none'; return; }
+
+  // Verificar se já tem acesso no usuarios_portal
+  try{
+    const r = await fetch(`${SUPA_URL}/rest/v1/usuarios_portal?email=eq.${encodeURIComponent(email)}&select=email,perfil`,{
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SB_SVC}
+    });
+    const d = r.ok ? await r.json() : [];
+    if(d.length>0){
+      status.innerHTML = '✅ Este e-mail já possui acesso ao portal (<strong>'+d[0].perfil+'</strong>)';
+      status.style.cssText='display:block;color:#22c55e;font-size:12px;margin-top:4px';
+      chk.checked=false; toggleCampoSenha();
+      chk.disabled=true;
+    } else {
+      status.innerHTML = '○ E-mail sem acesso ao portal ainda';
+      status.style.cssText='display:block;color:#64748b;font-size:12px;margin-top:4px';
+      chk.disabled=false;
+    }
+  } catch(e){ status.style.display='none'; }
+}
+
+async function criarAcessoPortal(email, nome, apto){
+  const senha = document.getElementById('fSenha').value.trim();
+  if(!senha || senha.length<6){
+    showAlert('A senha deve ter no mínimo 6 caracteres.','error');
+    return false;
+  }
+
+  // 1. Criar usuário no Supabase Auth via admin
+  const rAuth = await fetch(`${SUPA_URL}/auth/v1/admin/users`,{
+    method:'POST',
+    headers:{
+      'apikey':SB_SVC,
+      'Authorization':'Bearer '+SB_SVC,
+      'Content-Type':'application/json'
+    },
+    body: JSON.stringify({
+      email,
+      password: senha,
+      email_confirm: true,
+      user_metadata:{ full_name: nome }
+    })
+  });
+
+  if(!rAuth.ok){
+    const err = await rAuth.json();
+    // Se usuário já existe no Auth, apenas registra no portal
+    if(!err.message?.includes('already')) {
+      showAlert('❌ Erro ao criar acesso: '+( err.message||JSON.stringify(err)),'error');
+      return false;
+    }
+  }
+
+  // 2. Inserir/atualizar na tabela usuarios_portal
+  await fetch(`${SUPA_URL}/rest/v1/usuarios_portal`,{
+    method:'POST',
+    headers:{
+      'apikey':SB_SVC,
+      'Authorization':'Bearer '+SB_SVC,
+      'Content-Type':'application/json',
+      'Prefer':'resolution=merge-duplicates'
+    },
+    body: JSON.stringify({
+      email,
+      nome,
+      empresa: EMPRESA,
+      unidade: apto,
+      perfil: 'condômino',
+      adimplente: true
+    })
+  });
+
+  return true;
+}
+
 async function salvar(){
   const nome = document.getElementById('fNome').value.trim();
   const apto = document.getElementById('fApto').value.trim();
@@ -820,7 +940,24 @@ async function salvar(){
       }
     }
 
-    showAlert(_editId ? '✅ Morador atualizado!' : '✅ Morador cadastrado com sucesso!');
+    // ── Criar acesso ao portal se solicitado ─────────────
+    const criarAcesso = document.getElementById('fCriarAcesso')?.checked;
+    const emailVal    = document.getElementById('fEmail').value.trim();
+    const nomeVal     = document.getElementById('fNome').value.trim();
+    const aptoVal     = document.getElementById('fApto').value.trim();
+
+    if(criarAcesso && emailVal){
+      btn.textContent='Criando acesso...';
+      const ok = await criarAcessoPortal(emailVal, nomeVal, aptoVal);
+      if(!ok){
+        btn.disabled=false; btn.textContent='💾 Salvar Morador';
+        return; // erro já foi exibido dentro de criarAcessoPortal
+      }
+      showAlert('✅ Morador salvo e acesso ao portal criado! Credenciais: '+emailVal);
+    } else {
+      showAlert(_editId ? '✅ Morador atualizado!' : '✅ Morador cadastrado com sucesso!');
+    }
+
     fecharModal();
     await loadMoradores();
   } catch(e){
