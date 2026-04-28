@@ -281,31 +281,64 @@ input[type=file]#fFoto{display:none}
           <input id="fNasc" type="date"/>
         </div>
       </div>
-      <div class="grid2">
-        <div class="field">
-          <label>E-mail</label>
-          <input id="fEmail" type="email" placeholder="email@exemplo.com" oninput="verificarEmailAuth()"/>
+      <!-- EMAIL 1 -->
+      <div style="background:#0f1117;border:1px solid #2a2d3e;border-radius:10px;padding:14px;margin-bottom:12px">
+        <div style="font-size:11px;font-weight:700;color:#f5a623;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">👤 Acesso 1 — Titular</div>
+        <div class="grid2" style="margin-bottom:10px">
+          <div class="field" style="margin:0">
+            <label>E-mail</label>
+            <input id="fEmail" type="email" placeholder="email@exemplo.com" oninput="verificarEmailAuth('1')"/>
+          </div>
+          <div class="field" style="margin:0">
+            <label>Telefone Principal</label>
+            <input id="fTel" type="text" placeholder="(81) 99999-9999" oninput="mascaraTel(this)"/>
+          </div>
         </div>
-        <div class="field" style="margin-top:4px">
+        <div class="field" style="margin:0 0 6px">
           <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-            <input type="checkbox" id="fCriarAcesso" onchange="toggleCampoSenha()" style="width:16px;height:16px;accent-color:#f5a623"/>
-            <span style="font-size:13px;color:#f1f5f9;font-weight:600;text-transform:none;letter-spacing:0">🔑 Criar acesso ao portal para este morador</span>
+            <input type="checkbox" id="fCriarAcesso" onchange="toggleCampoSenha('1')" style="width:15px;height:15px;accent-color:#f5a623"/>
+            <span style="font-size:12px;color:#f1f5f9;font-weight:600;text-transform:none;letter-spacing:0">🔑 Criar acesso ao portal</span>
           </label>
-          <div id="statusAcessoPortal" style="margin-top:6px;font-size:12px;display:none"></div>
+          <div id="statusAcessoPortal" style="margin-top:5px;font-size:11px;display:none"></div>
         </div>
-        <div class="field" id="campoSenha" style="display:none">
-          <label>Senha Inicial para o Portal</label>
+        <div class="field" id="campoSenha" style="display:none;margin:0">
+          <label>Senha Inicial</label>
           <div style="position:relative">
             <input id="fSenha" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/>
-            <button type="button" onclick="toggleSenha()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#64748b;cursor:pointer;font-size:16px">👁</button>
+            <button type="button" onclick="toggleSenha('fSenha')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#64748b;cursor:pointer;font-size:15px">👁</button>
           </div>
-          <div style="font-size:11px;color:#64748b;margin-top:4px">Senha que o morador usará para acessar o portal</div>
-        </div>
-        <div class="field">
-          <label>Telefone Principal</label>
-          <input id="fTel" type="text" placeholder="(81) 99999-9999" oninput="mascaraTel(this)"/>
         </div>
       </div>
+
+      <!-- EMAIL 2 -->
+      <div style="background:#0f1117;border:1px solid #2a2d3e;border-radius:10px;padding:14px;margin-bottom:12px">
+        <div style="font-size:11px;font-weight:700;color:#a855f7;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">👤 Acesso 2 — Cônjuge / Segundo Morador</div>
+        <div class="grid2" style="margin-bottom:10px">
+          <div class="field" style="margin:0">
+            <label>E-mail 2</label>
+            <input id="fEmail2" type="email" placeholder="email2@exemplo.com" oninput="verificarEmailAuth('2')"/>
+          </div>
+          <div class="field" style="margin:0">
+            <label>Telefone Secundário</label>
+            <input id="fTel2" type="text" placeholder="(81) 99999-9999" oninput="mascaraTel(this)"/>
+          </div>
+        </div>
+        <div class="field" style="margin:0 0 6px">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="fCriarAcesso2" onchange="toggleCampoSenha('2')" style="width:15px;height:15px;accent-color:#a855f7"/>
+            <span style="font-size:12px;color:#f1f5f9;font-weight:600;text-transform:none;letter-spacing:0">🔑 Criar acesso ao portal</span>
+          </label>
+          <div id="statusAcessoPortal2" style="margin-top:5px;font-size:11px;display:none"></div>
+        </div>
+        <div class="field" id="campoSenha2" style="display:none;margin:0">
+          <label>Senha Inicial</label>
+          <div style="position:relative">
+            <input id="fSenha2" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/>
+            <button type="button" onclick="toggleSenha('fSenha2')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#64748b;cursor:pointer;font-size:15px">👁</button>
+          </div>
+        </div>
+      </div>
+
       <div class="field">
         <label>Telefone Secundário</label>
         <input id="fTel2" type="text" placeholder="(81) 99999-9999" oninput="mascaraTel(this)"/>
@@ -613,7 +646,8 @@ function abrirModal(id){
     if(m) preencherModal(m);
     document.getElementById('modalTitle').textContent = 'Editar Morador';
     // Verificar acesso ao portal se tem email
-    if(m?.email) setTimeout(()=>verificarEmailAuth(), 200);
+    if(m?.email)  setTimeout(()=>verificarEmailAuth('1'), 200);
+    if(m?.email2) setTimeout(()=>verificarEmailAuth('2'), 300);
   } else {
     document.getElementById('modalTitle').textContent = 'Cadastrar Morador';
   }
@@ -626,7 +660,7 @@ function fecharModal(){
 }
 
 function limparModal(){
-  ['fNome','fCpf','fRg','fEmail','fTel','fTel2','fApto','fBloco',
+  ['fNome','fCpf','fRg','fEmail','fEmail2','fTel','fTel2','fApto','fBloco',
    'fEntrada','fSaida','fPlaca','fModelo','fCorVei','fVaga',
    'fEmergNome','fEmergTel','fObs','fNasc'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
@@ -634,15 +668,17 @@ function limparModal(){
   document.getElementById('fTipoOcup').value = 'proprietario';
   document.getElementById('fEmergPar').value = '';
   document.getElementById('fAtivo').checked  = true;
-  // Reset campos de acesso ao portal
-  const chkAcesso = document.getElementById('fCriarAcesso');
-  if(chkAcesso){ chkAcesso.checked=false; chkAcesso.disabled=false; }
-  const campoSenha = document.getElementById('campoSenha');
-  if(campoSenha) campoSenha.style.display='none';
-  const fSenha = document.getElementById('fSenha');
-  if(fSenha) fSenha.value='';
-  const statusAcesso = document.getElementById('statusAcessoPortal');
-  if(statusAcesso) statusAcesso.style.display='none';
+  // Reset campos de acesso ao portal (1 e 2)
+  ['','2'].forEach(function(sfx){
+    const chk = document.getElementById('fCriarAcesso'+sfx);
+    if(chk){ chk.checked=false; chk.disabled=false; }
+    const campo = document.getElementById('campoSenha'+sfx);
+    if(campo) campo.style.display='none';
+    const senha = document.getElementById('fSenha'+sfx);
+    if(senha) senha.value='';
+    const status = document.getElementById('statusAcessoPortal'+sfx);
+    if(status) status.style.display='none';
+  });
   document.getElementById('fTemPet').checked = false;
   document.getElementById('petsArea').style.display = 'none';
   document.getElementById('listaResidentes').innerHTML = '';
@@ -653,7 +689,7 @@ function limparModal(){
 function preencherModal(m){
   const set = (id,v) => { const el=document.getElementById(id); if(el&&v!=null) el.value=v; };
   set('fNome',m.nome); set('fCpf',m.cpf); set('fRg',m.rg);
-  set('fEmail',m.email); set('fTel',m.telefone); set('fTel2',m.telefone2);
+  set('fEmail',m.email); set('fEmail2',m.email2); set('fTel',m.telefone); set('fTel2',m.telefone2);
   set('fNasc',m.data_nascimento);
   set('fApto',m.apartamento); set('fBloco',m.bloco);
   set('fTipoOcup',m.tipo_ocupacao);
@@ -770,46 +806,51 @@ async function uploadFoto(file, moradorId){
 
 // ── SALVAR ────────────────────────────────────────────────
 // ── ACESSO AO PORTAL ─────────────────────────────────────
-function toggleSenha(){
-  const inp = document.getElementById('fSenha');
-  inp.type = inp.type==='password' ? 'text' : 'password';
+function toggleSenha(inputId){
+  const inp = document.getElementById(inputId||'fSenha');
+  if(inp) inp.type = inp.type==='password' ? 'text' : 'password';
 }
 
-function toggleCampoSenha(){
-  const checked = document.getElementById('fCriarAcesso').checked;
-  const campo   = document.getElementById('campoSenha');
-  campo.style.display = checked ? 'block' : 'none';
-  if(!checked) document.getElementById('fSenha').value='';
+function toggleCampoSenha(num){
+  const sfx     = num==='2' ? '2' : '';
+  const checked = document.getElementById('fCriarAcesso'+sfx).checked;
+  const campo   = document.getElementById('campoSenha'+sfx);
+  if(campo) campo.style.display = checked ? 'block' : 'none';
+  const fSenha  = document.getElementById('fSenha'+sfx);
+  if(fSenha && !checked) fSenha.value='';
 }
 
-async function verificarEmailAuth(){
-  const email  = document.getElementById('fEmail').value.trim();
-  const status = document.getElementById('statusAcessoPortal');
-  const chk    = document.getElementById('fCriarAcesso');
+async function verificarEmailAuth(num){
+  const sfx    = num==='2' ? '2' : '';
+  const email  = document.getElementById('fEmail'+sfx)?.value.trim();
+  const status = document.getElementById('statusAcessoPortal'+sfx);
+  const chk    = document.getElementById('fCriarAcesso'+sfx);
   if(!status || !chk) return;
   if(!email || !email.includes('@')){ status.style.display='none'; return; }
 
-  // Verificar se já tem acesso no usuarios_portal
   try{
-    const r = await fetch(`${SUPA_URL}/rest/v1/usuarios_portal?email=eq.${encodeURIComponent(email)}&select=email,perfil`,{
-      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SB_SVC}
-    });
-    const d = r.ok ? await r.json() : [];
-    if(d.length>0){
-      status.innerHTML = '✅ Este e-mail já possui acesso ao portal (<strong>'+d[0].perfil+'</strong>)';
-      status.style.cssText='display:block;color:#22c55e;font-size:12px;margin-top:4px';
-      chk.checked=false; toggleCampoSenha();
-      chk.disabled=true;
-    } else {
-      status.innerHTML = '○ E-mail sem acesso ao portal ainda';
-      status.style.cssText='display:block;color:#64748b;font-size:12px;margin-top:4px';
-      chk.disabled=false;
+    const r = await fetch(
+      `${SUPA_URL}/rest/v1/usuarios_portal?email=eq.${encodeURIComponent(email)}&select=email,perfil`,
+      { headers:{'apikey':SB_SVC,'Authorization':'Bearer '+SB_SVC} }
+    );
+    if(r.ok){
+      const d = await r.json();
+      if(d.length>0){
+        status.innerHTML = '✅ E-mail já possui acesso (<strong>'+(d[0].perfil||'condômino')+'</strong>)';
+        status.style.cssText='display:block;color:#22c55e;font-size:11px;margin-top:4px';
+        chk.checked=false; toggleCampoSenha(num); chk.disabled=true;
+        return;
+      }
     }
+    status.innerHTML = '○ Sem acesso ao portal ainda';
+    status.style.cssText='display:block;color:#64748b;font-size:11px;margin-top:4px';
+    chk.disabled=false;
   } catch(e){ status.style.display='none'; }
 }
 
-async function criarAcessoPortal(email, nome, apto){
-  const senha = document.getElementById('fSenha').value.trim();
+async function criarAcessoPortal(email, nome, apto, sfxNum){
+  const sfx   = sfxNum==='2' ? '2' : '';
+  const senha = document.getElementById('fSenha'+sfx).value.trim();
   if(!senha || senha.length<6){
     showAlert('A senha deve ter no mínimo 6 caracteres.','error');
     return false;
@@ -832,10 +873,11 @@ async function criarAcessoPortal(email, nome, apto){
   });
 
   if(!rAuth.ok){
-    const err = await rAuth.json();
-    // Se usuário já existe no Auth, apenas registra no portal
-    if(!err.message?.includes('already')) {
-      showAlert('❌ Erro ao criar acesso: '+( err.message||JSON.stringify(err)),'error');
+    const err = await rAuth.json().catch(()=>({}));
+    const msg = err.message||err.msg||'';
+    // 422 = email já existe no Auth — tudo bem, apenas atualiza o portal
+    if(rAuth.status !== 422 && !msg.toLowerCase().includes('already')){
+      showAlert('❌ Erro ao criar acesso no Auth: '+msg,'error');
       return false;
     }
   }
@@ -878,6 +920,8 @@ async function salvar(){
     rg:                   document.getElementById('fRg').value.trim()||null,
     data_nascimento:      document.getElementById('fNasc').value||null,
     email:                document.getElementById('fEmail').value.trim()||null,
+    email2:               document.getElementById('fEmail2').value.trim()||null,
+    email2:               document.getElementById('fEmail2').value.trim()||null,
     telefone:             document.getElementById('fTel').value.trim()||null,
     telefone2:            document.getElementById('fTel2').value.trim()||null,
     apartamento:          apto,
@@ -941,19 +985,31 @@ async function salvar(){
     }
 
     // ── Criar acesso ao portal se solicitado ─────────────
-    const criarAcesso = document.getElementById('fCriarAcesso')?.checked;
-    const emailVal    = document.getElementById('fEmail').value.trim();
-    const nomeVal     = document.getElementById('fNome').value.trim();
-    const aptoVal     = document.getElementById('fApto').value.trim();
+    const criarAcesso  = document.getElementById('fCriarAcesso')?.checked;
+    const criarAcesso2 = document.getElementById('fCriarAcesso2')?.checked;
+    const emailVal     = document.getElementById('fEmail').value.trim();
+    const email2Val    = document.getElementById('fEmail2').value.trim();
+    const nomeVal      = document.getElementById('fNome').value.trim();
+    const aptoVal      = document.getElementById('fApto').value.trim();
+
+    let acessosCriados = [];
 
     if(criarAcesso && emailVal){
-      btn.textContent='Criando acesso...';
-      const ok = await criarAcessoPortal(emailVal, nomeVal, aptoVal);
-      if(!ok){
-        btn.disabled=false; btn.textContent='💾 Salvar Morador';
-        return; // erro já foi exibido dentro de criarAcessoPortal
-      }
-      showAlert('✅ Morador salvo e acesso ao portal criado! Credenciais: '+emailVal);
+      btn.textContent='Criando acesso 1...';
+      const ok = await criarAcessoPortal(emailVal, nomeVal, aptoVal, '');
+      if(!ok){ btn.disabled=false; btn.textContent='💾 Salvar Morador'; return; }
+      acessosCriados.push(emailVal);
+    }
+
+    if(criarAcesso2 && email2Val){
+      btn.textContent='Criando acesso 2...';
+      const ok = await criarAcessoPortal(email2Val, nomeVal, aptoVal, '2');
+      if(!ok){ btn.disabled=false; btn.textContent='💾 Salvar Morador'; return; }
+      acessosCriados.push(email2Val);
+    }
+
+    if(acessosCriados.length>0){
+      showAlert('✅ Morador salvo! Acessos criados: '+acessosCriados.join(' e '));
     } else {
       showAlert(_editId ? '✅ Morador atualizado!' : '✅ Morador cadastrado com sucesso!');
     }
