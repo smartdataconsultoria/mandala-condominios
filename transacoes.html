@@ -901,18 +901,20 @@ function calRenderizar(){
     const bg       = isSel ? '#f5a623' : isHoje ? '#f5a62330' : 'transparent';
     const cor      = isSel ? '#000' : isHoje ? '#f5a623' : '#f1f5f9';
     const fw       = isSel || isHoje ? '700' : '400';
-    grid.innerHTML += `<div onclick="calSelecionarDia(${d})" style="
-      text-align:center;padding:6px 2px;border-radius:50%;cursor:pointer;
-      font-size:13px;background:${bg};color:${cor};font-weight:${fw};
-      transition:.15s;" 
-      onmouseover="if(!${isSel})this.style.background='#2a2d3e'"
-      onmouseout="this.style.background='${bg}'">${d}</div>`;
+    grid.innerHTML += `<div onclick="calSelecionarDia(${d})" 
+      data-bg="${bg}" data-sel="${isSel ? 1 : 0}"
+      style="text-align:center;padding:6px 2px;border-radius:50%;cursor:pointer;
+      font-size:13px;background:${bg};color:${cor};font-weight:${fw};transition:.15s;"
+      onmouseover="if(!parseInt(this.dataset.sel))this.style.background='#2a2d3e'"
+      onmouseout="this.style.background=this.dataset.bg">${d}</div>`;
   }
 }
 
 function calSelecionarDia(d){
   _calData = new Date(_calMes.getFullYear(), _calMes.getMonth(), d);
   calRenderizar();
+  // Confirma automaticamente ao clicar no dia
+  calConfirmar();
 }
 
 function calNavMes(dir){
