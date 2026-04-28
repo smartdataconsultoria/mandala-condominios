@@ -862,7 +862,13 @@ function renderTabela(){
   }
 
 
-  document.getElementById('listaTransacoes').innerHTML = lista.map(t=>{
+  // ── Calcular totais da lista filtrada ──────────────────
+  const totalRec = lista.filter(t=>t.tipo==='receita').reduce((s,t)=>s+parseFloat(t.valor||0),0);
+  const totalDes = lista.filter(t=>t.tipo==='despesa').reduce((s,t)=>s+parseFloat(t.valor||0),0);
+  const totalLiq = totalRec - totalDes;
+  const qtd      = lista.length;
+
+  const linhas = lista.map(t=>{
     const cat   = catMap[t.categoria_id];
     const conta = contaMap[t.conta_id];
     const tp    = t.tipo==='receita' ? 'rec' : 'des';
@@ -894,6 +900,40 @@ function renderTabela(){
       </div>
     </div>`;
   }).join('');
+
+  // ── Rodapé totalizador ──────────────────────────────────
+  const rodape = `<div style="
+    display:grid;
+    grid-template-columns:36px 100px 1fr 180px 140px 110px 100px 60px;
+    gap:8px;padding:14px 20px;
+    background:#1e2130;
+    border-top:2px solid #2a2d3e;
+    border-radius:0 0 12px 12px;
+    align-items:center;
+  ">
+    <div></div>
+    <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em">
+      ${qtd} lançamento${qtd!==1?'s':''}
+    </div>
+    <div style="font-size:12px;color:#64748b">Total filtrado</div>
+    <div></div>
+    <div></div>
+    <div style="text-align:right">
+      ${totalRec>0 && totalDes>0 ? `
+        <div style="font-size:11px;color:#22c55e;margin-bottom:2px">+ ${fmt(totalRec)}</div>
+        <div style="font-size:11px;color:#ef4444;margin-bottom:2px">- ${fmt(totalDes)}</div>
+        <div style="font-size:13px;font-weight:800;color:${totalLiq>=0?'#22c55e':'#ef4444'};border-top:1px solid #2a2d3e;padding-top:3px">${totalLiq>=0?'+':'-'} ${fmt(Math.abs(totalLiq))}</div>
+      ` : totalDes>0 ? `
+        <div style="font-size:15px;font-weight:800;color:#ef4444">- ${fmt(totalDes)}</div>
+      ` : `
+        <div style="font-size:15px;font-weight:800;color:#22c55e">+ ${fmt(totalRec)}</div>
+      `}
+    </div>
+    <div></div>
+    <div></div>
+  </div>`;
+
+  document.getElementById('listaTransacoes').innerHTML = linhas + rodape;
 }
 
 // ── MODAL ────────────────────────────────────────────────
