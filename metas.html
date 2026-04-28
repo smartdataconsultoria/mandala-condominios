@@ -330,9 +330,19 @@ const fmt=v=>'R$ '+parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigit
 const brl=s=>parseFloat((s||'0').replace(/R\$\s*/g,'').replace(/\./g,'').replace(',','.'))||0;
 const fd=s=>{if(!s)return'';const[y,m,d]=s.split('-');return`${d}/${m}/${y}`;};
 const rt=v=>({a:v*FA,b:v*FB});
-function hdrs(){
+function getToken(){
   const k=Object.keys(localStorage).find(k=>k.includes('auth-token'));
-  let tk=null;try{if(k){const s=JSON.parse(localStorage.getItem(k));tk=s?.access_token;}}catch{}
+  if(!k)return null;
+  try{
+    const s=JSON.parse(localStorage.getItem(k));
+    const tk=s?.access_token, exp=s?.expires_at;
+    if(!tk)return null;
+    if(exp && Date.now()/1000 > exp)return null; // expirado
+    return tk;
+  }catch{return null;}
+}
+function hdrs(){
+  const tk=getToken();
   return{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${tk||SUPA_KEY}`};
 }
 
@@ -482,8 +492,7 @@ async function upAnx(idx){
   const f=_pfAnexos[idx],urlEx=document.getElementById(`pfAUrl${idx}`)?.value;
   if(!f)return urlEx||null;
   const path=`propostas/${EMPRESA}/${Date.now()}_${f.name}`;
-  const k=Object.keys(localStorage).find(k=>k.includes('auth-token'));
-  let tk=null;try{if(k){const s=JSON.parse(localStorage.getItem(k));tk=s?.access_token;}}catch{}
+  const tk=getToken();
   const r=await fetch(`${SUPA_URL}/storage/v1/object/contratos/${path}`,{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${tk||SUPA_KEY}`,'Content-Type':f.type},body:f});
   return r.ok?`${SUPA_URL}/storage/v1/object/public/contratos/${path}`:(urlEx||null);
 }
