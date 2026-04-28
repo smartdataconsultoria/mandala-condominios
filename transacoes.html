@@ -384,6 +384,47 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
         <button class="dq-btn" id="dqOutro" onclick="setDataRapida('outro',this)">Outros...</button>
       </div>
       <input type="date" id="fData" style="display:none"/>
+      <!-- Calendário customizado -->
+      <div id="calWrap" style="display:none;position:relative;">
+        <div id="calDisplay" onclick="toggleCal()" style="
+          background:#1a1d27;border:1px solid #f5a623;border-radius:8px;
+          padding:10px 14px;font-size:14px;color:#f1f5f9;cursor:pointer;
+          display:flex;align-items:center;gap:8px;user-select:none;">
+          <span style="font-size:16px">📅</span>
+          <span id="calDisplayText">Selecionar data</span>
+          <span style="margin-left:auto;color:#64748b;font-size:12px">▼</span>
+        </div>
+        <div id="calPanel" style="display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:9999;
+          background:#1e2130;border:1px solid #2a2d3e;border-radius:12px;
+          box-shadow:0 8px 32px rgba(0,0,0,.6);padding:16px;width:300px;">
+          <!-- Header -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <button onclick="calNavMes(-1)" style="background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px;" onmouseover="this.style.background='#2a2d3e'" onmouseout="this.style.background='none'">‹</button>
+            <div style="text-align:center;">
+              <div id="calAno" style="font-size:13px;color:#94a3b8;margin-bottom:2px;cursor:pointer;" onclick="calToggleAno()">2026</div>
+              <div id="calMesNome" style="font-size:18px;font-weight:700;color:#f1f5f9;">abril 2026</div>
+            </div>
+            <button onclick="calNavMes(1)" style="background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px;" onmouseover="this.style.background='#2a2d3e'" onmouseout="this.style.background='none'">›</button>
+          </div>
+          <!-- Dias da semana -->
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin:10px 0 4px;text-align:center;">
+            <div style="font-size:11px;color:#64748b;padding:4px;">Do</div>
+            <div style="font-size:11px;color:#64748b;padding:4px;">2ª</div>
+            <div style="font-size:11px;color:#64748b;padding:4px;">3ª</div>
+            <div style="font-size:11px;color:#64748b;padding:4px;">4ª</div>
+            <div style="font-size:11px;color:#64748b;padding:4px;">5ª</div>
+            <div style="font-size:11px;color:#64748b;padding:4px;">6ª</div>
+            <div style="font-size:11px;color:#64748b;padding:4px;">Sá</div>
+          </div>
+          <!-- Grid dos dias -->
+          <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;"></div>
+          <!-- Botões -->
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid #2a2d3e;">
+            <button onclick="fecharCal()" style="background:none;border:none;color:#94a3b8;font-size:13px;cursor:pointer;padding:6px 12px;border-radius:6px;" onmouseover="this.style.color='#f1f5f9'" onmouseout="this.style.color='#94a3b8'">CANCELAR</button>
+            <button onclick="calConfirmar()" style="background:none;border:none;color:#f5a623;font-size:13px;font-weight:700;cursor:pointer;padding:6px 12px;border-radius:6px;" onmouseover="this.style.color='#fbbf24'" onmouseout="this.style.color='#f5a623'">OK</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- DESCRIÇÃO + VALOR -->
@@ -767,6 +808,8 @@ function fecharModal(){
   document.getElementById('modalBg').classList.remove('open');
   _editId=null; _anexoArquivo=null;
   document.getElementById('btnSalvar').textContent = 'Salvar lançamento';
+  const calWrpF = document.getElementById('calWrap'); if(calWrpF) calWrpF.style.display='none';
+  const calPnlF = document.getElementById('calPanel'); if(calPnlF) calPnlF.style.display='none';
 }
 
 function limparModal(){
@@ -826,13 +869,117 @@ function setTipo(tipo){
 }
 
 // ── DATA RÁPIDA ──────────────────────────────────────────
+// ── CALENDÁRIO CUSTOMIZADO ───────────────────────────────
+let _calData = new Date(); // data temporária selecionada no calendário
+let _calMes  = new Date(); // mês sendo exibido
+
+const MESES_CAL = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+function calRenderizar(){
+  const ano = _calMes.getFullYear();
+  const mes = _calMes.getMonth();
+  document.getElementById('calAno').textContent = ano;
+  document.getElementById('calMesNome').textContent = MESES_CAL[mes] + ' ' + ano;
+
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+
+  const primeiroDia = new Date(ano, mes, 1).getDay(); // 0=dom
+  const diasNoMes   = new Date(ano, mes+1, 0).getDate();
+
+  // Células vazias antes do dia 1
+  for(let i=0; i<primeiroDia; i++){
+    grid.innerHTML += '<div></div>';
+  }
+
+  const hoje = new Date();
+  const selY = _calData.getFullYear(), selM = _calData.getMonth(), selD = _calData.getDate();
+
+  for(let d=1; d<=diasNoMes; d++){
+    const isHoje   = d===hoje.getDate() && mes===hoje.getMonth() && ano===hoje.getFullYear();
+    const isSel    = d===selD && mes===selM && ano===selY;
+    const bg       = isSel ? '#f5a623' : isHoje ? '#f5a62330' : 'transparent';
+    const cor      = isSel ? '#000' : isHoje ? '#f5a623' : '#f1f5f9';
+    const fw       = isSel || isHoje ? '700' : '400';
+    grid.innerHTML += `<div onclick="calSelecionarDia(${d})" style="
+      text-align:center;padding:6px 2px;border-radius:50%;cursor:pointer;
+      font-size:13px;background:${bg};color:${cor};font-weight:${fw};
+      transition:.15s;" 
+      onmouseover="if(!${isSel})this.style.background='#2a2d3e'"
+      onmouseout="this.style.background='${bg}'">${d}</div>`;
+  }
+}
+
+function calSelecionarDia(d){
+  _calData = new Date(_calMes.getFullYear(), _calMes.getMonth(), d);
+  calRenderizar();
+}
+
+function calNavMes(dir){
+  _calMes = new Date(_calMes.getFullYear(), _calMes.getMonth() + dir, 1);
+  calRenderizar();
+}
+
+function calToggleAno(){
+  // Navega 1 ano para frente/trás com duplo clique — simples
+  const input = prompt('Digite o ano:', _calMes.getFullYear());
+  if(input && !isNaN(input)){
+    _calMes = new Date(parseInt(input), _calMes.getMonth(), 1);
+    calRenderizar();
+  }
+}
+
+function toggleCal(){
+  const panel = document.getElementById('calPanel');
+  const aberto = panel.style.display !== 'none';
+  panel.style.display = aberto ? 'none' : 'block';
+  if(!aberto) calRenderizar();
+}
+
+function fecharCal(){
+  document.getElementById('calPanel').style.display='none';
+}
+
+function calConfirmar(){
+  // Aplica a data selecionada no input hidden
+  const iso = _calData.toISOString().split('T')[0];
+  document.getElementById('fData').value = iso;
+  // Atualiza o display
+  const [y,m,d] = iso.split('-');
+  document.getElementById('calDisplayText').textContent = `${d}/${m}/${y}`;
+  fecharCal();
+}
+
+// Fechar calendário ao clicar fora
+document.addEventListener('click', e=>{
+  const wrap = document.getElementById('calWrap');
+  if(wrap && !wrap.contains(e.target)) fecharCal();
+});
+
 function setDataRapida(qual, el){
   document.querySelectorAll('.dq-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
-  const input = document.getElementById('fData');
+  const input  = document.getElementById('fData');
+  const calWrp = document.getElementById('calWrap');
   if(qual==='outro'){
-    input.style.display='block'; input.focus();
+    input.style.display='none';
+    calWrp.style.display='block';
+    // Inicializa calendário com data atual do input ou hoje
+    const dataAtual = input.value ? new Date(input.value + 'T12:00:00') : new Date();
+    _calData = new Date(dataAtual);
+    _calMes  = new Date(dataAtual.getFullYear(), dataAtual.getMonth(), 1);
+    // Atualiza display se já tem valor
+    if(input.value){
+      const [y,m,d] = input.value.split('-');
+      document.getElementById('calDisplayText').textContent = `${d}/${m}/${y}`;
+    } else {
+      document.getElementById('calDisplayText').textContent = 'Selecionar data';
+    }
+    // Abre direto
+    document.getElementById('calPanel').style.display='block';
+    calRenderizar();
   } else {
+    calWrp.style.display='none';
     input.style.display='none';
     const hoje = new Date();
     if(qual==='ontem') hoje.setDate(hoje.getDate()-1);
@@ -1145,9 +1292,20 @@ async function editarTransacao(id){
   document.getElementById('btnSalvar').textContent = '💾 Atualizar lançamento';
   setTipo(t.tipo);
   document.getElementById('fData').value   = t.data;
-  document.getElementById('fData').style.display='block';
+  document.getElementById('fData').style.display='none';
   document.getElementById('dqOutro').classList.add('active');
   document.querySelectorAll('.dq-btn:not(#dqOutro)').forEach(b=>b.classList.remove('active'));
+  // Mostrar calendário com a data do lançamento
+  const calWrp = document.getElementById('calWrap');
+  if(calWrp){
+    calWrp.style.display='block';
+    if(t.data){
+      const [y,m,d] = t.data.split('-');
+      document.getElementById('calDisplayText').textContent = `${d}/${m}/${y}`;
+      _calData = new Date(parseInt(y), parseInt(m)-1, parseInt(d));
+      _calMes  = new Date(parseInt(y), parseInt(m)-1, 1);
+    }
+  }
   document.getElementById('fDesc').value   = t.descricao||'';
   document.getElementById('fValor').value  = t.valor ? parseFloat(t.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '';
   document.getElementById('fCat').value    = t.categoria_id||'';
