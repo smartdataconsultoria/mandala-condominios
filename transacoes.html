@@ -1140,7 +1140,7 @@ async function salvarLancamento(){
 async function editarTransacao(id){
   const t = _transacoes.find(t=>t.id===id);
   if(!t) return;
-  _editId = id;
+  // _editId é setado no final, após todas as chamadas que possam resetar o estado
   document.getElementById('mTitulo').textContent = 'Editar Lançamento';
   document.getElementById('btnSalvar').textContent = '💾 Atualizar lançamento';
   setTipo(t.tipo);
@@ -1183,6 +1183,7 @@ async function editarTransacao(id){
     const lbl = document.getElementById('secLabel');
     if(lbl) lbl.textContent = 'Menos detalhes';
   }
+  _editId = id; // setado aqui, após todas as chamadas que possam resetar
   document.getElementById('modalBg').classList.add('open');
 }
 
@@ -1209,10 +1210,34 @@ function deletar(id){
   document.getElementById('confirmDesc').innerHTML = desc;
 
   const opcoes = document.getElementById('confirmOpcoes');
-  opcoes.style.display = 'none';
-  opcoes.innerHTML = '';
-  document.getElementById('confirmDesc').innerHTML += '<br><span style="color:#64748b;font-size:12px">Esta ação não pode ser desfeita.</span>';
-  _deleteOpt = 'este'; // sempre exclui somente este lançamento
+  _deleteOpt = 'este';
+
+  if(ehFixo){
+    // Fixo: mostra opção de excluir só este mês ou este + próximos
+    const mesRef = t.data ? (() => { const p=t.data.split('-'); return p[1]+'/'+p[0]; })() : 'este mês';
+    opcoes.style.display = 'flex';
+    opcoes.innerHTML = `
+      <button class="confirm-opt selected" id="optEste" onclick="selecionarOpt('este')">
+        <span class="confirm-opt-icon">📄</span>
+        <div>
+          <div class="confirm-opt-label">Somente este mês</div>
+          <div class="confirm-opt-sub">Exclui apenas o lançamento de ${mesRef}</div>
+        </div>
+      </button>
+      <button class="confirm-opt" id="optTodos" onclick="selecionarOpt('todos')">
+        <span class="confirm-opt-icon">🗂</span>
+        <div>
+          <div class="confirm-opt-label">Este e os próximos meses</div>
+          <div class="confirm-opt-sub">Exclui ${mesRef} e todos os lançamentos futuros desta recorrência</div>
+        </div>
+      </button>`;
+    document.getElementById('confirmDesc').innerHTML += '<br><span style="color:#64748b;font-size:12px">Esta ação não pode ser desfeita.</span>';
+  } else {
+    // Avulso ou parcelado: só exclui este
+    opcoes.style.display = 'none';
+    opcoes.innerHTML = '';
+    document.getElementById('confirmDesc').innerHTML += '<br><span style="color:#64748b;font-size:12px">Esta ação não pode ser desfeita.</span>';
+  }
 
   document.getElementById('confirmBg').classList.add('open');
 }
@@ -1244,8 +1269,9 @@ async function executarDelete(){
         // Parcelado: deleta todos com mesma descrição + parcela_total + tipo
         url = `${SUPA_URL}/rest/v1/condo_transacoes?empresa=eq.${EMPRESA}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&parcela_total=eq.${t.parcela_total}`;
       } else {
-        // Fixo: deleta apenas os que têm recorrente=true com mesma descrição + tipo
-        url = `${SUPA_URL}/rest/v1/condo_transacoes?empresa=eq.${EMPRESA}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&recorrente=eq.true`;
+        // Fixo: deleta este mês e os próximos (data >= data do selecionado)
+        const dataEnc = encodeURIComponent(t.data);
+        url = `${SUPA_URL}/rest/v1/condo_transacoes?empresa=eq.${EMPRESA}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&recorrente=eq.true&data=gte.${dataEnc}`;
       }
       const res = await fetch(url, {method:'DELETE', headers:h});
       if(res.ok || res.status===204){
