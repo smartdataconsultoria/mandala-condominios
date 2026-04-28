@@ -192,6 +192,46 @@ html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:
 #toast.ok{border-color:rgba(52,201,126,.3);color:#34c97e}
 #toast.err{border-color:rgba(239,68,68,.3);color:#ef4444}
 @media(max-width:768px){.main,#admin-panel{padding:20px 16px}.sidebar{display:none}.metrics{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}.pbi3{grid-template-columns:1fr}}
+
+/* Metas & Projetos — cards expandíveis */
+.mp-tabs{display:flex;gap:4px;margin-bottom:18px;background:#0f1117;border-radius:8px;padding:3px;width:fit-content}
+.mp-tab{padding:6px 16px;border-radius:6px;border:none;background:none;color:rgba(241,245,249,.4);font-size:13px;font-weight:600;cursor:pointer;transition:.2s}
+.mp-tab.on{background:rgba(245,166,35,.15);color:#f5a623}
+.mp-tab:hover:not(.on){color:#f1f5f9}
+.mp-card{background:#111827;border:1px solid rgba(245,166,35,.08);border-radius:14px;margin-bottom:12px;overflow:hidden;transition:.2s;cursor:pointer}
+.mp-card:hover{border-color:rgba(245,166,35,.2)}
+.mp-top{display:flex;align-items:flex-start;gap:14px;padding:18px 20px}
+.mp-icon{width:46px;height:46px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.mp-info{flex:1;min-width:0}
+.mp-title{font-size:15px;font-weight:600;color:#f1f5f9;margin-bottom:3px}
+.mp-desc{font-size:12px;color:rgba(241,245,249,.35);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mp-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.mp-prog{padding:0 20px 16px}
+.mp-prog-row{display:flex;justify-content:space-between;font-size:12px;color:rgba(241,245,249,.35);margin-bottom:6px}
+.mp-prog-row strong{color:#f1f5f9;font-size:13px}
+.mp-bar{height:7px;background:#1e2130;border-radius:99px;overflow:hidden;margin-bottom:5px}
+.mp-fill{height:100%;border-radius:99px;transition:width .6s ease}
+.mp-falta{font-size:11px;color:rgba(241,245,249,.25);text-align:right}
+.mp-body{display:none;border-top:1px solid rgba(245,166,35,.06);padding:16px 20px}
+.mp-body.open{display:block}
+.mp-obs{background:rgba(255,255,255,.03);border-radius:8px;padding:10px 14px;font-size:12px;color:rgba(241,245,249,.5);line-height:1.5;margin-bottom:12px}
+.mp-obs-label{font-size:10px;font-weight:700;color:rgba(241,245,249,.25);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.mp-etapa{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.mp-etapa:last-child{border:none}
+.mp-enum{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.mp-einfo{flex:1}
+.mp-enome{font-size:13px;font-weight:500;color:#f1f5f9}
+.mp-emeta{font-size:11px;color:rgba(241,245,249,.3);margin-top:2px;display:flex;gap:12px;flex-wrap:wrap}
+.mp-eobs{font-size:11px;color:rgba(241,245,249,.35);margin-top:3px;font-style:italic}
+.mp-estat{font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap;flex-shrink:0;align-self:flex-start;margin-top:3px}
+.mp-contrato{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(241,245,249,.5);border-radius:7px;padding:6px 12px;font-size:12px;cursor:pointer;text-decoration:none;margin-top:8px;transition:.2s}
+.mp-contrato:hover{border-color:rgba(245,166,35,.4);color:#f5a623}
+.mp-sindico-actions{display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.05)}
+.mp-btn-edit{background:rgba(255,255,255,.05);border:none;color:rgba(241,245,249,.5);border-radius:7px;padding:6px 12px;font-size:12px;cursor:pointer;transition:.2s}
+.mp-btn-edit:hover{background:rgba(255,255,255,.08);color:#f1f5f9}
+.mp-btn-del{background:none;border:1px solid rgba(239,68,68,.2);color:#ef4444;border-radius:7px;padding:6px 12px;font-size:12px;cursor:pointer;transition:.2s}
+.mp-btn-del:hover{background:rgba(239,68,68,.08)}
+.mp-empty{text-align:center;padding:48px 20px;color:rgba(241,245,249,.2);font-size:14px}
 </style>
 </head>
 <body>
@@ -460,7 +500,9 @@ var NAVS={
     {id:'calendario',ic:'◷',lb:'Calendário'},
     {id:'comunicados',ic:'◎',lb:'Comunicados'},
     {id:'mensagens',ic:'✉',lb:'Fale com Síndico',badge:2},
-    {id:'boletos',ic:'◫',lb:'Boletos & Taxas'}
+    {id:'boletos',ic:'◫',lb:'Boletos & Taxas'},
+    {sec:'Administração'},
+    {id:'_metas_admin',ic:'🏗',lb:'Metas & Projetos',href:'metas.html'}
   ],
   conselho:[
     {sec:'Principal'},
