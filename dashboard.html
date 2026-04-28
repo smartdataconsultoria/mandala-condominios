@@ -488,6 +488,7 @@ var NAVS={
   sindico:[
     {sec:'Principal'},
     {id:'dashboard',ic:'◎',lb:'Dashboard'},
+    {id:'painel',ic:'◉',lb:'Painel do Síndico'},
     {id:'financeiro',ic:'$',lb:'Financeiro'},
     {id:'metas',ic:'◈',lb:'Metas & Projetos'},
     {sec:'Financeiro Avançado'},
@@ -554,7 +555,7 @@ function buildSidebar(){
 function navegar(page){
   document.querySelectorAll('.sb-item').forEach(function(x){x.classList.remove('on');});
   var el=document.getElementById('sb-'+page);if(el)el.classList.add('on');
-  var pages={dashboard:pgDashboard,financeiro:pgFinanceiro,metas:pgMetas,documentos:pgDocumentos,calendario:pgCalendario,comunicados:pgComunicados,mensagens:pgMensagens,boletos:pgBoletos};
+  var pages={dashboard:pgDashboard,painel:pgPainel,financeiro:pgFinanceiro,metas:pgMetas,documentos:pgDocumentos,calendario:pgCalendario,comunicados:pgComunicados,mensagens:pgMensagens,boletos:pgBoletos};
   var cont=document.getElementById('pageContent');
   if(pages[page])pages[page](cont);
 }
@@ -676,6 +677,326 @@ function saudacao(){
   var h=new Date().getHours(),p=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite',e=h<12?'☀️':h<18?'👋':'🌙';
   var n=usr._nome?usr._nome.split(' ')[0]:'';
   return '<span>'+(n?p+', '+n+'!':p+'!')+'</span> <span style="font-size:22px">'+e+'</span>';
+}
+
+
+// ══════════════════════════════════════════════════════════
+// PAINEL DO SÍNDICO — dados reais do Supabase
+// ══════════════════════════════════════════════════════════
+async function pgPainel(cont){
+  cont.innerHTML=`
+    <div class="greeting">
+      <div class="g-title" style="font-size:24px;display:flex;align-items:center;gap:12px">
+        📊 Painel do Síndico
+        <span style="font-size:13px;font-weight:400;color:rgba(241,245,249,.4);background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.2);padding:3px 10px;border-radius:20px">Dados em tempo real</span>
+      </div>
+      <div class="g-sub">Visão executiva completa do Edifício Mandala.</div>
+    </div>
+    <div id="painelConteudo"><div style="text-align:center;padding:60px;color:rgba(241,245,249,.3)">⏳ Carregando dados...</div></div>`;
+  await renderPainel();
+}
+
+async function renderPainel(){
+  var h={'apikey':SB_KEY,'Authorization':'Bearer '+(usr?.token||SB_KEY)};
+  var hoje=new Date(), anoMes=hoje.toISOString().slice(0,7);
+  var primDia=anoMes+'-01';
+  var ultDia=new Date(hoje.getFullYear(),hoje.getMonth()+1,0).toISOString().slice(0,10);
+  var mes3Atras=new Date(hoje.getFullYear(),hoje.getMonth()-2,1).toISOString().slice(0,10);
+
+  try{
+    var [rTrans,rProj,rMetas] = await Promise.all([
+      fetch(SB_URL+'/rest/v1/condo_transacoes?empresa=eq.'+EMPRESA+'&order=data.desc&limit=200',{headers:h}),
+      fetch(SB_URL+'/rest/v1/condo_projetos?empresa=eq.'+EMPRESA+'&order=created_at.desc',{headers:h}),
+      fetch(SB_URL+'/rest/v1/condo_metas?empresa=eq.'+EMPRESA+'&order=created_at.desc',{headers:h}),
+    ]);
+    var transacoes = rTrans.ok ? await rTrans.json() : [];
+    var projetos   = rProj.ok  ? await rProj.json()  : [];
+    var metas      = rMetas.ok ? await rMetas.json()  : [];
+
+    // ── CALCULOS FINANCEIROS ──────────────────────────────
+    var tMes    = transacoes.filter(function(t){ return t.data && t.data.startsWith(anoMes); });
+    var recMes  = tMes.filter(function(t){return t.tipo==='receita';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
+    var desMes  = tMes.filter(function(t){return t.tipo==='despesa';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
+    var saldoMes= recMes - desMes;
+    var pendMes = tMes.filter(function(t){return t.situacao==='pendente';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
+
+    // Despesas por categoria (mês atual)
+    var catMap={};
+    tMes.filter(function(t){return t.tipo==='despesa';}).forEach(function(t){
+      var c=t.descricao||'Outros';
+      catMap[c]=(catMap[c]||0)+parseFloat(t.valor||0);
+    });
+    var cats=Object.entries(catMap).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+
+    // Últimos 3 meses
+    var mesesLabel=[], mesesRec=[], mesesDes=[];
+    for(var i=2;i>=0;i--){
+      var d=new Date(hoje.getFullYear(),hoje.getMonth()-i,1);
+      var ym=d.toISOString().slice(0,7);
+      var mNome=d.toLocaleString('pt-BR',{month:'short'}).replace('.','');
+      mesesLabel.push(mNome.charAt(0).toUpperCase()+mNome.slice(1));
+      var tM=transacoes.filter(function(t){return t.data&&t.data.startsWith(ym);});
+      mesesRec.push(tM.filter(function(t){return t.tipo==='receita';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0));
+      mesesDes.push(tM.filter(function(t){return t.tipo==='despesa';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0));
+    }
+
+    // Fixos (recorrentes)
+    var fixos=transacoes.filter(function(t){return t.recorrente&&t.tipo==='despesa';});
+    var totalFixosMes=[...new Map(fixos.map(function(t){return[t.descricao,t];})).values()].reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
+
+    // Projeção (média dos últimos 3 meses de despesa)
+    var mediaDes=(mesesDes[0]+mesesDes[1]+mesesDes[2])/3;
+    var projecaoSaldo=recMes - mediaDes;
+
+    // ── PROJETOS ─────────────────────────────────────────
+    var projAguard=projetos.filter(function(p){return p.status==='aguardando'||p.status==='votacao';}).length;
+    var projAprov =projetos.filter(function(p){return p.status==='aprovado'||p.status==='execucao';}).length;
+    var projConc  =projetos.filter(function(p){return p.status==='concluido';}).length;
+
+    // ── METAS ─────────────────────────────────────────────
+    var totalMetaVal=metas.reduce(function(s,m){return s+parseFloat(m.valor_meta||0);},0);
+    var totalMetaArr=metas.reduce(function(s,m){return s+parseFloat(m.valor_arrecadado||0);},0);
+    var pctMetas=totalMetaVal>0?Math.min(100,Math.round(totalMetaArr/totalMetaVal*100)):0;
+
+    // ── ALERTAS ───────────────────────────────────────────
+    var alertas=[];
+    if(pendMes>0) alertas.push({ic:'⚠️',cor:'#f5a623',txt:'R$ '+pendMes.toLocaleString('pt-BR',{minimumFractionDigits:2})+' em pagamentos pendentes este mês'});
+    if(saldoMes<0) alertas.push({ic:'🔴',cor:'#ef4444',txt:'Saldo negativo no mês: '+brl(saldoMes)});
+    if(projAguard>0) alertas.push({ic:'📋',cor:'#3b82f6',txt:projAguard+' projeto(s) aguardando aprovação do conselho'});
+    if(desMes>recMes*0.85) alertas.push({ic:'📈',cor:'#f97316',txt:'Despesas acima de 85% da receita do mês'});
+    if(alertas.length===0) alertas.push({ic:'✅',cor:'#22c55e',txt:'Nenhum alerta crítico no momento'});
+
+    // ── ÚLTIMAS TRANSAÇÕES ────────────────────────────────
+    var ultimas=transacoes.slice(0,6);
+
+    // ── MAX para gráfico de barras ────────────────────────
+    var maxBar=Math.max.apply(null,mesesRec.concat(mesesDes))||1;
+    function barH(v){return Math.max(4,Math.round(v/maxBar*64));}
+
+    // ── RENDER ────────────────────────────────────────────
+    var mesAtualNome=hoje.toLocaleString('pt-BR',{month:'long',year:'numeric'});
+
+    document.getElementById('painelConteudo').innerHTML=`
+
+      <!-- KPIs PRINCIPAIS -->
+      <div class="metrics" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
+        <div class="mc">
+          <div class="mc-lbl">Receita ${mesAtualNome}</div>
+          <div class="mc-val g">${brl(recMes)}</div>
+          <div class="mc-sub" style="color:rgba(241,245,249,.35)">mês atual</div>
+        </div>
+        <div class="mc">
+          <div class="mc-lbl">Despesas ${mesAtualNome}</div>
+          <div class="mc-val r">${brl(desMes)}</div>
+          <div class="mc-sub" style="color:${desMes>recMes?'#ef4444':'rgba(241,245,249,.35)'}">
+            ${desMes>0?Math.round(desMes/Math.max(recMes,1)*100)+'% da receita':'sem despesas'}
+          </div>
+        </div>
+        <div class="mc">
+          <div class="mc-lbl">Saldo do Mês</div>
+          <div class="mc-val ${saldoMes>=0?'g':'r'}">${brl(saldoMes)}</div>
+          <div class="mc-sub" style="color:${saldoMes>=0?'#34c97e':'#ef4444'}">${saldoMes>=0?'↑ Superávit':'↓ Déficit'}</div>
+        </div>
+        <div class="mc">
+          <div class="mc-lbl">Pendências</div>
+          <div class="mc-val ${pendMes>0?'o':'g'}">${brl(pendMes)}</div>
+          <div class="mc-sub" style="color:rgba(241,245,249,.35)">a receber/pagar</div>
+        </div>
+      </div>
+
+      <!-- ALERTAS -->
+      <div style="margin-bottom:20px">
+        <div style="font-size:13px;font-weight:700;color:rgba(241,245,249,.5);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">🔔 Alertas</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${alertas.map(function(a){return`
+            <div style="display:flex;align-items:center;gap:12px;background:${a.cor}10;border:1px solid ${a.cor}25;border-radius:10px;padding:10px 14px">
+              <span style="font-size:18px">${a.ic}</span>
+              <span style="font-size:13px;color:rgba(241,245,249,.8)">${a.txt}</span>
+            </div>`;}).join('')}
+        </div>
+      </div>
+
+      <!-- GRÁFICO + CATEGORIAS -->
+      <div class="g2" style="margin-bottom:20px">
+        <div class="card">
+          <div class="ct">Receitas vs Despesas — últimos 3 meses</div>
+          <div style="display:flex;align-items:flex-end;gap:20px;height:90px;padding:10px 0 0;justify-content:center">
+            ${mesesLabel.map(function(m,i){return`
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1">
+                <div style="display:flex;align-items:flex-end;gap:4px;height:64px">
+                  <div style="width:18px;height:${barH(mesesRec[i])}px;background:#22c55e;border-radius:4px 4px 0 0;opacity:.8" title="Receita: ${brl(mesesRec[i])}"></div>
+                  <div style="width:18px;height:${barH(mesesDes[i])}px;background:#ef4444;border-radius:4px 4px 0 0;opacity:.8" title="Despesa: ${brl(mesesDes[i])}"></div>
+                </div>
+                <div style="font-size:11px;color:rgba(241,245,249,.35)">${m}</div>
+              </div>`;}).join('')}
+          </div>
+          <div style="display:flex;gap:16px;margin-top:12px;font-size:11px;color:rgba(241,245,249,.4);justify-content:center">
+            <span><span style="display:inline-block;width:10px;height:10px;background:#22c55e;border-radius:2px;margin-right:4px"></span>Receita</span>
+            <span><span style="display:inline-block;width:10px;height:10px;background:#ef4444;border-radius:2px;margin-right:4px"></span>Despesa</span>
+          </div>
+          <div style="border-top:1px solid rgba(245,166,35,.08);margin-top:14px;padding-top:12px">
+            <div style="font-size:12px;color:rgba(241,245,249,.4);margin-bottom:6px">Projeção para o mês (base: média 3 meses)</div>
+            <div style="display:flex;justify-content:space-between;font-size:13px">
+              <span style="color:rgba(241,245,249,.5)">Despesa média estimada:</span>
+              <strong style="color:#f5a623">${brl(mediaDes)}</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-top:4px">
+              <span style="color:rgba(241,245,249,.5)">Saldo projetado:</span>
+              <strong style="color:${projecaoSaldo>=0?'#22c55e':'#ef4444'}">${brl(projecaoSaldo)}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="ct">Top Despesas do Mês</div>
+          ${cats.length?cats.map(function(c){
+            var pct=Math.round(c[1]/Math.max(desMes,1)*100);
+            return`<div style="margin-bottom:12px">
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+                <span style="color:rgba(241,245,249,.7)">${esc(c[0])}</span>
+                <span style="font-weight:700;color:#ef6060">${brl(c[1])}</span>
+              </div>
+              <div class="prog"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#ef4444,#f97316);border-radius:99px;transition:width .6s"></div></div>
+              <div style="font-size:10px;color:rgba(241,245,249,.25);text-align:right;margin-top:2px">${pct}% do total</div>
+            </div>`;
+          }).join(''):`<div style="color:rgba(241,245,249,.25);font-size:13px;text-align:center;padding:20px">Sem despesas no mês</div>`}
+        </div>
+      </div>
+
+      <!-- PROJETOS + METAS -->
+      <div class="g2" style="margin-bottom:20px">
+        <div class="card">
+          <div class="ct" style="display:flex;align-items:center;justify-content:space-between">
+            Projetos
+            <a href="metas.html" style="font-size:12px;color:#f5a623;text-decoration:none">Gerenciar →</a>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+            <div style="background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.15);border-radius:10px;padding:12px;text-align:center">
+              <div style="font-size:22px;font-weight:800;color:#f5a623">${projAguard}</div>
+              <div style="font-size:11px;color:rgba(241,245,249,.4);margin-top:2px">Aguardando</div>
+            </div>
+            <div style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.15);border-radius:10px;padding:12px;text-align:center">
+              <div style="font-size:22px;font-weight:800;color:#3b82f6">${projAprov}</div>
+              <div style="font-size:11px;color:rgba(241,245,249,.4);margin-top:2px">Em Execução</div>
+            </div>
+            <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.15);border-radius:10px;padding:12px;text-align:center">
+              <div style="font-size:22px;font-weight:800;color:#22c55e">${projConc}</div>
+              <div style="font-size:11px;color:rgba(241,245,249,.4);margin-top:2px">Concluídos</div>
+            </div>
+          </div>
+          ${projetos.slice(0,3).map(function(p){
+            var sl={aguardando:'⏳ Aguardando',votacao:'🗳 Em Votação',aprovado:'✓ Aprovado',execucao:'🔨 Em Execução',concluido:'✅ Concluído',pausado:'⏸ Pausado'};
+            var sc={aguardando:'#f5a623',votacao:'#3b82f6',aprovado:'#a855f7',execucao:'#06b6d4',concluido:'#22c55e',pausado:'#ef4444'};
+            return`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+              <span style="font-size:20px">🔨</span>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:13px;font-weight:600;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.nome)}</div>
+                <div style="font-size:11px;color:rgba(241,245,249,.35)">${(p.propostas||[]).length} proposta(s)</div>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:${sc[p.status]||'#f5a623'};white-space:nowrap">${sl[p.status]||'—'}</span>
+            </div>`;
+          }).join('')}
+          ${!projetos.length?'<div style="text-align:center;color:rgba(241,245,249,.25);font-size:13px;padding:16px">Nenhum projeto cadastrado</div>':''}
+        </div>
+
+        <div class="card">
+          <div class="ct" style="display:flex;align-items:center;justify-content:space-between">
+            Metas de Arrecadação
+            <a href="metas.html" style="font-size:12px;color:#f5a623;text-decoration:none">Gerenciar →</a>
+          </div>
+          <div style="background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.12);border-radius:10px;padding:14px;margin-bottom:14px">
+            <div style="font-size:12px;color:rgba(241,245,249,.4);margin-bottom:6px">Total geral de arrecadação</div>
+            <div class="prog" style="margin-bottom:6px"><div style="height:100%;width:${pctMetas}%;background:linear-gradient(90deg,#f5a623,#22c55e);border-radius:99px;transition:width .6s"></div></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px">
+              <span style="color:#f5a623;font-weight:700">${brl(totalMetaArr)} arrecadados</span>
+              <span style="color:rgba(241,245,249,.4)">${pctMetas}% de ${brl(totalMetaVal)}</span>
+            </div>
+          </div>
+          ${metas.slice(0,4).map(function(m){
+            var meta=parseFloat(m.valor_meta||0),arr=parseFloat(m.valor_arrecadado||0);
+            var pct=meta>0?Math.min(100,Math.round(arr/meta*100)):0;
+            return`<div style="margin-bottom:12px">
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+                <span style="color:rgba(241,245,249,.7)">💰 ${esc(m.nome)}</span>
+                <span style="color:#f5a623;font-weight:700">${pct}%</span>
+              </div>
+              <div class="prog"><div style="height:100%;width:${pct}%;background:${m.cor||'#22c55e'};border-radius:99px"></div></div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:rgba(241,245,249,.25);margin-top:2px">
+                <span>${brl(arr)}</span><span>Meta: ${brl(meta)}</span>
+              </div>
+            </div>`;
+          }).join('')}
+          ${!metas.length?'<div style="text-align:center;color:rgba(241,245,249,.25);font-size:13px;padding:16px">Nenhuma meta cadastrada</div>':''}
+        </div>
+      </div>
+
+      <!-- DESPESAS FIXAS + ÚLTIMAS TRANSAÇÕES -->
+      <div class="g2" style="margin-bottom:20px">
+        <div class="card">
+          <div class="ct">Despesas Fixas Recorrentes</div>
+          <div style="font-size:12px;color:rgba(241,245,249,.35);margin-bottom:12px">Lançamentos marcados como fixos no sistema</div>
+          ${totalFixosMes>0
+            ?`<div style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.12);border-radius:10px;padding:12px;margin-bottom:12px;text-align:center">
+                <div style="font-size:11px;color:rgba(241,245,249,.4)">Total fixo estimado/mês</div>
+                <div style="font-size:22px;font-weight:800;color:#ef4444;margin-top:4px">${brl(totalFixosMes)}</div>
+              </div>`
+            :`<div style="color:rgba(241,245,249,.25);font-size:13px;text-align:center;padding:12px">Nenhuma despesa fixa encontrada</div>`}
+          <div style="font-size:12px;color:rgba(241,245,249,.35);margin-bottom:8px">Projeção próximo mês:</div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+            <span style="color:rgba(241,245,249,.5)">Despesas fixas</span>
+            <strong style="color:#ef4444">${brl(totalFixosMes)}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+            <span style="color:rgba(241,245,249,.5)">Despesas variáveis (média)</span>
+            <strong style="color:#f97316">${brl(Math.max(0,mediaDes-totalFixosMes))}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;margin-top:2px;background:rgba(245,166,35,.05);border-radius:7px;padding:8px 10px">
+            <span style="color:#f1f5f9;font-weight:600">Total projetado</span>
+            <strong style="color:#f5a623">${brl(mediaDes)}</strong>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="ct" style="display:flex;align-items:center;justify-content:space-between">
+            Últimas Transações
+            <a href="transacoes.html" style="font-size:12px;color:#f5a623;text-decoration:none">Ver todas →</a>
+          </div>
+          ${ultimas.length?ultimas.map(function(t){
+            var rec=t.tipo==='receita';
+            var d=t.data?t.data.split('-').reverse().join('/').slice(0,5):'';
+            return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+              <div style="width:28px;height:28px;border-radius:7px;background:${rec?'rgba(34,197,94,.15)':'rgba(239,68,68,.15)'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:${rec?'#22c55e':'#ef4444'};flex-shrink:0">${rec?'↑':'↓'}</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:13px;color:#f1f5f9;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.descricao||'—')}</div>
+                <div style="font-size:11px;color:rgba(241,245,249,.3)">${d} · ${t.situacao==='pendente'?'⏳ Pendente':'✓ '+(rec?'Recebido':'Pago')}</div>
+              </div>
+              <div style="font-size:13px;font-weight:700;color:${rec?'#22c55e':'#ef6060'};white-space:nowrap">${rec?'+':'-'}${brl(t.valor)}</div>
+            </div>`;
+          }).join(''):`<div style="text-align:center;color:rgba(241,245,249,.25);font-size:13px;padding:20px">Nenhuma transação encontrada</div>`}
+        </div>
+      </div>
+
+      <!-- ATALHOS -->
+      <div style="font-size:13px;font-weight:700;color:rgba(241,245,249,.5);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px">Acesso Rápido</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        ${[
+          {href:'transacoes.html',ic:'↕',cor:'rgba(245,166,35,.12)',lb:'Transações',ds:'Lançar receitas e despesas'},
+          {href:'orcamento.html',ic:'◩',cor:'rgba(52,201,126,.12)',lb:'Orçamento',ds:'Previsto vs realizado'},
+          {href:'metas.html',ic:'🏗',cor:'rgba(168,85,247,.12)',lb:'Metas & Projetos',ds:'Gerenciar projetos'},
+          {href:'categorias.html',ic:'🏷',cor:'rgba(79,142,247,.12)',lb:'Categorias',ds:'Categorias e contas'},
+          {href:'moradores.html',ic:'🏘',cor:'rgba(245,166,35,.1)',lb:'Moradores',ds:'Gestão de moradores'},
+          {href:'documentos.html',ic:'▤',cor:'rgba(52,201,126,.1)',lb:'Documentos',ds:'Repositório de documentos'},
+        ].map(function(a){return`
+          <a href="${a.href}" style="text-decoration:none;display:flex;align-items:center;gap:12px;background:#111827;border:1px solid rgba(245,166,35,.1);border-radius:12px;padding:14px;transition:all .2s" onmouseover="this.style.borderColor='rgba(245,166,35,.35)'" onmouseout="this.style.borderColor='rgba(245,166,35,.1)'">
+            <div style="width:38px;height:38px;border-radius:9px;background:${a.cor};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${a.ic}</div>
+            <div><div style="font-size:13px;font-weight:600;color:#f1f5f9">${a.lb}</div><div style="font-size:11px;color:rgba(241,245,249,.3);margin-top:1px">${a.ds}</div></div>
+            <span style="margin-left:auto;font-size:11px;color:#f5a623">↗</span>
+          </a>`;}).join('')}
+      </div>
+    `;
+  }catch(e){
+    document.getElementById('painelConteudo').innerHTML='<div style="color:#ef4444;padding:20px">Erro ao carregar dados: '+e.message+'</div>';
+  }
 }
 
 function pgDashboard(cont){
