@@ -467,32 +467,35 @@ const fmt = v => 'R$ '+parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionD
 const parseBRL = s => parseFloat((s||'0').replace(/R\$\s*/g,'').replace(/\./g,'').replace(',','.'))||0;
 const fmtDate = s => { if(!s) return ''; const [y,m,d]=s.split('-'); return `${d}/${m}/${y}`; };
 
+// ── ADMINS (mesma lista do dashboard) ───────────────────
+const ADMINS = ['admrafaelcavalcanti@gmail.com','tecnologia@smartdataconsultoria.com'];
+
 // ── INIT ─────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async ()=>{
-  // Checar se é síndico
+  // Checar se é síndico — mesma lógica do dashboard
   try{
-    const tk = getToken();
-    if(tk){
-      const r = await fetch(`${SUPA_URL}/rest/v1/condo_usuarios?empresa=eq.${EMPRESA}&select=role`,
-        {headers:{...hdrs(),'Authorization':`Bearer ${tk}`}});
-      if(r.ok){
-        const d = await r.json();
-        _isSindico = d[0]?.role === 'sindico';
+    const sessRaw = localStorage.getItem('mandala_session');
+    if(sessRaw){
+      const sess = JSON.parse(sessRaw);
+      const email = sess?.email || sess?.user?.email || '';
+      const perfil = localStorage.getItem('mandala_perfil') || '';
+      document.getElementById('navUser').textContent = email;
+      _isSindico = ADMINS.indexOf(email) !== -1 || perfil === 'sindico';
+    } else {
+      // Fallback: checar token Supabase
+      const k = Object.keys(localStorage).find(k=>k.includes('auth-token'));
+      if(k){
+        const sess = JSON.parse(localStorage.getItem(k));
+        const email = sess?.user?.email || '';
+        document.getElementById('navUser').textContent = email;
+        _isSindico = ADMINS.indexOf(email) !== -1;
       }
     }
-  } catch{}
-
-  // Email na nav
-  try{
-    const k = Object.keys(localStorage).find(k=>k.includes('auth-token'));
-    if(k){
-      const sess = JSON.parse(localStorage.getItem(k));
-      document.getElementById('navUser').textContent = sess?.user?.email || '';
-    }
-  } catch{}
+  } catch(e){ console.warn('Auth check:', e); }
 
   if(_isSindico){
     document.getElementById('btnNovo').style.display='flex';
+    document.getElementById('btnNovo').innerHTML='+ Novo Projeto';
     document.getElementById('navRole').style.display='inline-flex';
   }
 
@@ -516,7 +519,7 @@ function setTab(tab, el){
 
   // Botão muda de label
   const btn = document.getElementById('btnNovo');
-  btn.textContent = tab==='projetos' ? '+ Novo Projeto' : '+ Nova Meta';
+  btn.innerHTML = tab==='projetos' ? '+ Novo Projeto' : '+ Nova Meta';
 }
 
 // ── CARREGAR ─────────────────────────────────────────────
@@ -820,8 +823,8 @@ function abrirModal(){
   _iconesSel.proj='🏗'; _coresSel.proj='#f5a623';
   renderIconGrid('iconGrid','proj');
   renderCorGrid('corGrid','proj');
-  document.getElementById('modalTitulo').textContent = _tab==='projetos' ? 'Novo Projeto' : '';
   if(_tab==='metas'){ abrirModalMeta(); return; }
+  document.getElementById('modalTitulo').textContent = 'Novo Projeto';
   document.getElementById('modalBg').classList.add('open');
 }
 function fecharModal(){
