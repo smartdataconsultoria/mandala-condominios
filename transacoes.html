@@ -960,6 +960,7 @@ async function salvarLancamento(){
   if(!data){ showAlert('Informe a data.','error'); return; }
 
   btn.disabled=true; btn.textContent='Salvando...';
+  console.log('[DEBUG] _editId ao salvar:', _editId);
 
   // ── EDIÇÃO: atualiza apenas este lançamento pelo id ──────
   if(_editId){
