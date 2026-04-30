@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Prestação de Contas — Edifício Mandala</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#0f1117;color:#f1f5f9;min-height:100vh}
+nav{background:#1a1d27;border-bottom:1px solid #2a2d3e;padding:0 24px;display:flex;align-items:center;height:60px;gap:0;position:sticky;top:0;z-index:100}
+.nav-brand{display:flex;align-items:center;gap:10px;margin-right:32px;text-decoration:none}
+.nav-logo{width:36px;height:36px;background:#f5a623;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.nav-brand-text{font-size:13px;font-weight:700;color:#f1f5f9;line-height:1.2}
+.nav-brand-text span{display:block;font-size:10px;color:#94a3b8;font-weight:400}
+.nav-links{display:flex;gap:4px}
+.nav-links a{color:#94a3b8;text-decoration:none;padding:8px 14px;border-radius:6px;font-size:13px;transition:.2s}
+.nav-links a:hover{background:#2a2d3e;color:#f1f5f9}
+.nav-links a.active{background:#f5a623;color:#0f1117;font-weight:700}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.nav-role{background:#f5a62320;border:1px solid #f5a62340;color:#f5a623;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+.nav-user{font-size:13px;color:#64748b}
+
+main{max-width:1200px;margin:0 auto;padding:28px 24px}
+
+/* HEADER */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:16px;flex-wrap:wrap}
+.page-title{font-size:24px;font-weight:700}
+.page-sub{font-size:14px;color:#64748b;margin-top:4px}
+
+/* FILTROS */
+.filtros-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;align-items:center}
+.btn-mes{padding:5px 12px;border-radius:20px;border:1px solid #2a2d3e;background:transparent;color:rgba(241,245,249,.55);font-size:12px;font-weight:600;cursor:pointer;transition:.2s;font-family:inherit}
+.btn-mes:hover:not(:disabled){border-color:#f5a623;color:#f5a623}
+.btn-mes.ativo{background:#f5a62320;border-color:#f5a623;color:#f5a623;font-weight:700}
+.btn-mes:disabled{opacity:.3;cursor:default}
+.btn-todos{padding:5px 14px;border-radius:20px;border:1px solid #f5a623;background:#f5a62320;color:#f5a623;font-size:12px;font-weight:700;cursor:pointer;transition:.2s;font-family:inherit}
+.sep{width:1px;height:20px;background:#2a2d3e}
+
+/* MÉTRICAS */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.mc{background:#1a1d27;border:1px solid #2a2d3e;border-radius:12px;padding:16px 18px}
+.mc-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:rgba(241,245,249,.3);margin-bottom:8px}
+.mc-val{font-size:24px;font-weight:700;line-height:1;margin-bottom:4px}
+.mc-sub{font-size:12px;color:rgba(241,245,249,.35)}
+.g{color:#22c55e}.r{color:#ef4444}.o{color:#f5a623}.b{color:#3b82f6}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.card{background:#1a1d27;border:1px solid #2a2d3e;border-radius:12px;padding:20px}
+.ct{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(241,245,249,.35);margin-bottom:16px}
+.prog{height:6px;background:#2a2d3e;border-radius:99px;overflow:hidden;margin-bottom:2px}
+
+/* TABELA COMPARATIVA */
+.comp-table{width:100%;border-collapse:collapse;font-size:12px}
+.comp-table th{text-align:right;padding:8px 10px;color:rgba(241,245,249,.35);font-weight:700;font-size:10px;text-transform:uppercase;border-bottom:1px solid #2a2d3e}
+.comp-table th:first-child{text-align:left}
+.comp-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)}
+.comp-table td:first-child{text-align:left;font-weight:600;color:#f1f5f9}
+.comp-table td:not(:first-child){text-align:right;color:rgba(241,245,249,.65)}
+.comp-table tr:hover td{background:rgba(245,166,35,.03)}
+.comp-table tfoot td{font-weight:700;color:#f5a623;border-top:2px solid #2a2d3e;background:rgba(245,166,35,.04)}
+
+/* PROJEÇÃO */
+.proj-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.proj-row:last-child{border:none}
+.proj-mes{min-width:32px;font-size:11px;font-weight:700;color:rgba(241,245,249,.5)}
+.proj-bar-wrap{flex:1;height:5px;background:#1e2130;border-radius:99px;overflow:hidden}
+.proj-bar{height:100%;border-radius:99px;transition:width .6s}
+.proj-val{text-align:right;min-width:90px;font-size:12px}
+.proj-ico{min-width:16px;font-size:9px}
+
+/* LOADER */
+.loader{text-align:center;padding:60px;color:rgba(241,245,249,.25);font-size:14px}
+
+@media(max-width:768px){
+  .metrics{grid-template-columns:1fr 1fr}
+  .g2{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="dashboard.html">
+    <div class="nav-logo">🏠</div>
+    <div class="nav-brand-text">EDIFÍCIO<span>Mandala</span></div>
+  </a>
+  <div class="nav-links">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="financeiro.html" class="active">Financeiro</a>
+    <a href="transacoes.html">Transações</a>
+    <a href="categorias.html">Categorias</a>
+    <a href="metas.html">Metas & Projetos</a>
+  </div>
+  <div class="nav-right">
+    <span id="navRole" class="nav-role" style="display:none">🏛 Síndico</span>
+    <span class="nav-user" id="navUser"></span>
+    <a href="dashboard.html" style="color:#64748b;font-size:13px;text-decoration:none">⇤ Sair</a>
+  </div>
+</nav>
+
+<main>
+  <div class="page-header">
+    <div>
+      <div class="page-title">Prestação de Contas</div>
+      <div class="page-sub">Análise detalhada de gastos, categorias e projeções — dados reais.</div>
+    </div>
+    <select id="finAno" onchange="recarregar()" style="background:#1e2130;border:1px solid #2a2d3e;color:#f1f5f9;border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer">
+    </select>
+  </div>
+
+  <!-- Botões de mês -->
+  <div class="filtros-wrap" id="filtrosWrap">
+    <button class="btn-todos" id="btnTodos" onclick="toggleTodos()">Todos</button>
+    <div class="sep"></div>
+  </div>
+
+  <div id="conteudo"><div class="loader">⏳ Carregando dados...</div></div>
+</main>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────
+const SB_URL  = 'https://rbahvyejqybajnufftio.supabase.co';
+const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiYWh2eWVqcXliYWpudWZmdGlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjA5MjIsImV4cCI6MjA4OTYzNjkyMn0.nUIo2CT3o41YL1TT8Hrp5kq-_ZS-bMMf-gvUMCEyYMw';
+const EMPRESA = 'mandala';
+const ADMINS  = ['admrafaelcavalcanti@gmail.com','tecnologia@smartdataconsultoria.com'];
+
+const MESES_ABREV = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const MESES_FULL  = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const CORES_CAT   = ['#f5a623','#3b82f6','#a855f7','#22c55e','#ef4444','#06b6d4','#f97316','#ec4899'];
+
+// ── ESTADO ────────────────────────────────────────────────
+let _mesesSel = []; // [] = todos
+let _hoje     = new Date();
+let _mesHoje  = _hoje.getMonth();
+let _anoHoje  = _hoje.getFullYear();
+
+// ── UTILS ─────────────────────────────────────────────────
+const brl = v => 'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function getToken(){
+  const k = Object.keys(localStorage).find(k=>k.includes('auth-token'));
+  if(!k) return null;
+  try{ const s=JSON.parse(localStorage.getItem(k)); const tk=s?.access_token,exp=s?.expires_at; if(!tk)return null; if(exp&&Date.now()/1000>exp)return null; return tk; }catch{ return null; }
+}
+function hdrs(){ const tk=getToken(); return {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${tk||SB_KEY}`}; }
+
+// ── INIT ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', ()=>{
+  // Auth
+  try{
+    const sr = localStorage.getItem('mandala_session');
+    if(sr){ const s=JSON.parse(sr); const em=s?.email||s?.user?.email||''; document.getElementById('navUser').textContent=em; if(ADMINS.includes(em)||(localStorage.getItem('mandala_perfil')||'')==='sindico') document.getElementById('navRole').style.display='inline-flex'; }
+    else{ const k=Object.keys(localStorage).find(k=>k.includes('auth-token')); if(k){ const s=JSON.parse(localStorage.getItem(k)); document.getElementById('navUser').textContent=s?.user?.email||''; } }
+  }catch(e){}
+
+  // Popular seletor de ano
+  const sel = document.getElementById('finAno');
+  [_anoHoje-1, _anoHoje].forEach(y=>{ const o=document.createElement('option'); o.value=y; o.textContent=y; if(y===_anoHoje) o.selected=true; sel.appendChild(o); });
+
+  // Botões de mês
+  const wrap = document.getElementById('filtrosWrap');
+  MESES_ABREV.forEach((m,i)=>{
+    const btn = document.createElement('button');
+    btn.className='btn-mes'; btn.id='bm'+i; btn.textContent=m;
+    if(i > _mesHoje){ btn.disabled=true; }
+    btn.onclick = ()=>toggleMes(i);
+    wrap.appendChild(btn);
+  });
+
+  carregar();
+});
+
+// ── FILTROS ───────────────────────────────────────────────
+function toggleTodos(){ _mesesSel=[]; atualizarBotoes(); carregar(); }
+function toggleMes(i){
+  const idx=_mesesSel.indexOf(i);
+  if(idx>=0) _mesesSel.splice(idx,1); else _mesesSel.push(i);
+  atualizarBotoes(); carregar();
+}
+function atualizarBotoes(){
+  const nenhum = _mesesSel.length===0;
+  const btnT=document.getElementById('btnTodos');
+  btnT.style.background   = nenhum?'#f5a62320':'transparent';
+  btnT.style.borderColor  = nenhum?'#f5a623':'#2a2d3e';
+  btnT.style.color        = nenhum?'#f5a623':'rgba(241,245,249,.4)';
+  for(let m=0;m<12;m++){
+    const btn=document.getElementById('bm'+m); if(!btn) continue;
+    const sel=_mesesSel.includes(m);
+    btn.classList.toggle('ativo',sel);
+  }
+}
+function recarregar(){ _mesesSel=[]; atualizarBotoes(); carregar(); }
+
+// ── CARREGAR ─────────────────────────────────────────────
+async function carregar(){
+  document.getElementById('conteudo').innerHTML='<div class="loader">⏳ Carregando dados...</div>';
+  const ano    = parseInt(document.getElementById('finAno').value);
+  const h      = hdrs();
+  const primDia= `${ano}-01-01`;
+  const ultDia = `${ano}-12-31`;
+
+  try{
+    const [rTrans,rCats] = await Promise.all([
+      fetch(`${SB_URL}/rest/v1/condo_transacoes?empresa=eq.${EMPRESA}&data=gte.${primDia}&data=lte.${ultDia}&order=data.desc&limit=2000`,{headers:h}),
+      fetch(`${SB_URL}/rest/v1/condo_categorias?empresa=eq.${EMPRESA}`,{headers:h}),
+    ]);
+    const trans  = rTrans.ok ? await rTrans.json() : [];
+    const cats   = rCats.ok  ? await rCats.json()  : [];
+    const catMap = Object.fromEntries(cats.map(c=>[c.id,c]));
+
+    // Atualizar botões de mês — desabilitar meses futuros no ano atual
+    for(let m=0;m<12;m++){
+      const btn=document.getElementById('bm'+m); if(!btn) continue;
+      const temDados=trans.some(t=>parseInt((t.data||'').split('-')[1])-1===m);
+      const futuro=ano===_anoHoje && m>_mesHoje;
+      btn.disabled = futuro && !temDados;
+    }
+
+    // Agrupar por mês
+    const porMes = Array.from({length:12},()=>({rec:0,des:0,trans:[]}));
+    trans.forEach(t=>{
+      const m=parseInt((t.data||'').split('-')[1])-1;
+      if(m<0||m>11) return;
+      const v=parseFloat(t.valor||0);
+      if(t.tipo==='receita') porMes[m].rec+=v;
+      else if(t.tipo==='despesa') porMes[m].des+=v;
+      porMes[m].trans.push(t);
+    });
+
+    // Último mês com dados
+    let ultimoMes = ano<_anoHoje ? 11 : _mesHoje;
+    while(ultimoMes>0 && !porMes[ultimoMes].rec && !porMes[ultimoMes].des) ultimoMes--;
+
+    // Meses a considerar
+    const mesesFiltro = _mesesSel.length>0 ? _mesesSel.slice().sort((a,b)=>a-b) : null;
+    const mesRef      = mesesFiltro ? mesesFiltro[mesesFiltro.length-1] : ultimoMes;
+    const mesesTotais = mesesFiltro || Array.from({length:12},(_,i)=>i);
+
+    // Transações filtradas
+    const transFiltradas = mesesFiltro
+      ? mesesFiltro.flatMap(m=>porMes[m].trans)
+      : porMes[mesRef].trans;
+
+    // Totais
+    const totalRec = mesesTotais.reduce((s,m)=>s+porMes[m].rec,0);
+    const totalDes = mesesTotais.reduce((s,m)=>s+porMes[m].des,0);
+    const saldo    = totalRec - totalDes;
+
+    // Projeção — média últimos 3 meses com dados
+    const mesesComDados=[];
+    for(let m=ultimoMes;m>=0&&mesesComDados.length<3;m--) if(porMes[m].des>0) mesesComDados.push(porMes[m].des);
+    const mediaDes = mesesComDados.length ? mesesComDados.reduce((s,v)=>s+v,0)/mesesComDados.length : 0;
+    const mediaRec = (() => { const mr=[]; for(let m=ultimoMes;m>=0&&mr.length<3;m--) if(porMes[m].rec>0) mr.push(porMes[m].rec); return mr.length?mr.reduce((s,v)=>s+v,0)/mr.length:0; })();
+
+    // Categorias
+    const catMesMap={};
+    transFiltradas.filter(t=>t.tipo==='despesa').forEach(t=>{
+      const cat=catMap[t.categoria_id];
+      const chave=cat?.categoria||'Outros';
+      if(!catMesMap[chave]) catMesMap[chave]={val:0,sub:{}};
+      catMesMap[chave].val+=parseFloat(t.valor||0);
+      const sub=cat?.nome||'Sem subcategoria';
+      catMesMap[chave].sub[sub]=(catMesMap[chave].sub[sub]||0)+parseFloat(t.valor||0);
+    });
+    const catsMes=Object.entries(catMesMap).sort((a,b)=>b[1].val-a[1].val);
+
+    // Categorias anuais
+    const catAnoMap={};
+    trans.filter(t=>t.tipo==='despesa').forEach(t=>{
+      const cat=catMap[t.categoria_id]; const ch=cat?.categoria||'Outros';
+      catAnoMap[ch]=(catAnoMap[ch]||0)+parseFloat(t.valor||0);
+    });
+    const catsAno=Object.entries(catAnoMap).sort((a,b)=>b[1]-a[1]);
+
+    // Comparativo meses
+    const compMeses = mesesFiltro && mesesFiltro.length>1
+      ? mesesFiltro
+      : Array.from({length:6},(_,i)=>Math.max(0,ultimoMes-5+i)).filter(m=>m<=ultimoMes);
+    const topCats   = catsAno.slice(0,5).map(c=>c[0]);
+    const compData  = topCats.map(nome=>({
+      nome,
+      valores: compMeses.map(m=>{
+        let v=0;
+        porMes[m].trans.filter(t=>t.tipo==='despesa').forEach(t=>{
+          if((catMap[t.categoria_id]?.categoria||'Outros')===nome) v+=parseFloat(t.valor||0);
+        });
+        return v;
+      })
+    }));
+
+    // Label
+    const mesFiltrado = _mesesSel.length>0;
+    const labelPeriodo = !mesFiltrado ? String(ano)
+      : _mesesSel.length===1 ? `${MESES_FULL[_mesesSel[0]]} ${ano}`
+      : `${_mesesSel.map(m=>MESES_ABREV[m]).join('+')} ${ano}`;
+
+    const maxBar = Math.max(...porMes.map(m=>Math.max(m.rec,m.des)),1);
+    const maxCat = catsMes.length ? catsMes[0][1].val : 1;
+
+    // ── RENDER ────────────────────────────────────────────
+    document.getElementById('conteudo').innerHTML = `
+      <!-- KPIs -->
+      <div class="metrics" style="margin-bottom:20px">
+        <div class="mc">
+          <div class="mc-lbl">Receitas — ${labelPeriodo}</div>
+          <div class="mc-val g">${brl(totalRec)}</div>
+          <div class="mc-sub">${mesFiltrado ? _mesesSel.length+' mês(es)' : mesesComDados.length+' meses c/ dados'}</div>
+        </div>
+        <div class="mc">
+          <div class="mc-lbl">Despesas — ${labelPeriodo}</div>
+          <div class="mc-val r">${brl(totalDes)}</div>
+          <div class="mc-sub">${catsMes.length} categorias</div>
+        </div>
+        <div class="mc">
+          <div class="mc-lbl">Saldo — ${labelPeriodo}</div>
+          <div class="mc-val ${saldo>=0?'g':'r'}">${brl(saldo)}</div>
+          <div class="mc-sub" style="color:${saldo>=0?'#22c55e':'#ef4444'}">${saldo>=0?'↑ Superávit':'↓ Déficit'}</div>
+        </div>
+        <div class="mc" style="background:rgba(245,166,35,.05);border:1px solid rgba(245,166,35,.15)">
+          <div class="mc-lbl" style="color:#f5a623">📈 Projeção — próximo mês</div>
+          <div style="display:flex;flex-direction:column;gap:5px;margin-top:4px">
+            <div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:rgba(241,245,249,.4)">Receita est.</span><span style="font-size:13px;font-weight:700;color:#22c55e">${brl(mediaRec)}</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:rgba(241,245,249,.4)">Despesa est.</span><span style="font-size:13px;font-weight:700;color:#ef4444">${brl(mediaDes)}</span></div>
+            <div style="border-top:1px solid rgba(245,166,35,.12);margin-top:3px;padding-top:5px;display:flex;justify-content:space-between">
+              <span style="font-size:11px;font-weight:700;color:#f5a623">Saldo proj.</span>
+              <span style="font-size:15px;font-weight:800;color:${(mediaRec-mediaDes)>=0?'#22c55e':'#ef4444'}">${brl(mediaRec-mediaDes)}</span>
+            </div>
+          </div>
+          <div class="mc-sub" style="margin-top:5px">média ${mesesComDados.length} meses</div>
+        </div>
+      </div>
+
+      <!-- GRÁFICO ANUAL + CATEGORIAS -->
+      <div class="g2">
+        <div class="card">
+          <div class="ct">Receitas × Despesas — ${ano}</div>
+          <div style="display:flex;align-items:flex-end;gap:5px;height:110px;padding-top:10px">
+            ${porMes.map((m,i)=>{
+              const rH=Math.max(2,Math.round(m.rec/maxBar*90));
+              const dH=Math.max(2,Math.round(m.des/maxBar*90));
+              const futuro=ano===_anoHoje&&i>_mesHoje&&!m.rec&&!m.des;
+              const sel=_mesesSel.includes(i);
+              return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;opacity:${futuro?.35:sel||!_mesesSel.length?1:.4};transition:.3s">
+                <div style="display:flex;align-items:flex-end;gap:2px;height:90px">
+                  <div style="width:8px;height:${rH}px;background:${futuro?'rgba(34,197,94,.2)':'#22c55e'};border-radius:3px 3px 0 0" title="Rec ${MESES_ABREV[i]}: ${brl(m.rec)}"></div>
+                  <div style="width:8px;height:${dH}px;background:${futuro?'rgba(239,68,68,.2)':'#ef4444'};border-radius:3px 3px 0 0" title="Des ${MESES_ABREV[i]}: ${brl(m.des)}"></div>
+                </div>
+                <div style="font-size:9px;color:rgba(241,245,249,.3)">${MESES_ABREV[i]}</div>
+              </div>`;
+            }).join('')}
+          </div>
+          <div style="display:flex;gap:16px;margin-top:10px;font-size:11px;color:rgba(241,245,249,.35);justify-content:center">
+            <span><span style="display:inline-block;width:8px;height:8px;background:#22c55e;border-radius:2px;margin-right:4px"></span>Receita</span>
+            <span><span style="display:inline-block;width:8px;height:8px;background:#ef4444;border-radius:2px;margin-right:4px"></span>Despesa</span>
+          </div>
+          ${ultimoMes<11&&!mesFiltrado?`<div style="margin-top:12px;padding:10px 12px;background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.15);border-radius:8px;font-size:12px">
+            <span style="color:#f5a623;font-weight:700">📈 Projeção ${MESES_FULL[ultimoMes+1]} – Dez:</span>
+            <span style="color:rgba(241,245,249,.45);margin-left:8px">~ ${brl(mediaDes)}/mês = ${brl(mediaDes*(11-ultimoMes))} em ${11-ultimoMes} meses</span>
+          </div>`:''}
+        </div>
+
+        <div class="card">
+          <div class="ct">Despesas por Categoria — ${mesFiltrado?labelPeriodo:MESES_FULL[mesRef]}</div>
+          ${catsMes.length ? catsMes.map(([nome,data],ci)=>{
+            const pct=Math.round(data.val/Math.max(totalDes,1)*100);
+            const pctBar=Math.round(data.val/maxCat*100);
+            let varPct=null;
+            const mAnt=mesesFiltro?null:mesRef>0?mesRef-1:null;
+            if(mAnt!==null){
+              let vAnt=0;
+              porMes[mAnt].trans.filter(t=>t.tipo==='despesa').forEach(t=>{
+                if((catMap[t.categoria_id]?.categoria||'Outros')===nome) vAnt+=parseFloat(t.valor||0);
+              });
+              if(vAnt>0) varPct=((data.val-vAnt)/vAnt*100);
+            }
+            return `<div style="margin-bottom:13px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div style="display:flex;align-items:center;gap:7px">
+                  <span style="width:9px;height:9px;border-radius:50%;background:${CORES_CAT[ci%CORES_CAT.length]};display:inline-block;flex-shrink:0"></span>
+                  <span style="font-size:13px;color:rgba(241,245,249,.85);font-weight:600">${esc(nome)}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  ${varPct!==null?`<span style="font-size:10px;font-weight:700;color:${varPct>0?'#ef4444':'#22c55e'}">${varPct>0?'▲':'▼'}${Math.abs(Math.round(varPct))}%</span>`:''}
+                  <span style="font-size:13px;font-weight:700;color:#f1f5f9">${brl(data.val)}</span>
+                  <span style="font-size:11px;color:rgba(241,245,249,.3);min-width:30px;text-align:right">${pct}%</span>
+                </div>
+              </div>
+              <div class="prog"><div style="height:100%;width:${pctBar}%;background:${CORES_CAT[ci%CORES_CAT.length]};border-radius:99px;opacity:.75"></div></div>
+              <div style="margin-top:4px;padding-left:16px">
+                ${Object.entries(data.sub).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([s,v])=>`
+                  <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(241,245,249,.32);margin-top:2px">
+                    <span>└ ${esc(s)}</span><span>${brl(v)} (${Math.round(v/data.val*100)}%)</span>
+                  </div>`).join('')}
+              </div>
+            </div>`;
+          }).join('') : '<div style="color:rgba(241,245,249,.25);font-size:13px;text-align:center;padding:20px">Sem despesas no período</div>'}
+        </div>
+      </div>
+
+      <!-- COMPARATIVO MENSAL -->
+      <div class="card" style="margin-bottom:16px;overflow-x:auto">
+        <div class="ct">Comparativo por Categoria — ${compMeses.map(m=>MESES_ABREV[m]).join(', ')}</div>
+        <table class="comp-table">
+          <thead>
+            <tr>
+              <th style="text-align:left">Categoria</th>
+              ${compMeses.map(m=>`<th>${MESES_ABREV[m]}</th>`).join('')}
+              <th>Total</th>
+              <th>Represent.</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${compData.map((row,ri)=>{
+              const total=row.valores.reduce((s,v)=>s+v,0);
+              const rep=totalDes>0?Math.round(total/totalDes*100):0;
+              const ultimo=row.valores[row.valores.length-1];
+              const penult=row.valores.length>1?row.valores[row.valores.length-2]:0;
+              const tend=penult>0?((ultimo-penult)/penult*100):0;
+              return `<tr>
+                <td>
+                  <span style="width:7px;height:7px;border-radius:50%;background:${CORES_CAT[ri%CORES_CAT.length]};display:inline-block;margin-right:7px"></span>
+                  ${esc(row.nome)}
+                  ${tend!==0?`<span style="font-size:9px;font-weight:700;color:${tend>0?'#ef4444':'#22c55e'};margin-left:5px">${tend>0?'▲':'▼'}${Math.abs(Math.round(tend))}%</span>`:''}
+                </td>
+                ${row.valores.map((v,vi)=>{
+                  const prev=vi>0?row.valores[vi-1]:null;
+                  const d=prev!==null&&prev>0?((v-prev)/prev*100):null;
+                  return `<td style="color:${v===0?'rgba(241,245,249,.2)':'rgba(241,245,249,.75)'}">
+                    ${v===0?'—':brl(v)}
+                    ${d!==null&&v>0&&Math.abs(d)>5?`<div style="font-size:9px;color:${d>0?'#ef4444':'#22c55e'}">${d>0?'▲':'▼'}${Math.abs(Math.round(d))}%</div>`:''}
+                  </td>`;
+                }).join('')}
+                <td style="font-weight:700;color:#f5a623">${brl(total)}</td>
+                <td>
+                  <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px">
+                    <div style="width:44px;height:4px;background:#2a2d3e;border-radius:99px;overflow:hidden">
+                      <div style="height:100%;width:${rep}%;background:${CORES_CAT[ri%CORES_CAT.length]};border-radius:99px"></div>
+                    </div>
+                    <span style="font-size:11px;color:rgba(241,245,249,.4);min-width:26px">${rep}%</span>
+                  </div>
+                </td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td>TOTAL DESPESAS</td>
+              ${compMeses.map(m=>`<td style="color:#ef4444">${brl(porMes[m].des)}</td>`).join('')}
+              <td style="color:#ef4444">${brl(totalDes)}</td>
+              <td style="color:rgba(241,245,249,.35)">100%</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- PROJEÇÃO ANUAL + ÚLTIMOS LANÇAMENTOS -->
+      <div class="g2">
+        <div class="card">
+          <div class="ct">📈 Projeção Anual — ${ano}</div>
+          ${Array.from({length:12},(_,i)=>{
+            const futuro=i>ultimoMes;
+            const atual=i===ultimoMes;
+            const des=futuro?mediaDes:porMes[i].des;
+            return `<div class="proj-row">
+              <div class="proj-mes" style="color:${atual?'#f5a623':futuro?'rgba(241,245,249,.25)':'rgba(241,245,249,.55)'}">${MESES_ABREV[i]}</div>
+              <div class="proj-bar-wrap">
+                <div class="proj-bar" style="width:${Math.round(des/Math.max(mediaDes,1)*70)}%;background:${futuro?'rgba(239,68,68,.25)':'#ef4444'};${futuro?'border:1px dashed rgba(239,68,68,.4)':''}"></div>
+              </div>
+              <div class="proj-val" style="color:${atual?'#f5a623':futuro?'rgba(241,245,249,.3)':'rgba(241,245,249,.65)'};font-weight:${atual?700:500};font-size:12px">${futuro?'~':''} ${brl(des)}</div>
+              <div class="proj-ico" style="color:${futuro?'rgba(241,245,249,.2)':'#22c55e'}">${futuro?'📊':des>0?'✓':''}</div>
+            </div>`;
+          }).join('')}
+          <div style="margin-top:10px;padding:9px 12px;background:#0f1117;border-radius:8px;font-size:12px;display:flex;justify-content:space-between">
+            <span style="color:rgba(241,245,249,.35)">Projeção total ${ano}:</span>
+            <strong style="color:#f5a623">${brl(totalDes + mediaDes*(11-ultimoMes))}</strong>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="ct">Últimos Lançamentos — ${MESES_FULL[mesRef]}</div>
+          ${porMes[mesRef].trans.slice(0,8).map(t=>{
+            const cat=catMap[t.categoria_id];
+            const rec=t.tipo==='receita';
+            const dp=t.data?t.data.split('-').reverse().slice(0,2).join('/'):'-';
+            return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+              <div style="width:26px;height:26px;border-radius:7px;background:${rec?'rgba(34,197,94,.15)':'rgba(239,68,68,.15)'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:${rec?'#22c55e':'#ef4444'};flex-shrink:0">${rec?'↑':'↓'}</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:12px;color:#f1f5f9;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.descricao||'—')}</div>
+                <div style="font-size:10px;color:rgba(241,245,249,.3)">${dp}${cat?' · '+esc(cat.categoria||cat.nome||''):''}</div>
+              </div>
+              <div style="font-size:12px;font-weight:700;color:${rec?'#22c55e':'#ef6060'};white-space:nowrap">${rec?'+':'-'}${brl(t.valor)}</div>
+            </div>`;
+          }).join('')}
+          ${!porMes[mesRef].trans.length?'<div style="color:rgba(241,245,249,.25);font-size:13px;text-align:center;padding:20px">Sem lançamentos</div>':''}
+        </div>
+      </div>
+    `;
+  }catch(e){
+    document.getElementById('conteudo').innerHTML=`<div style="color:#ef4444;padding:20px">Erro ao carregar: ${e.message}</div>`;
+  }
+}
+</script>
+</body>
+</html>
