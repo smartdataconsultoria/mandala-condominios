@@ -1109,6 +1109,10 @@ async function pgFinanceiro(cont){
       <div class="g-title" style="font-size:24px;display:flex;align-items:center;justify-content:space-between">
         Prestação de Contas
         <div style="display:flex;gap:8px;align-items:center">
+          <select id="finMes" onchange="recarregarFinanceiro()" style="background:#1e2130;border:1px solid #2a2d3e;color:#f1f5f9;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer">
+            <option value="-1">Ano todo</option>
+            ${['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'].map(function(m,i){return '<option value="'+i+'" '+(i===mesAtual?'selected':'')+'>'+m+'</option>';}).join('')}
+          </select>
           <select id="finAno" onchange="recarregarFinanceiro()" style="background:#1e2130;border:1px solid #2a2d3e;color:#f1f5f9;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer">
             ${[anoAtual-1,anoAtual].map(function(y){return '<option value="'+y+'" '+(y===anoAtual?'selected':'')+'>'+y+'</option>';}).join('')}
           </select>
@@ -1129,9 +1133,10 @@ async function recarregarFinanceiro(){
 async function carregarFinanceiro(){
   var el = document.getElementById('finConteudo');
   if(!el) return;
-  var ano = parseInt(document.getElementById('finAno')?.value || new Date().getFullYear());
-  var hoje = new Date();
-  var mesHoje = hoje.getMonth();
+  var ano    = parseInt(document.getElementById('finAno')?.value  || new Date().getFullYear());
+  var mesSel = parseInt(document.getElementById('finMes')?.value ?? -1); // -1 = ano todo
+  var hoje   = new Date();
+  var mesHoje= hoje.getMonth();
 
   var h = {'apikey':SB_KEY,'Authorization':'Bearer '+(usr?.token||SB_KEY)};
   var primDiaAno = ano+'-01-01';
@@ -1164,21 +1169,25 @@ async function carregarFinanceiro(){
     var ultimoMesDados = ano < new Date().getFullYear() ? 11 : mesHoje;
     var mesesComDados = porMes.filter(function(m,i){ return i<=ultimoMesDados && (m.rec>0||m.des>0); });
 
-    // Totais anuais
-    var totalRecAno = porMes.reduce(function(s,m){return s+m.rec;},0);
-    var totalDesAno = porMes.reduce(function(s,m){return s+m.des;},0);
+    // Se mês específico selecionado, ajustar mesRef e totais
+    var mesFiltrado = mesSel >= 0; // true = visão de mês único
+    var mesRef = mesFiltrado ? mesSel : ultimoMesDados;
+    while(!mesFiltrado && mesRef>0 && porMes[mesRef].rec===0 && porMes[mesRef].des===0) mesRef--;
+
+    // Totais — mês único ou ano todo
+    var totalRecAno = mesFiltrado ? porMes[mesRef].rec : porMes.reduce(function(s,m){return s+m.rec;},0);
+    var totalDesAno = mesFiltrado ? porMes[mesRef].des : porMes.reduce(function(s,m){return s+m.des;},0);
     var saldoAno    = totalRecAno - totalDesAno;
 
-    // Mês mais recente com dados
-    var mesRef = ultimoMesDados;
-    while(mesRef>0 && porMes[mesRef].rec===0 && porMes[mesRef].des===0) mesRef--;
     var mesAnterior = mesRef>0 ? mesRef-1 : null;
-
-    var recMesRef = porMes[mesRef].rec;
-    var desMesRef = porMes[mesRef].des;
+    var recMesRef   = porMes[mesRef].rec;
+    var desMesRef   = porMes[mesRef].des;
     var saldoMesRef = recMesRef - desMesRef;
-    var desMAnt = mesAnterior!==null ? porMes[mesAnterior].des : 0;
-    var varDes  = desMAnt>0 ? ((desMesRef-desMAnt)/desMAnt*100) : 0;
+    var desMAnt     = mesAnterior!==null ? porMes[mesAnterior].des : 0;
+    var varDes      = desMAnt>0 ? ((desMesRef-desMAnt)/desMAnt*100) : 0;
+
+    // Label de período para KPIs
+    var labelPeriodo = mesFiltrado ? MESES_FULL[mesRef]+' '+ano : String(ano);
 
     // Projeção: média dos últimos 3 meses com dados
     var mesesParaMedia = [];
@@ -1236,17 +1245,17 @@ async function carregarFinanceiro(){
       <!-- KPIs -->
       <div class="metrics" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
         <div class="mc">
-          <div class="mc-lbl">Receitas ${ano}</div>
+          <div class="mc-lbl">Receitas — ${labelPeriodo}</div>
           <div class="mc-val g">${brl(totalRecAno)}</div>
-          <div class="mc-sub">${mesesComDados.length} meses com dados</div>
+          <div class="mc-sub">${mesFiltrado ? '1 mês selecionado' : mesesComDados.length+' meses com dados'}</div>
         </div>
         <div class="mc">
-          <div class="mc-lbl">Despesas ${ano}</div>
+          <div class="mc-lbl">Despesas — ${labelPeriodo}</div>
           <div class="mc-val r">${brl(totalDesAno)}</div>
           <div class="mc-sub">${catsMes.length} categorias</div>
         </div>
         <div class="mc">
-          <div class="mc-lbl">Saldo ${ano}</div>
+          <div class="mc-lbl">Saldo — ${labelPeriodo}</div>
           <div class="mc-val ${saldoAno>=0?'g':'r'}">${brl(saldoAno)}</div>
           <div class="mc-sub" style="color:${saldoAno>=0?'#34c97e':'#ef4444'}">${saldoAno>=0?'↑ Superávit':'↓ Déficit'}</div>
         </div>
@@ -1260,7 +1269,7 @@ async function carregarFinanceiro(){
       <!-- GRÁFICO ANUAL + CATEGORIAS MÊS -->
       <div class="g2" style="margin-bottom:20px">
         <div class="card">
-          <div class="ct">Receitas × Despesas — ${ano}</div>
+          <div class="ct">Receitas × Despesas — ${labelPeriodo}</div>
           <div style="display:flex;align-items:flex-end;gap:6px;height:120px;padding-top:12px">
             ${porMes.map(function(m,i){
               var rH = Math.max(2,Math.round(m.rec/maxBarMes*100));
@@ -1289,7 +1298,7 @@ async function carregarFinanceiro(){
         </div>
 
         <div class="card">
-          <div class="ct">Despesas por Categoria — ${MESES_FULL[mesRef]}</div>
+          <div class="ct">Despesas por Categoria — ${mesFiltrado ? labelPeriodo : MESES_FULL[mesRef]}</div>
           ${catsMes.length ? catsMes.map(function(entry,ci){
             var nome=entry[0], val=entry[1].val;
             var pct=Math.round(val/Math.max(desMesRef,1)*100);
@@ -1392,7 +1401,7 @@ async function carregarFinanceiro(){
       <!-- PROJEÇÃO + ÚLTIMOS LANÇAMENTOS -->
       <div class="g2">
         <div class="card">
-          <div class="ct">📈 Projeção Anual</div>
+          <div class="ct">📈 ${mesFiltrado ? 'Análise do Mês' : 'Projeção Anual'}</div>
           ${Array.from({length:12},function(_,i){
             var isPassado = i <= mesRef;
             var isAtual   = i === mesRef;
@@ -1420,7 +1429,7 @@ async function carregarFinanceiro(){
         </div>
 
         <div class="card">
-          <div class="ct">Últimos Lançamentos — ${MESES_FULL[mesRef]}</div>
+          <div class="ct">Últimos Lançamentos — ${mesFiltrado ? labelPeriodo : MESES_FULL[mesRef]}</div>
           ${porMes[mesRef].trans.slice(0,8).map(function(t){
             var cat=catMap[t.categoria_id];
             var rec=t.tipo==='receita';
