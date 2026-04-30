@@ -217,6 +217,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 .confirm-del-btn:hover{background:#dc2626}
 .confirm-del-btn:disabled{opacity:.4;cursor:not-allowed}
 </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -242,6 +243,44 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 
   <div class="page-header">
     <div class="page-title">Transações</div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button onclick="baixarModelo()" style="display:flex;align-items:center;gap:7px;background:#2a2d3e;border:1px solid #3a3d4e;color:#94a3b8;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s" onmouseover="this.style.borderColor='#f5a623';this.style.color='#f5a623'" onmouseout="this.style.borderColor='#3a3d4e';this.style.color='#94a3b8'">
+        📥 Baixar Modelo
+      </button>
+      <button onclick="abrirImportar()" style="display:flex;align-items:center;gap:7px;background:#3b82f620;border:1px solid #3b82f640;color:#3b82f6;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s" onmouseover="this.style.background='#3b82f630'" onmouseout="this.style.background='#3b82f620'">
+        📤 Importar Planilha
+      </button>
+      <button onclick="exportarExcel()" style="display:flex;align-items:center;gap:7px;background:#22c55e20;border:1px solid #22c55e40;color:#22c55e;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s" onmouseover="this.style.background='#22c55e30'" onmouseout="this.style.background='#22c55e20'">
+        📊 Exportar Mês
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL IMPORTAR -->
+  <div id="importBg" style="display:none;position:fixed;inset:0;background:#00000090;z-index:2000;align-items:center;justify-content:center">
+    <div style="background:#1a1d27;border:1px solid #2a2d3e;border-radius:16px;width:100%;max-width:480px;padding:0;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid #2a2d3e">
+        <div style="font-size:16px;font-weight:700">📤 Importar Planilha</div>
+        <button onclick="fecharImportar()" style="background:none;border:none;color:#64748b;font-size:20px;cursor:pointer">✕</button>
+      </div>
+      <div style="padding:22px">
+        <div style="background:#0f1117;border:2px dashed #2a2d3e;border-radius:10px;padding:24px;text-align:center;margin-bottom:16px;transition:.2s" id="dropZone"
+          ondragover="event.preventDefault();this.style.borderColor='#3b82f6'"
+          ondragleave="this.style.borderColor='#2a2d3e'"
+          ondrop="handleDrop(event)">
+          <div style="font-size:36px;margin-bottom:8px">📂</div>
+          <div style="font-size:14px;color:#94a3b8;margin-bottom:8px">Arraste a planilha aqui ou</div>
+          <button onclick="document.getElementById('fileInput').click()" style="background:#3b82f620;border:1px solid #3b82f640;color:#3b82f6;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer">Selecionar arquivo .xlsx</button>
+          <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" onchange="processarArquivo(this.files[0])"/>
+        </div>
+        <div id="importStatus" style="display:none;background:#0f1117;border-radius:8px;padding:12px 14px;font-size:13px;margin-bottom:16px"></div>
+        <div id="importPreview" style="display:none"></div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px">
+          <button onclick="fecharImportar()" style="background:#2a2d3e;border:none;color:#94a3b8;border-radius:8px;padding:9px 18px;font-size:14px;font-weight:600;cursor:pointer">Cancelar</button>
+          <button id="btnConfirmarImport" onclick="confirmarImportacao()" style="display:none;background:#3b82f6;border:none;color:#fff;border-radius:8px;padding:9px 18px;font-size:14px;font-weight:700;cursor:pointer">Importar Lançamentos</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- FAB flutuante -->
@@ -1503,6 +1542,241 @@ async function editarTransacao(id){
   }
   _editId = id; // setado aqui, após todas as chamadas que possam resetar
   document.getElementById('modalBg').classList.add('open');
+}
+
+// ── BAIXAR MODELO ─────────────────────────────────────────
+function baixarModelo(){
+  // Gera planilha modelo via SheetJS (XLSX) no browser
+  const wb = XLSX.utils.book_new();
+
+  const instrucoes = [
+    ['EDIFÍCIO MANDALA — Planilha de Importação de Transações'],
+    ['Preencha somente as linhas de dados. DATA: DD/MM/AAAA | TIPO: despesa ou receita | SITUAÇÃO: pago, pendente, agendado'],
+    ['DATA','TIPO','DESCRIÇÃO','CATEGORIA (Agrupamento)','SUBCATEGORIA','CONTA','VALOR (R$)','SITUAÇÃO','OBSERVAÇÃO'],
+    ['30/04/2026','despesa','Administração','Manutenção - Contrato','Administração','Conta Corrente Principal',1386.00,'pendente','Exemplo'],
+    ['20/04/2026','despesa','Água','Consumo','Água','Conta Corrente Principal',1976.64,'pago',''],
+    ['13/04/2026','despesa','Manutenção Jardim','Manutenção - Contrato','Manutenção Jardim','Conta Corrente Principal',230.00,'pago',''],
+  ];
+
+  const wsModelo = XLSX.utils.aoa_to_sheet(instrucoes);
+  wsModelo['!cols'] = [{wch:14},{wch:12},{wch:30},{wch:25},{wch:20},{wch:25},{wch:14},{wch:14},{wch:30}];
+  XLSX.utils.book_append_sheet(wb, wsModelo, 'Transações');
+
+  // Aba de categorias
+  const catRows = [
+    ['AGRUPAMENTO','SUBCATEGORIA','TIPO'],
+    ['Manutenção - Contrato','Administração','despesa'],
+    ['Manutenção - Contrato','Manutenção Jardim','despesa'],
+    ['Consumo','Água','despesa'],
+    ['Consumo','Energia','despesa'],
+    ['Funcionário','Adiantamento Salarial','despesa'],
+    ['Funcionário','Vale Transporte','despesa'],
+    ['Funcionário','Férias','despesa'],
+    ['Funcionário','INSS','despesa'],
+    ['Funcionário','FGTS','despesa'],
+    ['Funcionário','Cesta Básica','despesa'],
+    ['Conservação','Material Limpeza','despesa'],
+    ['Taxa','Taxa Condominial','receita'],
+    ['Taxa Ordinária','Taxa Ordinária','receita'],
+  ];
+  const wsCat = XLSX.utils.aoa_to_sheet(catRows);
+  wsCat['!cols'] = [{wch:28},{wch:28},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, wsCat, 'Categorias Disponíveis');
+
+  XLSX.writeFile(wb, `Modelo_Transacoes_${MESES[_mes]}_${_ano}.xlsx`);
+}
+
+// ── EXPORTAR MÊS ─────────────────────────────────────────
+function exportarExcel(){
+  if(!_transacoes.length){ showAlert('Nenhuma transação para exportar.','error'); return; }
+
+  const catMap  = Object.fromEntries(_categorias.map(c=>[c.id,c]));
+  const contaMap= Object.fromEntries(_contas.map(c=>[c.id,c]));
+
+  const rows = [
+    [`EDIFÍCIO MANDALA — Transações de ${MESES[_mes]} ${_ano}`],
+    [],
+    ['DATA','TIPO','DESCRIÇÃO','CATEGORIA','SUBCATEGORIA','CONTA','VALOR (R$)','SITUAÇÃO','FIXO','OBSERVAÇÃO'],
+  ];
+
+  _transacoes.forEach(t=>{
+    const cat   = catMap[t.categoria_id];
+    const conta = contaMap[t.conta_id];
+    const [y,m,d] = (t.data||'').split('-');
+    rows.push([
+      d&&m&&y ? `${d}/${m}/${y}` : (t.data||''),
+      t.tipo||'',
+      t.descricao||'',
+      cat?.categoria||'',
+      cat?.nome||'',
+      conta?.nome||'',
+      parseFloat(t.valor||0),
+      t.situacao||'',
+      t.recorrente ? 'Sim' : 'Não',
+      t.observacao||'',
+    ]);
+  });
+
+  // Totais
+  const rec = _transacoes.filter(t=>t.tipo==='receita').reduce((s,t)=>s+parseFloat(t.valor||0),0);
+  const des = _transacoes.filter(t=>t.tipo==='despesa').reduce((s,t)=>s+parseFloat(t.valor||0),0);
+  rows.push([]);
+  rows.push(['RESUMO','','','','','','','','','']);
+  rows.push(['Receitas','','','','','',rec,'','','']);
+  rows.push(['Despesas','','','','','',des,'','','']);
+  rows.push(['Saldo','','','','','',rec-des,'','','']);
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{wch:14},{wch:12},{wch:30},{wch:25},{wch:20},{wch:25},{wch:14},{wch:12},{wch:8},{wch:30}];
+  XLSX.utils.book_append_sheet(wb, ws, `${MESES[_mes]} ${_ano}`);
+  XLSX.writeFile(wb, `Transacoes_${MESES[_mes]}_${_ano}.xlsx`);
+  showAlert(`✅ Exportado: ${_transacoes.length} lançamentos de ${MESES[_mes]} ${_ano}`);
+}
+
+// ── IMPORTAR ─────────────────────────────────────────────
+let _dadosImport = [];
+
+function abrirImportar(){
+  document.getElementById('importBg').style.display='flex';
+  document.getElementById('importStatus').style.display='none';
+  document.getElementById('importPreview').style.display='none';
+  document.getElementById('btnConfirmarImport').style.display='none';
+  document.getElementById('fileInput').value='';
+  _dadosImport=[];
+}
+function fecharImportar(){
+  document.getElementById('importBg').style.display='none';
+  _dadosImport=[];
+}
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('dropZone').style.borderColor='#2a2d3e';
+  const file = e.dataTransfer.files[0];
+  if(file) processarArquivo(file);
+}
+
+function processarArquivo(file){
+  if(!file){ return; }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const wb   = XLSX.read(e.target.result, {type:'array'});
+      const ws   = wb.Sheets[wb.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(ws, {header:1, raw:false});
+
+      // Encontrar linha de cabeçalho (contém DATA e TIPO)
+      let headerRow = -1;
+      for(let i=0;i<Math.min(data.length,5);i++){
+        const r = (data[i]||[]).map(c=>(c||'').toString().toUpperCase());
+        if(r.includes('DATA') && r.includes('TIPO')){ headerRow=i; break; }
+      }
+      if(headerRow<0){ throw new Error('Cabeçalho não encontrado. Verifique se está usando o modelo correto.'); }
+
+      const headers = data[headerRow].map(h=>(h||'').toString().toUpperCase().trim());
+      const iData   = headers.findIndex(h=>h.includes('DATA'));
+      const iTipo   = headers.findIndex(h=>h.includes('TIPO'));
+      const iDesc   = headers.findIndex(h=>h.includes('DESCRI'));
+      const iCat    = headers.findIndex(h=>h.includes('CATEGORIA') && !h.includes('SUB'));
+      const iSub    = headers.findIndex(h=>h.includes('SUB'));
+      const iConta  = headers.findIndex(h=>h.includes('CONTA'));
+      const iValor  = headers.findIndex(h=>h.includes('VALOR'));
+      const iSit    = headers.findIndex(h=>h.includes('SITUA'));
+      const iObs    = headers.findIndex(h=>h.includes('OBSERVA'));
+
+      _dadosImport = [];
+      const catMap = Object.fromEntries(_categorias.map(c=>[
+        ((c.categoria||'').toLowerCase().trim()+'|'+(c.nome||'').toLowerCase().trim()), c.id
+      ]));
+      const contaMap = Object.fromEntries(_contas.map(c=>[(c.nome||'').toLowerCase().trim(), c.id]));
+
+      for(let i=headerRow+1;i<data.length;i++){
+        const row = data[i];
+        if(!row || !row[iData] || !row[iTipo]) continue;
+
+        const dataStr = (row[iData]||'').toString().trim();
+        let dataISO = '';
+        if(dataStr.match(/^\d{2}\/\d{2}\/\d{4}$/)){
+          const [d,m,y]=dataStr.split('/'); dataISO=`${y}-${m}-${d}`;
+        } else if(dataStr.match(/^\d{4}-\d{2}-\d{2}$/)){
+          dataISO=dataStr;
+        }
+
+        const tipo  = (row[iTipo]||'').toString().toLowerCase().trim();
+        const desc  = (row[iDesc]||'').toString().trim();
+        const cat   = (row[iCat]||'').toString().toLowerCase().trim();
+        const sub   = (row[iSub]||'').toString().toLowerCase().trim();
+        const conta = (row[iConta]||'').toString().toLowerCase().trim();
+        const valorRaw = (row[iValor]||'0').toString().replace(/[R$\s.]/g,'').replace(',','.');
+        const valor = parseFloat(valorRaw)||0;
+        const sit   = (row[iSit]||'pago').toString().toLowerCase().trim()||'pago';
+        const obs   = (row[iObs]||'').toString().trim();
+
+        if(!dataISO || !tipo || !desc || !valor) continue;
+
+        const catId   = catMap[cat+'|'+sub] || null;
+        const contaId = contaMap[conta] || null;
+
+        _dadosImport.push({data:dataISO, tipo, descricao:desc, categoria_id:catId, conta_id:contaId, valor, situacao:sit, observacao:obs||null, empresa:EMPRESA});
+      }
+
+      // Preview
+      const st = document.getElementById('importStatus');
+      st.style.display='block';
+      if(_dadosImport.length===0){
+        st.innerHTML='<span style="color:#ef4444">⚠ Nenhuma linha válida encontrada. Verifique o formato do arquivo.</span>';
+        document.getElementById('btnConfirmarImport').style.display='none';
+        return;
+      }
+      st.innerHTML=`<span style="color:#22c55e">✅ ${_dadosImport.length} lançamento(s) encontrado(s) para importar.</span>`;
+
+      // Tabela preview
+      const prev = document.getElementById('importPreview');
+      prev.style.display='block';
+      prev.innerHTML=`<div style="max-height:200px;overflow-y:auto;border:1px solid #2a2d3e;border-radius:8px;font-size:12px">
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr style="background:#1e2130;position:sticky;top:0">
+            ${['Data','Tipo','Descrição','Valor','Situação'].map(h=>`<th style="padding:7px 10px;text-align:left;color:#94a3b8;font-weight:700;font-size:10px;text-transform:uppercase">${h}</th>`).join('')}
+          </tr></thead>
+          <tbody>
+            ${_dadosImport.map((r,i)=>`<tr style="border-top:1px solid #2a2d3e20;background:${i%2?'#0f1117':'transparent'}">
+              <td style="padding:6px 10px;color:#94a3b8">${r.data.split('-').reverse().join('/')}</td>
+              <td style="padding:6px 10px;color:${r.tipo==='receita'?'#22c55e':'#ef4444'};font-weight:600">${r.tipo}</td>
+              <td style="padding:6px 10px;color:#f1f5f9">${r.descricao}</td>
+              <td style="padding:6px 10px;color:${r.tipo==='receita'?'#22c55e':'#ef4444'};font-weight:700">R$ ${parseFloat(r.valor).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+              <td style="padding:6px 10px;color:#64748b">${r.situacao}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+      document.getElementById('btnConfirmarImport').style.display='inline-flex';
+    } catch(err){
+      const st=document.getElementById('importStatus');
+      st.style.display='block';
+      st.innerHTML=`<span style="color:#ef4444">❌ Erro ao ler arquivo: ${err.message}</span>`;
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+async function confirmarImportacao(){
+  if(!_dadosImport.length) return;
+  const btn = document.getElementById('btnConfirmarImport');
+  btn.disabled=true; btn.textContent='Importando...';
+  const h = hdrs();
+  let ok=0, erros=0;
+  for(const row of _dadosImport){
+    const r = await fetch(`${SUPA_URL}/rest/v1/condo_transacoes`,{
+      method:'POST',
+      headers:{...h,'Prefer':'return=minimal'},
+      body: JSON.stringify(row)
+    });
+    if(r.ok||r.status===201||r.status===204) ok++; else erros++;
+  }
+  fecharImportar();
+  await loadTransacoes();
+  showAlert(`✅ Importação concluída: ${ok} lançamento(s) inserido(s)${erros>0?' | ⚠ '+erros+' erro(s)':''}`);
+  btn.disabled=false;
 }
 
 // ── DELETAR ───────────────────────────────────────────────
