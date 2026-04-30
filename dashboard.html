@@ -999,15 +999,153 @@ async function renderPainel(){
   }
 }
 
-function pgDashboard(cont){
+async function pgDashboard(cont){
+  var hoje = new Date();
+  var nomeMes = hoje.toLocaleString('pt-BR',{month:'long'});
+
   cont.innerHTML=`
     <div class="greeting"><div class="g-title" id="gTxt">Olá!</div><div class="g-sub">Bem-vindo ao portal do Edifício Mandala.</div></div>
-    <div class="metrics">
-      <div class="mc"><div class="mc-lbl">Unidades</div><div class="mc-val">32</div><div class="mc-sub">4 andares · 8 por andar</div></div>
-      <div class="mc"><div class="mc-lbl">Adimplência</div><div class="mc-val g">94%</div><div class="mc-sub" style="color:#34c97e">↑ +1% este mês</div></div>
-      <div class="mc"><div class="mc-lbl">Saldo do Fundo</div><div class="mc-val o">R$ 38.4k</div><div class="mc-sub" style="color:#34c97e">↑ R$ 2.800 este mês</div></div>
-      <div class="mc"><div class="mc-lbl">Mensagens</div><div class="mc-val r">2</div><div class="mc-sub">Não respondidas</div></div>
-    </div>
+    <div id="dashMetrics"><div style="text-align:center;padding:20px;color:rgba(241,245,249,.3);font-size:13px">⏳ Carregando...</div></div>
+    <div id="dashResto" style="display:none">`;
+
+  // Buscar dados em paralelo
+  var h = {'apikey':SB_KEY,'Authorization':'Bearer '+(usr?.token||SB_KEY)};
+  var anoMes = hoje.toISOString().slice(0,7);
+  var primDia = anoMes+'-01';
+  var ultDia  = new Date(hoje.getFullYear(),hoje.getMonth()+1,0).toISOString().slice(0,10);
+  var mes3Atras = new Date(hoje.getFullYear(),hoje.getMonth()-2,1).toISOString().slice(0,10);
+
+  try{
+    var [rContas, rTrans, rTrans3m] = await Promise.all([
+      fetch(SB_URL+'/rest/v1/condo_contas?empresa=eq.'+EMPRESA+'&order=nome',{headers:h}),
+      fetch(SB_URL+'/rest/v1/condo_transacoes?empresa=eq.'+EMPRESA+'&data=gte.'+primDia+'&data=lte.'+ultDia+'&select=tipo,valor,situacao',{headers:h}),
+      fetch(SB_URL+'/rest/v1/condo_transacoes?empresa=eq.'+EMPRESA+'&data=gte.'+mes3Atras+'&data=lte.'+ultDia+'&select=tipo,valor,data',{headers:h}),
+    ]);
+    var contas  = rContas.ok  ? await rContas.json()  : [];
+    var transMes= rTrans.ok   ? await rTrans.json()   : [];
+    var trans3m = rTrans3m.ok ? await rTrans3m.json() : [];
+
+    // Saldo por conta (acumulado histórico)
+    var rSaldos = await fetch(SB_URL+'/rest/v1/condo_transacoes?empresa=eq.'+EMPRESA+'&select=tipo,valor,conta_id',{headers:h});
+    var todasTrans = rSaldos.ok ? await rSaldos.json() : [];
+
+    // Calcular saldo por conta
+    var saldoPorConta = {};
+    todasTrans.forEach(function(t){
+      if(!t.conta_id) return;
+      if(!saldoPorConta[t.conta_id]) saldoPorConta[t.conta_id]=0;
+      saldoPorConta[t.conta_id] += t.tipo==='receita' ? parseFloat(t.valor||0) : -parseFloat(t.valor||0);
+    });
+
+    // Totais do mês
+    var recMes  = transMes.filter(function(t){return t.tipo==='receita';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
+    var desMes  = transMes.filter(function(t){return t.tipo==='despesa';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
+    var pendMes = transMes.filter(function(t){return t.situacao==='pendente';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
+
+    // Projeção — média de receita e despesa por mês nos últimos 3 meses
+    var mesesMap = {};
+    trans3m.forEach(function(t){
+      var ym = (t.data||'').slice(0,7);
+      if(!mesesMap[ym]) mesesMap[ym]={rec:0,des:0};
+      if(t.tipo==='receita') mesesMap[ym].rec+=parseFloat(t.valor||0);
+      else if(t.tipo==='despesa') mesesMap[ym].des+=parseFloat(t.valor||0);
+    });
+    var ymList = Object.keys(mesesMap).sort();
+    var mediaRec = ymList.length ? ymList.reduce(function(s,ym){return s+mesesMap[ym].rec;},0)/ymList.length : 0;
+    var mediaDes = ymList.length ? ymList.reduce(function(s,ym){return s+mesesMap[ym].des;},0)/ymList.length : 0;
+    var saldoProj = mediaRec - mediaDes;
+
+    // Saldo total de todas as contas
+    var saldoTotal = contas.reduce(function(s,c){return s+(saldoPorConta[c.id]||0);},0);
+
+    // Montar cards de contas
+    var contasCards = contas.map(function(c){
+      var saldo = saldoPorConta[c.id]||0;
+      var cor   = saldo>=0 ? '#22c55e' : '#ef4444';
+      return '<div class="mc" style="cursor:default">'+
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+
+          '<div style="width:30px;height:30px;border-radius:8px;background:rgba(245,166,35,.15);display:flex;align-items:center;justify-content:center;font-size:15px">🏦</div>'+
+          '<div>'+
+            '<div class="mc-lbl" style="margin-bottom:0;font-size:10px">'+esc(c.nome)+'</div>'+
+            '<div style="font-size:10px;color:rgba(241,245,249,.25)">'+esc(c.banco||c.tipo||'Conta')+'</div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="mc-val" style="color:'+cor+';font-size:22px">'+brl(saldo)+'</div>'+
+        '<div class="mc-sub" style="margin-top:4px;color:rgba(241,245,249,.35)">saldo acumulado</div>'+
+      '</div>';
+    }).join('');
+
+    // Projeção card
+    var projCard = '<div class="mc" style="cursor:default;background:linear-gradient(135deg,rgba(245,166,35,.06),rgba(245,166,35,.02));border:1px solid rgba(245,166,35,.15)">'+
+      '<div class="mc-lbl" style="color:#f5a623">📈 Projeção — próximo mês</div>'+
+      '<div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center">'+
+          '<span style="font-size:11px;color:rgba(241,245,249,.4)">Receita estimada</span>'+
+          '<span style="font-size:15px;font-weight:700;color:#22c55e">'+brl(mediaRec)+'</span>'+
+        '</div>'+
+        '<div style="display:flex;justify-content:space-between;align-items:center">'+
+          '<span style="font-size:11px;color:rgba(241,245,249,.4)">Despesa estimada</span>'+
+          '<span style="font-size:15px;font-weight:700;color:#ef4444">'+brl(mediaDes)+'</span>'+
+        '</div>'+
+        '<div style="border-top:1px solid rgba(245,166,35,.15);margin-top:4px;padding-top:6px;display:flex;justify-content:space-between;align-items:center">'+
+          '<span style="font-size:11px;font-weight:700;color:#f5a623">Saldo projetado</span>'+
+          '<span style="font-size:17px;font-weight:800;color:'+(saldoProj>=0?'#22c55e':'#ef4444')+'">'+brl(saldoProj)+'</span>'+
+        '</div>'+
+      '</div>'+
+      '<div class="mc-sub" style="margin-top:6px;color:rgba(241,245,249,.3)">média dos últimos '+ymList.length+' meses</div>'+
+    '</div>';
+
+    // KPIs do mês
+    var kpisMes = '<div class="mc">'+
+        '<div class="mc-lbl">Receitas — '+nomeMes+'</div>'+
+        '<div class="mc-val g">'+brl(recMes)+'</div>'+
+        '<div class="mc-sub">mês atual</div>'+
+      '</div>'+
+      '<div class="mc">'+
+        '<div class="mc-lbl">Despesas — '+nomeMes+'</div>'+
+        '<div class="mc-val r">'+brl(desMes)+'</div>'+
+        '<div class="mc-sub">'+(desMes>0?Math.round(desMes/Math.max(recMes,1)*100)+'% da receita':'sem despesas')+'</div>'+
+      '</div>';
+
+    // Linha 1: KPIs mês + projeção
+    document.getElementById('dashMetrics').innerHTML =
+      '<div class="metrics" style="margin-bottom:16px">'+
+        kpisMes+
+        '<div class="mc">'+
+          '<div class="mc-lbl">Pendências</div>'+
+          '<div class="mc-val '+(pendMes>0?'o':'g')+'">'+brl(pendMes)+'</div>'+
+          '<div class="mc-sub">a receber/pagar</div>'+
+        '</div>'+
+        projCard+
+      '</div>'+
+      // Linha 2: Cards de contas
+      (contas.length ? '<div style="font-size:11px;font-weight:700;color:rgba(241,245,249,.3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">🏦 Saldo das Contas</div>'+
+        '<div class="metrics" style="grid-template-columns:repeat('+Math.min(contas.length+1,4)+',1fr);margin-bottom:24px">'+
+          contasCards+
+          // Card saldo total
+          '<div class="mc" style="background:rgba(34,197,94,.04);border:1px solid rgba(34,197,94,.12)">'+
+            '<div class="mc-lbl">Total em Caixa</div>'+
+            '<div class="mc-val '+(saldoTotal>=0?'g':'r')+'" style="font-size:24px">'+brl(saldoTotal)+'</div>'+
+            '<div class="mc-sub">soma de '+contas.length+' conta(s)</div>'+
+          '</div>'+
+        '</div>'
+      : '');
+
+    document.getElementById('dashResto').style.display='block';
+  }catch(e){
+    document.getElementById('dashMetrics').innerHTML='<div style="color:#ef4444;padding:10px">Erro ao carregar: '+e.message+'</div>';
+    document.getElementById('dashResto').style.display='block';
+  }
+
+  // Saudação por horário
+  var h2=hoje.getHours();
+  var saud=h2<12?'Bom dia':h2<18?'Boa tarde':'Boa noite';
+  if(h2>=12&&h2<18) saud='Boa tarde';
+  var el=document.getElementById('gTxt');
+  if(el) el.textContent=saud+', '+((usr&&usr.nome)?usr.nome.split(' ')[0]:'')+'! 👋';
+
+  cont.innerHTML += `
+    <div class="g2">
     <div class="g2">
       <div class="card">
         <div class="ct">Atividades recentes</div>
