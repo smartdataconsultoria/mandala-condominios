@@ -412,17 +412,44 @@ function getSessao(){
 
 // ── INIT ─────────────────────────────────────────────────
 window.onload = function(){
-  var sessRaw = localStorage.getItem('mandala_session');
-  if(!sessRaw){ window.location.href='login.html'; return; }
-  var sess;
-  try{ sess=JSON.parse(sessRaw); }catch(e){ window.location.href='login.html'; return; }
-  if(!sess||!sess.access_token){ window.location.href='login.html'; return; }
+  // 1. Tentar sessão do portal (mandala_session)
+  var sess = getSessao();
+
+  // 2. Se não tiver sessão válida, tenta refresh ou redireciona
+  if(!sess || !sess.access_token){
+    window.location.href='login.html';
+    return;
+  }
+
+  // 3. Verificar expiração — tentar refresh antes de redirecionar
   if(sess.expires_at && sess.expires_at < Math.floor(Date.now()/1000)){
+    if(sess.refresh_token){
+      // Tentar renovar o token
+      fetch(SB_URL+'/auth/v1/token?grant_type=refresh_token',{
+        method:'POST',
+        headers:{'apikey':SB_KEY,'Content-Type':'application/json'},
+        body:JSON.stringify({refresh_token:sess.refresh_token})
+      }).then(function(r){return r.ok?r.json():null;}).then(function(d){
+        if(d&&d.access_token){
+          var nova={access_token:d.access_token,refresh_token:d.refresh_token,expires_at:d.expires_at||Math.floor(Date.now()/1000)+3600,user:d.user||sess.user,email:d.user?.email||sess.email};
+          localStorage.setItem('mandala_session',JSON.stringify(nova));
+          window.location.reload();
+        } else {
+          localStorage.removeItem('mandala_session');
+          window.location.href='login.html';
+        }
+      }).catch(function(){
+        localStorage.removeItem('mandala_session');
+        window.location.href='login.html';
+      });
+      return; // aguarda o refresh
+    }
     localStorage.removeItem('mandala_session');
     window.location.href='login.html';
     return;
   }
-  usr = { email:sess.user.email, token:sess.access_token, _nome:'', _unidade:'' };
+
+  usr = { email: sess.user?.email || sess.email || '', token: sess.access_token, _nome:'', _unidade:'' };
   perfil = localStorage.getItem('mandala_perfil') || 'sindico';
   if(ADMINS.indexOf(usr.email)!==-1) perfil='sindico';
   mostrarApp();
