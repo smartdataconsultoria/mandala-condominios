@@ -241,6 +241,7 @@ html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:
   <div class="ld-nome">Mandala</div>
   <div class="ld-msg" id="ldMsg">Verificando acesso...</div>
   <div class="spinner" style="margin-top:6px"></div>
+  <a id="ldEscape" href="login.html" style="display:none;margin-top:20px;color:#f5a623;font-size:13px;text-decoration:none;border:1px solid rgba(245,166,35,.3);padding:8px 20px;border-radius:8px">Ir para o Login →</a>
 </div>
 
 <div id="tela-app">
@@ -410,6 +411,18 @@ function getSessao(){
   }catch(e){return null;}
 }
 
+// ── SAFETY NET — redireciona se loading ficar preso ─────
+setTimeout(function(){
+  var loading = document.getElementById('tela-loading');
+  if(loading && loading.style.display !== 'none' && !loading.hasAttribute('hidden')){
+    // Mostrar botão de escape ao invés de redirecionar forçado
+    var esc = document.getElementById('ldEscape');
+    if(esc) esc.style.display='block';
+    var msg = document.getElementById('ldMsg');
+    if(msg) msg.textContent = 'Sessão expirada ou não encontrada.';
+  }
+}, 4000);
+
 // ── INIT ─────────────────────────────────────────────────
 window.onload = function(){
   // 1. Tentar sessão do portal (mandala_session)
@@ -466,15 +479,15 @@ window.onload = function(){
 
 function mostrarApp(){
   console.log('[Mandala] mostrarApp() chamado');
-  
-  // Esconde loading de todas as formas possíveis
+
+  // Esconde loading
   var loading = document.getElementById('tela-loading');
   if(loading){
     loading.style.cssText = 'display:none!important';
     loading.setAttribute('hidden','');
     loading.classList.add('hidden');
   }
-  
+
   // Mostra app
   var app = document.getElementById('tela-app');
   if(app){
