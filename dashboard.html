@@ -1099,6 +1099,42 @@ async function carregarDashboards(){
 function fDash(cat,el){document.querySelectorAll('.ftab').forEach(function(t){t.classList.remove('on');});if(el)el.classList.add('on');document.querySelectorAll('.dc').forEach(function(c){c.style.display=(cat==='todos'||c.dataset.cat===cat)?'':'none';});}
 function abrirDash(i){var url=_dashUrls[i];if(url){document.getElementById('vTitle').textContent='Dashboard';document.getElementById('vFrame').src=url;document.getElementById('viewer').style.display='flex';}}
 
+// ── ESTADO FILTRO FINANCEIRO ─────────────────────────────
+var _finMesesSel = []; // [] = todos, [0,1,2] = meses específicos
+
+function finToggleMes(i){
+  var idx = _finMesesSel.indexOf(i);
+  if(idx>=0) _finMesesSel.splice(idx,1);
+  else _finMesesSel.push(i);
+  finAtualizarBotoes();
+  recarregarFinanceiro();
+}
+
+function finToggleTodos(){
+  _finMesesSel = [];
+  finAtualizarBotoes();
+  recarregarFinanceiro();
+}
+
+function finAtualizarBotoes(){
+  var todos = document.getElementById('finBtnTodos');
+  var nenhumSel = _finMesesSel.length===0;
+  if(todos){
+    todos.style.background    = nenhumSel ? '#f5a62320' : 'transparent';
+    todos.style.borderColor   = nenhumSel ? '#f5a623' : '#2a2d3e';
+    todos.style.color         = nenhumSel ? '#f5a623' : 'rgba(241,245,249,.4)';
+  }
+  for(var m=0;m<12;m++){
+    var btn = document.getElementById('finMes'+m);
+    if(!btn) continue;
+    var sel = _finMesesSel.includes(m);
+    btn.style.background  = sel ? '#f5a62320' : 'transparent';
+    btn.style.borderColor = sel ? '#f5a623'   : '#2a2d3e';
+    btn.style.color       = sel ? '#f5a623'   : (btn.disabled ? 'rgba(241,245,249,.2)' : 'rgba(241,245,249,.6)');
+    btn.style.fontWeight  = sel ? '700' : '500';
+  }
+}
+
 async function pgFinanceiro(cont){
   var hoje = new Date();
   var anoAtual = hoje.getFullYear();
@@ -1109,16 +1145,21 @@ async function pgFinanceiro(cont){
       <div class="g-title" style="font-size:24px;display:flex;align-items:center;justify-content:space-between">
         Prestação de Contas
         <div style="display:flex;gap:8px;align-items:center">
-          <select id="finMes" onchange="recarregarFinanceiro()" style="background:#1e2130;border:1px solid #2a2d3e;color:#f1f5f9;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer">
-            <option value="-1">Ano todo</option>
-            ${['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'].map(function(m,i){return '<option value="'+i+'" '+(i===mesAtual?'selected':'')+'>'+m+'</option>';}).join('')}
-          </select>
           <select id="finAno" onchange="recarregarFinanceiro()" style="background:#1e2130;border:1px solid #2a2d3e;color:#f1f5f9;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer">
             ${[anoAtual-1,anoAtual].map(function(y){return '<option value="'+y+'" '+(y===anoAtual?'selected':'')+'>'+y+'</option>';}).join('')}
           </select>
         </div>
       </div>
       <div class="g-sub">Análise detalhada de gastos, categorias e projeções — dados reais do Supabase.</div>
+      <!-- Botões de seleção de meses -->
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;align-items:center">
+        <button onclick="finToggleTodos()" id="finBtnTodos" style="padding:5px 14px;border-radius:20px;border:1px solid #f5a623;background:#f5a62320;color:#f5a623;font-size:12px;font-weight:700;cursor:pointer;transition:.2s">Todos</button>
+        <div style="width:1px;height:20px;background:#2a2d3e;margin:0 2px"></div>
+        ${['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'].map(function(m,i){
+          var ativo = i <= mesAtual;
+          return '<button id="finMes'+i+'" onclick="finToggleMes('+i+')" style="padding:5px 12px;border-radius:20px;border:1px solid '+(ativo?'#2a2d3e':'#1a1d27')+';background:transparent;color:'+(ativo?'rgba(241,245,249,.6)':'rgba(241,245,249,.2)')+';font-size:12px;font-weight:600;cursor:'+(ativo?'pointer':'default')+';transition:.2s'+(ativo?'':';opacity:.4')+'" '+(ativo?'':'disabled')+'>'+m+'</button>';
+        }).join('')}
+      </div>
     </div>
     <div id="finConteudo"><div style="text-align:center;padding:60px;color:rgba(241,245,249,.3)">⏳ Carregando dados...</div></div>`;
 
@@ -1133,10 +1174,12 @@ async function recarregarFinanceiro(){
 async function carregarFinanceiro(){
   var el = document.getElementById('finConteudo');
   if(!el) return;
-  var ano    = parseInt(document.getElementById('finAno')?.value  || new Date().getFullYear());
-  var mesSel = parseInt(document.getElementById('finMes')?.value ?? -1); // -1 = ano todo
+  var ano    = parseInt(document.getElementById('finAno')?.value || new Date().getFullYear());
   var hoje   = new Date();
   var mesHoje= hoje.getMonth();
+  // Meses selecionados: [] = todos, [n,...] = específicos
+  var mesesSelecionados = _finMesesSel.slice();
+  var mesSel = mesesSelecionados.length===1 ? mesesSelecionados[0] : -1; // compatibilidade
 
   var h = {'apikey':SB_KEY,'Authorization':'Bearer '+(usr?.token||SB_KEY)};
   var primDiaAno = ano+'-01-01';
@@ -1169,25 +1212,42 @@ async function carregarFinanceiro(){
     var ultimoMesDados = ano < new Date().getFullYear() ? 11 : mesHoje;
     var mesesComDados = porMes.filter(function(m,i){ return i<=ultimoMesDados && (m.rec>0||m.des>0); });
 
-    // Se mês específico selecionado, ajustar mesRef e totais
-    var mesFiltrado = mesSel >= 0; // true = visão de mês único
-    var mesRef = mesFiltrado ? mesSel : ultimoMesDados;
+    // Modo de filtro
+    var mesFiltrado   = mesesSelecionados.length > 0; // true = seleção específica
+    var multiMes      = mesesSelecionados.length > 1; // true = múltiplos meses
+
+    // mesRef = mês de referência para categorias e lançamentos
+    var mesRef = mesFiltrado
+      ? mesesSelecionados[mesesSelecionados.length-1] // último mês selecionado
+      : ultimoMesDados;
     while(!mesFiltrado && mesRef>0 && porMes[mesRef].rec===0 && porMes[mesRef].des===0) mesRef--;
 
-    // Totais — mês único ou ano todo
-    var totalRecAno = mesFiltrado ? porMes[mesRef].rec : porMes.reduce(function(s,m){return s+m.rec;},0);
-    var totalDesAno = mesFiltrado ? porMes[mesRef].des : porMes.reduce(function(s,m){return s+m.des;},0);
+    // Totais — filtrados pelos meses selecionados
+    var mesesParaTotais = mesFiltrado
+      ? mesesSelecionados
+      : Array.from({length:12}, function(_,i){return i;});
+
+    var totalRecAno = mesesParaTotais.reduce(function(s,m){return s+porMes[m].rec;},0);
+    var totalDesAno = mesesParaTotais.reduce(function(s,m){return s+porMes[m].des;},0);
     var saldoAno    = totalRecAno - totalDesAno;
 
     var mesAnterior = mesRef>0 ? mesRef-1 : null;
-    var recMesRef   = porMes[mesRef].rec;
-    var desMesRef   = porMes[mesRef].des;
+    var recMesRef   = mesesParaTotais.reduce(function(s,m){return s+porMes[m].rec;},0);
+    var desMesRef   = mesesParaTotais.reduce(function(s,m){return s+porMes[m].des;},0);
     var saldoMesRef = recMesRef - desMesRef;
     var desMAnt     = mesAnterior!==null ? porMes[mesAnterior].des : 0;
     var varDes      = desMAnt>0 ? ((desMesRef-desMAnt)/desMAnt*100) : 0;
 
-    // Label de período para KPIs
-    var labelPeriodo = mesFiltrado ? MESES_FULL[mesRef]+' '+ano : String(ano);
+    // Recalcular catMesMap para os meses selecionados
+    var transFiltradas = mesFiltrado
+      ? mesesSelecionados.reduce(function(arr,m){return arr.concat(porMes[m].trans);}, [])
+      : porMes[mesRef].trans;
+
+    // Label de período para KPIs e títulos
+    var labelPeriodo = !mesFiltrado ? String(ano)
+      : multiMes
+        ? mesesSelecionados.map(function(m){return MESES_ABREV[m];}).join('+')+ ' '+ano
+        : MESES_FULL[mesesSelecionados[0]]+' '+ano;
 
     // Projeção: média dos últimos 3 meses com dados
     var mesesParaMedia = [];
@@ -1196,9 +1256,9 @@ async function carregarFinanceiro(){
     }
     var mediaDes = mesesParaMedia.length ? mesesParaMedia.reduce(function(s,v){return s+v;},0)/mesesParaMedia.length : 0;
 
-    // Categorias do mês ref
+    // Categorias dos meses selecionados (ou mês ref)
     var catMesMap = {};
-    porMes[mesRef].trans.filter(function(t){return t.tipo==='despesa';}).forEach(function(t){
+    transFiltradas.filter(function(t){return t.tipo==='despesa';}).forEach(function(t){
       var cat = catMap[t.categoria_id];
       var chave = cat?.categoria || 'Outros';
       if(!catMesMap[chave]) catMesMap[chave]={val:0,sub:{}};
@@ -1218,9 +1278,10 @@ async function carregarFinanceiro(){
     });
     var catsAno = Object.entries(catAnoMap).sort(function(a,b){return b[1]-a[1];});
 
-    // Comparativo mês a mês por categoria (últimos 6 meses)
-    var ultimosSeis = [];
-    for(var k=Math.max(0,mesRef-5);k<=mesRef;k++) ultimosSeis.push(k);
+    // Comparativo mês a mês por categoria
+    var ultimosSeis = mesFiltrado
+      ? mesesSelecionados.slice().sort(function(a,b){return a-b;}) // meses selecionados
+      : (function(){var arr=[];for(var k=Math.max(0,mesRef-5);k<=mesRef;k++)arr.push(k);return arr;})();
     var topCatsComp = catsAno.slice(0,5).map(function(c){return c[0];});
     var compData = topCatsComp.map(function(catNome){
       return {
@@ -1247,7 +1308,7 @@ async function carregarFinanceiro(){
         <div class="mc">
           <div class="mc-lbl">Receitas — ${labelPeriodo}</div>
           <div class="mc-val g">${brl(totalRecAno)}</div>
-          <div class="mc-sub">${mesFiltrado ? '1 mês selecionado' : mesesComDados.length+' meses com dados'}</div>
+          <div class="mc-sub">${mesFiltrado ? mesesSelecionados.length+' mês(es) selecionado(s)' : mesesComDados.length+' meses com dados'}</div>
         </div>
         <div class="mc">
           <div class="mc-lbl">Despesas — ${labelPeriodo}</div>
