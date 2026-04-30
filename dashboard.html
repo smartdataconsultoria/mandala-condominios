@@ -1000,743 +1000,128 @@ async function renderPainel(){
 }
 
 async function pgDashboard(cont){
-  var hoje = new Date();
+  var hoje    = new Date();
   var nomeMes = hoje.toLocaleString('pt-BR',{month:'long'});
+  var h2      = hoje.getHours();
+  var saud    = h2<12?'Bom dia ☀️':h2<18?'Boa tarde 🌤':'Boa noite 🌙';
 
   cont.innerHTML=`
-    <div class="greeting"><div class="g-title" id="gTxt">Olá!</div><div class="g-sub">Bem-vindo ao portal do Edifício Mandala.</div></div>
-    <div id="dashMetrics"><div style="text-align:center;padding:20px;color:rgba(241,245,249,.3);font-size:13px">⏳ Carregando...</div></div>
-    <div id="dashResto" style="display:none">`;
+    <div class="greeting">
+      <div class="g-title" id="gTxt">${saud}</div>
+      <div class="g-sub">Bem-vindo ao portal do Edifício Mandala.</div>
+    </div>
+    <div id="dashCards"><div style="text-align:center;padding:20px;color:rgba(241,245,249,.3);font-size:13px">⏳ Carregando...</div></div>`;
 
-  // Buscar dados em paralelo
   var h = {'apikey':SB_KEY,'Authorization':'Bearer '+(usr?.token||SB_KEY)};
-  var anoMes = hoje.toISOString().slice(0,7);
+  var anoMes  = hoje.toISOString().slice(0,7);
   var primDia = anoMes+'-01';
   var ultDia  = new Date(hoje.getFullYear(),hoje.getMonth()+1,0).toISOString().slice(0,10);
   var mes3Atras = new Date(hoje.getFullYear(),hoje.getMonth()-2,1).toISOString().slice(0,10);
 
   try{
-    var [rContas, rTrans, rTrans3m] = await Promise.all([
+    var [rContas, rTrans, rTrans3m, rTodasTrans] = await Promise.all([
       fetch(SB_URL+'/rest/v1/condo_contas?empresa=eq.'+EMPRESA+'&order=nome',{headers:h}),
       fetch(SB_URL+'/rest/v1/condo_transacoes?empresa=eq.'+EMPRESA+'&data=gte.'+primDia+'&data=lte.'+ultDia+'&select=tipo,valor,situacao',{headers:h}),
       fetch(SB_URL+'/rest/v1/condo_transacoes?empresa=eq.'+EMPRESA+'&data=gte.'+mes3Atras+'&data=lte.'+ultDia+'&select=tipo,valor,data',{headers:h}),
+      fetch(SB_URL+'/rest/v1/condo_transacoes?empresa=eq.'+EMPRESA+'&select=tipo,valor,conta_id',{headers:h}),
     ]);
-    var contas  = rContas.ok  ? await rContas.json()  : [];
-    var transMes= rTrans.ok   ? await rTrans.json()   : [];
-    var trans3m = rTrans3m.ok ? await rTrans3m.json() : [];
+    var todasContas = rContas.ok      ? await rContas.json()      : [];
+    var transMes    = rTrans.ok       ? await rTrans.json()        : [];
+    var trans3m     = rTrans3m.ok     ? await rTrans3m.json()      : [];
+    var todasTrans  = rTodasTrans.ok  ? await rTodasTrans.json()   : [];
 
-    // Saldo por conta (acumulado histórico)
-    var rSaldos = await fetch(SB_URL+'/rest/v1/condo_transacoes?empresa=eq.'+EMPRESA+'&select=tipo,valor,conta_id',{headers:h});
-    var todasTrans = rSaldos.ok ? await rSaldos.json() : [];
+    // Contas de reserva/fundo/obra
+    var contasFundo = todasContas.filter(function(c){
+      var nome = (c.nome||'').toLowerCase();
+      return nome.includes('reserva')||nome.includes('obra')||nome.includes('fundo')||nome.includes('estrutural');
+    });
 
-    // Calcular saldo por conta
+    // Saldo acumulado por conta
     var saldoPorConta = {};
     todasTrans.forEach(function(t){
       if(!t.conta_id) return;
       if(!saldoPorConta[t.conta_id]) saldoPorConta[t.conta_id]=0;
-      saldoPorConta[t.conta_id] += t.tipo==='receita' ? parseFloat(t.valor||0) : -parseFloat(t.valor||0);
+      saldoPorConta[t.conta_id] += t.tipo==='receita'?parseFloat(t.valor||0):-parseFloat(t.valor||0);
     });
 
-    // Totais do mês
+    // KPIs do mês
     var recMes  = transMes.filter(function(t){return t.tipo==='receita';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
     var desMes  = transMes.filter(function(t){return t.tipo==='despesa';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
     var pendMes = transMes.filter(function(t){return t.situacao==='pendente';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
+    var saldoMes = recMes - desMes;
 
-    // Projeção — média de receita e despesa por mês nos últimos 3 meses
+    // Projeção — média últimos 3 meses
     var mesesMap = {};
     trans3m.forEach(function(t){
-      var ym = (t.data||'').slice(0,7);
+      var ym=(t.data||'').slice(0,7);
       if(!mesesMap[ym]) mesesMap[ym]={rec:0,des:0};
       if(t.tipo==='receita') mesesMap[ym].rec+=parseFloat(t.valor||0);
       else if(t.tipo==='despesa') mesesMap[ym].des+=parseFloat(t.valor||0);
     });
-    var ymList = Object.keys(mesesMap).sort();
+    var ymList  = Object.keys(mesesMap).sort();
     var mediaRec = ymList.length ? ymList.reduce(function(s,ym){return s+mesesMap[ym].rec;},0)/ymList.length : 0;
     var mediaDes = ymList.length ? ymList.reduce(function(s,ym){return s+mesesMap[ym].des;},0)/ymList.length : 0;
     var saldoProj = mediaRec - mediaDes;
 
-    // Saldo total de todas as contas
-    var saldoTotal = contas.reduce(function(s,c){return s+(saldoPorConta[c.id]||0);},0);
-
-    // Montar cards de contas
-    var contasCards = contas.map(function(c){
-      var saldo = saldoPorConta[c.id]||0;
-      var cor   = saldo>=0 ? '#22c55e' : '#ef4444';
-      return '<div class="mc" style="cursor:default">'+
-        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+
-          '<div style="width:30px;height:30px;border-radius:8px;background:rgba(245,166,35,.15);display:flex;align-items:center;justify-content:center;font-size:15px">🏦</div>'+
-          '<div>'+
-            '<div class="mc-lbl" style="margin-bottom:0;font-size:10px">'+esc(c.nome)+'</div>'+
-            '<div style="font-size:10px;color:rgba(241,245,249,.25)">'+esc(c.banco||c.tipo||'Conta')+'</div>'+
+    // Montar HTML
+    // Linha 1 — KPIs do mês
+    var kpisHtml =
+      '<div class="metrics" style="margin-bottom:20px">'+
+        '<div class="mc"><div class="mc-lbl">💰 Receitas — '+nomeMes+'</div><div class="mc-val g">'+brl(recMes)+'</div><div class="mc-sub">mês atual</div></div>'+
+        '<div class="mc"><div class="mc-lbl">💸 Despesas — '+nomeMes+'</div><div class="mc-val r">'+brl(desMes)+'</div><div class="mc-sub">'+(desMes>0?Math.round(desMes/Math.max(recMes,1)*100)+'% da receita':'sem despesas')+'</div></div>'+
+        '<div class="mc"><div class="mc-lbl">📊 Saldo do Mês</div><div class="mc-val '+(saldoMes>=0?'g':'r')+'">'+brl(saldoMes)+'</div><div class="mc-sub" style="color:'+(saldoMes>=0?'#34c97e':'#ef4444')+'">'+(saldoMes>=0?'↑ Superávit':'↓ Déficit')+'</div></div>'+
+        '<div class="mc" style="background:rgba(245,166,35,.05);border:1px solid rgba(245,166,35,.15)">'+
+          '<div class="mc-lbl" style="color:#f5a623">📈 Projeção — próximo mês</div>'+
+          '<div style="display:flex;flex-direction:column;gap:5px;margin-top:6px">'+
+            '<div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:rgba(241,245,249,.4)">Receita est.</span><span style="font-size:13px;font-weight:700;color:#22c55e">'+brl(mediaRec)+'</span></div>'+
+            '<div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:rgba(241,245,249,.4)">Despesa est.</span><span style="font-size:13px;font-weight:700;color:#ef4444">'+brl(mediaDes)+'</span></div>'+
+            '<div style="border-top:1px solid rgba(245,166,35,.12);margin-top:2px;padding-top:5px;display:flex;justify-content:space-between">'+
+              '<span style="font-size:11px;font-weight:700;color:#f5a623">Saldo proj.</span>'+
+              '<span style="font-size:15px;font-weight:800;color:'+(saldoProj>=0?'#22c55e':'#ef4444')+'">'+brl(saldoProj)+'</span>'+
+            '</div>'+
           '</div>'+
+          '<div class="mc-sub" style="margin-top:4px;color:rgba(241,245,249,.3)">média '+ymList.length+' meses</div>'+
         '</div>'+
-        '<div class="mc-val" style="color:'+cor+';font-size:22px">'+brl(saldo)+'</div>'+
-        '<div class="mc-sub" style="margin-top:4px;color:rgba(241,245,249,.35)">saldo acumulado</div>'+
-      '</div>';
-    }).join('');
-
-    // Projeção card
-    var projCard = '<div class="mc" style="cursor:default;background:linear-gradient(135deg,rgba(245,166,35,.06),rgba(245,166,35,.02));border:1px solid rgba(245,166,35,.15)">'+
-      '<div class="mc-lbl" style="color:#f5a623">📈 Projeção — próximo mês</div>'+
-      '<div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">'+
-        '<div style="display:flex;justify-content:space-between;align-items:center">'+
-          '<span style="font-size:11px;color:rgba(241,245,249,.4)">Receita estimada</span>'+
-          '<span style="font-size:15px;font-weight:700;color:#22c55e">'+brl(mediaRec)+'</span>'+
-        '</div>'+
-        '<div style="display:flex;justify-content:space-between;align-items:center">'+
-          '<span style="font-size:11px;color:rgba(241,245,249,.4)">Despesa estimada</span>'+
-          '<span style="font-size:15px;font-weight:700;color:#ef4444">'+brl(mediaDes)+'</span>'+
-        '</div>'+
-        '<div style="border-top:1px solid rgba(245,166,35,.15);margin-top:4px;padding-top:6px;display:flex;justify-content:space-between;align-items:center">'+
-          '<span style="font-size:11px;font-weight:700;color:#f5a623">Saldo projetado</span>'+
-          '<span style="font-size:17px;font-weight:800;color:'+(saldoProj>=0?'#22c55e':'#ef4444')+'">'+brl(saldoProj)+'</span>'+
-        '</div>'+
-      '</div>'+
-      '<div class="mc-sub" style="margin-top:6px;color:rgba(241,245,249,.3)">média dos últimos '+ymList.length+' meses</div>'+
-    '</div>';
-
-    // KPIs do mês
-    var kpisMes = '<div class="mc">'+
-        '<div class="mc-lbl">Receitas — '+nomeMes+'</div>'+
-        '<div class="mc-val g">'+brl(recMes)+'</div>'+
-        '<div class="mc-sub">mês atual</div>'+
-      '</div>'+
-      '<div class="mc">'+
-        '<div class="mc-lbl">Despesas — '+nomeMes+'</div>'+
-        '<div class="mc-val r">'+brl(desMes)+'</div>'+
-        '<div class="mc-sub">'+(desMes>0?Math.round(desMes/Math.max(recMes,1)*100)+'% da receita':'sem despesas')+'</div>'+
       '</div>';
 
-    // Linha 1: KPIs mês + projeção
-    document.getElementById('dashMetrics').innerHTML =
-      '<div class="metrics" style="margin-bottom:16px">'+
-        kpisMes+
-        '<div class="mc">'+
-          '<div class="mc-lbl">Pendências</div>'+
-          '<div class="mc-val '+(pendMes>0?'o':'g')+'">'+brl(pendMes)+'</div>'+
-          '<div class="mc-sub">a receber/pagar</div>'+
-        '</div>'+
-        projCard+
-      '</div>'+
-      // Linha 2: Cards de contas
-      (contas.length ? '<div style="font-size:11px;font-weight:700;color:rgba(241,245,249,.3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">🏦 Saldo das Contas</div>'+
-        '<div class="metrics" style="grid-template-columns:repeat('+Math.min(contas.length+1,4)+',1fr);margin-bottom:24px">'+
-          contasCards+
-          // Card saldo total
-          '<div class="mc" style="background:rgba(34,197,94,.04);border:1px solid rgba(34,197,94,.12)">'+
-            '<div class="mc-lbl">Total em Caixa</div>'+
-            '<div class="mc-val '+(saldoTotal>=0?'g':'r')+'" style="font-size:24px">'+brl(saldoTotal)+'</div>'+
-            '<div class="mc-sub">soma de '+contas.length+' conta(s)</div>'+
+    // Linha 2 — Contas de fundo/reserva
+    var contasHtml = '';
+    if(contasFundo.length){
+      var saldoFundos = contasFundo.reduce(function(s,c){return s+(saldoPorConta[c.id]||0);},0);
+      contasHtml =
+        '<div style="font-size:11px;font-weight:700;color:rgba(241,245,249,.35);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">🏦 Fundos & Reservas</div>'+
+        '<div class="metrics" style="grid-template-columns:repeat('+Math.min(contasFundo.length+1,4)+',1fr);margin-bottom:24px">'+
+          contasFundo.map(function(c){
+            var saldo = saldoPorConta[c.id]||0;
+            var cor   = saldo>0?'#22c55e':saldo<0?'#ef4444':'rgba(241,245,249,.5)';
+            return '<div class="mc">'+
+              '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'+
+                '<div style="width:32px;height:32px;border-radius:9px;background:rgba(245,166,35,.12);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🏦</div>'+
+                '<div><div class="mc-lbl" style="margin:0;font-size:10px;color:#f5a623">'+esc(c.nome)+'</div>'+
+                '<div style="font-size:10px;color:rgba(241,245,249,.25)">'+esc(c.banco||c.tipo||'')+'</div></div>'+
+              '</div>'+
+              '<div class="mc-val" style="color:'+cor+';font-size:24px">'+brl(saldo)+'</div>'+
+              '<div class="mc-sub">saldo acumulado</div>'+
+            '</div>';
+          }).join('')+
+          '<div class="mc" style="background:rgba(34,197,94,.04);border:1px solid rgba(34,197,94,.1)">'+
+            '<div class="mc-lbl" style="color:#22c55e">Total em Fundos</div>'+
+            '<div class="mc-val '+(saldoFundos>=0?'g':'r')+'" style="font-size:24px">'+brl(saldoFundos)+'</div>'+
+            '<div class="mc-sub">'+contasFundo.length+' conta(s) de reserva</div>'+
           '</div>'+
-        '</div>'
-      : '');
-
-    document.getElementById('dashResto').style.display='block';
-  }catch(e){
-    document.getElementById('dashMetrics').innerHTML='<div style="color:#ef4444;padding:10px">Erro ao carregar: '+e.message+'</div>';
-    document.getElementById('dashResto').style.display='block';
-  }
-
-  // Saudação por horário
-  var h2=hoje.getHours();
-  var saud=h2<12?'Bom dia':h2<18?'Boa tarde':'Boa noite';
-  if(h2>=12&&h2<18) saud='Boa tarde';
-  var el=document.getElementById('gTxt');
-  if(el) el.textContent=saud+', '+((usr&&usr.nome)?usr.nome.split(' ')[0]:'')+'! 👋';
-
-  cont.innerHTML += `
-    <div class="g2">
-    <div class="g2">
-      <div class="card">
-        <div class="ct">Atividades recentes</div>
-        <div class="act"><div class="adot dg">💰</div><div><div class="at">Taxa de Agosto processada</div><div class="as">32 boletos gerados · 15/07/2025</div></div></div>
-        <div class="act"><div class="adot da">📄</div><div><div class="at">Ata da assembleia publicada</div><div class="as">28/06/2025 · 21 visualizações</div></div></div>
-        <div class="act"><div class="adot db">🎯</div><div><div class="at">Meta "Câmeras" atualizada</div><div class="as">55% · R$ 8.250 / R$ 15.000</div></div></div>
-        <div class="act"><div class="adot dr">✉</div><div><div class="at">2 mensagens sem resposta</div><div class="as">1 reclamação · 1 sugestão</div></div></div>
-      </div>
-      <div class="card">
-        <div class="ct">Adimplência por andar</div>
-        ${[['1º Andar','100%','pg'],['2º Andar','87%','pa'],['3º Andar','100%','pg'],['4º Andar','88%','pa']].map(function(a){
-          return '<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:rgba(241,245,249,.4)">'+a[0]+'</span><span style="font-weight:600">'+a[1]+'</span></div><div class="prog"><div class="pf '+a[2]+'" style="width:'+a[1]+'"></div></div></div>';
-        }).join('')}
-      </div>
-    </div>
-    <div class="pbi">
-      <div class="pbh"><span class="pbl">Power BI</span><span class="pbla">Dashboard financeiro — sincronizado com Supabase</span><div class="pbli"><div class="pbld"></div>Ao vivo</div></div>
-      <div class="pbi3">
-        <div class="pbc"><div class="pbcl">Distribuição de despesas</div>
-          <svg viewBox="0 0 120 80" width="100%" style="margin-top:4px">
-            <rect x="8" y="48" width="14" height="24" fill="#f5a623" rx="2" opacity=".85"/><rect x="28" y="32" width="14" height="40" fill="#f5a623" rx="2"/>
-            <rect x="48" y="58" width="14" height="14" fill="#4f8ef7" rx="2" opacity=".7"/><rect x="68" y="42" width="14" height="30" fill="#f5a623" rx="2" opacity=".75"/>
-            <rect x="88" y="54" width="14" height="18" fill="#34c97e" rx="2" opacity=".7"/>
-            <text x="15" y="79" font-size="7" fill="rgba(241,245,249,.28)" text-anchor="middle">Manu.</text><text x="35" y="79" font-size="7" fill="rgba(241,245,249,.28)" text-anchor="middle">Água</text>
-            <text x="55" y="79" font-size="7" fill="rgba(241,245,249,.28)" text-anchor="middle">Lim.</text><text x="75" y="79" font-size="7" fill="rgba(241,245,249,.28)" text-anchor="middle">Seg.</text>
-            <text x="95" y="79" font-size="7" fill="rgba(241,245,249,.28)" text-anchor="middle">Gás</text>
-          </svg>
-        </div>
-        <div class="pbc"><div class="pbcl">Resumo financeiro — Julho</div>
-          <table style="width:100%;font-size:12px;margin-top:6px">
-            <tr><td style="color:rgba(241,245,249,.4);padding:3px 0">Receita prevista</td><td style="text-align:right;font-weight:600">R$ 19.200</td></tr>
-            <tr><td style="color:rgba(241,245,249,.4);padding:3px 0">Realizado</td><td style="text-align:right;color:#34c97e;font-weight:600">R$ 18.048</td></tr>
-            <tr><td style="color:rgba(241,245,249,.4);padding:3px 0">Despesas</td><td style="text-align:right;color:#ef6060;font-weight:600">R$ 13.200</td></tr>
-            <tr style="border-top:1px solid rgba(245,166,35,.1)"><td style="padding:5px 0;font-weight:600">Saldo</td><td style="text-align:right;color:#f5a623;font-weight:700">R$ 4.848</td></tr>
-          </table>
-        </div>
-        <div class="pbc"><div class="pbcl">Metas ativas</div>
-          <div style="margin-top:6px">
-            <div style="font-size:12px;margin-bottom:8px"><span style="color:rgba(241,245,249,.45)">Câmeras Estac.</span><div class="prog" style="margin-top:3px"><div class="pf pa" style="width:55%"></div></div><span style="font-size:11px;color:rgba(241,245,249,.28)">55% · R$ 8.250</span></div>
-            <div style="font-size:12px"><span style="color:rgba(241,245,249,.45)">Pintura Fachada</span><div class="prog" style="margin-top:3px"><div class="pf pb" style="width:30%"></div></div><span style="font-size:11px;color:rgba(241,245,249,.28)">30% · R$ 6.000</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px" id="quickAccess">
-      <a href="transacoes.html" style="text-decoration:none;display:flex;align-items:center;gap:12px;background:#111827;border:1px solid rgba(245,166,35,.1);border-radius:12px;padding:16px;transition:all .2s;cursor:pointer" onmouseover="this.style.borderColor='rgba(245,166,35,.35)'" onmouseout="this.style.borderColor='rgba(245,166,35,.1)'">
-        <div style="width:42px;height:42px;border-radius:10px;background:rgba(245,166,35,.1);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">↕</div>
-        <div><div style="font-size:14px;font-weight:600;color:#f1f5f9">Transações</div><div style="font-size:12px;color:rgba(241,245,249,.35);margin-top:2px">Lançar receitas e despesas</div></div>
-        <span style="margin-left:auto;font-size:11px;color:#f5a623">↗</span>
-      </a>
-      <a href="orcamento.html" style="text-decoration:none;display:flex;align-items:center;gap:12px;background:#111827;border:1px solid rgba(245,166,35,.1);border-radius:12px;padding:16px;transition:all .2s;cursor:pointer" onmouseover="this.style.borderColor='rgba(245,166,35,.35)'" onmouseout="this.style.borderColor='rgba(245,166,35,.1)'">
-        <div style="width:42px;height:42px;border-radius:10px;background:rgba(52,201,126,.1);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">◩</div>
-        <div><div style="font-size:14px;font-weight:600;color:#f1f5f9">Orçamento</div><div style="font-size:12px;color:rgba(241,245,249,.35);margin-top:2px">Previsto vs realizado</div></div>
-        <span style="margin-left:auto;font-size:11px;color:#f5a623">↗</span>
-      </a>
-      <a href="categorias.html" style="text-decoration:none;display:flex;align-items:center;gap:12px;background:#111827;border:1px solid rgba(245,166,35,.1);border-radius:12px;padding:16px;transition:all .2s;cursor:pointer" onmouseover="this.style.borderColor='rgba(245,166,35,.35)'" onmouseout="this.style.borderColor='rgba(245,166,35,.1)'">
-        <div style="width:42px;height:42px;border-radius:10px;background:rgba(110,168,247,.1);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🏷</div>
-        <div><div style="font-size:14px;font-weight:600;color:#f1f5f9">Categorias</div><div style="font-size:12px;color:rgba(241,245,249,.35);margin-top:2px">Categorias e contas</div></div>
-        <span style="margin-left:auto;font-size:11px;color:#f5a623">↗</span>
-      </a>
-    </div>
-    <div style="font-size:17px;font-weight:700;color:#f1f5f9;margin-bottom:6px">Dashboards disponíveis</div>
-    <div style="font-size:13px;color:rgba(241,245,249,.3);margin-bottom:18px">Relatórios Power BI do condomínio</div>
-    <div class="ftabs" id="dashTabs"></div>
-    <div class="dgrid" id="dashGrid"><div style="text-align:center;padding:30px;color:rgba(241,245,249,.2);font-size:13px">Carregando dashboards...</div></div>
-  `;
-  document.getElementById('gTxt').innerHTML=saudacao();
-  carregarDashboards();
-}
-
-async function carregarDashboards(){
-  var grid=document.getElementById('dashGrid'),tabs=document.getElementById('dashTabs');if(!grid)return;
-  try{
-    var r=await fetch(SB_URL+'/rest/v1/dashboards_clientes?select=*&order=categoria&empresa=eq.'+EMPRESA,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+usr.token}});
-    var arr=r.ok?await r.json():[];arr=arr||[];
-    if(!arr.length){grid.innerHTML='<div style="text-align:center;padding:30px;color:rgba(241,245,249,.2);font-size:13px">Nenhum dashboard cadastrado.</div>';return;}
-    var cats=[];arr.forEach(function(d){if(d.categoria&&cats.indexOf(d.categoria)<0)cats.push(d.categoria);});
-    if(tabs){var th='<button class="ftab on" onclick="fDash(\'todos\',this)">Todos ('+arr.length+')</button>';cats.forEach(function(c){th+='<button class="ftab" onclick="fDash(\''+esc(c)+'\',this)">'+esc(c)+'</button>';});tabs.innerHTML=th;}
-    _dashUrls=arr.map(function(d){return d.url;});
-    grid.innerHTML=arr.map(function(d,i){
-      return '<div class="dc" data-cat="'+esc(d.categoria||'')+'">'
-        +'<div class="dcp"><div class="cbars"><div class="cb"></div><div class="cb"></div><div class="cb"></div><div class="cb"></div><div class="cb"></div><div class="cb"></div></div></div>'
-        +'<div class="dcb"><div class="dcc">'+esc(d.categoria||'BI')+'</div><div class="dcn">'+esc(d.titulo)+'</div><div class="dcd">'+esc(d.descricao||'Dashboard de Business Intelligence.')+'</div>'
-        +'<div class="dcf"><span class="dcs"><span class="dcsd"></span>Ativo</span><button class="dcbtn" onclick="abrirDash('+i+')">▶ Abrir</button></div></div></div>';
-    }).join('');
-  }catch(e){if(grid)grid.innerHTML='<div style="text-align:center;padding:30px;color:rgba(241,245,249,.2);font-size:13px">Nenhum dashboard disponível.</div>';}
-}
-
-function fDash(cat,el){document.querySelectorAll('.ftab').forEach(function(t){t.classList.remove('on');});if(el)el.classList.add('on');document.querySelectorAll('.dc').forEach(function(c){c.style.display=(cat==='todos'||c.dataset.cat===cat)?'':'none';});}
-function abrirDash(i){var url=_dashUrls[i];if(url){document.getElementById('vTitle').textContent='Dashboard';document.getElementById('vFrame').src=url;document.getElementById('viewer').style.display='flex';}}
-
-// ── ESTADO FILTRO FINANCEIRO ─────────────────────────────
-var _finMesesSel = []; // [] = todos, [0,1,2] = meses específicos
-
-function finToggleMes(i){
-  var idx = _finMesesSel.indexOf(i);
-  if(idx>=0) _finMesesSel.splice(idx,1);
-  else _finMesesSel.push(i);
-  finAtualizarBotoes();
-  recarregarFinanceiro();
-}
-
-function finToggleTodos(){
-  _finMesesSel = [];
-  finAtualizarBotoes();
-  recarregarFinanceiro();
-}
-
-function finAtualizarBotoes(){
-  var todos = document.getElementById('finBtnTodos');
-  var nenhumSel = _finMesesSel.length===0;
-  if(todos){
-    todos.style.background    = nenhumSel ? '#f5a62320' : 'transparent';
-    todos.style.borderColor   = nenhumSel ? '#f5a623' : '#2a2d3e';
-    todos.style.color         = nenhumSel ? '#f5a623' : 'rgba(241,245,249,.4)';
-  }
-  for(var m=0;m<12;m++){
-    var btn = document.getElementById('finMes'+m);
-    if(!btn) continue;
-    var sel = _finMesesSel.includes(m);
-    btn.style.background  = sel ? '#f5a62320' : 'transparent';
-    btn.style.borderColor = sel ? '#f5a623'   : '#2a2d3e';
-    btn.style.color       = sel ? '#f5a623'   : (btn.disabled ? 'rgba(241,245,249,.2)' : 'rgba(241,245,249,.6)');
-    btn.style.fontWeight  = sel ? '700' : '500';
-  }
-}
-
-async function pgFinanceiro(cont){
-  var hoje = new Date();
-  var anoAtual = hoje.getFullYear();
-  var mesAtual = hoje.getMonth(); // 0-based
-
-  cont.innerHTML=`
-    <div class="greeting">
-      <div class="g-title" style="font-size:24px;display:flex;align-items:center;justify-content:space-between">
-        Prestação de Contas
-        <div style="display:flex;gap:8px;align-items:center">
-          <select id="finAno" onchange="recarregarFinanceiro()" style="background:#1e2130;border:1px solid #2a2d3e;color:#f1f5f9;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer">
-            ${[anoAtual-1,anoAtual].map(function(y){return '<option value="'+y+'" '+(y===anoAtual?'selected':'')+'>'+y+'</option>';}).join('')}
-          </select>
-        </div>
-      </div>
-      <div class="g-sub">Análise detalhada de gastos, categorias e projeções — dados reais do Supabase.</div>
-      <!-- Botões de seleção de meses -->
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;align-items:center">
-        <button onclick="finToggleTodos()" id="finBtnTodos" style="padding:5px 14px;border-radius:20px;border:1px solid #f5a623;background:#f5a62320;color:#f5a623;font-size:12px;font-weight:700;cursor:pointer;transition:.2s">Todos</button>
-        <div style="width:1px;height:20px;background:#2a2d3e;margin:0 2px"></div>
-        ${['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'].map(function(m,i){
-          var ativo = i <= mesAtual;
-          return '<button id="finMes'+i+'" onclick="finToggleMes('+i+')" style="padding:5px 12px;border-radius:20px;border:1px solid '+(ativo?'#2a2d3e':'#1a1d27')+';background:transparent;color:'+(ativo?'rgba(241,245,249,.6)':'rgba(241,245,249,.2)')+';font-size:12px;font-weight:600;cursor:'+(ativo?'pointer':'default')+';transition:.2s'+(ativo?'':';opacity:.4')+'" '+(ativo?'':'disabled')+'>'+m+'</button>';
-        }).join('')}
-      </div>
-    </div>
-    <div id="finConteudo"><div style="text-align:center;padding:60px;color:rgba(241,245,249,.3)">⏳ Carregando dados...</div></div>`;
-
-  await carregarFinanceiro();
-}
-
-async function recarregarFinanceiro(){
-  document.getElementById('finConteudo').innerHTML='<div style="text-align:center;padding:60px;color:rgba(241,245,249,.3)">⏳ Carregando...</div>';
-  await carregarFinanceiro();
-}
-
-async function carregarFinanceiro(){
-  var el = document.getElementById('finConteudo');
-  if(!el) return;
-  var ano    = parseInt(document.getElementById('finAno')?.value || new Date().getFullYear());
-  var hoje   = new Date();
-  var mesHoje= hoje.getMonth();
-  // Meses selecionados: [] = todos, [n,...] = específicos
-  var mesesSelecionados = _finMesesSel.slice();
-  var mesSel = mesesSelecionados.length===1 ? mesesSelecionados[0] : -1; // compatibilidade
-
-  var h = {'apikey':SB_KEY,'Authorization':'Bearer '+(usr?.token||SB_KEY)};
-  var primDiaAno = ano+'-01-01';
-  var ultDiaAno  = ano+'-12-31';
-
-  try{
-    var [rTrans,rCats] = await Promise.all([
-      fetch(SB_URL+'/rest/v1/condo_transacoes?empresa=eq.'+EMPRESA+'&data=gte.'+primDiaAno+'&data=lte.'+ultDiaAno+'&order=data.desc&limit=2000',{headers:h}),
-      fetch(SB_URL+'/rest/v1/condo_categorias?empresa=eq.'+EMPRESA,{headers:h}),
-    ]);
-    var trans = rTrans.ok ? await rTrans.json() : [];
-    var cats  = rCats.ok  ? await rCats.json()  : [];
-    var catMap = Object.fromEntries(cats.map(function(c){return [c.id,c];}));
-
-    var MESES_ABREV=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-    var MESES_FULL =['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-
-    // Agrupar por mês
-    var porMes = Array.from({length:12}, function(){ return {rec:0, des:0, trans:[]}; });
-    trans.forEach(function(t){
-      var m = parseInt((t.data||'').split('-')[1])-1;
-      if(m<0||m>11) return;
-      var v = parseFloat(t.valor||0);
-      if(t.tipo==='receita') porMes[m].rec+=v;
-      else if(t.tipo==='despesa') porMes[m].des+=v;
-      porMes[m].trans.push(t);
-    });
-
-    // Meses com dados (até o mês atual se ano corrente)
-    var ultimoMesDados = ano < new Date().getFullYear() ? 11 : mesHoje;
-    var mesesComDados = porMes.filter(function(m,i){ return i<=ultimoMesDados && (m.rec>0||m.des>0); });
-
-    // Modo de filtro
-    var mesFiltrado   = mesesSelecionados.length > 0; // true = seleção específica
-    var multiMes      = mesesSelecionados.length > 1; // true = múltiplos meses
-
-    // mesRef = mês de referência para categorias e lançamentos
-    var mesRef = mesFiltrado
-      ? mesesSelecionados[mesesSelecionados.length-1] // último mês selecionado
-      : ultimoMesDados;
-    while(!mesFiltrado && mesRef>0 && porMes[mesRef].rec===0 && porMes[mesRef].des===0) mesRef--;
-
-    // Totais — filtrados pelos meses selecionados
-    var mesesParaTotais = mesFiltrado
-      ? mesesSelecionados
-      : Array.from({length:12}, function(_,i){return i;});
-
-    var totalRecAno = mesesParaTotais.reduce(function(s,m){return s+porMes[m].rec;},0);
-    var totalDesAno = mesesParaTotais.reduce(function(s,m){return s+porMes[m].des;},0);
-    var saldoAno    = totalRecAno - totalDesAno;
-
-    var mesAnterior = mesRef>0 ? mesRef-1 : null;
-    var recMesRef   = mesesParaTotais.reduce(function(s,m){return s+porMes[m].rec;},0);
-    var desMesRef   = mesesParaTotais.reduce(function(s,m){return s+porMes[m].des;},0);
-    var saldoMesRef = recMesRef - desMesRef;
-    var desMAnt     = mesAnterior!==null ? porMes[mesAnterior].des : 0;
-    var varDes      = desMAnt>0 ? ((desMesRef-desMAnt)/desMAnt*100) : 0;
-
-    // Recalcular catMesMap para os meses selecionados
-    var transFiltradas = mesFiltrado
-      ? mesesSelecionados.reduce(function(arr,m){return arr.concat(porMes[m].trans);}, [])
-      : porMes[mesRef].trans;
-
-    // Label de período para KPIs e títulos
-    var labelPeriodo = !mesFiltrado ? String(ano)
-      : multiMes
-        ? mesesSelecionados.map(function(m){return MESES_ABREV[m];}).join('+')+ ' '+ano
-        : MESES_FULL[mesesSelecionados[0]]+' '+ano;
-
-    // Projeção: média dos últimos 3 meses com dados
-    var mesesParaMedia = [];
-    for(var mi=mesRef;mi>=0&&mesesParaMedia.length<3;mi--){
-      if(porMes[mi].des>0) mesesParaMedia.push(porMes[mi].des);
+        '</div>';
     }
-    var mediaDes = mesesParaMedia.length ? mesesParaMedia.reduce(function(s,v){return s+v;},0)/mesesParaMedia.length : 0;
 
-    // Categorias dos meses selecionados (ou mês ref)
-    var catMesMap = {};
-    transFiltradas.filter(function(t){return t.tipo==='despesa';}).forEach(function(t){
-      var cat = catMap[t.categoria_id];
-      var chave = cat?.categoria || 'Outros';
-      if(!catMesMap[chave]) catMesMap[chave]={val:0,sub:{}};
-      catMesMap[chave].val += parseFloat(t.valor||0);
-      var sub = cat?.nome||'Sem subcategoria';
-      catMesMap[chave].sub[sub]=(catMesMap[chave].sub[sub]||0)+parseFloat(t.valor||0);
-    });
-    var catsMes = Object.entries(catMesMap).sort(function(a,b){return b[1].val-a[1].val;});
-    var maxCat = catsMes.length ? catsMes[0][1].val : 1;
+    document.getElementById('dashCards').innerHTML = kpisHtml + contasHtml;
 
-    // Categorias anuais (acumulado)
-    var catAnoMap = {};
-    trans.filter(function(t){return t.tipo==='despesa';}).forEach(function(t){
-      var cat = catMap[t.categoria_id];
-      var chave = cat?.categoria||'Outros';
-      catAnoMap[chave]=(catAnoMap[chave]||0)+parseFloat(t.valor||0);
-    });
-    var catsAno = Object.entries(catAnoMap).sort(function(a,b){return b[1]-a[1];});
-
-    // Comparativo mês a mês por categoria
-    var ultimosSeis = mesFiltrado
-      ? mesesSelecionados.slice().sort(function(a,b){return a-b;}) // meses selecionados
-      : (function(){var arr=[];for(var k=Math.max(0,mesRef-5);k<=mesRef;k++)arr.push(k);return arr;})();
-    var topCatsComp = catsAno.slice(0,5).map(function(c){return c[0];});
-    var compData = topCatsComp.map(function(catNome){
-      return {
-        nome: catNome,
-        valores: ultimosSeis.map(function(m){
-          var v=0;
-          porMes[m].trans.filter(function(t){return t.tipo==='despesa';}).forEach(function(t){
-            var c=catMap[t.categoria_id];
-            if((c?.categoria||'Outros')===catNome) v+=parseFloat(t.valor||0);
-          });
-          return v;
-        })
-      };
-    });
-
-    // Max para escala do gráfico mensal
-    var maxBarMes = Math.max.apply(null, porMes.map(function(m){return Math.max(m.rec,m.des);})) || 1;
-
-    var CORES_CAT=['#f5a623','#3b82f6','#a855f7','#22c55e','#ef4444','#06b6d4','#f97316','#ec4899'];
-
-    el.innerHTML = `
-      <!-- KPIs -->
-      <div class="metrics" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
-        <div class="mc">
-          <div class="mc-lbl">Receitas — ${labelPeriodo}</div>
-          <div class="mc-val g">${brl(totalRecAno)}</div>
-          <div class="mc-sub">${mesFiltrado ? mesesSelecionados.length+' mês(es) selecionado(s)' : mesesComDados.length+' meses com dados'}</div>
-        </div>
-        <div class="mc">
-          <div class="mc-lbl">Despesas — ${labelPeriodo}</div>
-          <div class="mc-val r">${brl(totalDesAno)}</div>
-          <div class="mc-sub">${catsMes.length} categorias</div>
-        </div>
-        <div class="mc">
-          <div class="mc-lbl">Saldo — ${labelPeriodo}</div>
-          <div class="mc-val ${saldoAno>=0?'g':'r'}">${brl(saldoAno)}</div>
-          <div class="mc-sub" style="color:${saldoAno>=0?'#34c97e':'#ef4444'}">${saldoAno>=0?'↑ Superávit':'↓ Déficit'}</div>
-        </div>
-        <div class="mc">
-          <div class="mc-lbl">Projeção próximo mês</div>
-          <div class="mc-val o">${brl(mediaDes)}</div>
-          <div class="mc-sub">média 3 últimos meses</div>
-        </div>
-      </div>
-
-      <!-- GRÁFICO ANUAL + CATEGORIAS MÊS -->
-      <div class="g2" style="margin-bottom:20px">
-        <div class="card">
-          <div class="ct">Receitas × Despesas — ${labelPeriodo}</div>
-          <div style="display:flex;align-items:flex-end;gap:6px;height:120px;padding-top:12px">
-            ${porMes.map(function(m,i){
-              var rH = Math.max(2,Math.round(m.rec/maxBarMes*100));
-              var dH = Math.max(2,Math.round(m.des/maxBarMes*100));
-              var isFuturo = (ano===new Date().getFullYear() && i>mesHoje);
-              return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">'+
-                '<div style="display:flex;align-items:flex-end;gap:2px;height:100px">'+
-                  '<div style="width:8px;height:'+rH+'px;background:'+(isFuturo?'rgba(34,197,94,.2)':'#22c55e')+';border-radius:3px 3px 0 0" title="Rec '+MESES_ABREV[i]+': '+brl(m.rec)+'"></div>'+
-                  '<div style="width:8px;height:'+dH+'px;background:'+(isFuturo?'rgba(239,68,68,.2)':'#ef4444')+';border-radius:3px 3px 0 0" title="Des '+MESES_ABREV[i]+': '+brl(m.des)+'"></div>'+
-                '</div>'+
-                '<div style="font-size:9px;color:rgba(241,245,249,.3);margin-top:3px">'+MESES_ABREV[i]+'</div>'+
-              '</div>';
-            }).join('')}
-          </div>
-          <div style="display:flex;gap:16px;margin-top:10px;font-size:11px;color:rgba(241,245,249,.4);justify-content:center">
-            <span><span style="display:inline-block;width:8px;height:8px;background:#22c55e;border-radius:2px;margin-right:4px"></span>Receita</span>
-            <span><span style="display:inline-block;width:8px;height:8px;background:#ef4444;border-radius:2px;margin-right:4px"></span>Despesa</span>
-            <span><span style="display:inline-block;width:8px;height:8px;background:rgba(239,68,68,.2);border-radius:2px;margin-right:4px"></span>Projetado</span>
-          </div>
-          <!-- Linha de projeção info -->
-          ${mesRef < 11 ? `<div style="margin-top:12px;padding:10px 12px;background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.15);border-radius:8px;font-size:12px">
-            <span style="color:#f5a623;font-weight:700">📈 Projeção ${MESES_FULL[mesRef+1]} – ${MESES_FULL[11]}:</span>
-            <span style="color:rgba(241,245,249,.5);margin-left:8px">Despesa estimada de ${brl(mediaDes)}/mês</span>
-            <span style="color:rgba(241,245,249,.3);margin-left:8px">= ${brl(mediaDes*(11-mesRef))} nos próximos ${11-mesRef} meses</span>
-          </div>` : ''}
-        </div>
-
-        <div class="card">
-          <div class="ct">Despesas por Categoria — ${mesFiltrado ? labelPeriodo : MESES_FULL[mesRef]}</div>
-          ${catsMes.length ? catsMes.map(function(entry,ci){
-            var nome=entry[0], val=entry[1].val;
-            var pct=Math.round(val/Math.max(desMesRef,1)*100);
-            var pctBar=Math.round(val/maxCat*100);
-            var varMesAnterior=0;
-            if(mesAnterior!==null){
-              var valAnt=0;
-              porMes[mesAnterior].trans.filter(function(t){return t.tipo==='despesa';}).forEach(function(t){
-                if((catMap[t.categoria_id]?.categoria||'Outros')===nome) valAnt+=parseFloat(t.valor||0);
-              });
-              varMesAnterior = valAnt>0 ? ((val-valAnt)/valAnt*100) : (val>0?100:0);
-            }
-            return '<div style="margin-bottom:14px">'+
-              '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">'+
-                '<div style="display:flex;align-items:center;gap:8px">'+
-                  '<span style="width:10px;height:10px;border-radius:50%;background:'+CORES_CAT[ci%CORES_CAT.length]+';display:inline-block;flex-shrink:0"></span>'+
-                  '<span style="font-size:13px;color:rgba(241,245,249,.8);font-weight:600">'+nome+'</span>'+
-                '</div>'+
-                '<div style="display:flex;align-items:center;gap:10px">'+
-                  (varMesAnterior!==0?'<span style="font-size:10px;font-weight:700;color:'+(varMesAnterior>0?'#ef4444':'#22c55e')+'">'+(varMesAnterior>0?'▲':'▼')+Math.abs(Math.round(varMesAnterior))+'%</span>':'')+
-                  '<span style="font-size:13px;font-weight:700;color:#f1f5f9">'+brl(val)+'</span>'+
-                  '<span style="font-size:11px;color:rgba(241,245,249,.3);min-width:32px;text-align:right">'+pct+'%</span>'+
-                '</div>'+
-              '</div>'+
-              '<div class="prog"><div style="height:100%;width:'+pctBar+'%;background:'+CORES_CAT[ci%CORES_CAT.length]+';border-radius:99px;opacity:.7"></div></div>'+
-              // Subcategorias
-              '<div style="margin-top:5px;padding-left:18px">'+
-                Object.entries(entry[1].sub).sort(function(a,b){return b[1]-a[1];}).slice(0,3).map(function(s){
-                  var sPct=Math.round(s[1]/val*100);
-                  return '<div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(241,245,249,.35);margin-top:2px">'+
-                    '<span>└ '+s[0]+'</span>'+
-                    '<span>'+brl(s[1])+' ('+sPct+'%)</span>'+
-                  '</div>';
-                }).join('')+
-              '</div>'+
-            '</div>';
-          }).join('') : '<div style="color:rgba(241,245,249,.25);font-size:13px;text-align:center;padding:20px">Sem despesas no período</div>'}
-        </div>
-      </div>
-
-      <!-- COMPARATIVO MENSAL POR CATEGORIA -->
-      <div class="card" style="margin-bottom:20px">
-        <div class="ct">Comparativo por Categoria — Últimos ${ultimosSeis.length} meses</div>
-        <div style="overflow-x:auto">
-          <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:500px">
-            <thead>
-              <tr>
-                <th style="text-align:left;padding:8px 12px;color:rgba(241,245,249,.4);font-weight:700;font-size:10px;text-transform:uppercase;border-bottom:1px solid #2a2d3e;white-space:nowrap">Categoria</th>
-                ${ultimosSeis.map(function(m){return '<th style="text-align:right;padding:8px 12px;color:rgba(241,245,249,.4);font-weight:700;font-size:10px;text-transform:uppercase;border-bottom:1px solid #2a2d3e;white-space:nowrap">'+MESES_ABREV[m]+'</th>';}).join('')}
-                <th style="text-align:right;padding:8px 12px;color:rgba(241,245,249,.4);font-weight:700;font-size:10px;text-transform:uppercase;border-bottom:1px solid #2a2d3e">Total</th>
-                <th style="text-align:right;padding:8px 12px;color:rgba(241,245,249,.4);font-weight:700;font-size:10px;text-transform:uppercase;border-bottom:1px solid #2a2d3e">Representat.</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${compData.map(function(row,ri){
-                var total=row.valores.reduce(function(s,v){return s+v;},0);
-                var represent=totalDesAno>0?Math.round(total/totalDesAno*100):0;
-                var ultimo=row.valores[row.valores.length-1];
-                var penultimo=row.valores.length>1?row.valores[row.valores.length-2]:0;
-                var tendencia=penultimo>0?((ultimo-penultimo)/penultimo*100):0;
-                return '<tr style="border-bottom:1px solid rgba(255,255,255,.04)" onmouseover="this.style.background=&quot;rgba(245,166,35,.04)&quot;" onmouseout="this.style.background=&quot;none&quot;">'+
-                  '<td style="padding:9px 12px;font-weight:600;color:#f1f5f9">'+
-                    '<span style="width:8px;height:8px;border-radius:50%;background:'+CORES_CAT[ri%CORES_CAT.length]+';display:inline-block;margin-right:8px"></span>'+
-                    row.nome+
-                    (tendencia!==0?'<span style="font-size:9px;font-weight:700;color:'+(tendencia>0?'#ef4444':'#22c55e')+';margin-left:6px">'+(tendencia>0?'▲':'▼')+Math.abs(Math.round(tendencia))+'%</span>':'')+
-                  '</td>'+
-                  row.valores.map(function(v,vi){
-                    var prev=vi>0?row.valores[vi-1]:null;
-                    var delta=prev!==null&&prev>0?((v-prev)/prev*100):null;
-                    return '<td style="text-align:right;padding:9px 12px;color:'+(v===0?'rgba(241,245,249,.2)':(v>=(mediaDes*0.4)?'#ef9090':'rgba(241,245,249,.7)'))+';font-weight:'+(v>0?'600':'400')+'">'+
-                      (v===0?'—':brl(v))+
-                      (delta!==null&&v>0&&Math.abs(delta)>5?'<div style="font-size:9px;color:'+(delta>0?'#ef4444':'#22c55e')+'">'+(delta>0?'▲':'▼')+Math.abs(Math.round(delta))+'%</div>':'')+
-                    '</td>';
-                  }).join('')+
-                  '<td style="text-align:right;padding:9px 12px;font-weight:700;color:#f5a623">'+brl(total)+'</td>'+
-                  '<td style="text-align:right;padding:9px 12px">'+
-                    '<div style="display:flex;align-items:center;justify-content:flex-end;gap:6px">'+
-                      '<div style="width:50px;height:5px;background:#2a2d3e;border-radius:99px;overflow:hidden">'+
-                        '<div style="height:100%;width:'+represent+'%;background:'+CORES_CAT[ri%CORES_CAT.length]+';border-radius:99px"></div>'+
-                      '</div>'+
-                      '<span style="font-size:11px;color:rgba(241,245,249,.5);min-width:28px">'+represent+'%</span>'+
-                    '</div>'+
-                  '</td>'+
-                '</tr>';
-              }).join('')}
-              <!-- Linha totais -->
-              <tr style="border-top:2px solid #2a2d3e;background:rgba(245,166,35,.04)">
-                <td style="padding:9px 12px;font-weight:700;color:#f5a623">TOTAL DESPESAS</td>
-                ${ultimosSeis.map(function(m){
-                  return '<td style="text-align:right;padding:9px 12px;font-weight:700;color:#ef4444">'+brl(porMes[m].des)+'</td>';
-                }).join('')}
-                <td style="text-align:right;padding:9px 12px;font-weight:700;color:#ef4444">'+brl(totalDesAno)+'</td>
-                <td style="text-align:right;padding:9px 12px;font-weight:700;color:rgba(241,245,249,.4)">100%</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- PROJEÇÃO + ÚLTIMOS LANÇAMENTOS -->
-      <div class="g2">
-        <div class="card">
-          <div class="ct">📈 ${mesFiltrado ? 'Análise do Mês' : 'Projeção Anual'}</div>
-          ${Array.from({length:12},function(_,i){
-            var isPassado = i <= mesRef;
-            var isAtual   = i === mesRef;
-            var isFuturo  = i > mesRef;
-            var des = isPassado ? porMes[i].des : mediaDes;
-            var rec = isPassado ? porMes[i].rec : 0;
-            var saldo = rec - des;
-            return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04)">'+
-              '<div style="min-width:36px;font-size:11px;font-weight:700;color:'+(isAtual?'#f5a623':isFuturo?'rgba(241,245,249,.3)':'rgba(241,245,249,.6)')+'">'+MESES_ABREV[i]+'</div>'+
-              '<div style="flex:1">'+
-                '<div style="height:5px;background:#1e2130;border-radius:99px;overflow:hidden">'+
-                  '<div style="height:100%;width:'+Math.round(des/Math.max(mediaDes,1)*70)+'%;background:'+(isFuturo?'rgba(239,68,68,.3)':'#ef4444')+';border-radius:99px;'+(isFuturo?'border:1px dashed rgba(239,68,68,.5)':'')+'" ></div>'+
-                '</div>'+
-              '</div>'+
-              '<div style="text-align:right;min-width:90px;font-size:12px;font-weight:'+(isAtual?'700':'500')+';color:'+(isFuturo?'rgba(241,245,249,.3)':isAtual?'#f5a623':'rgba(241,245,249,.6)')+'">'+
-                (isFuturo?'~ ':'')+brl(des)+
-              '</div>'+
-              (isFuturo?'<span style="font-size:9px;color:rgba(241,245,249,.25);min-width:16px">📊</span>':'<span style="font-size:9px;color:'+(porMes[i].des>0?'#22c55e':'rgba(241,245,249,.2)')+';min-width:16px">'+(porMes[i].des>0?'✓':'')+'</span>')+
-            '</div>';
-          }).join('')}
-          <div style="margin-top:12px;padding:10px;background:#0f1117;border-radius:8px;font-size:12px;display:flex;justify-content:space-between">
-            <span style="color:rgba(241,245,249,.4)">Projeção total ${ano}:</span>
-            <strong style="color:#f5a623">${brl(totalDesAno + mediaDes*(11-mesRef))}</strong>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="ct">Últimos Lançamentos — ${mesFiltrado ? labelPeriodo : MESES_FULL[mesRef]}</div>
-          ${porMes[mesRef].trans.slice(0,8).map(function(t){
-            var cat=catMap[t.categoria_id];
-            var rec=t.tipo==='receita';
-            var dp=t.data?t.data.split('-').reverse().slice(0,2).join('/'):'-';
-            return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)">'+
-              '<div style="width:26px;height:26px;border-radius:7px;background:'+(rec?'rgba(34,197,94,.15)':'rgba(239,68,68,.15)')+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:'+(rec?'#22c55e':'#ef4444')+';flex-shrink:0">'+(rec?'↑':'↓')+'</div>'+
-              '<div style="flex:1;min-width:0">'+
-                '<div style="font-size:12px;color:#f1f5f9;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(t.descricao||'—')+'</div>'+
-                '<div style="font-size:10px;color:rgba(241,245,249,.3)">'+dp+(cat?' · '+esc(cat.categoria||cat.nome||''):'')+'</div>'+
-              '</div>'+
-              '<div style="font-size:12px;font-weight:700;color:'+(rec?'#22c55e':'#ef6060')+';white-space:nowrap">'+
-                (rec?'+':'-')+brl(t.valor)+
-              '</div>'+
-            '</div>';
-          }).join('')}
-          ${!porMes[mesRef].trans.length?'<div style="color:rgba(241,245,249,.25);font-size:13px;text-align:center;padding:20px">Sem lançamentos</div>':''}
-        </div>
-      </div>
-    `;
   }catch(e){
-    document.getElementById('finConteudo').innerHTML='<div style="color:#ef4444;padding:20px">Erro ao carregar: '+e.message+'</div>';
+    document.getElementById('dashCards').innerHTML='<div style="color:#ef4444;padding:10px">Erro: '+e.message+'</div>';
   }
-}
 
-function pgMetas(cont){
-  cont.innerHTML=`<div class="greeting"><div class="g-title" style="font-size:24px">Metas & Projetos</div><div class="g-sub">Acompanhe o progresso das melhorias do Edifício Mandala.</div></div><div id="metasLista"></div>`;
-  var metas=[{em:'📷',tt:'Câmeras no Estacionamento',ds:'8 câmeras HD com gravação 30 dias',tot:15000,at:8250,cl:'pa'},{em:'🎨',tt:'Pintura da Fachada',ds:'Renovação completa da pintura externa',tot:20000,at:6000,cl:'pb'},{em:'🌳',tt:'Revitalização do Jardim',ds:'Paisagismo e novos bancos',tot:6000,at:6000,cl:'pg'},{em:'💡',tt:'Iluminação LED Corredores',ds:'Troca de toda iluminação por LED',tot:8500,at:2100,cl:'pa'}];
-  var html='';
-  metas.forEach(function(m){var pct=Math.min(100,Math.round(m.at/m.tot*100));html+='<div class="meta"><div class="mtop"><span class="mem">'+m.em+'</span><div style="flex:1"><div class="mtt">'+m.tt+'</div><div class="mds">'+m.ds+'</div></div><span class="badge '+(pct>=100?'bg':pct>=50?'ba':'bb')+'">'+( pct>=100?'✓ Concluída':pct+'%')+'</span></div><div class="mvs"><span>Arrecadado: <strong>'+brl(m.at)+'</strong></span><span>Meta: <strong>'+brl(m.tot)+'</strong></span></div><div class="prog"><div class="pf '+m.cl+'" style="width:'+pct+'%"></div></div><div class="mpc">'+(pct>=100?'Meta atingida!':'Faltam '+brl(m.tot-m.at))+'</div></div>';});
-  document.getElementById('metasLista').innerHTML=html;
-}
+  // Nome na saudação
+  if(usr&&usr.nome){
+    var el=document.getElementById('gTxt');
+    if(el) el.textContent=saud+', '+usr.nome.split(' ')[0]+'!';
+  }
 
-function pgDocumentos(cont){
-  var docs=[{ic:'📋',bg:'rgba(245,166,35,.08)',nm:'Ata da Assembleia Geral — Jun/2025',ct:'Ata de Assembleia',dt:'28/06/2025'},{ic:'📜',bg:'rgba(79,142,247,.08)',nm:'Convenção do Condomínio — Revisão 2022',ct:'Convenção',dt:'10/02/2022'},{ic:'📣',bg:'rgba(52,201,126,.08)',nm:'Comunicado — Manutenção Elevador Jul/25',ct:'Comunicado',dt:'01/07/2025'},{ic:'📅',bg:'rgba(239,96,96,.08)',nm:'Edital de Convocação — Assembleia Ago/2025',ct:'Edital',dt:'10/07/2025'},{ic:'📖',bg:'rgba(245,166,35,.05)',nm:'Regimento Interno — Versão Atual',ct:'Regimento',dt:'15/01/2022'},{ic:'📊',bg:'rgba(79,142,247,.07)',nm:'Prestação de Contas — Junho 2025',ct:'Financeiro',dt:'05/07/2025'}];
-  cont.innerHTML=`<div class="greeting"><div class="g-title" style="font-size:24px">Documentos</div><div class="g-sub">Repositório de documentos do Edifício Mandala.</div></div>
-  <div class="ftabs">${['Todos','Atas','Comunicados','Financeiro','Convenção','Regimento'].map(function(c,i){return '<button class="ftab '+(i===0?'on':'')+'" onclick="fDoc(\''+c+'\',this)">'+c+'</button>';}).join('')}</div>
-  <div id="docsLista">${docs.map(function(d){return '<div class="di" data-cat="'+d.ct+'"><div style="width:38px;height:38px;border-radius:8px;background:'+d.bg+';display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">'+d.ic+'</div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:#f1f5f9">'+d.nm+'</div><div style="font-size:11px;color:rgba(241,245,249,.3);margin-top:2px">'+d.ct+' · '+d.dt+'</div></div><div style="display:flex;gap:6px"><button class="btn-s" onclick="toast(\'Abrindo...\')">Visualizar</button><button class="btn-s" onclick="toast(\'Download iniciado...\')">↓</button></div></div>';}).join('')}</div>`;
-}
-function fDoc(cat,el){document.querySelectorAll('.ftab').forEach(function(t){t.classList.remove('on');});if(el)el.classList.add('on');document.querySelectorAll('#docsLista .di').forEach(function(d){d.style.display=(cat==='Todos'||d.dataset.cat===cat)?'':'none';});}
 
-function pgCalendario(cont){
-  var ev=[8,18,25,28];
-  cont.innerHTML=`<div class="greeting"><div class="g-title" style="font-size:24px">Calendário</div><div class="g-sub">Eventos e assembleias do Edifício Mandala.</div></div>
-  <div class="g2">
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><button class="btn-s">‹</button><span style="font-size:15px;font-weight:600">Julho 2025</span><button class="btn-s">›</button></div>
-      <div class="cg">${['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(function(d){return '<div class="ch">'+d+'</div>';}).join('')}<div class="cd om"></div><div class="cd om"></div>${Array.from({length:31},function(_,i){var d=i+1;return '<div class="cd'+(d===15?' hj':'')+(ev.indexOf(d)>=0?' ev':'')+'">'+(d)+'</div>';}).join('')}</div>
-    </div>
-    <div class="card">
-      <div class="ct">Próximos eventos</div>
-      ${[['08','Vistoria do Elevador','bb','Manutenção'],['18','Reunião Conselho Fiscal','ba','Reunião'],['25','Manutenção Piscina','bb','Manutenção'],['28','Assembleia Geral Ordinária','ba','Assembleia'],['05','Início — Câmeras Estac.','bg','Obra']].map(function(e){return '<div class="act"><div style="min-width:36px;text-align:center"><div style="font-size:18px;font-weight:700;color:#f5a623">'+e[0]+'</div><div style="font-size:10px;color:rgba(241,245,249,.3)">jul</div></div><div><div class="at">'+e[1]+'</div><span class="badge '+e[2]+'" style="margin-top:3px">'+e[3]+'</span></div></div>';}).join('')}
-    </div>
-  </div>`;
-}
-
-function pgComunicados(cont){
-  var coms=[{dt:'10/07/2025',tt:'Manutenção do Elevador — 08/07 das 8h às 17h',cp:'Informamos que haverá manutenção preventiva no elevador. Durante este período utilize as escadas.',bd:'ba',ct:'Manutenção'},{dt:'05/07/2025',tt:'Convocação: Assembleia Geral Ordinária — 28/07',cp:'Ficam convocados todos os condôminos para a AGO no salão do térreo. Pauta: Prestação de contas semestral.',bd:'ba',ct:'Assembleia'},{dt:'01/07/2025',tt:'Taxa condominial de Julho disponível',cp:'Os boletos de julho/2025 foram gerados. Vencimento: 10/07/2025.',bd:'bb',ct:'Financeiro'},{dt:'25/06/2025',tt:'Regras para uso da piscina nas férias',cp:'Horário: 8h às 22h. Agendamento obrigatório para grupos acima de 5 pessoas.',bd:'bg',ct:'Aviso'}];
-  cont.innerHTML=`<div class="greeting"><div class="g-title" style="font-size:24px">Comunicados</div><div class="g-sub">Avisos oficiais do Edifício Mandala.</div></div>`
-    +coms.map(function(c){return '<div class="card" style="margin-bottom:16px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><span class="badge '+c.bd+'">'+c.ct+'</span><span style="font-size:11px;color:rgba(241,245,249,.28)">'+c.dt+'</span></div><div style="font-size:15px;font-weight:600;color:#f1f5f9;margin-bottom:8px">'+c.tt+'</div><div style="font-size:13px;color:rgba(241,245,249,.42);line-height:1.6">'+c.cp+'</div></div>';}).join('');
-}
-
-function pgMensagens(cont){
-  var isSind=perfil==='sindico';
-  cont.innerHTML=`<div class="greeting"><div class="g-title" style="font-size:24px">Fale com o Síndico</div><div class="g-sub">${isSind?'Gerencie as mensagens dos moradores.':'Envie sugestões, reclamações ou propostas.'}</div></div>`
-  +(isSind?`<div class="g2"><div>
-    <div class="mi mu"><div class="mh"><div class="mdot"></div><span class="mf">Carlos Mendes (204)</span><span class="badge br" style="font-size:10px">Reclamação</span><span class="mt">Hoje 10h15</span></div><div class="mb">O interfone do apartamento está com defeito há mais de uma semana...</div></div>
-    <div class="mi mu"><div class="mh"><div class="mdot"></div><span class="mf">Mariana Costa (301)</span><span class="badge bb" style="font-size:10px">Sugestão</span><span class="mt">Ontem</span></div><div class="mb">Sugiro instalarmos um totem com câmera na entrada do estacionamento...</div></div>
-    </div>
-    <div class="card"><div class="ct">Responder</div>
-      <div style="background:rgba(245,166,35,.04);border:1px solid rgba(245,166,35,.1);border-radius:8px;padding:12px;margin-bottom:14px"><div style="font-size:13px;font-weight:500;color:#f5a623">Carlos Mendes (204) — Reclamação</div><div style="font-size:12px;color:rgba(241,245,249,.35);margin-top:4px">O interfone do apartamento...</div></div>
-      <div class="fr"><label>Resposta</label><textarea rows="4" placeholder="Escreva sua resposta..."></textarea></div>
-      <button class="btn-p btn-f" onclick="toast('Resposta enviada!','ok')">Enviar resposta</button>
-    </div></div>`
-  :`<div class="g2"><div class="card"><div class="ct">Nova mensagem</div>
-    <div class="fr"><label>Categoria</label><select><option>Reclamação</option><option>Sugestão</option><option>Proposta</option><option>Outro</option></select></div>
-    <div class="fr"><label>Assunto</label><input type="text" placeholder="Assunto"/></div>
-    <div class="fr"><label>Mensagem</label><textarea rows="5" placeholder="Descreva em detalhes..."></textarea></div>
-    <button class="btn-p btn-f" onclick="toast('Mensagem enviada!','ok')">Enviar</button>
-    </div></div>`);
-}
-
-function pgBoletos(cont){
-  var isSind=perfil==='sindico';
-  var bols=[{rf:'Julho/2025',ds:'Taxa condominial',vc:'10/07/2025',vl:600,st:'Em aberto',bd:'ba',ic:'📄'},{rf:'Junho/2025',ds:'Taxa condominial',vc:'10/06/2025',vl:600,st:'Pago',bd:'bg',ic:'✅'},{rf:'Maio/2025',ds:'Taxa condominial',vc:'10/05/2025',vl:600,st:'Pago',bd:'bg',ic:'✅'},{rf:'Abril/2025',ds:'Taxa condominial',vc:'10/04/2025',vl:600,st:'Pago',bd:'bg',ic:'✅'},{rf:'Março/2025',ds:'Taxa + rateio extra',vc:'10/03/2025',vl:780,st:'Pago',bd:'bg',ic:'✅'}];
-  cont.innerHTML=`<div class="greeting"><div class="g-title" style="font-size:24px">${isSind?'Boletos & Taxas':'Meus Boletos'}</div><div class="g-sub">${isSind?'Controle de boletos do Edifício Mandala.':'Histórico de pagamentos da sua unidade.'}</div></div>`
-  +(!isSind?`<div class="metrics" style="grid-template-columns:repeat(3,1fr);margin-bottom:28px"><div class="mc"><div class="mc-lbl">Em aberto</div><div class="mc-val o">R$ 600</div><div class="mc-sub">Vence 10/07/2025</div></div><div class="mc"><div class="mc-lbl">Pagos este ano</div><div class="mc-val g">6</div><div class="mc-sub">Jan a Jun/2025</div></div><div class="mc"><div class="mc-lbl">Total pago 2025</div><div class="mc-val">R$ 3.780</div><div class="mc-sub">Sem atraso</div></div></div>`:'<button class="btn-p" style="margin-bottom:22px" onclick="toast(\'Gerando boletos...\')">Gerar Boletos Agosto/2025</button>')
-  +`<div class="card"><div class="ct">Histórico</div>`
-  +bols.map(function(b){return '<div class="bi"><div style="font-size:20px;width:34px;text-align:center">'+b.ic+'</div><div style="flex:1"><div class="br2">'+b.rf+' — '+b.ds+'</div><div class="bd">Vencimento: '+b.vc+'</div></div><div><div class="bv"><span class="bvl">'+b.st+'</span>'+brl(b.vl)+'</div><span class="badge '+b.bd+'" style="float:right;margin-top:4px">'+b.st+'</span></div>'+(b.st==='Em aberto'?'<button class="btn-s" style="margin-left:12px" onclick="toast(\'Abrindo 2ª via...\')">2ª Via</button>':'<button class="btn-s" style="margin-left:12px" onclick="toast(\'Baixando...\')">Comprovante</button>')+'</div>';}).join('')+'</div>';
-}
-</script>
-<script>
-// Garante que o loading sempre desaparece após 5s
-window.addEventListener('load', function(){
-  setTimeout(function(){
-    var l = document.getElementById('tela-loading');
-    var a = document.getElementById('tela-app');
-    if(l && l.style.display !== 'none' && (!a || a.style.display === 'none')){
-      console.warn('[Mandala] Forçando ocultação do loading por timeout global');
-      if(usr && usr.email){
-        // Tem usuário — mostra o app
-        mostrarApp();
-      } else {
-        // Sem usuário — vai para login
-        window.location.href = 'login.html';
-      }
-    }
-  }, 5000);
-});
-</script>
-</body>
-</html>
