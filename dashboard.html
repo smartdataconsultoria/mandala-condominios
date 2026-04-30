@@ -1099,28 +1099,350 @@ async function carregarDashboards(){
 function fDash(cat,el){document.querySelectorAll('.ftab').forEach(function(t){t.classList.remove('on');});if(el)el.classList.add('on');document.querySelectorAll('.dc').forEach(function(c){c.style.display=(cat==='todos'||c.dataset.cat===cat)?'':'none';});}
 function abrirDash(i){var url=_dashUrls[i];if(url){document.getElementById('vTitle').textContent='Dashboard';document.getElementById('vFrame').src=url;document.getElementById('viewer').style.display='flex';}}
 
-function pgFinanceiro(cont){
+async function pgFinanceiro(cont){
+  var hoje = new Date();
+  var anoAtual = hoje.getFullYear();
+  var mesAtual = hoje.getMonth(); // 0-based
+
   cont.innerHTML=`
-    <div class="greeting"><div class="g-title" style="font-size:24px">Prestação de Contas</div><div class="g-sub">Transparência total dos recursos do Edifício Mandala.</div></div>
-    <div class="metrics" style="grid-template-columns:repeat(3,1fr)">
-      <div class="mc"><div class="mc-lbl">Receita — Jul/2025</div><div class="mc-val g">R$ 18.048</div><div class="mc-sub">94% adimplência</div></div>
-      <div class="mc"><div class="mc-lbl">Despesas — Jul/2025</div><div class="mc-val r">R$ 13.200</div><div class="mc-sub">5 categorias</div></div>
-      <div class="mc"><div class="mc-lbl">Saldo do mês</div><div class="mc-val o">R$ 4.848</div><div class="mc-sub" style="color:#34c97e">↑ Superávit</div></div>
+    <div class="greeting">
+      <div class="g-title" style="font-size:24px;display:flex;align-items:center;justify-content:space-between">
+        Prestação de Contas
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="finAno" onchange="recarregarFinanceiro()" style="background:#1e2130;border:1px solid #2a2d3e;color:#f1f5f9;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer">
+            ${[anoAtual-1,anoAtual].map(function(y){return '<option value="'+y+'" '+(y===anoAtual?'selected':'')+'>'+y+'</option>';}).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="g-sub">Análise detalhada de gastos, categorias e projeções — dados reais do Supabase.</div>
     </div>
-    <div class="ai">ℹ Dados inseridos pelo síndico em tempo real no Supabase. Integrado ao Power BI automaticamente.</div>
-    <div class="card">
-      <div class="ct">Lançamentos recentes</div>
-      <table class="dt">
-        <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th>Valor</th></tr></thead>
-        <tbody>
-          <tr><td>15/07</td><td>Taxa condominial — 32 unidades</td><td>Taxa</td><td><span class="badge bg">Receita</span></td><td style="font-weight:600;color:#34c97e">R$ 18.048</td></tr>
-          <tr><td>12/07</td><td>Conta de água — COMPESA</td><td>Utilidades</td><td><span class="badge br">Despesa</span></td><td style="font-weight:600;color:#ef6060">R$ 2.840</td></tr>
-          <tr><td>10/07</td><td>Portaria — empresa terceirizada</td><td>Segurança</td><td><span class="badge br">Despesa</span></td><td style="font-weight:600;color:#ef6060">R$ 4.500</td></tr>
-          <tr><td>08/07</td><td>Limpeza e zeladoria</td><td>Manutenção</td><td><span class="badge br">Despesa</span></td><td style="font-weight:600;color:#ef6060">R$ 2.400</td></tr>
-          <tr><td>05/07</td><td>Energia elétrica — áreas comuns</td><td>Utilidades</td><td><span class="badge br">Despesa</span></td><td style="font-weight:600;color:#ef6060">R$ 1.680</td></tr>
-        </tbody>
-      </table>
-    </div>`;
+    <div id="finConteudo"><div style="text-align:center;padding:60px;color:rgba(241,245,249,.3)">⏳ Carregando dados...</div></div>`;
+
+  await carregarFinanceiro();
+}
+
+async function recarregarFinanceiro(){
+  document.getElementById('finConteudo').innerHTML='<div style="text-align:center;padding:60px;color:rgba(241,245,249,.3)">⏳ Carregando...</div>';
+  await carregarFinanceiro();
+}
+
+async function carregarFinanceiro(){
+  var el = document.getElementById('finConteudo');
+  if(!el) return;
+  var ano = parseInt(document.getElementById('finAno')?.value || new Date().getFullYear());
+  var hoje = new Date();
+  var mesHoje = hoje.getMonth();
+
+  var h = {'apikey':SB_KEY,'Authorization':'Bearer '+(usr?.token||SB_KEY)};
+  var primDiaAno = ano+'-01-01';
+  var ultDiaAno  = ano+'-12-31';
+
+  try{
+    var [rTrans,rCats] = await Promise.all([
+      fetch(SB_URL+'/rest/v1/condo_transacoes?empresa=eq.'+EMPRESA+'&data=gte.'+primDiaAno+'&data=lte.'+ultDiaAno+'&order=data.desc&limit=2000',{headers:h}),
+      fetch(SB_URL+'/rest/v1/condo_categorias?empresa=eq.'+EMPRESA,{headers:h}),
+    ]);
+    var trans = rTrans.ok ? await rTrans.json() : [];
+    var cats  = rCats.ok  ? await rCats.json()  : [];
+    var catMap = Object.fromEntries(cats.map(function(c){return [c.id,c];}));
+
+    var MESES_ABREV=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    var MESES_FULL =['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+    // Agrupar por mês
+    var porMes = Array.from({length:12}, function(){ return {rec:0, des:0, trans:[]}; });
+    trans.forEach(function(t){
+      var m = parseInt((t.data||'').split('-')[1])-1;
+      if(m<0||m>11) return;
+      var v = parseFloat(t.valor||0);
+      if(t.tipo==='receita') porMes[m].rec+=v;
+      else if(t.tipo==='despesa') porMes[m].des+=v;
+      porMes[m].trans.push(t);
+    });
+
+    // Meses com dados (até o mês atual se ano corrente)
+    var ultimoMesDados = ano < new Date().getFullYear() ? 11 : mesHoje;
+    var mesesComDados = porMes.filter(function(m,i){ return i<=ultimoMesDados && (m.rec>0||m.des>0); });
+
+    // Totais anuais
+    var totalRecAno = porMes.reduce(function(s,m){return s+m.rec;},0);
+    var totalDesAno = porMes.reduce(function(s,m){return s+m.des;},0);
+    var saldoAno    = totalRecAno - totalDesAno;
+
+    // Mês mais recente com dados
+    var mesRef = ultimoMesDados;
+    while(mesRef>0 && porMes[mesRef].rec===0 && porMes[mesRef].des===0) mesRef--;
+    var mesAnterior = mesRef>0 ? mesRef-1 : null;
+
+    var recMesRef = porMes[mesRef].rec;
+    var desMesRef = porMes[mesRef].des;
+    var saldoMesRef = recMesRef - desMesRef;
+    var desMAnt = mesAnterior!==null ? porMes[mesAnterior].des : 0;
+    var varDes  = desMAnt>0 ? ((desMesRef-desMAnt)/desMAnt*100) : 0;
+
+    // Projeção: média dos últimos 3 meses com dados
+    var mesesParaMedia = [];
+    for(var mi=mesRef;mi>=0&&mesesParaMedia.length<3;mi--){
+      if(porMes[mi].des>0) mesesParaMedia.push(porMes[mi].des);
+    }
+    var mediaDes = mesesParaMedia.length ? mesesParaMedia.reduce(function(s,v){return s+v;},0)/mesesParaMedia.length : 0;
+
+    // Categorias do mês ref
+    var catMesMap = {};
+    porMes[mesRef].trans.filter(function(t){return t.tipo==='despesa';}).forEach(function(t){
+      var cat = catMap[t.categoria_id];
+      var chave = cat?.categoria || 'Outros';
+      if(!catMesMap[chave]) catMesMap[chave]={val:0,sub:{}};
+      catMesMap[chave].val += parseFloat(t.valor||0);
+      var sub = cat?.nome||'Sem subcategoria';
+      catMesMap[chave].sub[sub]=(catMesMap[chave].sub[sub]||0)+parseFloat(t.valor||0);
+    });
+    var catsMes = Object.entries(catMesMap).sort(function(a,b){return b[1].val-a[1].val;});
+    var maxCat = catsMes.length ? catsMes[0][1].val : 1;
+
+    // Categorias anuais (acumulado)
+    var catAnoMap = {};
+    trans.filter(function(t){return t.tipo==='despesa';}).forEach(function(t){
+      var cat = catMap[t.categoria_id];
+      var chave = cat?.categoria||'Outros';
+      catAnoMap[chave]=(catAnoMap[chave]||0)+parseFloat(t.valor||0);
+    });
+    var catsAno = Object.entries(catAnoMap).sort(function(a,b){return b[1]-a[1];});
+
+    // Comparativo mês a mês por categoria (últimos 6 meses)
+    var ultimosSeis = [];
+    for(var k=Math.max(0,mesRef-5);k<=mesRef;k++) ultimosSeis.push(k);
+    var topCatsComp = catsAno.slice(0,5).map(function(c){return c[0];});
+    var compData = topCatsComp.map(function(catNome){
+      return {
+        nome: catNome,
+        valores: ultimosSeis.map(function(m){
+          var v=0;
+          porMes[m].trans.filter(function(t){return t.tipo==='despesa';}).forEach(function(t){
+            var c=catMap[t.categoria_id];
+            if((c?.categoria||'Outros')===catNome) v+=parseFloat(t.valor||0);
+          });
+          return v;
+        })
+      };
+    });
+
+    // Max para escala do gráfico mensal
+    var maxBarMes = Math.max.apply(null, porMes.map(function(m){return Math.max(m.rec,m.des);})) || 1;
+
+    var CORES_CAT=['#f5a623','#3b82f6','#a855f7','#22c55e','#ef4444','#06b6d4','#f97316','#ec4899'];
+
+    el.innerHTML = `
+      <!-- KPIs -->
+      <div class="metrics" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
+        <div class="mc">
+          <div class="mc-lbl">Receitas ${ano}</div>
+          <div class="mc-val g">${brl(totalRecAno)}</div>
+          <div class="mc-sub">${mesesComDados.length} meses com dados</div>
+        </div>
+        <div class="mc">
+          <div class="mc-lbl">Despesas ${ano}</div>
+          <div class="mc-val r">${brl(totalDesAno)}</div>
+          <div class="mc-sub">${catsMes.length} categorias</div>
+        </div>
+        <div class="mc">
+          <div class="mc-lbl">Saldo ${ano}</div>
+          <div class="mc-val ${saldoAno>=0?'g':'r'}">${brl(saldoAno)}</div>
+          <div class="mc-sub" style="color:${saldoAno>=0?'#34c97e':'#ef4444'}">${saldoAno>=0?'↑ Superávit':'↓ Déficit'}</div>
+        </div>
+        <div class="mc">
+          <div class="mc-lbl">Projeção próximo mês</div>
+          <div class="mc-val o">${brl(mediaDes)}</div>
+          <div class="mc-sub">média 3 últimos meses</div>
+        </div>
+      </div>
+
+      <!-- GRÁFICO ANUAL + CATEGORIAS MÊS -->
+      <div class="g2" style="margin-bottom:20px">
+        <div class="card">
+          <div class="ct">Receitas × Despesas — ${ano}</div>
+          <div style="display:flex;align-items:flex-end;gap:6px;height:120px;padding-top:12px">
+            ${porMes.map(function(m,i){
+              var rH = Math.max(2,Math.round(m.rec/maxBarMes*100));
+              var dH = Math.max(2,Math.round(m.des/maxBarMes*100));
+              var isFuturo = (ano===new Date().getFullYear() && i>mesHoje);
+              return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">'+
+                '<div style="display:flex;align-items:flex-end;gap:2px;height:100px">'+
+                  '<div style="width:8px;height:'+rH+'px;background:'+(isFuturo?'rgba(34,197,94,.2)':'#22c55e')+';border-radius:3px 3px 0 0" title="Rec '+MESES_ABREV[i]+': '+brl(m.rec)+'"></div>'+
+                  '<div style="width:8px;height:'+dH+'px;background:'+(isFuturo?'rgba(239,68,68,.2)':'#ef4444')+';border-radius:3px 3px 0 0" title="Des '+MESES_ABREV[i]+': '+brl(m.des)+'"></div>'+
+                '</div>'+
+                '<div style="font-size:9px;color:rgba(241,245,249,.3);margin-top:3px">'+MESES_ABREV[i]+'</div>'+
+              '</div>';
+            }).join('')}
+          </div>
+          <div style="display:flex;gap:16px;margin-top:10px;font-size:11px;color:rgba(241,245,249,.4);justify-content:center">
+            <span><span style="display:inline-block;width:8px;height:8px;background:#22c55e;border-radius:2px;margin-right:4px"></span>Receita</span>
+            <span><span style="display:inline-block;width:8px;height:8px;background:#ef4444;border-radius:2px;margin-right:4px"></span>Despesa</span>
+            <span><span style="display:inline-block;width:8px;height:8px;background:rgba(239,68,68,.2);border-radius:2px;margin-right:4px"></span>Projetado</span>
+          </div>
+          <!-- Linha de projeção info -->
+          ${mesRef < 11 ? `<div style="margin-top:12px;padding:10px 12px;background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.15);border-radius:8px;font-size:12px">
+            <span style="color:#f5a623;font-weight:700">📈 Projeção ${MESES_FULL[mesRef+1]} – ${MESES_FULL[11]}:</span>
+            <span style="color:rgba(241,245,249,.5);margin-left:8px">Despesa estimada de ${brl(mediaDes)}/mês</span>
+            <span style="color:rgba(241,245,249,.3);margin-left:8px">= ${brl(mediaDes*(11-mesRef))} nos próximos ${11-mesRef} meses</span>
+          </div>` : ''}
+        </div>
+
+        <div class="card">
+          <div class="ct">Despesas por Categoria — ${MESES_FULL[mesRef]}</div>
+          ${catsMes.length ? catsMes.map(function(entry,ci){
+            var nome=entry[0], val=entry[1].val;
+            var pct=Math.round(val/Math.max(desMesRef,1)*100);
+            var pctBar=Math.round(val/maxCat*100);
+            var varMesAnterior=0;
+            if(mesAnterior!==null){
+              var valAnt=0;
+              porMes[mesAnterior].trans.filter(function(t){return t.tipo==='despesa';}).forEach(function(t){
+                if((catMap[t.categoria_id]?.categoria||'Outros')===nome) valAnt+=parseFloat(t.valor||0);
+              });
+              varMesAnterior = valAnt>0 ? ((val-valAnt)/valAnt*100) : (val>0?100:0);
+            }
+            return '<div style="margin-bottom:14px">'+
+              '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">'+
+                '<div style="display:flex;align-items:center;gap:8px">'+
+                  '<span style="width:10px;height:10px;border-radius:50%;background:'+CORES_CAT[ci%CORES_CAT.length]+';display:inline-block;flex-shrink:0"></span>'+
+                  '<span style="font-size:13px;color:rgba(241,245,249,.8);font-weight:600">'+nome+'</span>'+
+                '</div>'+
+                '<div style="display:flex;align-items:center;gap:10px">'+
+                  (varMesAnterior!==0?'<span style="font-size:10px;font-weight:700;color:'+(varMesAnterior>0?'#ef4444':'#22c55e')+'">'+(varMesAnterior>0?'▲':'▼')+Math.abs(Math.round(varMesAnterior))+'%</span>':'')+
+                  '<span style="font-size:13px;font-weight:700;color:#f1f5f9">'+brl(val)+'</span>'+
+                  '<span style="font-size:11px;color:rgba(241,245,249,.3);min-width:32px;text-align:right">'+pct+'%</span>'+
+                '</div>'+
+              '</div>'+
+              '<div class="prog"><div style="height:100%;width:'+pctBar+'%;background:'+CORES_CAT[ci%CORES_CAT.length]+';border-radius:99px;opacity:.7"></div></div>'+
+              // Subcategorias
+              '<div style="margin-top:5px;padding-left:18px">'+
+                Object.entries(entry[1].sub).sort(function(a,b){return b[1]-a[1];}).slice(0,3).map(function(s){
+                  var sPct=Math.round(s[1]/val*100);
+                  return '<div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(241,245,249,.35);margin-top:2px">'+
+                    '<span>└ '+s[0]+'</span>'+
+                    '<span>'+brl(s[1])+' ('+sPct+'%)</span>'+
+                  '</div>';
+                }).join('')+
+              '</div>'+
+            '</div>';
+          }).join('') : '<div style="color:rgba(241,245,249,.25);font-size:13px;text-align:center;padding:20px">Sem despesas no período</div>'}
+        </div>
+      </div>
+
+      <!-- COMPARATIVO MENSAL POR CATEGORIA -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="ct">Comparativo por Categoria — Últimos ${ultimosSeis.length} meses</div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:500px">
+            <thead>
+              <tr>
+                <th style="text-align:left;padding:8px 12px;color:rgba(241,245,249,.4);font-weight:700;font-size:10px;text-transform:uppercase;border-bottom:1px solid #2a2d3e;white-space:nowrap">Categoria</th>
+                ${ultimosSeis.map(function(m){return '<th style="text-align:right;padding:8px 12px;color:rgba(241,245,249,.4);font-weight:700;font-size:10px;text-transform:uppercase;border-bottom:1px solid #2a2d3e;white-space:nowrap">'+MESES_ABREV[m]+'</th>';}).join('')}
+                <th style="text-align:right;padding:8px 12px;color:rgba(241,245,249,.4);font-weight:700;font-size:10px;text-transform:uppercase;border-bottom:1px solid #2a2d3e">Total</th>
+                <th style="text-align:right;padding:8px 12px;color:rgba(241,245,249,.4);font-weight:700;font-size:10px;text-transform:uppercase;border-bottom:1px solid #2a2d3e">Representat.</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${compData.map(function(row,ri){
+                var total=row.valores.reduce(function(s,v){return s+v;},0);
+                var represent=totalDesAno>0?Math.round(total/totalDesAno*100):0;
+                var ultimo=row.valores[row.valores.length-1];
+                var penultimo=row.valores.length>1?row.valores[row.valores.length-2]:0;
+                var tendencia=penultimo>0?((ultimo-penultimo)/penultimo*100):0;
+                return '<tr style="border-bottom:1px solid rgba(255,255,255,.04)" onmouseover="this.style.background='rgba(245,166,35,.04)'" onmouseout="this.style.background='none'">'+
+                  '<td style="padding:9px 12px;font-weight:600;color:#f1f5f9">'+
+                    '<span style="width:8px;height:8px;border-radius:50%;background:'+CORES_CAT[ri%CORES_CAT.length]+';display:inline-block;margin-right:8px"></span>'+
+                    row.nome+
+                    (tendencia!==0?'<span style="font-size:9px;font-weight:700;color:'+(tendencia>0?'#ef4444':'#22c55e')+';margin-left:6px">'+(tendencia>0?'▲':'▼')+Math.abs(Math.round(tendencia))+'%</span>':'')+
+                  '</td>'+
+                  row.valores.map(function(v,vi){
+                    var prev=vi>0?row.valores[vi-1]:null;
+                    var delta=prev!==null&&prev>0?((v-prev)/prev*100):null;
+                    return '<td style="text-align:right;padding:9px 12px;color:'+(v===0?'rgba(241,245,249,.2)':(v>=(mediaDes*0.4)?'#ef9090':'rgba(241,245,249,.7)'))+';font-weight:'+(v>0?'600':'400')+'">'+
+                      (v===0?'—':brl(v))+
+                      (delta!==null&&v>0&&Math.abs(delta)>5?'<div style="font-size:9px;color:'+(delta>0?'#ef4444':'#22c55e')+'">'+(delta>0?'▲':'▼')+Math.abs(Math.round(delta))+'%</div>':'')+
+                    '</td>';
+                  }).join('')+
+                  '<td style="text-align:right;padding:9px 12px;font-weight:700;color:#f5a623">'+brl(total)+'</td>'+
+                  '<td style="text-align:right;padding:9px 12px">'+
+                    '<div style="display:flex;align-items:center;justify-content:flex-end;gap:6px">'+
+                      '<div style="width:50px;height:5px;background:#2a2d3e;border-radius:99px;overflow:hidden">'+
+                        '<div style="height:100%;width:'+represent+'%;background:'+CORES_CAT[ri%CORES_CAT.length]+';border-radius:99px"></div>'+
+                      '</div>'+
+                      '<span style="font-size:11px;color:rgba(241,245,249,.5);min-width:28px">'+represent+'%</span>'+
+                    '</div>'+
+                  '</td>'+
+                '</tr>';
+              }).join('')}
+              <!-- Linha totais -->
+              <tr style="border-top:2px solid #2a2d3e;background:rgba(245,166,35,.04)">
+                <td style="padding:9px 12px;font-weight:700;color:#f5a623">TOTAL DESPESAS</td>
+                ${ultimosSeis.map(function(m){
+                  return '<td style="text-align:right;padding:9px 12px;font-weight:700;color:#ef4444">'+brl(porMes[m].des)+'</td>';
+                }).join('')}
+                <td style="text-align:right;padding:9px 12px;font-weight:700;color:#ef4444">'+brl(totalDesAno)+'</td>
+                <td style="text-align:right;padding:9px 12px;font-weight:700;color:rgba(241,245,249,.4)">100%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PROJEÇÃO + ÚLTIMOS LANÇAMENTOS -->
+      <div class="g2">
+        <div class="card">
+          <div class="ct">📈 Projeção Anual</div>
+          ${Array.from({length:12},function(_,i){
+            var isPassado = i <= mesRef;
+            var isAtual   = i === mesRef;
+            var isFuturo  = i > mesRef;
+            var des = isPassado ? porMes[i].des : mediaDes;
+            var rec = isPassado ? porMes[i].rec : 0;
+            var saldo = rec - des;
+            return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04)">'+
+              '<div style="min-width:36px;font-size:11px;font-weight:700;color:'+(isAtual?'#f5a623':isFuturo?'rgba(241,245,249,.3)':'rgba(241,245,249,.6)')+'">'+MESES_ABREV[i]+'</div>'+
+              '<div style="flex:1">'+
+                '<div style="height:5px;background:#1e2130;border-radius:99px;overflow:hidden">'+
+                  '<div style="height:100%;width:'+Math.round(des/Math.max(mediaDes,1)*70)+'%;background:'+(isFuturo?'rgba(239,68,68,.3)':'#ef4444')+';border-radius:99px;'+(isFuturo?'border:1px dashed rgba(239,68,68,.5)':'')+'" ></div>'+
+                '</div>'+
+              '</div>'+
+              '<div style="text-align:right;min-width:90px;font-size:12px;font-weight:'+(isAtual?'700':'500')+';color:'+(isFuturo?'rgba(241,245,249,.3)':isAtual?'#f5a623':'rgba(241,245,249,.6)')+'">'+
+                (isFuturo?'~ ':'')+brl(des)+
+              '</div>'+
+              (isFuturo?'<span style="font-size:9px;color:rgba(241,245,249,.25);min-width:16px">📊</span>':'<span style="font-size:9px;color:'+(porMes[i].des>0?'#22c55e':'rgba(241,245,249,.2)')+';min-width:16px">'+(porMes[i].des>0?'✓':'')+'</span>')+
+            '</div>';
+          }).join('')}
+          <div style="margin-top:12px;padding:10px;background:#0f1117;border-radius:8px;font-size:12px;display:flex;justify-content:space-between">
+            <span style="color:rgba(241,245,249,.4)">Projeção total ${ano}:</span>
+            <strong style="color:#f5a623">${brl(totalDesAno + mediaDes*(11-mesRef))}</strong>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="ct">Últimos Lançamentos — ${MESES_FULL[mesRef]}</div>
+          ${porMes[mesRef].trans.slice(0,8).map(function(t){
+            var cat=catMap[t.categoria_id];
+            var rec=t.tipo==='receita';
+            var dp=t.data?t.data.split('-').reverse().slice(0,2).join('/'):'-';
+            return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)">'+
+              '<div style="width:26px;height:26px;border-radius:7px;background:'+(rec?'rgba(34,197,94,.15)':'rgba(239,68,68,.15)')+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:'+(rec?'#22c55e':'#ef4444')+';flex-shrink:0">'+(rec?'↑':'↓')+'</div>'+
+              '<div style="flex:1;min-width:0">'+
+                '<div style="font-size:12px;color:#f1f5f9;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(t.descricao||'—')+'</div>'+
+                '<div style="font-size:10px;color:rgba(241,245,249,.3)">'+dp+(cat?' · '+esc(cat.categoria||cat.nome||''):'')+'</div>'+
+              '</div>'+
+              '<div style="font-size:12px;font-weight:700;color:'+(rec?'#22c55e':'#ef6060');white-space:nowrap">'+
+                (rec?'+':'-')+brl(t.valor)+
+              '</div>'+
+            '</div>';
+          }).join('')}
+          ${!porMes[mesRef].trans.length?'<div style="color:rgba(241,245,249,.25);font-size:13px;text-align:center;padding:20px">Sem lançamentos</div>':''}
+        </div>
+      </div>
+    `;
+  }catch(e){
+    document.getElementById('finConteudo').innerHTML='<div style="color:#ef4444;padding:20px">Erro ao carregar: '+e.message+'</div>';
+  }
 }
 
 function pgMetas(cont){
