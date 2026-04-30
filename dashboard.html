@@ -578,7 +578,7 @@ function buildSidebar(){
 function navegar(page){
   document.querySelectorAll('.sb-item').forEach(function(x){x.classList.remove('on');});
   var el=document.getElementById('sb-'+page);if(el)el.classList.add('on');
-  var pages={dashboard:pgDashboard,painel:pgPainel,financeiro:pgFinanceiro,metas:pgMetas,documentos:pgDocumentos,calendario:pgCalendario,comunicados:pgComunicados,mensagens:pgMensagens,boletos:pgBoletos};
+  var pages={dashboard:pgDashboard,painel:pgPainel,metas:pgMetas,documentos:pgDocumentos,calendario:pgCalendario,comunicados:pgComunicados,mensagens:pgMensagens,boletos:pgBoletos};
   var cont=document.getElementById('pageContent');
   if(pages[page])pages[page](cont);
 }
@@ -720,7 +720,7 @@ async function pgPainel(cont){
 }
 
 async function renderPainel(){
-  var h={'apikey':SB_KEY,'Authorization':'Bearer '+(usr?.token||SB_KEY)};
+  var h={'apikey':SB_KEY,'Authorization':'Bearer '+((usr&&usr.token)?usr.token:SB_KEY)};
   var hoje=new Date(), anoMes=hoje.toISOString().slice(0,7);
   var primDia=anoMes+'-01';
   var ultDia=new Date(hoje.getFullYear(),hoje.getMonth()+1,0).toISOString().slice(0,10);
@@ -1022,6 +1022,12 @@ async function renderPainel(){
   }
 }
 
+
+// Financeiro agora é página separada
+function pgFinanceiro(cont){
+  window.location.href='financeiro.html';
+}
+
 async function pgDashboard(cont){
   var hoje    = new Date();
   var nomeMes = hoje.toLocaleString('pt-BR',{month:'long'});
@@ -1035,7 +1041,7 @@ async function pgDashboard(cont){
     </div>
     <div id="dashCards"><div style="text-align:center;padding:20px;color:rgba(241,245,249,.3);font-size:13px">⏳ Carregando...</div></div>`;
 
-  var h = {'apikey':SB_KEY,'Authorization':'Bearer '+(usr?.token||SB_KEY)};
+  var h = {'apikey':SB_KEY,'Authorization':'Bearer '+((usr&&usr.token)?usr.token:SB_KEY)};
   var anoMes  = hoje.toISOString().slice(0,7);
   var primDia = anoMes+'-01';
   var ultDia  = new Date(hoje.getFullYear(),hoje.getMonth()+1,0).toISOString().slice(0,10);
