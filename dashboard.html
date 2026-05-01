@@ -424,32 +424,23 @@ function getSessao(){
   }catch(e){ ldDebug('Erro em getSessao: '+e.message); return null; }
 }
 
-// ── SAFETY NET — backup em 5s ─────────────────────────────
-setTimeout(function(){
-  if(_initDone) return; // já resolveu
-  var loading = document.getElementById('tela-loading');
-  if(loading && !loading.hasAttribute('hidden')){
-    var computed = window.getComputedStyle(loading).display;
-    if(computed !== 'none'){
-      ldDebug('Safety net de 5s ativado');
-      document.getElementById('ldEscape').style.display='block';
-      var sp = document.getElementById('ldSpinner'); if(sp) sp.style.display='none';
-      document.getElementById('ldMsg').textContent = 'Sessão expirada ou não encontrada.';
-    }
-  }
-}, 5000);
-
 // ── INIT ─────────────────────────────────────────────────
-
-// Timeout absoluto — se em 8s nada aconteceu, mostra login
+// _initDone DEVE ser declarado ANTES de qualquer setTimeout que o use
 var _initDone = false;
-setTimeout(function(){
+
+function mostrarLogin(motivo){
   if(_initDone) return;
-  ldDebug('Timeout absoluto atingido');
-  document.getElementById('ldMsg').textContent = 'Tempo esgotado. Faça o login.';
+  _initDone = true;
+  ldDebug(motivo||'Mostrando login');
   var sp = document.getElementById('ldSpinner'); if(sp) sp.style.display='none';
+  document.getElementById('ldMsg').textContent = 'Sessão não encontrada. Faça o login.';
   document.getElementById('ldEscape').style.display='block';
-}, 8000);
+}
+
+// Safety net 5s
+setTimeout(function(){ mostrarLogin('Safety net 5s'); }, 5000);
+// Timeout absoluto 8s
+setTimeout(function(){ mostrarLogin('Timeout absoluto 8s'); }, 8000);
 
 window.onload = function(){
   ldDebug('window.onload disparado');
@@ -461,29 +452,28 @@ window.onload = function(){
     if(sess.user && sess.user.email) emailSess = sess.user.email;
     else if(sess.email) emailSess = sess.email;
 
-    ldDebug('Sessão válida para: '+emailSess);
-    ldMsg('Carregando dados...');
+    ldDebug('Sessão encontrada: '+emailSess);
+    ldMsg('Carregando...');
 
     usr = { email: emailSess, token: sess.access_token, _nome:'', _unidade:'' };
     perfil = localStorage.getItem('mandala_perfil') || 'sindico';
     if(ADMINS.indexOf(usr.email)!==-1) perfil='sindico';
 
-    // Timeout de segurança para o fetch (3s)
     var fetchDone = false;
     var fetchTimer = setTimeout(function(){
-      if(!fetchDone){ ldDebug('Fetch timeout — abrindo app mesmo assim'); _initDone=true; mostrarApp(); }
+      if(!fetchDone){ fetchDone=true; ldDebug('Fetch timeout 3s — abrindo app'); _initDone=true; mostrarApp(); }
     }, 3000);
 
     fetch(SB_URL+'/rest/v1/usuarios_portal?select=nome,unidade,perfil&email=eq.'+encodeURIComponent(emailSess),{
       headers:{'apikey':SB_KEY,'Authorization':'Bearer '+sess.access_token}
     }).then(function(r){
-      ldDebug('Fetch status: '+r.status);
-      return r.ok?r.json():[];
+      ldDebug('Fetch usuarios_portal: '+r.status);
+      return r.ok ? r.json() : [];
     }).then(function(a){
-      if(a&&a[0]){
-        if(a[0].nome) usr._nome=a[0].nome;
-        if(a[0].unidade) usr._unidade=a[0].unidade;
-        if(a[0].perfil&&ADMINS.indexOf(usr.email)===-1) perfil=a[0].perfil;
+      if(a && a[0]){
+        if(a[0].nome)   usr._nome    = a[0].nome;
+        if(a[0].unidade) usr._unidade = a[0].unidade;
+        if(a[0].perfil && ADMINS.indexOf(usr.email)===-1) perfil = a[0].perfil;
       }
     }).catch(function(e){ ldDebug('Fetch erro: '+e.message); })
     .finally(function(){
@@ -492,12 +482,8 @@ window.onload = function(){
     return;
   }
 
-  // Sem sessão — mostrar botão de login IMEDIATAMENTE
-  ldDebug('Sem sessão — redirecionando para login');
-  _initDone = true;
-  var sp = document.getElementById('ldSpinner'); if(sp) sp.style.display='none';
-  document.getElementById('ldMsg').textContent = 'Sessão não encontrada. Faça o login.';
-  document.getElementById('ldEscape').style.display='block';
+  // Sem sessão — login imediato
+  mostrarLogin('Sem sessão no localStorage');
 };
 
 function mostrarApp(){
@@ -1193,4 +1179,6 @@ async function pgDashboard(cont){
     if(el) el.textContent=saud+', '+usr.nome.split(' ')[0]+'!';
   }
 
-
+</script>
+</body>
+</html>
