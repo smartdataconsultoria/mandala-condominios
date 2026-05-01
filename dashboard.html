@@ -414,15 +414,20 @@ function getSessao(){
   }catch(e){ return null; }
 }
 
-// ── SAFETY NET — redireciona se loading ficar preso ─────
+// ── SAFETY NET — mostra botão de login se loading ficar preso ─────
 setTimeout(function(){
   var loading = document.getElementById('tela-loading');
-  if(loading && loading.style.display !== 'none' && !loading.hasAttribute('hidden')){
-    // Mostrar botão de escape ao invés de redirecionar forçado
-    var esc = document.getElementById('ldEscape');
-    if(esc) esc.style.display='block';
-    var msg = document.getElementById('ldMsg');
-    if(msg) msg.textContent = 'Sessão expirada ou não encontrada.';
+  // Verifica se loading ainda está visível (sem display:none inline E sem atributo hidden)
+  if(loading && !loading.hasAttribute('hidden')){
+    var computed = window.getComputedStyle(loading).display;
+    if(computed !== 'none'){
+      var ldEsc = document.getElementById('ldEscape');
+      if(ldEsc) ldEsc.style.display='block';
+      var spinner = document.querySelector('.spinner');
+      if(spinner) spinner.style.display='none';
+      var msg = document.getElementById('ldMsg');
+      if(msg) msg.textContent = 'Sessão expirada ou não encontrada.';
+    }
   }
 }, 4000);
 
@@ -440,24 +445,29 @@ window.onload = function(){
     usr = { email: emailSess, token: sess.access_token, _nome:'', _unidade:'' };
     perfil = localStorage.getItem('mandala_perfil') || 'sindico';
     if(ADMINS.indexOf(usr.email)!==-1) perfil='sindico';
-    mostrarApp();
+
+    // Buscar nome/unidade do usuário na tabela (sem bloquear o carregamento)
+    fetch(SB_URL+'/rest/v1/usuarios_portal?select=nome,unidade,perfil&email=eq.'+encodeURIComponent(emailSess),{
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+sess.access_token}
+    }).then(function(r){return r.ok?r.json():[];}).then(function(a){
+      if(a&&a[0]){
+        if(a[0].nome) usr._nome=a[0].nome;
+        if(a[0].unidade) usr._unidade=a[0].unidade;
+        if(a[0].perfil&&ADMINS.indexOf(usr.email)===-1) perfil=a[0].perfil;
+      }
+    }).catch(function(){}).finally(function(){
+      mostrarApp();
+    });
     return;
   }
 
-  // Sem sessão — mostrar botão de login
-  document.getElementById('ldMsg').textContent = 'Sessão não encontrada. Faça o login.';
-  document.getElementById('ldEscape').style.display='block';
-  if(document.querySelector('.spinner')) document.querySelector('.spinner').style.display='none';
-  // dummy para não quebrar código abaixo
-  fetch(SB_URL+'/rest/v1/usuarios_portal?select=nome,unidade,perfil&email=eq.anonimo',{
-    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
-  }).then(function(r){return r.ok?r.json():[];}).then(function(a){
-    if(a&&a[0]){
-      if(a[0].nome) usr._nome=a[0].nome;
-      if(a[0].unidade){usr._unidade=a[0].unidade;var t=document.getElementById('topUnidade');if(t){t.textContent='Unidade '+a[0].unidade;t.style.display='';}}
-      if(a[0].perfil&&ADMINS.indexOf(usr.email)===-1){perfil=a[0].perfil;}
-    }
-  }).catch(function(){});
+  // Sem sessão — mostrar botão de login IMEDIATAMENTE
+  var spinner = document.querySelector('.spinner');
+  if(spinner) spinner.style.display='none';
+  var msgEl = document.getElementById('ldMsg');
+  if(msgEl) msgEl.textContent = 'Sessão não encontrada. Faça o login.';
+  var ldEsc = document.getElementById('ldEscape');
+  if(ldEsc) ldEsc.style.display='block';
 };
 
 function mostrarApp(){
