@@ -320,10 +320,13 @@ body.light .exp-table td[style*="rgba(241,245,249,.4)"]{color:var(--text-sub) !i
           <label>Nome completo</label>
           <input type="text" id="dispNome" placeholder="Seu nome completo"/>
         </div>
+        <!-- Campo apelido: adicionar coluna na tabela para habilitar
         <div class="fr">
           <label>Apelido (opcional)</label>
           <input type="text" id="dispApelido" placeholder="Como prefere ser chamado"/>
         </div>
+        -->
+        <input type="hidden" id="dispApelido" value=""/>
         <div class="btn-row">
           <button class="btn-prim" onclick="salvarNome()">💾 Salvar nome</button>
         </div>
@@ -413,6 +416,8 @@ body.light .exp-table td[style*="rgba(241,245,249,.4)"]{color:var(--text-sub) !i
         <div class="pcard-title">📋 Ajustar Meus Dados de Morador</div>
         <div class="pcard-sub">Mantenha suas informações cadastrais atualizadas</div>
 
+        <!-- IDENTIFICAÇÃO -->
+        <div class="sec-label">Identificação</div>
         <div class="mf-grid">
           <div class="fr mf-span2">
             <label>Nome completo</label>
@@ -421,45 +426,114 @@ body.light .exp-table td[style*="rgba(241,245,249,.4)"]{color:var(--text-sub) !i
           <div class="fr">
             <label>E-mail</label>
             <input type="email" id="mrEmail" disabled/>
-            <div class="fr-hint">O e-mail não pode ser alterado aqui. Use a aba "Dados da Conta".</div>
+            <div class="fr-hint">Altere na aba "Dados da Conta"</div>
           </div>
+          <div class="fr">
+            <label>Tipo de ocupação</label>
+            <select id="mrTipoOcupacao">
+              <option value="proprietario">Proprietário</option>
+              <option value="inquilino">Inquilino</option>
+              <option value="dependente">Dependente</option>
+            </select>
+          </div>
+          <div class="fr">
+            <label>CPF</label>
+            <input type="text" id="mrCpf" placeholder="000.000.000-00"/>
+          </div>
+          <div class="fr">
+            <label>RG</label>
+            <input type="text" id="mrRg" placeholder="0000000"/>
+          </div>
+          <div class="fr">
+            <label>Data de nascimento</label>
+            <input type="date" id="mrDataNasc"/>
+          </div>
+          <div class="fr">
+            <label>Data de entrada no condomínio</label>
+            <input type="date" id="mrDataEntrada"/>
+          </div>
+        </div>
+
+        <hr class="divider">
+        <div class="sec-label">Unidade</div>
+        <div class="mf-grid">
+          <div class="fr">
+            <label>Apartamento</label>
+            <input type="text" id="mrApartamento" placeholder="Ex: 302"/>
+          </div>
+          <div class="fr">
+            <label>Bloco</label>
+            <input type="text" id="mrBloco" placeholder="Ex: A"/>
+          </div>
+        </div>
+
+        <hr class="divider">
+        <div class="sec-label">Contato</div>
+        <div class="mf-grid">
           <div class="fr">
             <label>Telefone / WhatsApp</label>
             <input type="tel" id="mrTelefone" placeholder="(81) 99999-9999"/>
           </div>
           <div class="fr">
-            <label>Unidade / Apartamento</label>
-            <input type="text" id="mrUnidade" placeholder="Ex: Apto 302"/>
-          </div>
-          <div class="fr">
-            <label>Bloco (se aplicável)</label>
-            <input type="text" id="mrBloco" placeholder="Ex: Bloco A"/>
-          </div>
-          <div class="fr mf-span2">
-            <label>Veículo (placa)</label>
-            <input type="text" id="mrVeiculo" placeholder="Ex: ABC-1234, DEF-5678"/>
-            <div class="fr-hint">Separe múltiplas placas por vírgula</div>
-          </div>
-          <div class="fr mf-span2">
-            <label>Observações / Necessidades especiais</label>
-            <textarea id="mrObs" rows="3" placeholder="Qualquer informação relevante para o condomínio..." style="background:var(--bg-input);border:1px solid var(--border);border-radius:9px;color:var(--text-main);padding:11px 14px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;resize:vertical;width:100%;transition:background .3s,color .3s"></textarea>
+            <label>Telefone 2 (opcional)</label>
+            <input type="tel" id="mrTelefone2" placeholder="(81) 99999-9999"/>
           </div>
         </div>
 
         <hr class="divider">
-        <div class="sec-label">Contato de Emergência</div>
-
+        <div class="sec-label">Veículo</div>
         <div class="mf-grid">
           <div class="fr">
-            <label>Nome do contato</label>
-            <input type="text" id="mrEmergNome" placeholder="Nome completo"/>
+            <label>Placa</label>
+            <input type="text" id="mrVeiculoPlaca" placeholder="ABC-1234"/>
           </div>
           <div class="fr">
-            <label>Telefone de emergência</label>
-            <input type="tel" id="mrEmergTel" placeholder="(81) 99999-9999"/>
+            <label>Modelo</label>
+            <input type="text" id="mrVeiculoModelo" placeholder="Ex: Civic 2022"/>
+          </div>
+          <div class="fr">
+            <label>Cor</label>
+            <input type="text" id="mrVeiculoCor" placeholder="Ex: Prata"/>
+          </div>
+          <div class="fr">
+            <label>Vaga de garagem</label>
+            <input type="text" id="mrVagaGaragem" placeholder="Ex: 12"/>
           </div>
         </div>
 
+        <hr class="divider">
+        <div class="sec-label">Pets</div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 0;margin-bottom:12px">
+          <input type="checkbox" id="mrTemPet" style="width:18px;height:18px;accent-color:#f5a623;cursor:pointer"/>
+          <label for="mrTemPet" style="font-size:13px;color:var(--text-main);cursor:pointer">Tenho animal de estimação no apartamento</label>
+        </div>
+
+        <hr class="divider">
+        <div class="sec-label">Contato de Emergência</div>
+        <div class="mf-grid">
+          <div class="fr">
+            <label>Nome do contato</label>
+            <input type="text" id="mrContEmergNome" placeholder="Nome completo"/>
+          </div>
+          <div class="fr">
+            <label>Telefone de emergência</label>
+            <input type="tel" id="mrContEmergTel" placeholder="(81) 99999-9999"/>
+          </div>
+          <div class="fr">
+            <label>Parentesco</label>
+            <input type="text" id="mrContEmergParent" placeholder="Ex: Cônjuge, Filho(a)"/>
+          </div>
+        </div>
+
+        <hr class="divider">
+        <div class="sec-label">Observações</div>
+        <div class="fr">
+          <textarea id="mrObs" rows="3" placeholder="Informações relevantes para o condomínio..." style="background:var(--bg-input);border:1px solid var(--border);border-radius:9px;color:var(--text-main);padding:11px 14px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;resize:vertical;width:100%;transition:background .3s,color .3s"></textarea>
+        </div>
+
+        <div style="background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:10px;padding:12px 16px;font-size:12px;color:var(--gold);margin-bottom:16px">
+          💾 Todos os dados são salvos diretamente no banco de dados (tabela <strong>condo_moradores</strong>).
+        </div>
         <div class="btn-row">
           <button class="btn-prim" onclick="salvarCadastro()">💾 Salvar cadastro</button>
           <button class="btn-sec" onclick="carregarCadastro()">↺ Recarregar dados</button>
@@ -711,32 +785,58 @@ window.onload=function(){
 };
 
 // ── CARREGAR USUÁRIO ──────────────────────────────────────
+// Busca dados em duas tabelas:
+// 1. usuarios_portal → nome, empresa, ativo (autenticação)
+// 2. condo_moradores → dados completos do morador (apartamento, telefone, etc.)
 async function carregarUsuario(){
+  var h={'apikey':SB_KEY,'Authorization':'Bearer '+usr.token};
   try{
-    var r=await fetch(SB_URL+'/rest/v1/usuarios_portal?select=*&email=eq.'+encodeURIComponent(usr.email),{
-      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+usr.token}
-    });
-    var arr=r.ok?await r.json():[];
-    if(arr&&arr[0]){
-      var u=arr[0];
-      var nome=u.nome||'';
-      document.getElementById('dispNome').value=nome;
-      document.getElementById('mrNome').value=nome;
-      document.getElementById('mrTelefone').value=u.telefone||'';
-      document.getElementById('mrUnidade').value=u.unidade||'';
-      document.getElementById('mrBloco').value=u.bloco||'';
-      document.getElementById('mrVeiculo').value=u.veiculo||'';
-      document.getElementById('mrObs').value=u.observacoes||'';
-      document.getElementById('mrEmergNome').value=u.emerg_nome||'';
-      document.getElementById('mrEmergTel').value=u.emerg_tel||'';
-      document.getElementById('dispApelido').value=u.apelido||'';
+    // 1. Buscar na usuarios_portal (autenticação)
+    var r1=await fetch(SB_URL+'/rest/v1/usuarios_portal?select=nome,email,empresa,ativo&email=eq.'+encodeURIComponent(usr.email),{headers:h});
+    var arr1=r1.ok?await r1.json():[];
+    var nomePortal=arr1&&arr1[0]?arr1[0].nome||'':'';
 
-      // Avatar e nome no topo
-      atualizarAvatar(nome, u.foto_url||null);
-    } else {
-      atualizarAvatar(usr.email, null);
-    }
-  }catch(e){ atualizarAvatar(usr.email,null); }
+    // 2. Buscar na condo_moradores (dados completos)
+    var r2=await fetch(SB_URL+'/rest/v1/condo_moradores?select=*&email=eq.'+encodeURIComponent(usr.email)+'&empresa=eq.'+EMPRESA,{headers:h});
+    var arr2=r2.ok?await r2.json():[];
+    var m=arr2&&arr2[0]?arr2[0]:null;
+
+    var nome=nomePortal||(m?m.nome:'');
+
+    // Preencher aba Meu Perfil
+    document.getElementById('dispNome').value=nome;
+
+    // Preencher aba Cadastro com dados de condo_moradores
+    document.getElementById('mrNome').value=m?m.nome||nome:nome;
+    document.getElementById('mrApartamento').value=m?m.apartamento||'':'';
+    document.getElementById('mrBloco').value=m?m.bloco||'':'';
+    document.getElementById('mrTipoOcupacao').value=m?m.tipo_ocupacao||'proprietario':'proprietario';
+    document.getElementById('mrCpf').value=m?m.cpf||'':'';
+    document.getElementById('mrRg').value=m?m.rg||'':'';
+    document.getElementById('mrDataNasc').value=m?m.data_nascimento||'':'';
+    document.getElementById('mrTelefone').value=m?m.telefone||'':'';
+    document.getElementById('mrTelefone2').value=m?m.telefone2||'':'';
+    document.getElementById('mrDataEntrada').value=m?m.data_entrada||'':'';
+    document.getElementById('mrVeiculoPlaca').value=m?m.veiculo_placa||'':'';
+    document.getElementById('mrVeiculoModelo').value=m?m.veiculo_modelo||'':'';
+    document.getElementById('mrVeiculoCor').value=m?m.veiculo_cor||'':'';
+    document.getElementById('mrVagaGaragem').value=m?m.vaga_garagem||'':'';
+    document.getElementById('mrTemPet').checked=m?m.tem_pet||false:false;
+    document.getElementById('mrContEmergNome').value=m?m.contato_emerg_nome||'':'';
+    document.getElementById('mrContEmergTel').value=m?m.contato_emerg_telefone||'':'';
+    document.getElementById('mrContEmergParent').value=m?m.contato_emerg_parentesco||'':'';
+    document.getElementById('mrObs').value=m?m.observacao||'':'';
+
+    // Foto de perfil
+    var foto=m?m.foto_url||null:null;
+    atualizarAvatar(nome, localStorage.getItem('mandala_foto_'+usr.email)||foto||null);
+
+  }catch(e){
+    console.error('carregarUsuario erro:',e);
+    var nomeLoc=localStorage.getItem('mandala_nome_'+usr.email);
+    atualizarAvatar(nomeLoc||usr.email,null);
+    if(nomeLoc) document.getElementById('dispNome').value=nomeLoc;
+  }
 }
 
 // ── CARREGAR CONTAGENS (privacidade) ─────────────────────
@@ -839,24 +939,36 @@ async function salvarNome(){
     var r=await fetch(SB_URL+'/rest/v1/usuarios_portal?email=eq.'+encodeURIComponent(usr.email),{
       method:'PATCH',
       headers:{'apikey':SB_KEY,'Authorization':'Bearer '+usr.token,'Content-Type':'application/json','Prefer':'return=minimal'},
-      body:JSON.stringify({nome:nome,apelido:apelido})
+      body:JSON.stringify({nome:nome}) // única coluna editável que existe
     });
     // Se RLS bloquear (403/401), tenta upsert com service role
     if(!r.ok && (r.status===401||r.status===403||r.status===404)){
       r=await fetch(SB_URL+'/rest/v1/usuarios_portal',{
         method:'POST',
         headers:{'apikey':SB_SVC,'Authorization':'Bearer '+SB_SVC,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
-        body:JSON.stringify({email:usr.email,nome:nome,apelido:apelido,empresa:EMPRESA})
+        body:JSON.stringify({email:usr.email,nome:nome,empresa:EMPRESA,ativo:true})
       });
     }
     if(r.ok||r.status===204||r.status===201){
       atualizarAvatar(nome, localStorage.getItem('mandala_foto_'+usr.email)||null);
       document.getElementById('mrNome').value=nome;
+      // Salvar também no localStorage como fallback
+      localStorage.setItem('mandala_nome_'+usr.email, nome);
       toast('Nome salvo com sucesso!','ok');
     } else {
-      var err=await r.text();
-      console.error('Erro salvarNome',r.status,err);
-      toast('Erro ao salvar nome ('+r.status+').','err');
+      var errTxt=await r.text();
+      var errObj={};
+      try{ errObj=JSON.parse(errTxt); }catch(ex){}
+      // Se a coluna não existe, salva só no localStorage
+      if(errObj.code==='PGRST204'||errObj.message&&errObj.message.includes('column')){
+        localStorage.setItem('mandala_nome_'+usr.email, nome);
+        atualizarAvatar(nome, localStorage.getItem('mandala_foto_'+usr.email)||null);
+        document.getElementById('mrNome').value=nome;
+        toast('Nome salvo localmente!','ok');
+      } else {
+        console.error('Erro salvarNome',r.status,errTxt);
+        toast('Erro ao salvar nome ('+r.status+').','err');
+      }
     }
   }catch(e){ toast('Erro: '+e.message,'err'); }
 }
@@ -925,39 +1037,70 @@ async function alterarSenha(){
 
 // ── CADASTRO DE MORADOR ───────────────────────────────────
 async function salvarCadastro(){
+  // Salvar em DUAS tabelas:
+  // 1. usuarios_portal → nome atualizado
+  // 2. condo_moradores → dados completos do morador
+
+  var nome=document.getElementById('mrNome').value.trim();
+  if(!nome){ toast('Informe seu nome.','err'); return; }
+
+  // Dados para condo_moradores (todas as colunas reais da tabela)
   var dados={
-    nome:document.getElementById('mrNome').value.trim(),
-    telefone:document.getElementById('mrTelefone').value.trim(),
-    unidade:document.getElementById('mrUnidade').value.trim(),
-    bloco:document.getElementById('mrBloco').value.trim(),
-    veiculo:document.getElementById('mrVeiculo').value.trim(),
-    observacoes:document.getElementById('mrObs').value.trim(),
-    emerg_nome:document.getElementById('mrEmergNome').value.trim(),
-    emerg_tel:document.getElementById('mrEmergTel').value.trim()
+    nome:          nome,
+    email:         usr.email,
+    empresa:       EMPRESA,
+    apartamento:   document.getElementById('mrApartamento').value.trim(),
+    bloco:         document.getElementById('mrBloco').value.trim(),
+    tipo_ocupacao: document.getElementById('mrTipoOcupacao').value,
+    cpf:           document.getElementById('mrCpf').value.trim(),
+    rg:            document.getElementById('mrRg').value.trim(),
+    data_nascimento: document.getElementById('mrDataNasc').value||null,
+    telefone:      document.getElementById('mrTelefone').value.trim(),
+    telefone2:     document.getElementById('mrTelefone2').value.trim(),
+    data_entrada:  document.getElementById('mrDataEntrada').value||null,
+    veiculo_placa: document.getElementById('mrVeiculoPlaca').value.trim(),
+    veiculo_modelo:document.getElementById('mrVeiculoModelo').value.trim(),
+    veiculo_cor:   document.getElementById('mrVeiculoCor').value.trim(),
+    vaga_garagem:  document.getElementById('mrVagaGaragem').value.trim(),
+    tem_pet:       document.getElementById('mrTemPet').checked,
+    contato_emerg_nome:        document.getElementById('mrContEmergNome').value.trim(),
+    contato_emerg_telefone:    document.getElementById('mrContEmergTel').value.trim(),
+    contato_emerg_parentesco:  document.getElementById('mrContEmergParent').value.trim(),
+    observacao:    document.getElementById('mrObs').value.trim()
   };
+  // Remover campos vazios opcionais para não sobrescrever com null
+  Object.keys(dados).forEach(function(k){
+    if(dados[k]===''&&k!=='nome'&&k!=='email'&&k!=='empresa') delete dados[k];
+  });
   if(!dados.nome){ toast('Informe seu nome.','err'); return; }
   try{
-    var r=await fetch(SB_URL+'/rest/v1/usuarios_portal?email=eq.'+encodeURIComponent(usr.email),{
+    var h={'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'};
+
+    // 1. Salvar nome na usuarios_portal
+    var r1=await fetch(SB_URL+'/rest/v1/usuarios_portal?email=eq.'+encodeURIComponent(usr.email),{
       method:'PATCH',
-      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+usr.token,'Content-Type':'application/json','Prefer':'return=minimal'},
+      headers:Object.assign({'apikey':SB_KEY,'Authorization':'Bearer '+usr.token},h),
+      body:JSON.stringify({nome:nome})
+    });
+
+    // 2. Upsert em condo_moradores (insert ou update pelo email+empresa)
+    var r2=await fetch(SB_URL+'/rest/v1/condo_moradores',{
+      method:'POST',
+      headers:Object.assign({'apikey':SB_SVC,'Authorization':'Bearer '+SB_SVC},h),
       body:JSON.stringify(dados)
     });
-    if(!r.ok&&(r.status===401||r.status===403||r.status===404)){
-      dados.email=usr.email; dados.empresa=EMPRESA;
-      r=await fetch(SB_URL+'/rest/v1/usuarios_portal',{
-        method:'POST',
-        headers:{'apikey':SB_SVC,'Authorization':'Bearer '+SB_SVC,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
-        body:JSON.stringify(dados)
-      });
-    }
-    if(r.ok||r.status===204||r.status===201){
+
+    if((r1.ok||r1.status===204)&&(r2.ok||r2.status===201||r2.status===204)){
       toast('Cadastro salvo com sucesso!','ok');
-      document.getElementById('dispNome').value=dados.nome;
-      atualizarAvatar(dados.nome, localStorage.getItem('mandala_foto_'+usr.email)||null);
+      document.getElementById('dispNome').value=nome;
+      atualizarAvatar(nome, localStorage.getItem('mandala_foto_'+usr.email)||null);
     } else {
-      var err=await r.text();
-      console.error('Erro salvarCadastro',r.status,err);
-      toast('Erro ao salvar cadastro ('+r.status+').','err');
+      var e1=r1.ok?'':await r1.text();
+      var e2=r2.ok?'':await r2.text();
+      console.error('Erro salvarCadastro',r1.status,e1,r2.status,e2);
+      // Mostrar qual parte falhou
+      if(!r1.ok) toast('Erro ao salvar nome ('+r1.status+').','err');
+      else toast('Erro ao salvar dados do morador ('+r2.status+').','err');
     }
   }catch(e){ toast('Erro: '+e.message,'err'); }
 }
