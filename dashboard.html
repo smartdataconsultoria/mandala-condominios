@@ -240,8 +240,9 @@ html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:
   <div class="ld-sub">Edifício</div>
   <div class="ld-nome">Mandala</div>
   <div class="ld-msg" id="ldMsg">Verificando acesso...</div>
-  <div class="spinner" style="margin-top:6px"></div>
-  <a id="ldEscape" href="login.html" style="display:none;margin-top:20px;color:#f5a623;font-size:13px;text-decoration:none;border:1px solid rgba(245,166,35,.3);padding:8px 20px;border-radius:8px">Ir para o Login →</a>
+  <div class="spinner" id="ldSpinner" style="margin-top:6px"></div>
+  <div id="ldDebug" style="display:none;margin-top:14px;font-size:11px;color:rgba(241,245,249,.25);max-width:300px;text-align:center;line-height:1.6"></div>
+  <a id="ldEscape" href="login.html" style="display:none;margin-top:20px;color:#f5a623;font-size:13px;text-decoration:none;border:1px solid rgba(245,166,35,.3);padding:8px 20px;border-radius:8px">→ Ir para o Login</a>
 </div>
 
 <div id="tela-app">
@@ -376,17 +377,24 @@ function toast(m,t){var e=document.getElementById('toast');e.textContent=m;e.cla
 function fecharViewer(){document.getElementById('viewer').style.display='none';document.getElementById('vFrame').src='';}
 
 // ── SESSÃO via chave própria ─────────────────────────────
+function ldDebug(msg){
+  var d=document.getElementById('ldDebug');
+  if(d){d.style.display='block';d.innerHTML+=(d.innerHTML?'<br>':'')+msg;}
+  console.log('[Mandala]',msg);
+}
+
 function getSessao(){
   try{
-    var agora = Math.floor(Date.now()/1000);
-
-    // 1. Chave própria do portal — aceita mesmo expirado (refresh feito no onload)
+    // 1. Chave própria do portal
     var s = localStorage.getItem('mandala_session');
+    ldDebug('Chave mandala_session: '+(s?'encontrada':'não encontrada'));
     if(s){
       var sess = JSON.parse(s);
-      if(sess && sess.access_token) return sess; // retorna mesmo expirado
+      if(sess && sess.access_token){
+        ldDebug('Token encontrado, usando sessão salva');
+        return sess;
+      }
     }
-
     // 2. Qualquer chave do Supabase no localStorage
     for(var i=0;i<localStorage.length;i++){
       var k = localStorage.key(i);
@@ -403,6 +411,7 @@ function getSessao(){
           var ref   = obj.refresh_token||(obj.currentSession&&obj.currentSession.refresh_token);
           var exp   = obj.expires_at||(obj.currentSession&&obj.currentSession.expires_at);
           if(token && user){
+            ldDebug('Token encontrado via chave Supabase: '+k);
             var normalizado = {access_token:token,refresh_token:ref,expires_at:exp,user:user,email:user.email};
             localStorage.setItem('mandala_session', JSON.stringify(normalizado));
             return normalizado;
@@ -410,64 +419,85 @@ function getSessao(){
         }catch(ex){}
       }
     }
+    ldDebug('Nenhuma sessão encontrada no localStorage');
     return null;
-  }catch(e){ return null; }
+  }catch(e){ ldDebug('Erro em getSessao: '+e.message); return null; }
 }
 
-// ── SAFETY NET — mostra botão de login se loading ficar preso ─────
+// ── SAFETY NET — backup em 5s ─────────────────────────────
 setTimeout(function(){
+  if(_initDone) return; // já resolveu
   var loading = document.getElementById('tela-loading');
-  // Verifica se loading ainda está visível (sem display:none inline E sem atributo hidden)
   if(loading && !loading.hasAttribute('hidden')){
     var computed = window.getComputedStyle(loading).display;
     if(computed !== 'none'){
-      var ldEsc = document.getElementById('ldEscape');
-      if(ldEsc) ldEsc.style.display='block';
-      var spinner = document.querySelector('.spinner');
-      if(spinner) spinner.style.display='none';
-      var msg = document.getElementById('ldMsg');
-      if(msg) msg.textContent = 'Sessão expirada ou não encontrada.';
+      ldDebug('Safety net de 5s ativado');
+      document.getElementById('ldEscape').style.display='block';
+      var sp = document.getElementById('ldSpinner'); if(sp) sp.style.display='none';
+      document.getElementById('ldMsg').textContent = 'Sessão expirada ou não encontrada.';
     }
   }
-}, 4000);
+}, 5000);
 
 // ── INIT ─────────────────────────────────────────────────
+
+// Timeout absoluto — se em 8s nada aconteceu, mostra login
+var _initDone = false;
+setTimeout(function(){
+  if(_initDone) return;
+  ldDebug('Timeout absoluto atingido');
+  document.getElementById('ldMsg').textContent = 'Tempo esgotado. Faça o login.';
+  var sp = document.getElementById('ldSpinner'); if(sp) sp.style.display='none';
+  document.getElementById('ldEscape').style.display='block';
+}, 8000);
+
 window.onload = function(){
-  // Tentar sessão salva
+  ldDebug('window.onload disparado');
+
   var sess = getSessao();
 
   if(sess && sess.access_token){
-    // Extrair email de forma compatível com todos os browsers
     var emailSess = '';
     if(sess.user && sess.user.email) emailSess = sess.user.email;
     else if(sess.email) emailSess = sess.email;
+
+    ldDebug('Sessão válida para: '+emailSess);
+    ldMsg('Carregando dados...');
 
     usr = { email: emailSess, token: sess.access_token, _nome:'', _unidade:'' };
     perfil = localStorage.getItem('mandala_perfil') || 'sindico';
     if(ADMINS.indexOf(usr.email)!==-1) perfil='sindico';
 
-    // Buscar nome/unidade do usuário na tabela (sem bloquear o carregamento)
+    // Timeout de segurança para o fetch (3s)
+    var fetchDone = false;
+    var fetchTimer = setTimeout(function(){
+      if(!fetchDone){ ldDebug('Fetch timeout — abrindo app mesmo assim'); _initDone=true; mostrarApp(); }
+    }, 3000);
+
     fetch(SB_URL+'/rest/v1/usuarios_portal?select=nome,unidade,perfil&email=eq.'+encodeURIComponent(emailSess),{
       headers:{'apikey':SB_KEY,'Authorization':'Bearer '+sess.access_token}
-    }).then(function(r){return r.ok?r.json():[];}).then(function(a){
+    }).then(function(r){
+      ldDebug('Fetch status: '+r.status);
+      return r.ok?r.json():[];
+    }).then(function(a){
       if(a&&a[0]){
         if(a[0].nome) usr._nome=a[0].nome;
         if(a[0].unidade) usr._unidade=a[0].unidade;
         if(a[0].perfil&&ADMINS.indexOf(usr.email)===-1) perfil=a[0].perfil;
       }
-    }).catch(function(){}).finally(function(){
-      mostrarApp();
+    }).catch(function(e){ ldDebug('Fetch erro: '+e.message); })
+    .finally(function(){
+      if(!fetchDone){ fetchDone=true; clearTimeout(fetchTimer); _initDone=true; mostrarApp(); }
     });
     return;
   }
 
   // Sem sessão — mostrar botão de login IMEDIATAMENTE
-  var spinner = document.querySelector('.spinner');
-  if(spinner) spinner.style.display='none';
-  var msgEl = document.getElementById('ldMsg');
-  if(msgEl) msgEl.textContent = 'Sessão não encontrada. Faça o login.';
-  var ldEsc = document.getElementById('ldEscape');
-  if(ldEsc) ldEsc.style.display='block';
+  ldDebug('Sem sessão — redirecionando para login');
+  _initDone = true;
+  var sp = document.getElementById('ldSpinner'); if(sp) sp.style.display='none';
+  document.getElementById('ldMsg').textContent = 'Sessão não encontrada. Faça o login.';
+  document.getElementById('ldEscape').style.display='block';
 };
 
 function mostrarApp(){
