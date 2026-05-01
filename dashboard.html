@@ -791,7 +791,7 @@ async function renderPainel(){
 
     // Fixos (recorrentes)
     var fixos=transacoes.filter(function(t){return t.recorrente&&t.tipo==='despesa';});
-    var totalFixosMes=[...new Map(fixos.map(function(t){return[t.descricao,t];})).values()].reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
+   
 
     // Projeção (média dos últimos 3 meses de despesa)
     var mediaDes=(mesesDes[0]+mesesDes[1]+mesesDes[2])/3;
