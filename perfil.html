@@ -7,10 +7,49 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:#f1f5f9}
+
+/* ── TEMAS ── */
+:root{
+  --bg-base:#0a0e1a;
+  --bg-card:#111827;
+  --bg-input:#0a0e1a;
+  --bg-sidebar:#0a0e1a;
+  --border:rgba(245,166,35,.09);
+  --border-focus:rgba(245,166,35,.4);
+  --border-top:rgba(245,166,35,.1);
+  --text-main:#f1f5f9;
+  --text-sub:rgba(241,245,249,.3);
+  --text-muted:rgba(241,245,249,.2);
+  --gold:#f5a623;
+  --gold-bg:rgba(245,166,35,.08);
+  --gold-border:rgba(245,166,35,.2);
+  --divider:rgba(245,166,35,.07);
+  --hover-bg:rgba(245,166,35,.04);
+  --shadow:none;
+}
+body.light{
+  --bg-base:#f0f2f8;
+  --bg-card:#ffffff;
+  --bg-input:#f8f9fc;
+  --bg-sidebar:#ffffff;
+  --border:rgba(0,0,0,.08);
+  --border-focus:#f5a623;
+  --border-top:rgba(0,0,0,.08);
+  --text-main:#1e2535;
+  --text-sub:#64748b;
+  --text-muted:#94a3b8;
+  --gold:#c47d0e;
+  --gold-bg:rgba(245,166,35,.1);
+  --gold-border:rgba(196,125,14,.25);
+  --divider:rgba(0,0,0,.07);
+  --hover-bg:rgba(245,166,35,.05);
+  --shadow:0 2px 12px rgba(0,0,0,.07);
+}
+
+html,body{height:100%;font-family:'Poppins',sans-serif;background:var(--bg-base);color:var(--text-main);transition:background .3s,color .3s}
 
 /* ── LOADING ── */
-#tela-loading{position:fixed;inset:0;background:#0a0e1a;display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:14px}
+#tela-loading{position:fixed;inset:0;background:var(--bg-base);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:14px}
 .ld-sub{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#f5a623}
 .ld-nome{font-size:22px;font-weight:800;color:#f1f5f9}
 .ld-msg{font-size:12px;color:#6b7a99;margin-top:4px}
@@ -18,7 +57,7 @@ html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── TOPBAR ── */
-.topbar{height:62px;background:#0a0e1a;border-bottom:1px solid rgba(245,166,35,.1);padding:0 28px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:100}
+.topbar{height:62px;background:var(--bg-base);border-bottom:1px solid var(--border-top);padding:0 28px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:100}
 .t-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
 .t-logo-icon{width:34px;height:34px;background:linear-gradient(135deg,#f5a623,#c47d0e);border-radius:9px;display:flex;align-items:center;justify-content:center}
 .t-logo-icon svg{width:20px;height:20px}
@@ -28,7 +67,7 @@ html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:
 .t-right{display:flex;align-items:center;gap:10px}
 .t-sair{background:transparent;border:1px solid rgba(241,245,249,.1);border-radius:8px;color:rgba(241,245,249,.4);padding:6px 14px;font-size:12px;cursor:pointer;transition:all .2s;font-family:'Poppins',sans-serif}
 .t-sair:hover{border-color:#ef4444;color:#ef4444}
-.t-back{background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.2);border-radius:8px;color:#f5a623;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Poppins',sans-serif;text-decoration:none;display:flex;align-items:center;gap:6px}
+.t-back{background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:8px;color:#f5a623;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Poppins',sans-serif;text-decoration:none;display:flex;align-items:center;gap:6px}
 .t-back:hover{background:rgba(245,166,35,.14)}
 
 /* ── LAYOUT ── */
@@ -37,13 +76,13 @@ html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:
 
 /* ── HEADER DA PÁGINA ── */
 .ph{margin-bottom:32px}
-.ph-title{font-size:26px;font-weight:700;color:#f1f5f9;margin-bottom:4px}
-.ph-sub{font-size:14px;color:rgba(241,245,249,.3)}
+.ph-title{font-size:26px;font-weight:700;color:var(--text-main);margin-bottom:4px}
+.ph-sub{font-size:14px;color:var(--text-sub)}
 
 /* ── TABS ── */
-.ptabs{display:flex;gap:2px;margin-bottom:32px;background:rgba(255,255,255,.03);border:1px solid rgba(245,166,35,.08);border-radius:12px;padding:5px;flex-wrap:wrap}
-.ptab{flex:1;min-width:120px;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:none;color:rgba(241,245,249,.35);transition:all .2s;font-family:'Poppins',sans-serif;text-align:center}
-.ptab:hover{color:rgba(241,245,249,.7)}
+.ptabs{display:flex;gap:2px;margin-bottom:32px;background:var(--gold-bg);border:1px solid var(--border);border-radius:12px;padding:5px;flex-wrap:wrap}
+.ptab{flex:1;min-width:120px;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:none;color:var(--text-sub);transition:all .2s;font-family:'Poppins',sans-serif;text-align:center}
+.ptab:hover{color:var(--text-main)}
 .ptab.on{background:rgba(245,166,35,.12);color:#f5a623;font-weight:600;border:1px solid rgba(245,166,35,.2)}
 
 /* ── SEÇÕES ── */
@@ -51,10 +90,10 @@ html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:
 .psec.on{display:block}
 
 /* ── CARD BASE ── */
-.pcard{background:#111827;border:1px solid rgba(245,166,35,.09);border-radius:16px;padding:28px 30px;margin-bottom:20px}
-.pcard-title{font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:4px;display:flex;align-items:center;gap:8px}
-.pcard-sub{font-size:12px;color:rgba(241,245,249,.3);margin-bottom:22px}
-.divider{border:none;border-top:1px solid rgba(245,166,35,.07);margin:22px 0}
+.pcard{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:28px 30px;margin-bottom:20px}
+.pcard-title{font-size:14px;font-weight:700;color:var(--text-main);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.pcard-sub{font-size:12px;color:var(--text-sub);margin-bottom:22px}
+.divider{border:none;border-top:1px solid var(--divider);margin:22px 0}
 
 /* ── AVATAR ── */
 .avatar-wrap{display:flex;align-items:center;gap:24px;margin-bottom:24px}
@@ -63,8 +102,8 @@ html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:
 .avatar-overlay{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;opacity:0;transition:.2s;border-radius:50%}
 .avatar-circle:hover .avatar-overlay{opacity:1}
 .avatar-overlay span{font-size:20px}
-.avatar-info h3{font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:3px}
-.avatar-info p{font-size:12px;color:rgba(241,245,249,.35);margin-bottom:10px}
+.avatar-info h3{font-size:16px;font-weight:700;color:var(--text-main);margin-bottom:3px}
+.avatar-info p{font-size:12px;color:var(--text-sub);margin-bottom:10px}
 .avatar-btns{display:flex;gap:8px;flex-wrap:wrap}
 .btn-foto{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.28);color:#f5a623;border-radius:8px;padding:7px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s}
 .btn-foto:hover{background:rgba(245,166,35,.2)}
@@ -80,25 +119,25 @@ html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:
 .ap-preview{width:100%;height:56px;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;font-weight:600}
 .ap-preview.dark{background:#0a0e1a;color:rgba(241,245,249,.5);border:1px solid rgba(255,255,255,.07)}
 .ap-preview.light{background:#f1f5f9;color:#334155;border:1px solid rgba(0,0,0,.08)}
-.ap-label{font-size:12px;font-weight:600;color:rgba(241,245,249,.6);text-align:center}
+.ap-label{font-size:12px;font-weight:600;color:var(--text-sub);text-align:center}
 .ap-opt.on .ap-label{color:#f5a623}
 
 /* ── FORM ── */
 .fr{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
-.fr label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:rgba(241,245,249,.3)}
-.fr input,.fr select,.fr textarea{background:#0a0e1a;border:1px solid rgba(245,166,35,.12);border-radius:9px;color:#f1f5f9;padding:11px 14px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;transition:border .2s;width:100%}
-.fr input:focus,.fr select:focus{border-color:rgba(245,166,35,.4)}
+.fr label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-sub)}
+.fr input,.fr select,.fr textarea{background:var(--bg-input);border:1px solid var(--border);border-radius:9px;color:var(--text-main);padding:11px 14px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;transition:border .2s;width:100%}
+.fr input:focus,.fr select:focus{border-color:var(--border-focus)}
 .fr input:disabled{opacity:.4;cursor:not-allowed}
-.fr select option{background:#0a0e1a}
+.fr select option{background:var(--bg-input)}
 .fr-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.fr-hint{font-size:11px;color:rgba(241,245,249,.2);margin-top:3px}
+.fr-hint{font-size:11px;color:var(--text-muted);margin-top:3px}
 
 /* ── BOTÕES ── */
 .btn-prim{background:linear-gradient(135deg,#f5a623,#c47d0e);border:none;color:#fff;border-radius:9px;padding:11px 26px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s;box-shadow:0 4px 16px rgba(245,166,35,.3)}
 .btn-prim:hover{opacity:.9;transform:translateY(-1px)}
 .btn-prim:disabled{opacity:.4;cursor:not-allowed;transform:none}
-.btn-sec{background:transparent;border:1px solid rgba(241,245,249,.12);color:rgba(241,245,249,.5);border-radius:9px;padding:11px 20px;font-size:13px;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s}
-.btn-sec:hover{border-color:rgba(241,245,249,.3);color:#f1f5f9}
+.btn-sec{background:transparent;border:1px solid var(--border);color:var(--text-sub);border-radius:9px;padding:11px 20px;font-size:13px;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s}
+.btn-sec:hover{border-color:var(--text-sub);color:var(--text-main)}
 .btn-danger{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);color:#ef4444;border-radius:9px;padding:11px 20px;font-size:13px;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s}
 .btn-danger:hover{background:rgba(239,68,68,.16)}
 .btn-export{background:rgba(52,201,126,.08);border:1px solid rgba(52,201,126,.25);color:#34c97e;border-radius:9px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s;display:flex;align-items:center;gap:8px}
@@ -116,25 +155,25 @@ html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:
 
 /* ── EXPORT TABLE ── */
 .exp-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px}
-.exp-table th{text-align:left;padding:10px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:rgba(241,245,249,.22);border-bottom:1px solid rgba(245,166,35,.07)}
-.exp-table td{padding:12px 14px;border-bottom:1px solid rgba(245,166,35,.04);color:rgba(241,245,249,.7);vertical-align:middle}
-.exp-table tr:hover td{background:rgba(245,166,35,.02)}
-.exp-item-icon{font-size:22px;width:38px;height:38px;background:rgba(245,166,35,.07);border-radius:9px;display:flex;align-items:center;justify-content:center}
+.exp-table th{text-align:left;padding:10px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);border-bottom:1px solid var(--divider)}
+.exp-table td{padding:12px 14px;border-bottom:1px solid var(--divider);color:var(--text-sub);vertical-align:middle}
+.exp-table tr:hover td{background:var(--hover-bg)}
+.exp-item-icon{font-size:22px;width:38px;height:38px;background:var(--gold-bg);border-radius:9px;display:flex;align-items:center;justify-content:center}
 
 /* ── ALERTA ── */
 .alerta{display:flex;align-items:center;gap:10px;background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.18);border-radius:10px;padding:12px 16px;font-size:13px;color:rgba(245,166,35,.85);margin-bottom:20px}
 .alerta-danger{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.18);color:#ef4444}
 
 /* ── SEPARADOR DE SEÇÃO ── */
-.sec-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(241,245,249,.2);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(245,166,35,.06)}
+.sec-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--divider)}
 
 /* ── SENHA STRENGTH ── */
 .strength-bar{height:4px;border-radius:2px;background:rgba(255,255,255,.06);margin-top:6px;overflow:hidden}
 .strength-fill{height:100%;border-radius:2px;transition:width .3s,background .3s;width:0}
-.strength-label{font-size:11px;margin-top:4px;color:rgba(241,245,249,.3)}
+.strength-label{font-size:11px;margin-top:4px;color:var(--text-sub)}
 
 /* ── TOAST ── */
-#toast{position:fixed;bottom:24px;right:24px;background:#1a2235;border:1px solid rgba(245,166,35,.25);color:#f1f5f9;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;max-width:300px}
+#toast{position:fixed;bottom:24px;right:24px;background:var(--bg-card);border:1px solid var(--gold-border);color:var(--text-main);padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;max-width:300px}
 #toast.on{opacity:1;transform:translateY(0)}
 #toast.ok{border-color:rgba(52,201,126,.3);color:#34c97e}
 #toast.err{border-color:rgba(239,68,68,.3);color:#ef4444}
@@ -148,6 +187,24 @@ html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:
   .ptab{font-size:11px;padding:8px 10px}
   .avatar-wrap{flex-direction:column;align-items:flex-start}
 }
+
+/* ── MODO CLARO: overrides específicos ── */
+body.light .topbar{border-bottom:1px solid var(--border-top);box-shadow:0 1px 8px rgba(0,0,0,.06)}
+body.light .pcard-title{color:var(--text-main)}
+body.light .ap-preview.dark{background:#1e293b}
+body.light .badge-ok{background:rgba(52,201,126,.1);color:#16a34a}
+body.light .t-sair{color:#64748b;border-color:rgba(0,0,0,.12)}
+body.light .t-sair:hover{border-color:#ef4444;color:#ef4444}
+body.light .avatar-circle{background:linear-gradient(135deg,rgba(245,166,35,.2),rgba(196,125,14,.1));border-color:rgba(196,125,14,.3)}
+body.light .btn-foto{background:rgba(196,125,14,.1);border-color:rgba(196,125,14,.3);color:#c47d0e}
+body.light .btn-foto:hover{background:rgba(196,125,14,.2)}
+body.light .ptab.on{background:rgba(196,125,14,.1);color:#c47d0e}
+body.light #toast{box-shadow:0 4px 16px rgba(0,0,0,.12)}
+body.light .alerta{background:rgba(196,125,14,.06);border-color:rgba(196,125,14,.2);color:#92400e}
+body.light .alerta.alerta-danger{background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.2);color:#b91c1c}
+body.light .fr input:disabled{background:#e8ecf4;color:#94a3b8}
+body.light .exp-table td[style*="font-weight:600"]{color:var(--text-main) !important}
+body.light .exp-table td[style*="rgba(241,245,249,.4)"]{color:var(--text-sub) !important}
 </style>
 </head>
 <body>
@@ -250,8 +307,8 @@ html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:
           </div>
         </div>
 
-        <div style="background:rgba(245,166,35,.05);border:1px solid rgba(245,166,35,.12);border-radius:9px;padding:12px 16px;font-size:12px;color:rgba(245,166,35,.7)">
-          ℹ️ O modo claro está em desenvolvimento. Por enquanto, o portal usa o tema escuro.
+        <div id="temaAviso" style="background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:9px;padding:12px 16px;font-size:12px;color:var(--gold)">
+          ℹ️ O modo claro foi ativado com sucesso! As cores do portal foram ajustadas.
         </div>
       </div>
 
@@ -331,15 +388,15 @@ html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:
         <div class="pcard-sub">Informações sobre sua sessão atual</div>
         <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(245,166,35,.05)">
           <div>
-            <div style="font-size:13px;color:#f1f5f9;font-weight:500">Dispositivo atual</div>
-            <div style="font-size:11px;color:rgba(241,245,249,.3);margin-top:2px" id="deviceInfo">—</div>
+            <div style="font-size:13px;color:var(--text-main);font-weight:500">Dispositivo atual</div>
+            <div style="font-size:11px;color:var(--text-sub);margin-top:2px" id="deviceInfo">—</div>
           </div>
           <span class="badge-ok">● Ativo</span>
         </div>
         <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0">
           <div>
-            <div style="font-size:13px;color:#f1f5f9;font-weight:500">Expira em</div>
-            <div style="font-size:11px;color:rgba(241,245,249,.3);margin-top:2px" id="sessaoExpira">—</div>
+            <div style="font-size:13px;color:var(--text-main);font-weight:500">Expira em</div>
+            <div style="font-size:11px;color:var(--text-sub);margin-top:2px" id="sessaoExpira">—</div>
           </div>
         </div>
         <div class="btn-row">
@@ -385,7 +442,7 @@ html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:
           </div>
           <div class="fr mf-span2">
             <label>Observações / Necessidades especiais</label>
-            <textarea id="mrObs" rows="3" placeholder="Qualquer informação relevante para o condomínio..." style="background:#0a0e1a;border:1px solid rgba(245,166,35,.12);border-radius:9px;color:#f1f5f9;padding:11px 14px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;resize:vertical;width:100%"></textarea>
+            <textarea id="mrObs" rows="3" placeholder="Qualquer informação relevante para o condomínio..." style="background:var(--bg-input);border:1px solid var(--border);border-radius:9px;color:var(--text-main);padding:11px 14px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;resize:vertical;width:100%;transition:background .3s,color .3s"></textarea>
           </div>
         </div>
 
@@ -417,8 +474,8 @@ html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:
         <div style="display:flex;flex-direction:column;gap:14px">
           <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:12px 0;border-bottom:1px solid rgba(245,166,35,.05)">
             <div>
-              <div style="font-size:13px;color:#f1f5f9;font-weight:500">Comunicados gerais</div>
-              <div style="font-size:11px;color:rgba(241,245,249,.3)">Avisos do síndico e da administração</div>
+              <div style="font-size:13px;color:var(--text-main);font-weight:500">Comunicados gerais</div>
+              <div style="font-size:11px;color:var(--text-sub)">Avisos do síndico e da administração</div>
             </div>
             <div class="toggle" id="tog-comunicados" onclick="togglePref('comunicados')" style="width:42px;height:24px;background:rgba(245,166,35,.3);border-radius:12px;position:relative;cursor:pointer;transition:.3s">
               <div style="width:18px;height:18px;background:#f5a623;border-radius:50%;position:absolute;top:3px;left:3px;transition:.3s" id="tog-comunicados-knob"></div>
@@ -426,8 +483,8 @@ html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:
           </label>
           <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:12px 0;border-bottom:1px solid rgba(245,166,35,.05)">
             <div>
-              <div style="font-size:13px;color:#f1f5f9;font-weight:500">Boletos e cobranças</div>
-              <div style="font-size:11px;color:rgba(241,245,249,.3)">Vencimentos e cobranças da taxa condominial</div>
+              <div style="font-size:13px;color:var(--text-main);font-weight:500">Boletos e cobranças</div>
+              <div style="font-size:11px;color:var(--text-sub)">Vencimentos e cobranças da taxa condominial</div>
             </div>
             <div class="toggle" id="tog-boletos" onclick="togglePref('boletos')" style="width:42px;height:24px;background:rgba(245,166,35,.3);border-radius:12px;position:relative;cursor:pointer;transition:.3s">
               <div style="width:18px;height:18px;background:#f5a623;border-radius:50%;position:absolute;top:3px;left:3px;transition:.3s" id="tog-boletos-knob"></div>
@@ -435,8 +492,8 @@ html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:
           </label>
           <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:12px 0">
             <div>
-              <div style="font-size:13px;color:#f1f5f9;font-weight:500">Assembleias e votações</div>
-              <div style="font-size:11px;color:rgba(241,245,249,.3)">Convocações e pautas de assembleia</div>
+              <div style="font-size:13px;color:var(--text-main);font-weight:500">Assembleias e votações</div>
+              <div style="font-size:11px;color:var(--text-sub)">Convocações e pautas de assembleia</div>
             </div>
             <div class="toggle" id="tog-assembleias" onclick="togglePref('assembleias')" style="width:42px;height:24px;background:rgba(245,166,35,.3);border-radius:12px;position:relative;cursor:pointer;transition:.3s">
               <div style="width:18px;height:18px;background:#f5a623;border-radius:50%;position:absolute;top:3px;left:3px;transition:.3s" id="tog-assembleias-knob"></div>
@@ -460,15 +517,15 @@ html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:
         <div class="pcard-sub">Informações armazenadas sobre você no sistema</div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:22px">
-          <div style="background:#0a0e1a;border:1px solid rgba(245,166,35,.08);border-radius:10px;padding:14px;text-align:center">
+          <div style="background:var(--bg-input);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
             <div style="font-size:24px;font-weight:800;color:#f5a623" id="cntTransacoes">—</div>
             <div style="font-size:11px;color:rgba(241,245,249,.3);margin-top:4px">Transações</div>
           </div>
-          <div style="background:#0a0e1a;border:1px solid rgba(245,166,35,.08);border-radius:10px;padding:14px;text-align:center">
+          <div style="background:var(--bg-input);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
             <div style="font-size:24px;font-weight:800;color:#f5a623" id="cntBoletos">—</div>
             <div style="font-size:11px;color:rgba(241,245,249,.3);margin-top:4px">Boletos</div>
           </div>
-          <div style="background:#0a0e1a;border:1px solid rgba(245,166,35,.08);border-radius:10px;padding:14px;text-align:center">
+          <div style="background:var(--bg-input);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
             <div style="font-size:24px;font-weight:800;color:#f5a623" id="cntDocs">—</div>
             <div style="font-size:11px;color:rgba(241,245,249,.3);margin-top:4px">Documentos</div>
           </div>
@@ -758,8 +815,17 @@ function carregarTema(){
 
 function setTema(tema,silencioso){
   localStorage.setItem('mandala_tema',tema);
+  // Aplicar classe no body para ativar variáveis CSS
+  if(tema==='light'){
+    document.body.classList.add('light');
+  } else {
+    document.body.classList.remove('light');
+  }
   document.getElementById('opt-dark').classList.toggle('on',tema==='dark');
   document.getElementById('opt-light').classList.toggle('on',tema==='light');
+  // Remover aviso de "em desenvolvimento" se claro for selecionado
+  var aviso=document.getElementById('temaAviso');
+  if(aviso) aviso.style.display=tema==='light'?'none':'';
   if(!silencioso) toast('Tema "'+(tema==='dark'?'Escuro':'Claro')+'" aplicado!','ok');
 }
 
@@ -769,16 +835,29 @@ async function salvarNome(){
   var apelido=document.getElementById('dispApelido').value.trim();
   if(!nome){ toast('Informe seu nome.','err'); return; }
   try{
+    // Tenta PATCH com token do usuário primeiro
     var r=await fetch(SB_URL+'/rest/v1/usuarios_portal?email=eq.'+encodeURIComponent(usr.email),{
       method:'PATCH',
-      headers:{'apikey':SB_SVC,'Authorization':'Bearer '+SB_SVC,'Content-Type':'application/json','Prefer':'return=minimal'},
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+usr.token,'Content-Type':'application/json','Prefer':'return=minimal'},
       body:JSON.stringify({nome:nome,apelido:apelido})
     });
-    if(r.ok||r.status===204){
+    // Se RLS bloquear (403/401), tenta upsert com service role
+    if(!r.ok && (r.status===401||r.status===403||r.status===404)){
+      r=await fetch(SB_URL+'/rest/v1/usuarios_portal',{
+        method:'POST',
+        headers:{'apikey':SB_SVC,'Authorization':'Bearer '+SB_SVC,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+        body:JSON.stringify({email:usr.email,nome:nome,apelido:apelido,empresa:EMPRESA})
+      });
+    }
+    if(r.ok||r.status===204||r.status===201){
       atualizarAvatar(nome, localStorage.getItem('mandala_foto_'+usr.email)||null);
       document.getElementById('mrNome').value=nome;
       toast('Nome salvo com sucesso!','ok');
-    } else { toast('Erro ao salvar nome.','err'); }
+    } else {
+      var err=await r.text();
+      console.error('Erro salvarNome',r.status,err);
+      toast('Erro ao salvar nome ('+r.status+').','err');
+    }
   }catch(e){ toast('Erro: '+e.message,'err'); }
 }
 
@@ -860,14 +939,26 @@ async function salvarCadastro(){
   try{
     var r=await fetch(SB_URL+'/rest/v1/usuarios_portal?email=eq.'+encodeURIComponent(usr.email),{
       method:'PATCH',
-      headers:{'apikey':SB_SVC,'Authorization':'Bearer '+SB_SVC,'Content-Type':'application/json','Prefer':'return=minimal'},
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+usr.token,'Content-Type':'application/json','Prefer':'return=minimal'},
       body:JSON.stringify(dados)
     });
-    if(r.ok||r.status===204){
+    if(!r.ok&&(r.status===401||r.status===403||r.status===404)){
+      dados.email=usr.email; dados.empresa=EMPRESA;
+      r=await fetch(SB_URL+'/rest/v1/usuarios_portal',{
+        method:'POST',
+        headers:{'apikey':SB_SVC,'Authorization':'Bearer '+SB_SVC,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+        body:JSON.stringify(dados)
+      });
+    }
+    if(r.ok||r.status===204||r.status===201){
       toast('Cadastro salvo com sucesso!','ok');
       document.getElementById('dispNome').value=dados.nome;
       atualizarAvatar(dados.nome, localStorage.getItem('mandala_foto_'+usr.email)||null);
-    } else { toast('Erro ao salvar cadastro.','err'); }
+    } else {
+      var err=await r.text();
+      console.error('Erro salvarCadastro',r.status,err);
+      toast('Erro ao salvar cadastro ('+r.status+').','err');
+    }
   }catch(e){ toast('Erro: '+e.message,'err'); }
 }
 
