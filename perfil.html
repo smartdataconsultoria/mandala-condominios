@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edifício Mandala | Meu Perfil</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:'Poppins',sans-serif;background:#0a0e1a;color:#f1f5f9}
+
+/* ── LOADING ── */
+#tela-loading{position:fixed;inset:0;background:#0a0e1a;display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:14px}
+.ld-sub{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#f5a623}
+.ld-nome{font-size:22px;font-weight:800;color:#f1f5f9}
+.ld-msg{font-size:12px;color:#6b7a99;margin-top:4px}
+.spinner{width:34px;height:34px;border:3px solid rgba(245,166,35,.15);border-top-color:#f5a623;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── TOPBAR ── */
+.topbar{height:62px;background:#0a0e1a;border-bottom:1px solid rgba(245,166,35,.1);padding:0 28px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:100}
+.t-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.t-logo-icon{width:34px;height:34px;background:linear-gradient(135deg,#f5a623,#c47d0e);border-radius:9px;display:flex;align-items:center;justify-content:center}
+.t-logo-icon svg{width:20px;height:20px}
+.t-logo-nome{display:flex;flex-direction:column;line-height:1.1}
+.t-logo-sub{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#f5a623}
+.t-logo-main{font-size:16px;font-weight:800;color:#f1f5f9}
+.t-right{display:flex;align-items:center;gap:10px}
+.t-sair{background:transparent;border:1px solid rgba(241,245,249,.1);border-radius:8px;color:rgba(241,245,249,.4);padding:6px 14px;font-size:12px;cursor:pointer;transition:all .2s;font-family:'Poppins',sans-serif}
+.t-sair:hover{border-color:#ef4444;color:#ef4444}
+.t-back{background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.2);border-radius:8px;color:#f5a623;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Poppins',sans-serif;text-decoration:none;display:flex;align-items:center;gap:6px}
+.t-back:hover{background:rgba(245,166,35,.14)}
+
+/* ── LAYOUT ── */
+#app{display:none;min-height:100vh;flex-direction:column}
+.page-wrap{max-width:900px;margin:0 auto;padding:40px 24px 60px;width:100%}
+
+/* ── HEADER DA PÁGINA ── */
+.ph{margin-bottom:32px}
+.ph-title{font-size:26px;font-weight:700;color:#f1f5f9;margin-bottom:4px}
+.ph-sub{font-size:14px;color:rgba(241,245,249,.3)}
+
+/* ── TABS ── */
+.ptabs{display:flex;gap:2px;margin-bottom:32px;background:rgba(255,255,255,.03);border:1px solid rgba(245,166,35,.08);border-radius:12px;padding:5px;flex-wrap:wrap}
+.ptab{flex:1;min-width:120px;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:none;color:rgba(241,245,249,.35);transition:all .2s;font-family:'Poppins',sans-serif;text-align:center}
+.ptab:hover{color:rgba(241,245,249,.7)}
+.ptab.on{background:rgba(245,166,35,.12);color:#f5a623;font-weight:600;border:1px solid rgba(245,166,35,.2)}
+
+/* ── SEÇÕES ── */
+.psec{display:none}
+.psec.on{display:block}
+
+/* ── CARD BASE ── */
+.pcard{background:#111827;border:1px solid rgba(245,166,35,.09);border-radius:16px;padding:28px 30px;margin-bottom:20px}
+.pcard-title{font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.pcard-sub{font-size:12px;color:rgba(241,245,249,.3);margin-bottom:22px}
+.divider{border:none;border-top:1px solid rgba(245,166,35,.07);margin:22px 0}
+
+/* ── AVATAR ── */
+.avatar-wrap{display:flex;align-items:center;gap:24px;margin-bottom:24px}
+.avatar-circle{width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,rgba(245,166,35,.3),rgba(196,125,14,.2));border:2px solid rgba(245,166,35,.25);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#f5a623;position:relative;overflow:hidden;cursor:pointer;flex-shrink:0}
+.avatar-circle img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.avatar-overlay{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;opacity:0;transition:.2s;border-radius:50%}
+.avatar-circle:hover .avatar-overlay{opacity:1}
+.avatar-overlay span{font-size:20px}
+.avatar-info h3{font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:3px}
+.avatar-info p{font-size:12px;color:rgba(241,245,249,.35);margin-bottom:10px}
+.avatar-btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn-foto{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.28);color:#f5a623;border-radius:8px;padding:7px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s}
+.btn-foto:hover{background:rgba(245,166,35,.2)}
+.btn-rm-foto{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);color:#ef4444;border-radius:8px;padding:7px 16px;font-size:12px;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s}
+.btn-rm-foto:hover{background:rgba(239,68,68,.14)}
+#inputFoto{display:none}
+
+/* ── APARÊNCIA ── */
+.aparencia-opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.ap-opt{border:2px solid rgba(245,166,35,.1);border-radius:12px;padding:18px 16px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:8px;align-items:center}
+.ap-opt:hover{border-color:rgba(245,166,35,.3)}
+.ap-opt.on{border-color:#f5a623;background:rgba(245,166,35,.06)}
+.ap-preview{width:100%;height:56px;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;font-weight:600}
+.ap-preview.dark{background:#0a0e1a;color:rgba(241,245,249,.5);border:1px solid rgba(255,255,255,.07)}
+.ap-preview.light{background:#f1f5f9;color:#334155;border:1px solid rgba(0,0,0,.08)}
+.ap-label{font-size:12px;font-weight:600;color:rgba(241,245,249,.6);text-align:center}
+.ap-opt.on .ap-label{color:#f5a623}
+
+/* ── FORM ── */
+.fr{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.fr label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:rgba(241,245,249,.3)}
+.fr input,.fr select,.fr textarea{background:#0a0e1a;border:1px solid rgba(245,166,35,.12);border-radius:9px;color:#f1f5f9;padding:11px 14px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;transition:border .2s;width:100%}
+.fr input:focus,.fr select:focus{border-color:rgba(245,166,35,.4)}
+.fr input:disabled{opacity:.4;cursor:not-allowed}
+.fr select option{background:#0a0e1a}
+.fr-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fr-hint{font-size:11px;color:rgba(241,245,249,.2);margin-top:3px}
+
+/* ── BOTÕES ── */
+.btn-prim{background:linear-gradient(135deg,#f5a623,#c47d0e);border:none;color:#fff;border-radius:9px;padding:11px 26px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s;box-shadow:0 4px 16px rgba(245,166,35,.3)}
+.btn-prim:hover{opacity:.9;transform:translateY(-1px)}
+.btn-prim:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-sec{background:transparent;border:1px solid rgba(241,245,249,.12);color:rgba(241,245,249,.5);border-radius:9px;padding:11px 20px;font-size:13px;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s}
+.btn-sec:hover{border-color:rgba(241,245,249,.3);color:#f1f5f9}
+.btn-danger{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);color:#ef4444;border-radius:9px;padding:11px 20px;font-size:13px;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s}
+.btn-danger:hover{background:rgba(239,68,68,.16)}
+.btn-export{background:rgba(52,201,126,.08);border:1px solid rgba(52,201,126,.25);color:#34c97e;border-radius:9px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s;display:flex;align-items:center;gap:8px}
+.btn-export:hover{background:rgba(52,201,126,.18)}
+.btn-export:disabled{opacity:.4;cursor:not-allowed}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:4px}
+
+/* ── BADGE / STATUS ── */
+.badge-ok{background:rgba(52,201,126,.1);border:1px solid rgba(52,201,126,.25);color:#34c97e;border-radius:7px;padding:4px 12px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:5px}
+.badge-warn{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.25);color:#f5a623;border-radius:7px;padding:4px 12px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:5px}
+
+/* ── MORADOR FORM ── */
+.mf-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.mf-span2{grid-column:span 2}
+
+/* ── EXPORT TABLE ── */
+.exp-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px}
+.exp-table th{text-align:left;padding:10px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:rgba(241,245,249,.22);border-bottom:1px solid rgba(245,166,35,.07)}
+.exp-table td{padding:12px 14px;border-bottom:1px solid rgba(245,166,35,.04);color:rgba(241,245,249,.7);vertical-align:middle}
+.exp-table tr:hover td{background:rgba(245,166,35,.02)}
+.exp-item-icon{font-size:22px;width:38px;height:38px;background:rgba(245,166,35,.07);border-radius:9px;display:flex;align-items:center;justify-content:center}
+
+/* ── ALERTA ── */
+.alerta{display:flex;align-items:center;gap:10px;background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.18);border-radius:10px;padding:12px 16px;font-size:13px;color:rgba(245,166,35,.85);margin-bottom:20px}
+.alerta-danger{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.18);color:#ef4444}
+
+/* ── SEPARADOR DE SEÇÃO ── */
+.sec-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(241,245,249,.2);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(245,166,35,.06)}
+
+/* ── SENHA STRENGTH ── */
+.strength-bar{height:4px;border-radius:2px;background:rgba(255,255,255,.06);margin-top:6px;overflow:hidden}
+.strength-fill{height:100%;border-radius:2px;transition:width .3s,background .3s;width:0}
+.strength-label{font-size:11px;margin-top:4px;color:rgba(241,245,249,.3)}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;right:24px;background:#1a2235;border:1px solid rgba(245,166,35,.25);color:#f1f5f9;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;max-width:300px}
+#toast.on{opacity:1;transform:translateY(0)}
+#toast.ok{border-color:rgba(52,201,126,.3);color:#34c97e}
+#toast.err{border-color:rgba(239,68,68,.3);color:#ef4444}
+
+/* ── RESPONSIVO ── */
+@media(max-width:640px){
+  .page-wrap{padding:24px 16px 48px}
+  .fr-row,.mf-grid{grid-template-columns:1fr}
+  .mf-span2{grid-column:auto}
+  .aparencia-opts{grid-template-columns:1fr 1fr}
+  .ptab{font-size:11px;padding:8px 10px}
+  .avatar-wrap{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="tela-loading">
+  <div class="ld-sub">Edifício</div>
+  <div class="ld-nome">Mandala</div>
+  <div class="ld-msg">Verificando acesso...</div>
+  <div class="spinner"></div>
+  <a href="login.html" style="display:none;margin-top:20px;color:#f5a623;font-size:13px;text-decoration:none;border:1px solid rgba(245,166,35,.3);padding:8px 20px;border-radius:8px" id="ldEscape">→ Ir para o Login</a>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <a class="t-logo" href="dashboard.html">
+      <div class="t-logo-icon">
+        <svg viewBox="0 0 36 36" fill="none">
+          <rect x="4" y="11" width="28" height="22" rx="2" fill="white" opacity=".95"/>
+          <polygon points="2,13 18,3 34,13" fill="white"/>
+          <rect x="14" y="24" width="8" height="9" rx="1.5" fill="#c47d0e" opacity=".9"/>
+        </svg>
+      </div>
+      <div class="t-logo-nome">
+        <span class="t-logo-sub">Edifício</span>
+        <span class="t-logo-main">Mandala</span>
+      </div>
+    </a>
+    <div class="t-right">
+      <a class="t-back" href="dashboard.html">← Voltar ao Portal</a>
+      <button class="t-sair" onclick="sair()">↩ Sair</button>
+    </div>
+  </div>
+
+  <!-- CONTEÚDO -->
+  <div class="page-wrap">
+
+    <div class="ph">
+      <div class="ph-title">⚙ Meu Perfil</div>
+      <div class="ph-sub">Gerencie suas informações, aparência e preferências</div>
+    </div>
+
+    <!-- TABS -->
+    <div class="ptabs">
+      <button class="ptab on" onclick="pTab('perfil',this)">👤 Meu Perfil</button>
+      <button class="ptab"    onclick="pTab('conta',this)">🔐 Dados da Conta</button>
+      <button class="ptab"    onclick="pTab('morador',this)">📋 Cadastro</button>
+      <button class="ptab"    onclick="pTab('privacidade',this)">📊 Privacidade & Exportar</button>
+    </div>
+
+    <!-- ══ TAB 1: MEU PERFIL ══ -->
+    <div class="psec on" id="sec-perfil">
+
+      <!-- AVATAR -->
+      <div class="pcard">
+        <div class="pcard-title">📸 Foto de Perfil</div>
+        <div class="pcard-sub">Clique na imagem para alterar sua foto</div>
+
+        <div class="avatar-wrap">
+          <div class="avatar-circle" onclick="document.getElementById('inputFoto').click()">
+            <div id="avatarInitials" style="font-size:32px;font-weight:800;color:#f5a623"></div>
+            <img id="avatarImg" src="" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%"/>
+            <div class="avatar-overlay"><span>✏️</span></div>
+          </div>
+          <div class="avatar-info">
+            <h3 id="avatarNome">—</h3>
+            <p id="avatarEmail">—</p>
+            <div class="avatar-btns">
+              <button class="btn-foto" onclick="document.getElementById('inputFoto').click()">📷 Alterar foto</button>
+              <button class="btn-rm-foto" onclick="removerFoto()">🗑 Remover</button>
+            </div>
+          </div>
+        </div>
+        <input type="file" id="inputFoto" accept="image/*" onchange="trocarFoto(this)"/>
+        <div style="font-size:11px;color:rgba(241,245,249,.2)">Formatos aceitos: JPG, PNG, GIF • Máximo: 2MB</div>
+      </div>
+
+      <!-- APARÊNCIA -->
+      <div class="pcard">
+        <div class="pcard-title">🎨 Aparência</div>
+        <div class="pcard-sub">Escolha o tema visual do portal</div>
+
+        <div class="aparencia-opts">
+          <div class="ap-opt on" id="opt-dark" onclick="setTema('dark')">
+            <div class="ap-preview dark">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"/></svg>
+              Modo Escuro
+            </div>
+            <div class="ap-label">🌙 Escuro</div>
+          </div>
+          <div class="ap-opt" id="opt-light" onclick="setTema('light')">
+            <div class="ap-preview light">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2"/><line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2"/></svg>
+              Modo Claro
+            </div>
+            <div class="ap-label">☀️ Claro</div>
+          </div>
+        </div>
+
+        <div style="background:rgba(245,166,35,.05);border:1px solid rgba(245,166,35,.12);border-radius:9px;padding:12px 16px;font-size:12px;color:rgba(245,166,35,.7)">
+          ℹ️ O modo claro está em desenvolvimento. Por enquanto, o portal usa o tema escuro.
+        </div>
+      </div>
+
+      <!-- NOME EXIBIDO -->
+      <div class="pcard">
+        <div class="pcard-title">✏️ Nome de Exibição</div>
+        <div class="pcard-sub">Como seu nome aparece no portal</div>
+        <div class="fr">
+          <label>Nome completo</label>
+          <input type="text" id="dispNome" placeholder="Seu nome completo"/>
+        </div>
+        <div class="fr">
+          <label>Apelido (opcional)</label>
+          <input type="text" id="dispApelido" placeholder="Como prefere ser chamado"/>
+        </div>
+        <div class="btn-row">
+          <button class="btn-prim" onclick="salvarNome()">💾 Salvar nome</button>
+        </div>
+      </div>
+
+    </div><!-- /sec-perfil -->
+
+    <!-- ══ TAB 2: DADOS DA CONTA ══ -->
+    <div class="psec" id="sec-conta">
+
+      <!-- INFO ATUAL -->
+      <div class="pcard">
+        <div class="pcard-title">📧 E-mail da Conta</div>
+        <div class="pcard-sub">Seu e-mail de acesso ao portal</div>
+
+        <div class="fr">
+          <label>E-mail atual</label>
+          <input type="email" id="emailAtual" disabled/>
+        </div>
+
+        <hr class="divider">
+        <div class="sec-label">Alterar e-mail</div>
+
+        <div class="alerta">⚠️ Após alterar o e-mail, você precisará confirmar o novo endereço antes de fazer login novamente.</div>
+
+        <div class="fr">
+          <label>Novo e-mail</label>
+          <input type="email" id="novoEmail" placeholder="novo@email.com"/>
+        </div>
+        <div class="fr">
+          <label>Confirmar novo e-mail</label>
+          <input type="email" id="confEmail" placeholder="novo@email.com"/>
+        </div>
+        <div class="btn-row">
+          <button class="btn-prim" onclick="alterarEmail()">✉️ Alterar e-mail</button>
+        </div>
+      </div>
+
+      <!-- SENHA -->
+      <div class="pcard">
+        <div class="pcard-title">🔑 Alterar Senha</div>
+        <div class="pcard-sub">Recomendamos usar uma senha forte com letras, números e símbolos</div>
+
+        <div class="fr">
+          <label>Nova senha</label>
+          <input type="password" id="novaSenha" placeholder="••••••••" oninput="checkSenha(this.value)"/>
+          <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+          <div class="strength-label" id="strengthLabel"></div>
+        </div>
+        <div class="fr">
+          <label>Confirmar nova senha</label>
+          <input type="password" id="confSenha" placeholder="••••••••"/>
+        </div>
+        <div class="btn-row">
+          <button class="btn-prim" onclick="alterarSenha()">🔒 Alterar senha</button>
+        </div>
+      </div>
+
+      <!-- SESSÃO -->
+      <div class="pcard">
+        <div class="pcard-title">🔓 Sessão Ativa</div>
+        <div class="pcard-sub">Informações sobre sua sessão atual</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(245,166,35,.05)">
+          <div>
+            <div style="font-size:13px;color:#f1f5f9;font-weight:500">Dispositivo atual</div>
+            <div style="font-size:11px;color:rgba(241,245,249,.3);margin-top:2px" id="deviceInfo">—</div>
+          </div>
+          <span class="badge-ok">● Ativo</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0">
+          <div>
+            <div style="font-size:13px;color:#f1f5f9;font-weight:500">Expira em</div>
+            <div style="font-size:11px;color:rgba(241,245,249,.3);margin-top:2px" id="sessaoExpira">—</div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn-danger" onclick="sair()">↩ Encerrar sessão</button>
+        </div>
+      </div>
+
+    </div><!-- /sec-conta -->
+
+    <!-- ══ TAB 3: CADASTRO DE MORADOR ══ -->
+    <div class="psec" id="sec-morador">
+
+      <div class="pcard">
+        <div class="pcard-title">📋 Ajustar Meus Dados de Morador</div>
+        <div class="pcard-sub">Mantenha suas informações cadastrais atualizadas</div>
+
+        <div class="mf-grid">
+          <div class="fr mf-span2">
+            <label>Nome completo</label>
+            <input type="text" id="mrNome" placeholder="Seu nome completo"/>
+          </div>
+          <div class="fr">
+            <label>E-mail</label>
+            <input type="email" id="mrEmail" disabled/>
+            <div class="fr-hint">O e-mail não pode ser alterado aqui. Use a aba "Dados da Conta".</div>
+          </div>
+          <div class="fr">
+            <label>Telefone / WhatsApp</label>
+            <input type="tel" id="mrTelefone" placeholder="(81) 99999-9999"/>
+          </div>
+          <div class="fr">
+            <label>Unidade / Apartamento</label>
+            <input type="text" id="mrUnidade" placeholder="Ex: Apto 302"/>
+          </div>
+          <div class="fr">
+            <label>Bloco (se aplicável)</label>
+            <input type="text" id="mrBloco" placeholder="Ex: Bloco A"/>
+          </div>
+          <div class="fr mf-span2">
+            <label>Veículo (placa)</label>
+            <input type="text" id="mrVeiculo" placeholder="Ex: ABC-1234, DEF-5678"/>
+            <div class="fr-hint">Separe múltiplas placas por vírgula</div>
+          </div>
+          <div class="fr mf-span2">
+            <label>Observações / Necessidades especiais</label>
+            <textarea id="mrObs" rows="3" placeholder="Qualquer informação relevante para o condomínio..." style="background:#0a0e1a;border:1px solid rgba(245,166,35,.12);border-radius:9px;color:#f1f5f9;padding:11px 14px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;resize:vertical;width:100%"></textarea>
+          </div>
+        </div>
+
+        <hr class="divider">
+        <div class="sec-label">Contato de Emergência</div>
+
+        <div class="mf-grid">
+          <div class="fr">
+            <label>Nome do contato</label>
+            <input type="text" id="mrEmergNome" placeholder="Nome completo"/>
+          </div>
+          <div class="fr">
+            <label>Telefone de emergência</label>
+            <input type="tel" id="mrEmergTel" placeholder="(81) 99999-9999"/>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-prim" onclick="salvarCadastro()">💾 Salvar cadastro</button>
+          <button class="btn-sec" onclick="carregarCadastro()">↺ Recarregar dados</button>
+        </div>
+      </div>
+
+      <!-- PREFERÊNCIAS DO CONDOMÍNIO -->
+      <div class="pcard">
+        <div class="pcard-title">🔔 Preferências de Notificação</div>
+        <div class="pcard-sub">Escolha como deseja receber avisos do condomínio</div>
+
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:12px 0;border-bottom:1px solid rgba(245,166,35,.05)">
+            <div>
+              <div style="font-size:13px;color:#f1f5f9;font-weight:500">Comunicados gerais</div>
+              <div style="font-size:11px;color:rgba(241,245,249,.3)">Avisos do síndico e da administração</div>
+            </div>
+            <div class="toggle" id="tog-comunicados" onclick="togglePref('comunicados')" style="width:42px;height:24px;background:rgba(245,166,35,.3);border-radius:12px;position:relative;cursor:pointer;transition:.3s">
+              <div style="width:18px;height:18px;background:#f5a623;border-radius:50%;position:absolute;top:3px;left:3px;transition:.3s" id="tog-comunicados-knob"></div>
+            </div>
+          </label>
+          <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:12px 0;border-bottom:1px solid rgba(245,166,35,.05)">
+            <div>
+              <div style="font-size:13px;color:#f1f5f9;font-weight:500">Boletos e cobranças</div>
+              <div style="font-size:11px;color:rgba(241,245,249,.3)">Vencimentos e cobranças da taxa condominial</div>
+            </div>
+            <div class="toggle" id="tog-boletos" onclick="togglePref('boletos')" style="width:42px;height:24px;background:rgba(245,166,35,.3);border-radius:12px;position:relative;cursor:pointer;transition:.3s">
+              <div style="width:18px;height:18px;background:#f5a623;border-radius:50%;position:absolute;top:3px;left:3px;transition:.3s" id="tog-boletos-knob"></div>
+            </div>
+          </label>
+          <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:12px 0">
+            <div>
+              <div style="font-size:13px;color:#f1f5f9;font-weight:500">Assembleias e votações</div>
+              <div style="font-size:11px;color:rgba(241,245,249,.3)">Convocações e pautas de assembleia</div>
+            </div>
+            <div class="toggle" id="tog-assembleias" onclick="togglePref('assembleias')" style="width:42px;height:24px;background:rgba(245,166,35,.3);border-radius:12px;position:relative;cursor:pointer;transition:.3s">
+              <div style="width:18px;height:18px;background:#f5a623;border-radius:50%;position:absolute;top:3px;left:3px;transition:.3s" id="tog-assembleias-knob"></div>
+            </div>
+          </label>
+        </div>
+
+        <div class="btn-row" style="margin-top:20px">
+          <button class="btn-prim" onclick="salvarPrefs()">💾 Salvar preferências</button>
+        </div>
+      </div>
+
+    </div><!-- /sec-morador -->
+
+    <!-- ══ TAB 4: PRIVACIDADE & EXPORTAR ══ -->
+    <div class="psec" id="sec-privacidade">
+
+      <!-- MEUS DADOS -->
+      <div class="pcard">
+        <div class="pcard-title">🔒 Seus Dados no Portal</div>
+        <div class="pcard-sub">Informações armazenadas sobre você no sistema</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:22px">
+          <div style="background:#0a0e1a;border:1px solid rgba(245,166,35,.08);border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:24px;font-weight:800;color:#f5a623" id="cntTransacoes">—</div>
+            <div style="font-size:11px;color:rgba(241,245,249,.3);margin-top:4px">Transações</div>
+          </div>
+          <div style="background:#0a0e1a;border:1px solid rgba(245,166,35,.08);border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:24px;font-weight:800;color:#f5a623" id="cntBoletos">—</div>
+            <div style="font-size:11px;color:rgba(241,245,249,.3);margin-top:4px">Boletos</div>
+          </div>
+          <div style="background:#0a0e1a;border:1px solid rgba(245,166,35,.08);border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:24px;font-weight:800;color:#f5a623" id="cntDocs">—</div>
+            <div style="font-size:11px;color:rgba(241,245,249,.3);margin-top:4px">Documentos</div>
+          </div>
+        </div>
+
+        <div class="alerta">
+          🛡️ Seus dados são armazenados de forma segura no servidor. Apenas você e a administração do condomínio têm acesso.
+        </div>
+      </div>
+
+      <!-- EXPORTAR DADOS -->
+      <div class="pcard">
+        <div class="pcard-title">📥 Exportar Meus Dados</div>
+        <div class="pcard-sub">Baixe seus dados financeiros e cadastrais em Excel (.xlsx) ou CSV</div>
+
+        <table class="exp-table">
+          <thead>
+            <tr>
+              <th style="width:44px"></th>
+              <th>Dados</th>
+              <th>Descrição</th>
+              <th>Formato</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="exp-item-icon">💰</div></td>
+              <td style="font-weight:600;color:#f1f5f9">Transações financeiras</td>
+              <td style="color:rgba(241,245,249,.4);font-size:12px">Todas as receitas e despesas do condomínio</td>
+              <td><span style="background:rgba(52,201,126,.08);color:#34c97e;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:600">Excel</span></td>
+              <td><button class="btn-export" onclick="exportar('transacoes')">📥 Exportar</button></td>
+            </tr>
+            <tr>
+              <td><div class="exp-item-icon">📄</div></td>
+              <td style="font-weight:600;color:#f1f5f9">Boletos e cobranças</td>
+              <td style="color:rgba(241,245,249,.4);font-size:12px">Histórico de boletos e situação de pagamento</td>
+              <td><span style="background:rgba(52,201,126,.08);color:#34c97e;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:600">Excel</span></td>
+              <td><button class="btn-export" onclick="exportar('boletos')">📥 Exportar</button></td>
+            </tr>
+            <tr>
+              <td><div class="exp-item-icon">📋</div></td>
+              <td style="font-weight:600;color:#f1f5f9">Meu cadastro</td>
+              <td style="color:rgba(241,245,249,.4);font-size:12px">Seus dados cadastrais no condomínio</td>
+              <td><span style="background:rgba(52,201,126,.08);color:#34c97e;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:600">Excel</span></td>
+              <td><button class="btn-export" onclick="exportar('cadastro')">📥 Exportar</button></td>
+            </tr>
+            <tr>
+              <td><div class="exp-item-icon">📢</div></td>
+              <td style="font-weight:600;color:#f1f5f9">Comunicados</td>
+              <td style="color:rgba(241,245,249,.4);font-size:12px">Histórico de comunicados e avisos</td>
+              <td><span style="background:rgba(52,201,126,.08);color:#34c97e;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:600">Excel</span></td>
+              <td><button class="btn-export" onclick="exportar('comunicados')">📥 Exportar</button></td>
+            </tr>
+            <tr>
+              <td><div class="exp-item-icon">📦</div></td>
+              <td style="font-weight:600;color:#f1f5f9">Exportação completa</td>
+              <td style="color:rgba(241,245,249,.4);font-size:12px">Todos os dados acima em um único arquivo</td>
+              <td><span style="background:rgba(79,142,247,.08);color:#6ea8f7;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:600">Excel</span></td>
+              <td><button class="btn-export" style="background:rgba(79,142,247,.1);border-color:rgba(79,142,247,.3);color:#6ea8f7" onclick="exportar('tudo')">📦 Exportar tudo</button></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="font-size:11px;color:rgba(241,245,249,.2);margin-top:8px">
+          Os arquivos exportados contêm apenas dados do Edifício Mandala (EMPRESA: <span id="empLabel">—</span>).
+        </div>
+      </div>
+
+      <!-- SOLICITAR EXCLUSÃO -->
+      <div class="pcard">
+        <div class="pcard-title" style="color:#ef4444">⚠️ Zona de Perigo</div>
+        <div class="pcard-sub">Ações irreversíveis — proceda com cuidado</div>
+
+        <div class="alerta alerta-danger" style="margin-bottom:16px">
+          ⛔ A exclusão da conta remove permanentemente todos os seus dados do portal. Essa ação não pode ser desfeita.
+        </div>
+        <div class="btn-row">
+          <button class="btn-danger" onclick="solicitarExclusao()">🗑 Solicitar exclusão da conta</button>
+        </div>
+      </div>
+
+    </div><!-- /sec-privacidade -->
+
+  </div><!-- /page-wrap -->
+</div><!-- /app -->
+
+<div id="toast"></div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────
+var SB_URL   = 'https://rbahvyejqybajnufftio.supabase.co';
+var SB_KEY   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiYWh2eWVqcXliYWpudWZmdGlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjA5MjIsImV4cCI6MjA4OTYzNjkyMn0.nUIo2CT3o41YL1TT8Hrp5kq-_ZS-bMMf-gvUMCEyYMw';
+var SB_SVC   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiYWh2eWVqcXliYWpudWZmdGlvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDA2MDkyMiwiZXhwIjoyMDg5NjM2OTIyfQ.NczaREWnxFVKB5jaJtNXNpPjlF9hQJ3J2TW1e9VbHm8';
+var EMPRESA  = 'mandala';
+
+var usr = null;
+var sess = null;
+
+// ── SESSÃO ────────────────────────────────────────────────
+function getSessao(){
+  try{
+    var s=localStorage.getItem('mandala_session');
+    if(s){ var o=JSON.parse(s); if(o&&o.access_token) return o; }
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(!k) continue;
+      if((k.indexOf('sb-')!==-1&&k.indexOf('auth')!==-1)||k.indexOf('supabase.auth.token')!==-1){
+        try{
+          var r=localStorage.getItem(k); if(!r) continue;
+          var obj=JSON.parse(r);
+          var t=obj.access_token||(obj.currentSession&&obj.currentSession.access_token);
+          var u=obj.user||(obj.currentSession&&obj.currentSession.user);
+          if(t&&u){ var n={access_token:t,refresh_token:obj.refresh_token,user:u}; localStorage.setItem('mandala_session',JSON.stringify(n)); return n; }
+        }catch(ex){}
+      }
+    }
+    return null;
+  }catch(e){ return null; }
+}
+
+function sair(){
+  localStorage.removeItem('mandala_session');
+  localStorage.removeItem('mandala_perfil');
+  window.location.href='login.html';
+}
+
+// ── TOAST ─────────────────────────────────────────────────
+var _toastTimer;
+function toast(msg,tipo){
+  var el=document.getElementById('toast');
+  el.textContent=msg;
+  el.className='on '+(tipo||'');
+  clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(function(){el.className='';},3200);
+}
+
+// ── INIT ──────────────────────────────────────────────────
+var _safetyFired=false;
+setTimeout(function(){
+  if(!_safetyFired){
+    _safetyFired=true;
+    document.getElementById('ldEscape').style.display='block';
+  }
+},5000);
+
+window.onload=function(){
+  sess=getSessao();
+  if(!sess||!sess.access_token){
+    document.querySelector('.ld-msg').textContent='Sessão não encontrada.';
+    document.getElementById('ldEscape').style.display='block';
+    document.querySelector('.spinner').style.display='none';
+    return;
+  }
+
+  var email=sess.user&&sess.user.email?sess.user.email:(sess.email||'');
+  usr={email:email,token:sess.access_token};
+
+  // Iniciar app
+  _safetyFired=true;
+  document.getElementById('tela-loading').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('app').style.flexDirection='column';
+
+  // Preencher dados básicos
+  document.getElementById('emailAtual').value=email;
+  document.getElementById('mrEmail').value=email;
+  document.getElementById('empLabel').textContent=EMPRESA;
+
+  // Info do dispositivo/sessão
+  document.getElementById('deviceInfo').textContent=navigator.userAgent.includes('Chrome')?'Chrome — '+navigator.platform:navigator.userAgent.slice(0,60);
+  if(sess.expires_at){
+    var d=new Date(sess.expires_at*1000);
+    document.getElementById('sessaoExpira').textContent=d.toLocaleString('pt-BR');
+  }
+
+  // Carregar dados do usuário
+  carregarUsuario();
+  carregarContagens();
+  carregarTema();
+  carregarPrefs();
+  carregarAvatar();
+};
+
+// ── CARREGAR USUÁRIO ──────────────────────────────────────
+async function carregarUsuario(){
+  try{
+    var r=await fetch(SB_URL+'/rest/v1/usuarios_portal?select=*&email=eq.'+encodeURIComponent(usr.email),{
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+usr.token}
+    });
+    var arr=r.ok?await r.json():[];
+    if(arr&&arr[0]){
+      var u=arr[0];
+      var nome=u.nome||'';
+      document.getElementById('dispNome').value=nome;
+      document.getElementById('mrNome').value=nome;
+      document.getElementById('mrTelefone').value=u.telefone||'';
+      document.getElementById('mrUnidade').value=u.unidade||'';
+      document.getElementById('mrBloco').value=u.bloco||'';
+      document.getElementById('mrVeiculo').value=u.veiculo||'';
+      document.getElementById('mrObs').value=u.observacoes||'';
+      document.getElementById('mrEmergNome').value=u.emerg_nome||'';
+      document.getElementById('mrEmergTel').value=u.emerg_tel||'';
+      document.getElementById('dispApelido').value=u.apelido||'';
+
+      // Avatar e nome no topo
+      atualizarAvatar(nome, u.foto_url||null);
+    } else {
+      atualizarAvatar(usr.email, null);
+    }
+  }catch(e){ atualizarAvatar(usr.email,null); }
+}
+
+// ── CARREGAR CONTAGENS (privacidade) ─────────────────────
+async function carregarContagens(){
+  try{
+    var h={'apikey':SB_KEY,'Authorization':'Bearer '+usr.token};
+    var [r1,r2,r3]=await Promise.all([
+      fetch(SB_URL+'/rest/v1/condo_transacoes?empresa=eq.'+EMPRESA+'&select=id',{headers:h}),
+      fetch(SB_URL+'/rest/v1/condo_boletos?empresa=eq.'+EMPRESA+'&select=id',{headers:h}),
+      fetch(SB_URL+'/rest/v1/condo_documentos?empresa=eq.'+EMPRESA+'&select=id',{headers:h})
+    ]);
+    var arr1=r1.ok?await r1.json():[];
+    var arr2=r2.ok?await r2.json():[];
+    var arr3=r3.ok?await r3.json():[];
+    document.getElementById('cntTransacoes').textContent=arr1.length;
+    document.getElementById('cntBoletos').textContent=arr2.length;
+    document.getElementById('cntDocs').textContent=arr3.length;
+  }catch(e){}
+}
+
+// ── AVATAR ────────────────────────────────────────────────
+function atualizarAvatar(nome, fotoUrl){
+  var n=nome||usr.email||'?';
+  document.getElementById('avatarNome').textContent=n;
+  document.getElementById('avatarEmail').textContent=usr.email;
+  var img=document.getElementById('avatarImg');
+  var ini=document.getElementById('avatarInitials');
+  if(fotoUrl){
+    img.src=fotoUrl;
+    img.style.display='block';
+    ini.style.display='none';
+  } else {
+    var partes=n.trim().split(' ');
+    var iniciais=(partes[0][0]+(partes.length>1?partes[partes.length-1][0]:'')).toUpperCase();
+    ini.textContent=iniciais;
+    ini.style.display='';
+    img.style.display='none';
+  }
+}
+
+function carregarAvatar(){
+  var fotoSalva=localStorage.getItem('mandala_foto_'+usr.email);
+  if(fotoSalva){
+    var n=document.getElementById('dispNome').value||usr.email;
+    atualizarAvatar(n,fotoSalva);
+  }
+}
+
+function trocarFoto(input){
+  var file=input.files[0];
+  if(!file) return;
+  if(file.size>2*1024*1024){ toast('Foto muito grande. Máximo 2MB.','err'); return; }
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var dataUrl=e.target.result;
+    localStorage.setItem('mandala_foto_'+usr.email,dataUrl);
+    var n=document.getElementById('dispNome').value||usr.email;
+    atualizarAvatar(n,dataUrl);
+    toast('Foto atualizada!','ok');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removerFoto(){
+  localStorage.removeItem('mandala_foto_'+usr.email);
+  var n=document.getElementById('dispNome').value||usr.email;
+  atualizarAvatar(n,null);
+  toast('Foto removida.','ok');
+}
+
+// ── TEMA ──────────────────────────────────────────────────
+function carregarTema(){
+  var t=localStorage.getItem('mandala_tema')||'dark';
+  setTema(t,true);
+}
+
+function setTema(tema,silencioso){
+  localStorage.setItem('mandala_tema',tema);
+  document.getElementById('opt-dark').classList.toggle('on',tema==='dark');
+  document.getElementById('opt-light').classList.toggle('on',tema==='light');
+  if(!silencioso) toast('Tema "'+(tema==='dark'?'Escuro':'Claro')+'" aplicado!','ok');
+}
+
+// ── NOME ──────────────────────────────────────────────────
+async function salvarNome(){
+  var nome=document.getElementById('dispNome').value.trim();
+  var apelido=document.getElementById('dispApelido').value.trim();
+  if(!nome){ toast('Informe seu nome.','err'); return; }
+  try{
+    var r=await fetch(SB_URL+'/rest/v1/usuarios_portal?email=eq.'+encodeURIComponent(usr.email),{
+      method:'PATCH',
+      headers:{'apikey':SB_SVC,'Authorization':'Bearer '+SB_SVC,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({nome:nome,apelido:apelido})
+    });
+    if(r.ok||r.status===204){
+      atualizarAvatar(nome, localStorage.getItem('mandala_foto_'+usr.email)||null);
+      document.getElementById('mrNome').value=nome;
+      toast('Nome salvo com sucesso!','ok');
+    } else { toast('Erro ao salvar nome.','err'); }
+  }catch(e){ toast('Erro: '+e.message,'err'); }
+}
+
+// ── EMAIL ─────────────────────────────────────────────────
+async function alterarEmail(){
+  var novo=document.getElementById('novoEmail').value.trim();
+  var conf=document.getElementById('confEmail').value.trim();
+  if(!novo||!conf){ toast('Preencha os dois campos de e-mail.','err'); return; }
+  if(novo!==conf){ toast('Os e-mails não coincidem.','err'); return; }
+  if(novo===usr.email){ toast('O novo e-mail é igual ao atual.','err'); return; }
+  try{
+    var r=await fetch(SB_URL+'/auth/v1/user',{
+      method:'PUT',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+usr.token,'Content-Type':'application/json'},
+      body:JSON.stringify({email:novo})
+    });
+    var d=await r.json();
+    if(r.ok){
+      toast('Confirmação enviada para '+novo+'. Verifique sua caixa de entrada.','ok');
+      document.getElementById('novoEmail').value='';
+      document.getElementById('confEmail').value='';
+    } else { toast(d.message||'Erro ao alterar e-mail.','err'); }
+  }catch(e){ toast('Erro: '+e.message,'err'); }
+}
+
+// ── SENHA ─────────────────────────────────────────────────
+function checkSenha(v){
+  var fill=document.getElementById('strengthFill');
+  var label=document.getElementById('strengthLabel');
+  var score=0;
+  if(v.length>=8) score++;
+  if(/[A-Z]/.test(v)) score++;
+  if(/[0-9]/.test(v)) score++;
+  if(/[^A-Za-z0-9]/.test(v)) score++;
+  var cores=['#ef4444','#f97316','#f5a623','#22c55e'];
+  var labels=['Muito fraca','Fraca','Boa','Forte'];
+  if(v.length===0){ fill.style.width='0'; label.textContent=''; return; }
+  fill.style.width=(score/4*100)+'%';
+  fill.style.background=cores[score-1]||cores[0];
+  label.textContent=labels[score-1]||labels[0];
+}
+
+async function alterarSenha(){
+  var nova=document.getElementById('novaSenha').value;
+  var conf=document.getElementById('confSenha').value;
+  if(!nova||!conf){ toast('Preencha os campos de senha.','err'); return; }
+  if(nova!==conf){ toast('As senhas não coincidem.','err'); return; }
+  if(nova.length<6){ toast('A senha deve ter pelo menos 6 caracteres.','err'); return; }
+  try{
+    var r=await fetch(SB_URL+'/auth/v1/user',{
+      method:'PUT',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+usr.token,'Content-Type':'application/json'},
+      body:JSON.stringify({password:nova})
+    });
+    var d=await r.json();
+    if(r.ok){
+      toast('Senha alterada com sucesso!','ok');
+      document.getElementById('novaSenha').value='';
+      document.getElementById('confSenha').value='';
+      document.getElementById('strengthFill').style.width='0';
+      document.getElementById('strengthLabel').textContent='';
+    } else { toast(d.message||'Erro ao alterar senha.','err'); }
+  }catch(e){ toast('Erro: '+e.message,'err'); }
+}
+
+// ── CADASTRO DE MORADOR ───────────────────────────────────
+async function salvarCadastro(){
+  var dados={
+    nome:document.getElementById('mrNome').value.trim(),
+    telefone:document.getElementById('mrTelefone').value.trim(),
+    unidade:document.getElementById('mrUnidade').value.trim(),
+    bloco:document.getElementById('mrBloco').value.trim(),
+    veiculo:document.getElementById('mrVeiculo').value.trim(),
+    observacoes:document.getElementById('mrObs').value.trim(),
+    emerg_nome:document.getElementById('mrEmergNome').value.trim(),
+    emerg_tel:document.getElementById('mrEmergTel').value.trim()
+  };
+  if(!dados.nome){ toast('Informe seu nome.','err'); return; }
+  try{
+    var r=await fetch(SB_URL+'/rest/v1/usuarios_portal?email=eq.'+encodeURIComponent(usr.email),{
+      method:'PATCH',
+      headers:{'apikey':SB_SVC,'Authorization':'Bearer '+SB_SVC,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify(dados)
+    });
+    if(r.ok||r.status===204){
+      toast('Cadastro salvo com sucesso!','ok');
+      document.getElementById('dispNome').value=dados.nome;
+      atualizarAvatar(dados.nome, localStorage.getItem('mandala_foto_'+usr.email)||null);
+    } else { toast('Erro ao salvar cadastro.','err'); }
+  }catch(e){ toast('Erro: '+e.message,'err'); }
+}
+
+async function carregarCadastro(){
+  await carregarUsuario();
+  toast('Dados recarregados.','ok');
+}
+
+// ── PREFERÊNCIAS ──────────────────────────────────────────
+function carregarPrefs(){
+  var prefs=JSON.parse(localStorage.getItem('mandala_prefs_'+usr.email)||'{}');
+  ['comunicados','boletos','assembleias'].forEach(function(p){
+    var ativo=prefs[p]!==false; // padrão ativo
+    setToggle(p,ativo);
+  });
+}
+
+function setToggle(id, ativo){
+  var tog=document.getElementById('tog-'+id);
+  var knob=document.getElementById('tog-'+id+'-knob');
+  if(!tog||!knob) return;
+  if(ativo){
+    tog.style.background='rgba(245,166,35,.4)';
+    knob.style.left='21px';
+    knob.style.background='#f5a623';
+  } else {
+    tog.style.background='rgba(255,255,255,.08)';
+    knob.style.left='3px';
+    knob.style.background='rgba(241,245,249,.3)';
+  }
+  tog.dataset.ativo=ativo?'1':'0';
+}
+
+function togglePref(id){
+  var tog=document.getElementById('tog-'+id);
+  var ativo=tog.dataset.ativo!=='1';
+  setToggle(id,ativo);
+}
+
+function salvarPrefs(){
+  var prefs={};
+  ['comunicados','boletos','assembleias'].forEach(function(p){
+    var tog=document.getElementById('tog-'+p);
+    prefs[p]=tog&&tog.dataset.ativo==='1';
+  });
+  localStorage.setItem('mandala_prefs_'+usr.email,JSON.stringify(prefs));
+  toast('Preferências salvas!','ok');
+}
+
+// ── TABS ──────────────────────────────────────────────────
+function pTab(id,btn){
+  document.querySelectorAll('.psec').forEach(function(s){s.classList.remove('on');});
+  document.querySelectorAll('.ptab').forEach(function(b){b.classList.remove('on');});
+  document.getElementById('sec-'+id).classList.add('on');
+  if(btn) btn.classList.add('on');
+}
+
+// ── EXPORTAR EXCEL ────────────────────────────────────────
+async function exportar(tipo){
+  toast('Preparando exportação...','');
+  var h={'apikey':SB_KEY,'Authorization':'Bearer '+usr.token};
+  try{
+    var sheets={};
+
+    if(tipo==='transacoes'||tipo==='tudo'){
+      var r=await fetch(SB_URL+'/rest/v1/condo_transacoes?empresa=eq.'+EMPRESA+'&order=data.desc',{headers:h});
+      sheets['Transacoes']=r.ok?await r.json():[];
+    }
+    if(tipo==='boletos'||tipo==='tudo'){
+      var r=await fetch(SB_URL+'/rest/v1/condo_boletos?empresa=eq.'+EMPRESA+'&order=vencimento.desc',{headers:h});
+      sheets['Boletos']=r.ok?await r.json():[];
+    }
+    if(tipo==='cadastro'||tipo==='tudo'){
+      var r=await fetch(SB_URL+'/rest/v1/usuarios_portal?email=eq.'+encodeURIComponent(usr.email),{headers:h});
+      sheets['Cadastro']=r.ok?await r.json():[];
+    }
+    if(tipo==='comunicados'||tipo==='tudo'){
+      var r=await fetch(SB_URL+'/rest/v1/condo_comunicados?empresa=eq.'+EMPRESA+'&order=created_at.desc',{headers:h});
+      sheets['Comunicados']=r.ok?await r.json():[];
+    }
+
+    // Gerar CSV por aba e fazer download
+    var nomeArq=tipo==='tudo'?'mandala_exportacao_completa':'mandala_'+tipo;
+    gerarExcelCSV(sheets, nomeArq);
+    toast('Exportação concluída! Arquivo baixado.','ok');
+  }catch(e){
+    toast('Erro ao exportar: '+e.message,'err');
+  }
+}
+
+function gerarExcelCSV(sheets, nome){
+  // Gerar arquivo CSV multi-aba (usando separador de seção)
+  var csvCompleto='';
+  var primeiraAba=true;
+
+  Object.keys(sheets).forEach(function(aba){
+    var dados=sheets[aba];
+    if(!dados||!dados.length){
+      csvCompleto+=(primeiraAba?'':'\n\n')+'=== '+aba+' ===\nNenhum dado encontrado\n';
+      primeiraAba=false;
+      return;
+    }
+
+    // Cabeçalho
+    var cols=Object.keys(dados[0]).filter(function(c){return c!=='empresa'&&c!=='id';});
+    var header=cols.map(function(c){return '"'+traduzirColuna(c)+'"';}).join(';');
+
+    // Linhas
+    var linhas=dados.map(function(row){
+      return cols.map(function(col){
+        var v=row[col];
+        if(v===null||v===undefined) return '';
+        if(typeof v==='number'&&(col.includes('valor')||col.includes('preco'))) return String(v).replace('.',',');
+        return '"'+String(v).replace(/"/g,'""')+'"';
+      }).join(';');
+    });
+
+    csvCompleto+=(primeiraAba?'':'\n\n')+'=== '+aba+' ===\n'+header+'\n'+linhas.join('\n')+'\n';
+    primeiraAba=false;
+  });
+
+  // BOM para Excel reconhecer UTF-8
+  var bom='\uFEFF';
+  var blob=new Blob([bom+csvCompleto],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download=nome+'_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function traduzirColuna(col){
+  var mapa={
+    nome:'Nome',email:'E-mail',telefone:'Telefone',unidade:'Unidade',bloco:'Bloco',
+    perfil:'Perfil',adimplente:'Adimplente',created_at:'Data de Criação',updated_at:'Última Atualização',
+    tipo:'Tipo',descricao:'Descrição',valor:'Valor',data:'Data',categoria:'Categoria',
+    situacao:'Situação',recorrente:'Recorrente',vencimento:'Vencimento',
+    titulo:'Título',corpo:'Corpo/Texto',autor_email:'Autor',
+    url:'URL/Link'
+  };
+  return mapa[col]||col.charAt(0).toUpperCase()+col.slice(1).replace(/_/g,' ');
+}
+
+// ── SOLICITAR EXCLUSÃO ────────────────────────────────────
+function solicitarExclusao(){
+  if(!confirm('Tem certeza que deseja solicitar a exclusão da sua conta?\n\nEsta ação será revisada pela administração e é irreversível.')){return;}
+  toast('Solicitação de exclusão enviada. A administração entrará em contato.','ok');
+  // Em produção: enviar e-mail/notificação para o administrador
+}
+</script>
+</body>
+</html>
