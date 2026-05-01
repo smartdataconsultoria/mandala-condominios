@@ -791,7 +791,7 @@ async function renderPainel(){
 
     // Fixos (recorrentes)
     var fixos=transacoes.filter(function(t){return t.recorrente&&t.tipo==='despesa';});
-   
+    var totalFixosMes=[...new Map(fixos.map(function(t){return[t.descricao,t];})).values()].reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
 
     // Projeção (média dos últimos 3 meses de despesa)
     var mediaDes=(mesesDes[0]+mesesDes[1]+mesesDes[2])/3;
@@ -1178,6 +1178,190 @@ async function pgDashboard(cont){
     var el=document.getElementById('gTxt');
     if(el) el.textContent=saud+', '+usr.nome.split(' ')[0]+'!';
   }
+
+} // fim pgDashboard
+
+// ── PÁGINAS FALTANTES ────────────────────────────────────
+
+async function pgMetas(cont){
+  cont.innerHTML='<div class="greeting"><div class="g-title">Metas & Projetos</div><div class="g-sub">Acompanhe as metas e projetos do condomínio.</div></div><div id="metasConteudo"><div style="text-align:center;padding:40px;color:rgba(241,245,249,.3)">Carregando...</div></div>';
+  var h={'apikey':SB_KEY,'Authorization':'Bearer '+((usr&&usr.token)?usr.token:SB_KEY)};
+  try{
+    var rM=await fetch(SB_URL+'/rest/v1/condo_metas?empresa=eq.'+EMPRESA+'&order=created_at.desc',{headers:h});
+    var rP=await fetch(SB_URL+'/rest/v1/condo_projetos?empresa=eq.'+EMPRESA+'&order=created_at.desc',{headers:h});
+    var metas=rM.ok?await rM.json():[];
+    var projs=rP.ok?await rP.json():[];
+    var html='';
+    html+='<div style="display:flex;gap:8px;margin-bottom:18px">';
+    html+='<button class="ftab on" id="tab-metas" onclick="mpTab(this,&quot;mp-metas&quot;)">Metas</button>';
+    html+='<button class="ftab" id="tab-projetos" onclick="mpTab(this,&quot;mp-projetos&quot;)">Projetos</button>';
+    html+='</div>';
+    html+='<div id="mp-metas">';
+    if(!metas.length) html+='<div class="mp-empty">Nenhuma meta cadastrada ainda.</div>';
+    else metas.forEach(function(m){
+      var meta=parseFloat(m.valor_meta||0),arr=parseFloat(m.valor_arrecadado||0);
+      var pct=meta>0?Math.min(100,Math.round(arr/meta*100)):0;
+      var cor=m.cor||'#22c55e';
+      html+='<div class="mp-card" style="margin-bottom:12px;padding:18px 20px">';
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
+      html+='<div style="font-size:14px;font-weight:600;color:#f1f5f9">'+esc(m.nome)+'</div>';
+      html+='<div style="font-size:18px;font-weight:800;color:'+cor+'">'+pct+'%</div>';
+      html+='</div>';
+      html+='<div style="font-size:12px;color:rgba(241,245,249,.35);margin-bottom:8px">'+esc(m.descricao||'')+'</div>';
+      html+='<div class="prog"><div style="height:100%;width:'+pct+'%;background:'+cor+';border-radius:4px;transition:width .5s"></div></div>';
+      html+='<div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(241,245,249,.3);margin-top:4px"><span>'+brl(arr)+'</span><span>Meta: '+brl(meta)+'</span></div>';
+      html+='</div>';
+    });
+    html+='</div>';
+    html+='<div id="mp-projetos" style="display:none">';
+    if(!projs.length) html+='<div class="mp-empty">Nenhum projeto cadastrado ainda.</div>';
+    else projs.forEach(function(p){
+      var sc={aguardando:'#f5a623',votacao:'#3b82f6',aprovado:'#a855f7',execucao:'#06b6d4',concluido:'#22c55e',pausado:'#ef4444'};
+      var sl={aguardando:'Aguardando',votacao:'Em Votacao',aprovado:'Aprovado',execucao:'Em Execucao',concluido:'Concluido',pausado:'Pausado'};
+      var cor=sc[p.status]||'#f5a623';
+      html+='<div class="mp-card" style="margin-bottom:10px;padding:16px 18px">';
+      html+='<div style="display:flex;align-items:center;justify-content:space-between">';
+      html+='<div style="font-size:14px;font-weight:600;color:#f1f5f9">'+esc(p.nome)+'</div>';
+      html+='<span style="background:'+cor+'20;color:'+cor+';border:1px solid '+cor+'40;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700">'+esc(sl[p.status]||p.status)+'</span>';
+      html+='</div>';
+      html+='<div style="font-size:12px;color:rgba(241,245,249,.35);margin-top:4px">'+esc(p.descricao||'')+'</div>';
+      html+='</div>';
+    });
+    html+='</div>';
+    document.getElementById('metasConteudo').innerHTML=html;
+  }catch(e){document.getElementById('metasConteudo').innerHTML='<div style="color:#ef4444;padding:20px">Erro: '+e.message+'</div>';}
+}
+
+function mpTab(btn,target){
+  document.querySelectorAll('.ftab').forEach(function(b){b.classList.remove('on');});
+  if(btn) btn.classList.add('on');
+  ['mp-metas','mp-projetos'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.style.display=(id===target?'':'none');
+  });
+}
+
+async function pgDocumentos(cont){
+  cont.innerHTML='<div class="greeting"><div class="g-title">Documentos</div><div class="g-sub">Documentos e arquivos do condomínio.</div></div><div id="docsConteudo"><div style="text-align:center;padding:40px;color:rgba(241,245,249,.3)">Carregando...</div></div>';
+  var h={'apikey':SB_KEY,'Authorization':'Bearer '+((usr&&usr.token)?usr.token:SB_KEY)};
+  try{
+    var r=await fetch(SB_URL+'/rest/v1/condo_documentos?empresa=eq.'+EMPRESA+'&order=created_at.desc',{headers:h});
+    var arr=r.ok?await r.json():[];
+    if(!arr.length){document.getElementById('docsConteudo').innerHTML='<div style="text-align:center;padding:40px;color:rgba(241,245,249,.3)">Nenhum documento publicado ainda.</div>';return;}
+    var cats=[...new Set(arr.map(function(d){return d.categoria||'Geral';}))];
+    var html='<div class="ftabs" id="docFiltros"></div><div id="docLista"></div>';
+    document.getElementById('docsConteudo').innerHTML=html;
+    var filtrosEl=document.getElementById('docFiltros');
+    cats.forEach(function(c,i){
+      var btn=document.createElement('button');
+      btn.className='ftab'+(i===0?' on':'');
+      btn.textContent=c;
+      btn.onclick=function(){filtrarDocs(c,btn);};
+      filtrosEl.appendChild(btn);
+    });
+    var todosBtn=document.createElement('button');
+    todosBtn.className='ftab';
+    todosBtn.textContent='Todos';
+    todosBtn.onclick=function(){filtrarDocs('todos',todosBtn);};
+    filtrosEl.appendChild(todosBtn);
+    var lista=document.getElementById('docLista');
+    arr.forEach(function(d){
+      var div=document.createElement('div');
+      div.className='di doc-item';
+      div.dataset.cat=d.categoria||'Geral';
+      div.onclick=function(){window.open(d.url,'_blank');};
+      div.innerHTML='<div style="width:36px;height:36px;border-radius:9px;background:rgba(245,166,35,.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📄</div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:#f1f5f9">'+esc(d.nome)+'</div><div style="font-size:11px;color:rgba(241,245,249,.3);margin-top:2px">'+esc(d.categoria||'Geral')+'</div></div><span style="font-size:11px;color:#f5a623">Abrir</span>';
+      lista.appendChild(div);
+    });
+    if(cats.length) filtrarDocs(cats[0],filtrosEl.firstChild);
+  }catch(e){document.getElementById('docsConteudo').innerHTML='<div style="color:#ef4444;padding:20px">Erro: '+e.message+'</div>';}
+}
+
+function filtrarDocs(cat,btn){
+  document.querySelectorAll('.doc-item').forEach(function(el){
+    el.style.display=(cat==='todos'||el.dataset.cat===cat)?'':'none';
+  });
+  if(btn){document.querySelectorAll('.ftab').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');}
+}
+
+function pgCalendario(cont){
+  var hoje=new Date();
+  var _calAno=hoje.getFullYear(), _calMes=hoje.getMonth();
+  function buildCal(a,m){
+    var el=document.getElementById('calGrid');
+    if(!el) return;
+    var primDia=new Date(a,m,1).getDay(),ultDia=new Date(a,m+1,0).getDate();
+    var nomeMes=new Date(a,m,1).toLocaleString('pt-BR',{month:'long',year:'numeric'});
+    var h='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">';
+    h+='<button id="calPrev" style="background:none;border:1px solid rgba(245,166,35,.2);color:#f5a623;border-radius:7px;padding:5px 12px;cursor:pointer;font-size:16px">&#8249;</button>';
+    h+='<div style="font-size:15px;font-weight:700;color:#f1f5f9;text-transform:capitalize">'+nomeMes+'</div>';
+    h+='<button id="calNext" style="background:none;border:1px solid rgba(245,166,35,.2);color:#f5a623;border-radius:7px;padding:5px 12px;cursor:pointer;font-size:16px">&#8250;</button>';
+    h+='</div><div class="cg">';
+    ['Dom','Seg','Ter','Qua','Qui','Sex','Sab'].forEach(function(d){h+='<div class="ch">'+d+'</div>';});
+    for(var i=0;i<primDia;i++) h+='<div class="cd om"></div>';
+    for(var d=1;d<=ultDia;d++){
+      var ehHj=d===hoje.getDate()&&m===hoje.getMonth()&&a===hoje.getFullYear();
+      h+='<div class="cd'+(ehHj?' hj':'')+'">'+d+'</div>';
+    }
+    h+='</div>';
+    el.innerHTML=h;
+    document.getElementById('calPrev').onclick=function(){
+      _calMes--;if(_calMes<0){_calMes=11;_calAno--;}buildCal(_calAno,_calMes);
+    };
+    document.getElementById('calNext').onclick=function(){
+      _calMes++;if(_calMes>11){_calMes=0;_calAno++;}buildCal(_calAno,_calMes);
+    };
+  }
+  cont.innerHTML='<div class="greeting"><div class="g-title">Calendario</div><div class="g-sub">Agenda e eventos do condominio.</div></div><div class="card" style="max-width:420px"><div id="calGrid"></div></div>';
+  buildCal(_calAno,_calMes);
+}
+
+async function pgComunicados(cont){
+  cont.innerHTML='<div class="greeting"><div class="g-title">◎ Comunicados</div><div class="g-sub">Avisos e comunicados do condomínio.</div></div><div id="comLista"><div style="text-align:center;padding:40px;color:rgba(241,245,249,.3)">⏳ Carregando...</div></div>';
+  var h={'apikey':SB_KEY,'Authorization':'Bearer '+((usr&&usr.token)?usr.token:SB_KEY)};
+  try{
+    var r=await fetch(SB_URL+'/rest/v1/condo_comunicados?empresa=eq.'+EMPRESA+'&order=created_at.desc&limit=20',{headers:h});
+    var arr=r.ok?await r.json():[];
+    if(!arr.length){document.getElementById('comLista').innerHTML='<div style="text-align:center;padding:40px;color:rgba(241,245,249,.3)">Nenhum comunicado ainda.</div>';return;}
+    document.getElementById('comLista').innerHTML=arr.map(function(c){
+      var d=c.created_at?new Date(c.created_at).toLocaleDateString('pt-BR'):'';
+      return'<div class="mi"><div class="mh"><div class="mdot"></div><div class="mf">'+esc(c.titulo)+'</div><div class="mt">'+d+'</div></div><div style="font-size:11px;color:#f5a623;margin-bottom:4px">'+esc(c.categoria||'')+'</div><div class="mb">'+esc(c.corpo||'')+'</div></div>';
+    }).join('');
+  }catch(e){document.getElementById('comLista').innerHTML='<div style="color:#ef4444;padding:20px">Erro: '+e.message+'</div>';}
+}
+
+async function pgMensagens(cont){
+  cont.innerHTML='<div class="greeting"><div class="g-title">✉ Fale com o Síndico</div><div class="g-sub">Envie mensagens diretamente ao síndico.</div></div><div class="fc" style="max-width:560px"><div class="fct">Nova mensagem</div><div class="fr"><label>Assunto</label><input type="text" id="msgAssunto" placeholder="Ex: Problema na área comum"/></div><div class="fr"><label>Mensagem</label><textarea id="msgTexto" rows="5" placeholder="Descreva sua solicitação..."></textarea></div><button class="btn-p" onclick="enviarMensagem()">Enviar mensagem</button></div>';
+}
+
+window.enviarMensagem = async function(){
+  var assunto=document.getElementById('msgAssunto').value.trim();
+  var texto=document.getElementById('msgTexto').value.trim();
+  if(!assunto||!texto){toast('Preencha assunto e mensagem.','err');return;}
+  try{
+    var r=await fetch(SB_URL+'/rest/v1/condo_mensagens',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+((usr&&usr.token)?usr.token:SB_KEY),'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({assunto:assunto,corpo:texto,empresa:EMPRESA,remetente_email:usr.email,lida:false})});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    toast('Mensagem enviada!','ok');
+    document.getElementById('msgAssunto').value='';
+    document.getElementById('msgTexto').value='';
+  }catch(e){toast('Erro ao enviar: '+e.message,'err');}
+};
+
+async function pgBoletos(cont){
+  cont.innerHTML='<div class="greeting"><div class="g-title">◫ Boletos & Taxas</div><div class="g-sub">Seus boletos e taxas condominiais.</div></div><div id="boletoLista"><div style="text-align:center;padding:40px;color:rgba(241,245,249,.3)">⏳ Carregando...</div></div>';
+  var h={'apikey':SB_KEY,'Authorization':'Bearer '+((usr&&usr.token)?usr.token:SB_KEY)};
+  try{
+    var q=perfil==='sindico'?'':(usr.email?'&email=eq.'+encodeURIComponent(usr.email):'');
+    var r=await fetch(SB_URL+'/rest/v1/condo_boletos?empresa=eq.'+EMPRESA+q+'&order=vencimento.desc&limit=20',{headers:h});
+    var arr=r.ok?await r.json():[];
+    if(!arr.length){document.getElementById('boletoLista').innerHTML='<div style="text-align:center;padding:40px;color:rgba(241,245,249,.3)">Nenhum boleto encontrado.</div>';return;}
+    document.getElementById('boletoLista').innerHTML=arr.map(function(b){
+      var venc=b.vencimento?new Date(b.vencimento).toLocaleDateString('pt-BR'):'';
+      var cor=b.situacao==='pago'?'#22c55e':b.situacao==='vencido'?'#ef4444':'#f5a623';
+      return'<div class="bi"><div style="flex:1"><div class="br2">'+esc(b.descricao||'Boleto')+'</div><div class="bd">Venc: '+venc+'</div></div><div class="bv" style="color:'+cor+'">'+brl(b.valor)+'<span class="bvl">'+esc(b.situacao||'pendente')+'</span></div>'+(b.url?'<a href="'+esc(b.url)+'" target="_blank" class="btn-s" style="margin-left:8px;text-decoration:none">📄 Ver</a>':'')+'</div>';
+    }).join('');
+  }catch(e){document.getElementById('boletoLista').innerHTML='<div style="color:#ef4444;padding:20px">Erro: '+e.message+'</div>';}
+}
+
 
 </script>
 </body>
