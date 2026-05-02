@@ -1,262 +1,578 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Edifício Mandala | Login</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Poppins',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0a0e1a;position:relative}
-    body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(245,166,35,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(245,166,35,.03) 1px,transparent 1px);background-size:44px 44px;pointer-events:none}
-    .card{background:rgba(17,24,39,.95);border:1px solid rgba(245,166,35,.15);border-radius:20px;padding:48px 44px;width:100%;max-width:420px;position:relative;z-index:1;box-shadow:0 24px 64px rgba(0,0,0,.6);animation:up .4s ease}
-    @keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-    .logo{text-align:center;margin-bottom:32px}
-    .logo-box{width:64px;height:64px;background:linear-gradient(135deg,#f5a623,#c47d0e);border-radius:16px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(245,166,35,.35)}
-    .logo-box svg{width:34px;height:34px}
-    .logo h1{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#f5a623;margin-bottom:4px}
-    .logo h2{font-size:22px;font-weight:700;color:#f1f5f9}
-    .logo p{font-size:13px;color:#6b7a99;margin-top:4px}
-    .perfis{display:flex;gap:8px;margin-bottom:22px}
-    .perfil{flex:1;padding:8px 4px;border:1px solid #1e2d45;border-radius:8px;background:transparent;color:#6b7a99;font-family:'Poppins',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s}
-    .perfil:hover{border-color:rgba(245,166,35,.3);color:#e8eaf0}
-    .perfil.on{border-color:#f5a623;background:rgba(245,166,35,.08);color:#f5a623}
-    .label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6b7a99;display:block;margin-bottom:7px}
-    .field{margin-bottom:16px}
-    .field-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
-    .field-row .label{margin-bottom:0}
-    .forgot{font-size:12px;color:#f5a623;cursor:pointer;text-decoration:none}
-    .forgot:hover{text-decoration:underline}
-    .wrap{position:relative}
-    input{width:100%;background:rgba(26,34,53,.9);border:1px solid #1e2d45;border-radius:10px;padding:13px 16px;font-size:14px;font-family:'Poppins',sans-serif;color:#e8eaf0;outline:none;transition:border .2s}
-    input:focus{border-color:#f5a623;box-shadow:0 0 0 3px rgba(245,166,35,.12)}
-    input::placeholder{color:#6b7a99}
-    .eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#6b7a99;padding:0;display:flex}
-    .eye:hover{color:#f5a623}
-    .btn{width:100%;padding:14px;background:linear-gradient(135deg,#f5a623,#c47d0e);color:#fff;font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;border:none;border-radius:10px;cursor:pointer;margin-top:8px;box-shadow:0 4px 16px rgba(245,166,35,.38);transition:all .2s}
-    .btn:hover{opacity:.92;transform:translateY(-1px)}
-    .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
-    .erro{background:rgba(224,85,85,.1);border:1px solid rgba(224,85,85,.28);color:#f08080;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
-    .suc{background:rgba(52,201,126,.1);border:1px solid rgba(52,201,126,.28);color:#5ddb9a;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
-    .footer{text-align:center;margin-top:24px;font-size:11px;color:#6b7a99}
-    .footer strong{color:#f5a623}
-    .back{display:block;text-align:center;margin-top:16px;font-size:13px;color:#f5a623;cursor:pointer}
-    .back:hover{text-decoration:underline}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CondoGestor — Entrar</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:       #0B1F3A;
+    --navy-light: #142D52;
+    --gold:       #E8A320;
+    --gold-light: #F5C35A;
+    --white:      #FFFFFF;
+    --off-white:  #F7F6F2;
+    --border:     #E2E8F0;
+    --text-mid:   #445571;
+    --text-light: #8899B4;
+    --danger:     #DC2626;
+    --danger-bg:  #FEF2F2;
+    --radius:     12px;
+    --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--off-white);
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* LADO ESQUERDO — visual */
+  .left-panel {
+    background: var(--navy);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .left-panel::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(232,163,32,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .left-panel::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -80px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(232,163,32,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none;
+    position: relative; z-index: 1;
+  }
+  .logo-icon {
+    width: 40px; height: 40px;
+    background: var(--gold);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-icon svg { width: 22px; height: 22px; }
+  .logo-text {
+    font-size: 1.3rem; font-weight: 800;
+    color: var(--white); letter-spacing: -0.5px;
+  }
+  .logo-text span { color: var(--gold); }
+
+  .left-content {
+    position: relative; z-index: 1;
+  }
+  .left-content h1 {
+    font-size: 2rem; font-weight: 700;
+    color: var(--white);
+    line-height: 1.25;
+    letter-spacing: -0.5px;
+    margin-bottom: 1rem;
+  }
+  .left-content h1 em {
+    font-style: normal;
+    color: var(--gold);
+  }
+  .left-content p {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.7;
+    max-width: 340px;
+  }
+
+  .feature-list {
+    list-style: none;
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .feature-list li {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.7);
+  }
+  .feature-list li .check {
+    width: 20px; height: 20px;
+    background: rgba(232,163,32,0.2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .feature-list li .check svg { width: 11px; height: 11px; }
+
+  .left-footer {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.3);
+    position: relative; z-index: 1;
+  }
+
+  /* LADO DIREITO — formulário */
+  .right-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  .form-box {
+    width: 100%;
+    max-width: 400px;
+  }
+  .form-box h2 {
+    font-size: 1.6rem; font-weight: 800;
+    color: var(--navy);
+    letter-spacing: -0.5px;
+    margin-bottom: 0.4rem;
+  }
+  .form-box .subtitle {
+    font-size: 0.88rem;
+    color: var(--text-light);
+    margin-bottom: 2rem;
+  }
+
+  /* Tabs de role */
+  .role-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    background: var(--border);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 1.75rem;
+  }
+  .role-tab {
+    padding: 8px 4px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    font-family: inherit;
+    font-size: 0.82rem; font-weight: 600;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all var(--transition);
+    text-align: center;
+  }
+  .role-tab.active {
+    background: var(--white);
+    color: var(--navy);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  /* Campos */
+  .field { margin-bottom: 1.1rem; }
+  .field label {
+    display: block;
+    font-size: 0.82rem; font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 0.4rem;
+  }
+  .field input {
+    width: 100%;
+    height: 46px;
+    padding: 0 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: var(--navy);
+    background: var(--white);
+    transition: border-color var(--transition), box-shadow var(--transition);
+    outline: none;
+  }
+  .field input::placeholder { color: var(--text-light); }
+  .field input:focus {
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(11,31,58,0.08);
+  }
+  .field input.error {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px rgba(220,38,38,0.08);
+  }
+
+  .field-row {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+  }
+  .field-row label {
+    font-size: 0.82rem; font-weight: 600;
+    color: var(--navy);
+  }
+  .forgot-link {
+    font-size: 0.78rem; font-weight: 500;
+    color: var(--text-light);
+    text-decoration: none;
+    transition: color var(--transition);
+  }
+  .forgot-link:hover { color: var(--navy); }
+
+  /* Erro */
+  .error-msg {
+    display: none;
+    align-items: center; gap: 8px;
+    background: var(--danger-bg);
+    border: 1px solid #FECACA;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 0.82rem;
+    color: var(--danger);
+    margin-bottom: 1rem;
+  }
+  .error-msg.show { display: flex; }
+  .error-msg svg { flex-shrink: 0; width: 15px; height: 15px; }
+
+  /* Botão */
+  .btn-login {
+    width: 100%;
+    height: 48px;
+    background: var(--navy);
+    border: none;
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: 0.95rem; font-weight: 700;
+    color: var(--white);
+    cursor: pointer;
+    transition: all var(--transition);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-top: 0.5rem;
+  }
+  .btn-login:hover { background: var(--navy-light); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(11,31,58,0.2); }
+  .btn-login:active { transform: translateY(0); }
+  .btn-login:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* Spinner */
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  .btn-login.loading .spinner { display: block; }
+  .btn-login.loading .btn-text { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Divider */
+  .divider {
+    display: flex; align-items: center; gap: 10px;
+    margin: 1.5rem 0;
+    font-size: 0.78rem; color: var(--text-light);
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1;
+    height: 1px; background: var(--border);
+  }
+
+  .register-link {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-light);
+  }
+  .register-link a {
+    color: var(--navy);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .register-link a:hover { text-decoration: underline; }
+
+  /* Badge de role */
+  .role-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(11,31,58,0.06);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.78rem; font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 1.5rem;
+  }
+  .role-badge .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--gold);
+  }
+
+  /* Responsive */
+  @media (max-width: 700px) {
+    body { grid-template-columns: 1fr; }
+    .left-panel { display: none; }
+    .right-panel { padding: 2rem 1.5rem; }
+  }
+</style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div class="card" id="cardLogin">
-  <div class="logo">
-    <div class="logo-box">
-      <svg viewBox="0 0 36 36" fill="none">
-        <rect x="4" y="11" width="28" height="22" rx="2" fill="white" opacity=".95"/>
-        <polygon points="2,13 18,3 34,13" fill="white"/>
-        <rect x="8" y="16" width="5" height="5" rx="1" fill="#c47d0e" opacity=".7"/>
-        <rect x="16" y="16" width="5" height="5" rx="1" fill="#c47d0e" opacity=".7"/>
-        <rect x="24" y="16" width="5" height="5" rx="1" fill="#c47d0e" opacity=".7"/>
-        <rect x="14" y="24" width="8" height="9" rx="1.5" fill="#c47d0e" opacity=".85"/>
+<!-- LADO ESQUERDO -->
+<div class="left-panel">
+  <a href="/public/index.html" class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="#0B1F3A" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M9 22V12h6v10" stroke="#0B1F3A" stroke-width="2"/>
       </svg>
     </div>
-    <h1>Edifício</h1>
-    <h2>Mandala</h2>
-    <p>Portal do Condômino</p>
+    <span class="logo-text">Condo<span>Gestor</span></span>
+  </a>
+
+  <div class="left-content">
+    <h1>Bem-vindo de <em>volta</em> ao seu condomínio</h1>
+    <p>Gerencie finanças, chamados, moradores e muito mais em um único lugar.</p>
+    <ul class="feature-list">
+      <li>
+        <div class="check">
+          <svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#E8A320" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        Controle financeiro completo
+      </li>
+      <li>
+        <div class="check">
+          <svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#E8A320" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        Chamados e comunicação em tempo real
+      </li>
+      <li>
+        <div class="check">
+          <svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#E8A320" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        Relatórios e dashboards Power BI
+      </li>
+      <li>
+        <div class="check">
+          <svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#E8A320" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        Multi-condomínio para administradoras
+      </li>
+    </ul>
   </div>
 
-  <span class="label">Acessar como</span>
-  <div class="perfis">
-    <button class="perfil on" id="p0" onclick="setPerfil('sindico',0)">Síndico</button>
-    <button class="perfil"    id="p1" onclick="setPerfil('conselho',1)">Conselho</button>
-    <button class="perfil"    id="p2" onclick="setPerfil('condômino',2)">Condômino</button>
-  </div>
+  <div class="left-footer">© 2025 CondoGestor · Todos os direitos reservados</div>
+</div>
 
-  <div class="erro" id="errLogin"></div>
+<!-- LADO DIREITO -->
+<div class="right-panel">
+  <div class="form-box">
+    <h2>Entrar</h2>
+    <p class="subtitle">Acesse sua conta para continuar</p>
 
-  <div class="field">
-    <label class="label">E-mail</label>
-    <input type="email" id="email" placeholder="seu@email.com" autocomplete="email"/>
-  </div>
-
-  <div class="field">
-    <div class="field-row">
-      <label class="label">Senha</label>
-      <a class="forgot" onclick="showRecovery()">Esqueceu a senha?</a>
+    <!-- Seletor de perfil -->
+    <div class="role-tabs">
+      <button class="role-tab active" data-role="administradora" onclick="selecionarRole(this)">Administradora</button>
+      <button class="role-tab" data-role="sindico" onclick="selecionarRole(this)">Síndico</button>
+      <button class="role-tab" data-role="morador" onclick="selecionarRole(this)">Morador</button>
     </div>
-    <div class="wrap">
-      <input type="password" id="senha" placeholder="••••••••" autocomplete="current-password"/>
-      <button class="eye" onclick="toggleSenha()" type="button">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-        </svg>
+
+    <div class="role-badge">
+      <div class="dot"></div>
+      <span id="role-label">Entrando como Administradora</span>
+    </div>
+
+    <!-- Mensagem de erro -->
+    <div class="error-msg" id="erro">
+      <svg viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="7" stroke="#DC2626" stroke-width="1.5"/>
+        <path d="M8 5v3M8 10v1" stroke="#DC2626" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span id="erro-texto">E-mail ou senha incorretos.</span>
+    </div>
+
+    <!-- Formulário -->
+    <form id="form-login" onsubmit="fazerLogin(event)">
+      <div class="field">
+        <label for="email">E-mail</label>
+        <input
+          type="email"
+          id="email"
+          placeholder="seu@email.com"
+          required
+          autocomplete="email"
+        />
+      </div>
+
+      <div class="field">
+        <div class="field-row">
+          <label for="senha">Senha</label>
+          <a href="#" class="forgot-link">Esqueci minha senha</a>
+        </div>
+        <input
+          type="password"
+          id="senha"
+          placeholder="••••••••"
+          required
+          autocomplete="current-password"
+          minlength="6"
+        />
+      </div>
+
+      <button type="submit" class="btn-login" id="btn-login">
+        <div class="spinner"></div>
+        <span class="btn-text">Entrar</span>
       </button>
+    </form>
+
+    <div class="divider">ou</div>
+
+    <div class="register-link">
+      Ainda não tem conta?
+      <a href="/public/cadastro.html">Cadastre-se grátis</a>
     </div>
   </div>
-
-  <button class="btn" id="btnLogin" onclick="fazerLogin()">Entrar no portal</button>
-
-  <div class="footer">Desenvolvido pela <strong>SmartData</strong> Consultoria</div>
 </div>
 
-<!-- RECUPERAR SENHA -->
-<div class="card" id="cardRecovery" style="display:none">
-  <div class="logo">
-    <div class="logo-box">
-      <svg viewBox="0 0 36 36" fill="none">
-        <rect x="4" y="11" width="28" height="22" rx="2" fill="white" opacity=".95"/>
-        <polygon points="2,13 18,3 34,13" fill="white"/>
-        <rect x="14" y="24" width="8" height="9" rx="1.5" fill="#c47d0e" opacity=".85"/>
-      </svg>
-    </div>
-    <h1>Edifício</h1>
-    <h2>Mandala</h2>
-    <p>Recuperação de senha</p>
-  </div>
+<script type="module">
+  import { supabase } from '../shared/supabase.js'
 
-  <div class="erro" id="errRec"></div>
-  <div class="suc"  id="sucRec"></div>
+  // ─── Seletor de role ───────────────────────────────────────
+  // Permite ao usuário indicar qual perfil está usando.
+  // Isso não altera a lógica de autenticação — o role real
+  // vem do banco. Serve para feedback visual e UX.
+  let roleSelecionado = 'administradora'
 
-  <div class="field">
-    <label class="label">E-mail</label>
-    <input type="email" id="recEmail" placeholder="seu@email.com"/>
-  </div>
+  window.selecionarRole = function(btn) {
+    document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'))
+    btn.classList.add('active')
+    roleSelecionado = btn.dataset.role
 
-  <button class="btn" id="btnRec" onclick="enviarRecuperacao()">Enviar link de recuperação</button>
-  <a class="back" onclick="showLogin()">← Voltar ao login</a>
-
-  <div class="footer">Desenvolvido pela <strong>SmartData</strong> Consultoria</div>
-</div>
-
-<script>
-// ── CONFIG ──────────────────────────────────────────────
-var SB_URL  = 'https://rbahvyejqybajnufftio.supabase.co';
-var SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiYWh2eWVqcXliYWpudWZmdGlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjA5MjIsImV4cCI6MjA4OTYzNjkyMn0.nUIo2CT3o41YL1TT8Hrp5kq-_ZS-bMMf-gvUMCEyYMw';
-
-var perfilAtual = 'sindico';
-
-function setPerfil(p, idx){
-  perfilAtual = p;
-  [0,1,2].forEach(function(i){ document.getElementById('p'+i).classList.toggle('on', i===idx); });
-}
-
-function toggleSenha(){
-  var i = document.getElementById('senha');
-  i.type = i.type==='password' ? 'text' : 'password';
-}
-
-function showRecovery(){ document.getElementById('cardLogin').style.display='none'; document.getElementById('cardRecovery').style.display=''; }
-function showLogin(){ document.getElementById('cardRecovery').style.display='none'; document.getElementById('cardLogin').style.display=''; }
-
-function showErr(id, msg){ var e=document.getElementById(id); e.textContent=msg; e.style.display='block'; }
-function hideErr(id){ document.getElementById(id).style.display='none'; }
-
-document.getElementById('senha').addEventListener('keydown', function(e){ if(e.key==='Enter') fazerLogin(); });
-
-// ── LOGIN via REST puro ──────────────────────────────────
-async function fazerLogin(){
-  var email = document.getElementById('email').value.trim();
-  var senha = document.getElementById('senha').value;
-  var btn   = document.getElementById('btnLogin');
-
-  hideErr('errLogin');
-  if(!email||!senha){ showErr('errLogin','Preencha e-mail e senha.'); return; }
-
-  btn.disabled = true;
-  btn.textContent = 'Entrando…';
-
-  try {
-    var res = await fetch(SB_URL + '/auth/v1/token?grant_type=password', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SB_ANON
-      },
-      body: JSON.stringify({ email: email, password: senha })
-    });
-
-    var data = await res.json();
-
-    if(!res.ok || !data.access_token){
-      showErr('errLogin', 'E-mail ou senha inválidos.');
-      btn.disabled = false;
-      btn.textContent = 'Entrar no portal';
-      return;
+    const labels = {
+      administradora: 'Entrando como Administradora',
+      sindico:        'Entrando como Síndico',
+      morador:        'Entrando como Morador',
     }
-
-    // Salva sessão no localStorage — dura 7 dias
-    var expiresAt = data.expires_in
-      ? Math.floor(Date.now()/1000) + data.expires_in
-      : Math.floor(Date.now()/1000) + 604800; // 7 dias fallback
-
-    var sessao = {
-      access_token:  data.access_token,
-      refresh_token: data.refresh_token,
-      expires_at:    expiresAt,
-      token_type:    'bearer',
-      user:          data.user
-    };
-    localStorage.setItem('mandala_session', JSON.stringify(sessao));
-
-    // Salva também no formato Supabase nativo para compatibilidade
-    var sbKey = 'sb-rbahvyejqybajnufftio-auth-token';
-    localStorage.setItem(sbKey, JSON.stringify({
-      access_token:  data.access_token,
-      refresh_token: data.refresh_token,
-      expires_at:    expiresAt,
-      user:          data.user
-    }));
-
-    localStorage.setItem('mandala_perfil', perfilAtual);
-    sessionStorage.setItem('mandala_perfil', perfilAtual);
-
-    btn.textContent = 'Redirecionando…';
-    setTimeout(function(){ window.location.href = 'dashboard.html'; }, 400);
-
-  } catch(e) {
-    showErr('errLogin', 'Erro de conexão. Tente novamente.');
-    btn.disabled = false;
-    btn.textContent = 'Entrar no portal';
-  }
-}
-
-// ── RECUPERAR SENHA ──────────────────────────────────────
-async function enviarRecuperacao(){
-  var email = document.getElementById('recEmail').value.trim();
-  var btn   = document.getElementById('btnRec');
-
-  hideErr('errRec');
-  document.getElementById('sucRec').style.display='none';
-  if(!email){ showErr('errRec','Informe seu e-mail.'); return; }
-
-  btn.disabled=true; btn.textContent='Enviando…';
-
-  try {
-    await fetch(SB_URL+'/auth/v1/recover', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SB_ANON},
-      body: JSON.stringify({ email: email })
-    });
-    document.getElementById('sucRec').textContent='Link enviado! Verifique sua caixa de entrada.';
-    document.getElementById('sucRec').style.display='block';
-  } catch(e){
-    showErr('errRec','Erro ao enviar. Tente novamente.');
+    document.getElementById('role-label').textContent = labels[roleSelecionado]
+    esconderErro()
   }
 
-  btn.disabled=false; btn.textContent='Enviar link de recuperação';
-}
+  // ─── Login ─────────────────────────────────────────────────
+  window.fazerLogin = async function(event) {
+    event.preventDefault()
+    esconderErro()
 
-// ── VERIFICA SE JÁ ESTÁ LOGADO ───────────────────────────
-(function(){
-  try {
-    var s = localStorage.getItem('mandala_session');
-    if(s){
-      var sess = JSON.parse(s);
-      if(sess && sess.access_token && sess.expires_at > Math.floor(Date.now()/1000)){
-        window.location.href = 'dashboard.html';
+    const email = document.getElementById('email').value.trim()
+    const senha = document.getElementById('senha').value
+    const btn   = document.getElementById('btn-login')
+
+    // Ativa estado de carregamento
+    btn.disabled = true
+    btn.classList.add('loading')
+
+    try {
+      // 1. Autentica no Supabase Auth
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha })
+
+      if (error) {
+        mostrarErro(traduzirErro(error.message))
+        return
       }
+
+      // 2. Busca o perfil do usuário na tabela `usuarios`
+      const { data: perfil, error: erroPerfil } = await supabase
+        .from('usuarios')
+        .select('role, ativo, condominio_id, administradora_id')
+        .eq('id', data.user.id)
+        .single()
+
+      if (erroPerfil || !perfil) {
+        mostrarErro('Perfil não encontrado. Contate o suporte.')
+        await supabase.auth.signOut()
+        return
+      }
+
+      if (!perfil.ativo) {
+        mostrarErro('Conta desativada. Contate a administradora.')
+        await supabase.auth.signOut()
+        return
+      }
+
+      // 3. Redireciona para a área correta pelo role real do banco
+      const destinos = {
+        administradora: '/admin/index.html',
+        sindico:        '/sindico/dashboard.html',
+        morador:        '/morador/avisos.html',
+      }
+
+      const destino = destinos[perfil.role]
+
+      if (!destino) {
+        mostrarErro('Perfil inválido. Contate o suporte.')
+        await supabase.auth.signOut()
+        return
+      }
+
+      // Verifica se havia página salva antes do redirecionamento
+      const paginaSalva = sessionStorage.getItem('redirectAfterLogin')
+      sessionStorage.removeItem('redirectAfterLogin')
+
+      window.location.href = paginaSalva || destino
+
+    } catch (e) {
+      mostrarErro('Erro inesperado. Tente novamente.')
+      console.error(e)
+    } finally {
+      btn.disabled = false
+      btn.classList.remove('loading')
     }
-  } catch(e){}
-})();
+  }
+
+  // ─── Utilitários ───────────────────────────────────────────
+  function mostrarErro(msg) {
+    const el = document.getElementById('erro')
+    document.getElementById('erro-texto').textContent = msg
+    el.classList.add('show')
+    document.getElementById('email').classList.add('error')
+    document.getElementById('senha').classList.add('error')
+  }
+
+  function esconderErro() {
+    document.getElementById('erro').classList.remove('show')
+    document.getElementById('email').classList.remove('error')
+    document.getElementById('senha').classList.remove('error')
+  }
+
+  function traduzirErro(msg) {
+    const erros = {
+      'Invalid login credentials': 'E-mail ou senha incorretos.',
+      'Email not confirmed':        'Confirme seu e-mail antes de entrar.',
+      'Too many requests':          'Muitas tentativas. Aguarde alguns minutos.',
+    }
+    return erros[msg] ?? 'Erro ao fazer login. Tente novamente.'
+  }
+
+  // ─── Se já estiver logado, redireciona direto ──────────────
+  // Evita que um usuário logado veja a tela de login.
+  const { data: { session } } = await supabase.auth.getSession()
+  if (session) {
+    const { data: perfil } = await supabase
+      .from('usuarios')
+      .select('role')
+      .eq('id', session.user.id)
+      .single()
+
+    if (perfil?.role) {
+      const destinos = {
+        administradora: '/admin/index.html',
+        sindico:        '/sindico/dashboard.html',
+        morador:        '/morador/avisos.html',
+      }
+      window.location.href = destinos[perfil.role] || '/'
+    }
+  }
 </script>
+
 </body>
 </html>
