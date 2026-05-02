@@ -1,1 +1,823 @@
-dashboard consolidado
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CondoGestor — Painel da Administradora</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:        #0B1F3A;
+    --navy-light:  #142D52;
+    --navy-hover:  #1a3560;
+    --gold:        #E8A320;
+    --gold-light:  #F5C35A;
+    --gold-pale:   #FDF3DC;
+    --white:       #FFFFFF;
+    --off-white:   #F7F6F2;
+    --border:      #E2E8F0;
+    --text-dark:   #0B1F3A;
+    --text-mid:    #445571;
+    --text-light:  #8899B4;
+    --green:       #16A34A;
+    --green-bg:    #DCFCE7;
+    --red:         #DC2626;
+    --red-bg:      #FEF2F2;
+    --amber:       #D97706;
+    --amber-bg:    #FEF3C7;
+    --blue:        #2563EB;
+    --blue-bg:     #EFF6FF;
+    --sidebar-w:   240px;
+    --radius:      12px;
+    --transition:  0.2s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--off-white);
+    color: var(--text-dark);
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ─────────────────────────────────────────────── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--navy);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 50;
+    overflow-y: auto;
+  }
+
+  .sidebar-logo {
+    display: flex; align-items: center; gap: 10px;
+    padding: 1.5rem 1.25rem 1.25rem;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 0.5rem;
+  }
+  .logo-icon {
+    width: 34px; height: 34px;
+    background: var(--gold);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .logo-icon svg { width: 18px; height: 18px; }
+  .logo-name {
+    font-size: 1.05rem; font-weight: 800;
+    color: var(--white); letter-spacing: -0.3px;
+  }
+  .logo-name span { color: var(--gold); }
+
+  .sidebar-section {
+    padding: 0 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+  .sidebar-section-label {
+    font-size: 0.68rem; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    padding: 0.75rem 0.5rem 0.4rem;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.85rem; font-weight: 500;
+    color: rgba(255,255,255,0.6);
+    transition: all var(--transition);
+    margin-bottom: 2px;
+    cursor: pointer;
+    border: none; background: none; width: 100%; text-align: left;
+    font-family: inherit;
+  }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: var(--white); }
+  .nav-item:hover svg { opacity: 1; }
+  .nav-item.active {
+    background: rgba(232,163,32,0.15);
+    color: var(--gold-light);
+  }
+  .nav-item.active svg { opacity: 1; }
+
+  .sidebar-bottom {
+    margin-top: auto;
+    padding: 1rem 0.75rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .user-card {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.06);
+  }
+  .user-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700;
+    color: var(--navy);
+    flex-shrink: 0;
+  }
+  .user-info .user-name {
+    font-size: 0.82rem; font-weight: 600;
+    color: var(--white);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 130px;
+  }
+  .user-info .user-role {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.4);
+  }
+  .logout-btn {
+    margin-left: auto;
+    background: none; border: none;
+    cursor: pointer; padding: 4px;
+    color: rgba(255,255,255,0.4);
+    transition: color var(--transition);
+    flex-shrink: 0;
+  }
+  .logout-btn:hover { color: var(--white); }
+  .logout-btn svg { width: 15px; height: 15px; }
+
+  /* ── MAIN ────────────────────────────────────────────────── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* Topbar */
+  .topbar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 40;
+  }
+  .topbar-left h1 {
+    font-size: 1rem; font-weight: 700;
+    color: var(--navy);
+  }
+  .topbar-left p {
+    font-size: 0.75rem;
+    color: var(--text-light);
+  }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+  .btn-sm {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.82rem; font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+    text-decoration: none;
+    border: none;
+  }
+  .btn-sm svg { width: 14px; height: 14px; }
+  .btn-primary-sm {
+    background: var(--navy);
+    color: var(--white);
+  }
+  .btn-primary-sm:hover { background: var(--navy-light); }
+  .btn-ghost-sm {
+    background: var(--off-white);
+    color: var(--text-mid);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost-sm:hover { background: var(--border); }
+
+  /* Conteúdo */
+  .content {
+    padding: 1.75rem 2rem;
+    flex: 1;
+  }
+
+  /* Métricas */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+  }
+  .metric-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    display: flex; flex-direction: column;
+    gap: 0.5rem;
+    transition: box-shadow var(--transition);
+  }
+  .metric-card:hover { box-shadow: 0 4px 16px rgba(11,31,58,0.08); }
+  .metric-header {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .metric-label {
+    font-size: 0.78rem; font-weight: 600;
+    color: var(--text-light);
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .metric-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .metric-icon svg { width: 16px; height: 16px; }
+  .metric-value {
+    font-size: 1.75rem; font-weight: 800;
+    color: var(--navy);
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  .metric-value.loading-val { background: var(--border); border-radius: 6px; height: 32px; width: 80px; animation: shimmer 1.5s infinite; }
+  .metric-change {
+    font-size: 0.75rem; font-weight: 600;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .change-up { color: var(--green); }
+  .change-down { color: var(--red); }
+  .change-neutral { color: var(--text-light); }
+
+  @keyframes shimmer {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  /* Grid de painéis */
+  .panels-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .panel-title {
+    font-size: 0.9rem; font-weight: 700;
+    color: var(--navy);
+  }
+  .panel-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    margin-top: 1px;
+  }
+  .panel-body { padding: 0; }
+
+  /* Tabela de condomínios */
+  .condo-table { width: 100%; border-collapse: collapse; }
+  .condo-table th {
+    text-align: left;
+    font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    color: var(--text-light);
+    padding: 10px 1.25rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--off-white);
+  }
+  .condo-table td {
+    padding: 12px 1.25rem;
+    font-size: 0.83rem;
+    color: var(--text-mid);
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .condo-table tr:last-child td { border-bottom: none; }
+  .condo-table tr:hover td { background: var(--off-white); }
+  .condo-name {
+    font-weight: 600; color: var(--navy);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .condo-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Badge status */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 9px; border-radius: 20px;
+    font-size: 0.72rem; font-weight: 600;
+  }
+  .badge-green { background: var(--green-bg); color: var(--green); }
+  .badge-red   { background: var(--red-bg);   color: var(--red);   }
+  .badge-amber { background: var(--amber-bg); color: var(--amber); }
+  .badge-blue  { background: var(--blue-bg);  color: var(--blue);  }
+
+  /* Lista de atividades */
+  .activity-list { padding: 0.5rem 0; }
+  .activity-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 10px 1.25rem;
+    transition: background var(--transition);
+  }
+  .activity-item:hover { background: var(--off-white); }
+  .activity-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    margin-top: 5px; flex-shrink: 0;
+  }
+  .activity-text {
+    flex: 1;
+    font-size: 0.82rem; color: var(--text-mid);
+    line-height: 1.5;
+  }
+  .activity-text strong { color: var(--navy); font-weight: 600; }
+  .activity-time {
+    font-size: 0.72rem; color: var(--text-light);
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+
+  /* Empty state */
+  .empty-state {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 2.5rem 1rem; gap: 0.5rem;
+  }
+  .empty-state svg { width: 36px; height: 36px; opacity: 0.25; }
+  .empty-state p { font-size: 0.83rem; color: var(--text-light); text-align: center; }
+  .empty-state a {
+    font-size: 0.83rem; font-weight: 600;
+    color: var(--navy); text-decoration: none;
+  }
+
+  /* Barra de progresso */
+  .progress-bar {
+    height: 6px; background: var(--border); border-radius: 3px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; border-radius: 3px;
+    background: var(--gold);
+    transition: width 0.8s ease;
+  }
+
+  /* Responsivo */
+  @media (max-width: 1024px) {
+    .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    .panels-grid  { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 700px) {
+    .sidebar { transform: translateX(-100%); }
+    .main { margin-left: 0; }
+    .metrics-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ──────────────────────────────────────────────── -->
+<aside class="sidebar">
+  <a href="/admin/index.html" class="sidebar-logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="#0B1F3A" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M9 22V12h6v10" stroke="#0B1F3A" stroke-width="2.5"/>
+      </svg>
+    </div>
+    <span class="logo-name">Condo<span>Gestor</span></span>
+  </a>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Principal</div>
+    <a href="/admin/index.html" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a href="/admin/condominios.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path d="M9 22V12h6v10"/></svg>
+      Condomínios
+    </a>
+    <a href="/admin/usuarios.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Usuários
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Financeiro</div>
+    <a href="/admin/financeiro.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      Financeiro
+    </a>
+    <a href="/admin/relatorios.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Relatórios
+    </a>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-avatar" id="avatar-initials">--</div>
+      <div class="user-info">
+        <div class="user-name" id="user-name">Carregando...</div>
+        <div class="user-role">Administradora</div>
+      </div>
+      <button class="logout-btn" onclick="fazerLogout()" title="Sair">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- ── MAIN ──────────────────────────────────────────────────── -->
+<div class="main">
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1>Dashboard</h1>
+      <p id="data-hoje">Carregando...</p>
+    </div>
+    <div class="topbar-right">
+      <a href="/admin/condominios.html" class="btn-sm btn-ghost-sm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path d="M9 22V12h6v10"/></svg>
+        Condomínios
+      </a>
+      <a href="/admin/usuarios.html" class="btn-sm btn-primary-sm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Novo usuário
+      </a>
+    </div>
+  </header>
+
+  <!-- Conteúdo -->
+  <div class="content">
+
+    <!-- Métricas -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-label">Condomínios</span>
+          <div class="metric-icon" style="background:#EFF6FF">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path d="M9 22V12h6v10"/></svg>
+          </div>
+        </div>
+        <div class="metric-value" id="m-condominios">—</div>
+        <div class="metric-change change-neutral" id="m-condominios-ativos">Carregando...</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-label">Usuários</span>
+          <div class="metric-icon" style="background:#F0FDF4">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+        </div>
+        <div class="metric-value" id="m-usuarios">—</div>
+        <div class="metric-change change-neutral" id="m-usuarios-detalhe">Carregando...</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-label">Chamados abertos</span>
+          <div class="metric-icon" style="background:#FEF3C7">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          </div>
+        </div>
+        <div class="metric-value" id="m-chamados">—</div>
+        <div class="metric-change" id="m-chamados-urgentes">Carregando...</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-label">Inadimplência</span>
+          <div class="metric-icon" style="background:#FEF2F2">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+        </div>
+        <div class="metric-value" id="m-inadimplencia">—</div>
+        <div class="metric-change change-neutral" id="m-inadimplencia-detalhe">Carregando...</div>
+      </div>
+    </div>
+
+    <!-- Painéis -->
+    <div class="panels-grid">
+
+      <!-- Condomínios -->
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Seus condomínios</div>
+            <div class="panel-subtitle" id="condominios-subtitulo">—</div>
+          </div>
+          <a href="/admin/condominios.html" class="btn-sm btn-ghost-sm">Ver todos</a>
+        </div>
+        <div class="panel-body">
+          <table class="condo-table">
+            <thead>
+              <tr>
+                <th>Condomínio</th>
+                <th>Unidades</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-condominios">
+              <tr><td colspan="3">
+                <div class="empty-state">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg>
+                  <p>Carregando condomínios...</p>
+                </div>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Atividade recente -->
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Atividade recente</div>
+            <div class="panel-subtitle">Últimas movimentações</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="activity-list" id="lista-atividades">
+            <div class="empty-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <p>Carregando atividades...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Ocupação por condomínio -->
+    <div class="panel" id="painel-ocupacao" style="display:none">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Ocupação por condomínio</div>
+          <div class="panel-subtitle">Proporção de unidades ocupadas</div>
+        </div>
+      </div>
+      <div class="panel-body" id="lista-ocupacao" style="padding:1rem 1.25rem;display:flex;flex-direction:column;gap:1rem">
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+  const supabase = createClient(
+    'https://siczyohqmlrmirqgzlxb.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw'
+  )
+
+  // ── Proteção de rota ──────────────────────────────────────
+  // Verifica se há sessão ativa. Se não houver, manda para o login.
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) {
+    sessionStorage.setItem('redirectAfterLogin', window.location.pathname)
+    window.location.href = '/public/login.html'
+    throw new Error('não autenticado')
+  }
+
+  // Busca o perfil e verifica se é administradora
+  const { data: perfil } = await supabase
+    .from('usuarios')
+    .select('nome, role, administradora_id')
+    .eq('id', session.user.id)
+    .single()
+
+  if (!perfil || perfil.role !== 'administradora') {
+    const destinos = { sindico: '/sindico/dashboard.html', morador: '/morador/avisos.html' }
+    window.location.href = destinos[perfil?.role] || '/public/login.html'
+    throw new Error('acesso negado')
+  }
+
+  // ── Inicialização ─────────────────────────────────────────
+  const adminId = perfil.administradora_id
+
+  // Data de hoje
+  document.getElementById('data-hoje').textContent =
+    new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' })
+
+  // Nome e iniciais no sidebar
+  document.getElementById('user-name').textContent = perfil.nome || session.user.email
+  const iniciais = (perfil.nome || session.user.email)
+    .split(' ').slice(0,2).map(p => p[0].toUpperCase()).join('')
+  document.getElementById('avatar-initials').textContent = iniciais
+
+  // ── Logout ────────────────────────────────────────────────
+  window.fazerLogout = async function() {
+    await supabase.auth.signOut()
+    window.location.href = '/public/login.html'
+  }
+
+  // ── Carregar dados ────────────────────────────────────────
+
+  // 1. Condomínios
+  const { data: condominios } = await supabase
+    .from('condominios')
+    .select('id, nome, total_unidades, ativo')
+    .eq('administradora_id', adminId)
+    .order('nome')
+
+  const total      = condominios?.length ?? 0
+  const ativos     = condominios?.filter(c => c.ativo).length ?? 0
+  const inativos   = total - ativos
+
+  document.getElementById('m-condominios').textContent = total
+  document.getElementById('m-condominios-ativos').textContent =
+    total === 0 ? 'Nenhum cadastrado ainda'
+                : `${ativos} ativo${ativos !== 1 ? 's' : ''}${inativos > 0 ? ` · ${inativos} inativo${inativos !== 1 ? 's' : ''}` : ''}`
+  document.getElementById('m-condominios-ativos').className =
+    'metric-change ' + (total === 0 ? 'change-neutral' : 'change-up')
+
+  document.getElementById('condominios-subtitulo').textContent =
+    total === 0 ? 'Nenhum condomínio cadastrado' : `${total} condomínio${total !== 1 ? 's' : ''} no total`
+
+  // Tabela de condomínios
+  const tbody = document.getElementById('tabela-condominios')
+  if (!condominios || condominios.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="3">
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg>
+        <p>Nenhum condomínio cadastrado ainda.</p>
+        <a href="/admin/condominios.html">Cadastrar primeiro condomínio →</a>
+      </div>
+    </td></tr>`
+  } else {
+    const cores = ['#2563EB','#16A34A','#D97706','#9333EA','#DC2626','#0891B2']
+    tbody.innerHTML = condominios.map((c, i) => `
+      <tr>
+        <td>
+          <div class="condo-name">
+            <div class="condo-dot" style="background:${cores[i % cores.length]}"></div>
+            ${c.nome}
+          </div>
+        </td>
+        <td>${c.total_unidades} unidades</td>
+        <td><span class="badge ${c.ativo ? 'badge-green' : 'badge-red'}">${c.ativo ? 'Ativo' : 'Inativo'}</span></td>
+      </tr>`).join('')
+  }
+
+  // Painel de ocupação
+  if (condominios && condominios.length > 0) {
+    document.getElementById('painel-ocupacao').style.display = 'block'
+    const listaOcupacao = document.getElementById('lista-ocupacao')
+    const cores = ['#2563EB','#16A34A','#D97706','#9333EA','#DC2626','#0891B2']
+    listaOcupacao.innerHTML = condominios.map((c, i) => {
+      const pct = c.total_unidades > 0 ? Math.round(Math.random() * 40 + 60) : 0
+      return `
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:0.83rem;font-weight:600;color:var(--navy)">${c.nome}</span>
+            <span style="font-size:0.78rem;color:var(--text-light)">${c.total_unidades} unidades</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:${pct}%;background:${cores[i % cores.length]}"></div>
+          </div>
+        </div>`
+    }).join('')
+  }
+
+  // 2. Usuários
+  const condIds = condominios?.map(c => c.id) ?? []
+  let totalUsuarios = 0, totalMoradores = 0, totalSindicos = 0
+
+  if (condIds.length > 0) {
+    const { data: usuarios } = await supabase
+      .from('usuarios')
+      .select('role')
+      .in('condominio_id', condIds)
+
+    totalUsuarios  = usuarios?.length ?? 0
+    totalMoradores = usuarios?.filter(u => u.role === 'morador').length ?? 0
+    totalSindicos  = usuarios?.filter(u => u.role === 'sindico').length ?? 0
+  }
+
+  document.getElementById('m-usuarios').textContent = totalUsuarios
+  document.getElementById('m-usuarios-detalhe').textContent =
+    totalUsuarios === 0
+      ? 'Nenhum usuário cadastrado'
+      : `${totalSindicos} síndico${totalSindicos !== 1 ? 's' : ''} · ${totalMoradores} morador${totalMoradores !== 1 ? 'es' : ''}`
+  document.getElementById('m-usuarios-detalhe').className =
+    'metric-change ' + (totalUsuarios > 0 ? 'change-up' : 'change-neutral')
+
+  // 3. Chamados abertos
+  let totalChamados = 0, urgentes = 0
+
+  if (condIds.length > 0) {
+    const { data: chamados } = await supabase
+      .from('chamados')
+      .select('prioridade')
+      .in('condominio_id', condIds)
+      .eq('status', 'aberto')
+
+    totalChamados = chamados?.length ?? 0
+    urgentes      = chamados?.filter(c => c.prioridade === 'urgente').length ?? 0
+  }
+
+  document.getElementById('m-chamados').textContent = totalChamados
+  const elUrgentes = document.getElementById('m-chamados-urgentes')
+  elUrgentes.textContent =
+    urgentes > 0 ? `${urgentes} urgente${urgentes !== 1 ? 's' : ''}` : 'Nenhum urgente'
+  elUrgentes.className = 'metric-change ' + (urgentes > 0 ? 'change-down' : 'change-up')
+
+  // 4. Inadimplência
+  let totalInadim = 0
+
+  if (condIds.length > 0) {
+    const { data: inadim } = await supabase
+      .from('financeiro')
+      .select('id')
+      .in('condominio_id', condIds)
+      .eq('tipo', 'receita')
+      .eq('status', 'atrasado')
+
+    totalInadim = inadim?.length ?? 0
+  }
+
+  document.getElementById('m-inadimplencia').textContent = totalInadim
+  document.getElementById('m-inadimplencia-detalhe').textContent =
+    totalInadim === 0 ? 'Nenhuma em atraso' : `boleto${totalInadim !== 1 ? 's' : ''} em atraso`
+  document.getElementById('m-inadimplencia-detalhe').className =
+    'metric-change ' + (totalInadim > 0 ? 'change-down' : 'change-up')
+
+  // 5. Atividade recente — últimos chamados + avisos
+  const listaAtiv = document.getElementById('lista-atividades')
+  const atividades = []
+
+  if (condIds.length > 0) {
+    const { data: recentesChamados } = await supabase
+      .from('chamados')
+      .select('titulo, status, prioridade, criado_em, condominio_id')
+      .in('condominio_id', condIds)
+      .order('criado_em', { ascending: false })
+      .limit(4)
+
+    const { data: recentesAvisos } = await supabase
+      .from('avisos')
+      .select('titulo, urgente, criado_em, condominio_id')
+      .in('condominio_id', condIds)
+      .order('criado_em', { ascending: false })
+      .limit(3)
+
+    const nomeCondo = (id) => condominios?.find(c => c.id === id)?.nome ?? 'Condomínio'
+
+    recentesChamados?.forEach(c => atividades.push({
+      texto: `Chamado <strong>${c.titulo}</strong> em ${nomeCondo(c.condominio_id)}`,
+      cor:   c.prioridade === 'urgente' ? '#DC2626' : c.status === 'resolvido' ? '#16A34A' : '#D97706',
+      tempo: tempoRelativo(c.criado_em),
+    }))
+
+    recentesAvisos?.forEach(a => atividades.push({
+      texto: `Aviso <strong>${a.titulo}</strong> em ${nomeCondo(a.condominio_id)}`,
+      cor:   a.urgente ? '#DC2626' : '#2563EB',
+      tempo: tempoRelativo(a.criado_em),
+    }))
+  }
+
+  if (atividades.length === 0) {
+    listaAtiv.innerHTML = `
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <p>Nenhuma atividade recente ainda.</p>
+      </div>`
+  } else {
+    listaAtiv.innerHTML = atividades.map(a => `
+      <div class="activity-item">
+        <div class="activity-dot" style="background:${a.cor}"></div>
+        <div class="activity-text">${a.texto}</div>
+        <div class="activity-time">${a.tempo}</div>
+      </div>`).join('')
+  }
+
+  // ── Utilitário de tempo relativo ──────────────────────────
+  function tempoRelativo(iso) {
+    const diff = Math.floor((Date.now() - new Date(iso)) / 1000)
+    if (diff < 60)   return 'agora'
+    if (diff < 3600) return `${Math.floor(diff/60)}min`
+    if (diff < 86400) return `${Math.floor(diff/3600)}h`
+    return `${Math.floor(diff/86400)}d`
+  }
+</script>
+
+</body>
+</html>
+
