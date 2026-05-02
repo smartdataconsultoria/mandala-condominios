@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CondoGestor — Prestação de Contas</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #0B1F3A; --navy-light: #142D52; --gold: #E8A320;
+    --white: #FFFFFF; --off-white: #F7F6F2; --border: #E2E8F0;
+    --text-dark: #0B1F3A; --text-mid: #445571; --text-light: #8899B4;
+    --green: #16A34A; --green-bg: #DCFCE7; --red: #DC2626; --red-bg: #FEF2F2;
+    --amber: #D97706; --amber-bg: #FEF3C7; --blue: #2563EB; --blue-bg: #EFF6FF;
+    --sidebar-w: 240px; --radius: 12px; --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+  }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--off-white); color: var(--text-dark); display: flex; min-height: 100vh; }
+  .sidebar { width: var(--sidebar-w); background: var(--navy); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; }
+  .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 1.5rem 1.25rem 1.25rem; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 0.5rem; }
+  .logo-icon { width: 34px; height: 34px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .logo-icon svg { width: 18px; height: 18px; }
+  .logo-name { font-size: 1.05rem; font-weight: 800; color: var(--white); }
+  .logo-name span { color: var(--gold); }
+  .sidebar-section { padding: 0 0.75rem; }
+  .sidebar-section-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0.75rem 0.5rem 0.4rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.6); transition: all var(--transition); margin-bottom: 2px; }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: var(--white); }
+  .nav-item.active { background: rgba(232,163,32,0.15); color: #F5C35A; }
+  .nav-item.active svg { opacity: 1; }
+  .sidebar-bottom { margin-top: auto; padding: 1rem 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); }
+  .user-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,0.06); }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--navy); flex-shrink: 0; }
+  .user-name { font-size: 0.82rem; font-weight: 600; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+  .user-sub { font-size: 0.7rem; color: rgba(255,255,255,0.4); }
+  .logout-btn { margin-left: auto; background: none; border: none; cursor: pointer; padding: 4px; color: rgba(255,255,255,0.4); }
+  .logout-btn:hover { color: var(--white); }
+  .logout-btn svg { width: 15px; height: 15px; }
+  .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+  .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 40; }
+  .topbar h1 { font-size: 1rem; font-weight: 700; color: var(--navy); }
+  .topbar p { font-size: 0.75rem; color: var(--text-light); }
+  .content { padding: 1.75rem 2rem; flex: 1; max-width: 720px; }
+
+  .mes-selector { display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; }
+  .mes-selector select { height: 38px; padding: 0 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.85rem; color: var(--text-dark); background: var(--white); cursor: pointer; outline: none; }
+  .mes-selector select:focus { border-color: var(--navy); }
+
+  .resumo-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+  .resumo-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.25rem; }
+  .resumo-label { font-size: 0.75rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .resumo-val { font-size: 1.3rem; font-weight: 800; color: var(--navy); }
+  .resumo-val.green { color: var(--green); }
+  .resumo-val.red   { color: var(--red); }
+
+  .section-label { font-size: 0.78rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-light); margin-bottom: 0.75rem; margin-top: 1.5rem; }
+  .lancamento-item { display: flex; align-items: center; gap: 12px; padding: 12px 1.25rem; background: var(--white); border-bottom: 1px solid var(--border); }
+  .lancamento-item:first-child { border-radius: var(--radius) var(--radius) 0 0; }
+  .lancamento-item:last-child { border-radius: 0 0 var(--radius) var(--radius); border-bottom: none; }
+  .lancamento-item:only-child { border-radius: var(--radius); }
+  .l-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1rem; }
+  .l-desc { flex: 1; }
+  .l-titulo { font-size: 0.85rem; font-weight: 600; color: var(--navy); }
+  .l-data { font-size: 0.75rem; color: var(--text-light); }
+  .l-valor { font-size: 0.9rem; font-weight: 700; }
+  .l-valor.rec { color: var(--green); }
+  .l-valor.des { color: var(--red); }
+
+  .bar-chart { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
+  .bar-chart h3 { font-size: 0.88rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem; }
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .bar-label { font-size: 0.78rem; color: var(--text-mid); width: 120px; text-align: right; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
+  .bar-pct { font-size: 0.75rem; color: var(--text-light); width: 40px; text-align: right; }
+
+  @media (max-width: 700px) { .sidebar { transform: translateX(-100%); } .main { margin-left: 0; } .resumo-grid { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <a href="/morador/avisos.html" class="sidebar-logo">
+    <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="#0B1F3A" stroke-width="2.5" stroke-linejoin="round"/><path d="M9 22V12h6v10" stroke="#0B1F3A" stroke-width="2.5"/></svg></div>
+    <span class="logo-name">Condo<span>Gestor</span></span>
+  </a>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Meu condomínio</div>
+    <a href="/morador/avisos.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17H2a3 3 0 003-3V9a7 7 0 0114 0v5a3 3 0 003 3zm-8.27 4a2 2 0 01-3.46 0"/></svg>Avisos</a>
+    <a href="/morador/chamados.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Chamados</a>
+    <a href="/morador/reservas.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Reservas</a>
+    <a href="/morador/boleto.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Boletos</a>
+    <a href="/morador/assembleias.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Assembleias</a>
+    <a href="/morador/sindico.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Fale com o Síndico</a>
+    <a href="/morador/portaria.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg>Portaria</a>
+    <a href="/morador/prestacao.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Prestação de Contas</a>
+    <a href="/morador/documentos.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documentos</a>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-avatar" id="avatar-initials">--</div>
+      <div><div class="user-name" id="user-name">Carregando...</div><div class="user-sub" id="user-unidade">—</div></div>
+      <button class="logout-btn" onclick="fazerLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+    </div>
+  </div>
+</aside>
+<div class="main">
+  <header class="topbar">
+    <div><h1>Prestação de Contas</h1><p id="condo-nome">Carregando...</p></div>
+  </header>
+  <div class="content">
+    <div class="mes-selector">
+      <select id="sel-mes" onchange="carregarMes()"></select>
+    </div>
+
+    <div class="resumo-grid">
+      <div class="resumo-card"><div class="resumo-label">Receitas</div><div class="resumo-val green" id="r-rec">R$ —</div></div>
+      <div class="resumo-card"><div class="resumo-label">Despesas</div><div class="resumo-val red" id="r-des">R$ —</div></div>
+      <div class="resumo-card"><div class="resumo-label">Saldo</div><div class="resumo-val" id="r-saldo">R$ —</div></div>
+    </div>
+
+    <div class="bar-chart" id="chart-categorias"></div>
+
+    <div class="section-label">Lançamentos do período</div>
+    <div id="lista-lancamentos"></div>
+  </div>
+</div>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+  const supabase = createClient('https://siczyohqmlrmirqgzlxb.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw')
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) { window.location.href = '/login.html'; throw new Error() }
+  const { data: perfil } = await supabase.from('usuarios').select('nome, role, condominio_id, unidade, bloco').eq('id', session.user.id).single()
+  if (!perfil || perfil.role !== 'morador') { window.location.href = '/login.html'; throw new Error() }
+  document.getElementById('user-name').textContent = perfil.nome || session.user.email
+  document.getElementById('avatar-initials').textContent = (perfil.nome||session.user.email).split(' ').slice(0,2).map(p=>p[0].toUpperCase()).join('')
+  document.getElementById('user-unidade').textContent = [perfil.unidade, perfil.bloco].filter(Boolean).join(' · ') || 'Morador'
+  window.fazerLogout = async () => { await supabase.auth.signOut(); window.location.href = '/login.html' }
+
+  const fmt = (v) => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+  const fmtData = (d) => d ? new Date(d+'T00:00:00').toLocaleDateString('pt-BR') : '—'
+  const cores = ['#2563EB','#16A34A','#D97706','#DC2626','#7C3AED','#0891B2']
+
+  // Popula seletor de meses
+  const sel = document.getElementById('sel-mes')
+  const hoje = new Date()
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1)
+    const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`
+    const label = d.toLocaleDateString('pt-BR', { month:'long', year:'numeric' })
+    sel.innerHTML += `<option value="${val}">${label}</option>`
+  }
+
+  if (perfil.condominio_id) {
+    const { data: condo } = await supabase.from('condominios').select('nome').eq('id', perfil.condominio_id).single()
+    document.getElementById('condo-nome').textContent = condo?.nome || ''
+  }
+
+  window.carregarMes = async function() {
+    const mes = document.getElementById('sel-mes').value
+    if (!perfil.condominio_id) return
+
+    const { data: lancamentos } = await supabase.from('financeiro')
+      .select('*').eq('condominio_id', perfil.condominio_id)
+      .gte('data_vencimento', mes + '-01')
+      .lte('data_vencimento', mes + '-31')
+      .order('data_vencimento')
+
+    const todos = lancamentos || []
+    const receitas  = todos.filter(l => l.tipo === 'receita')
+    const despesas  = todos.filter(l => l.tipo === 'despesa')
+    const totRec = receitas.reduce((s,l) => s+Number(l.valor), 0)
+    const totDes = despesas.reduce((s,l) => s+Number(l.valor), 0)
+    const saldo  = totRec - totDes
+
+    document.getElementById('r-rec').textContent   = fmt(totRec)
+    document.getElementById('r-des').textContent   = fmt(totDes)
+    document.getElementById('r-saldo').textContent = fmt(Math.abs(saldo))
+    document.getElementById('r-saldo').style.color = saldo >= 0 ? 'var(--green)' : 'var(--red)'
+
+    // Gráfico por categoria
+    const catMap = {}
+    despesas.forEach(l => { const c = l.categoria||'Outros'; catMap[c] = (catMap[c]||0) + Number(l.valor) })
+    const cats = Object.entries(catMap).sort((a,b) => b[1]-a[1])
+    const maxVal = cats[0]?.[1] || 1
+    document.getElementById('chart-categorias').innerHTML = cats.length === 0 ? '' : `
+      <h3>Despesas por categoria</h3>
+      ${cats.map(([cat, val], i) => `
+        <div class="bar-row">
+          <div class="bar-label">${cat}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(val/maxVal*100).toFixed(0)}%;background:${cores[i%cores.length]}"></div></div>
+          <div class="bar-pct">${fmt(val)}</div>
+        </div>`).join('')}`
+
+    // Lista
+    const lista = document.getElementById('lista-lancamentos')
+    if (todos.length === 0) {
+      lista.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-light);font-size:0.85rem">Nenhum lançamento neste período.</div>'
+      return
+    }
+    lista.innerHTML = todos.map(l => `
+      <div class="lancamento-item">
+        <div class="l-icon" style="background:${l.tipo==='receita'?'var(--green-bg)':'var(--red-bg)'}">
+          ${l.tipo === 'receita' ? '↑' : '↓'}
+        </div>
+        <div class="l-desc">
+          <div class="l-titulo">${l.descricao}</div>
+          <div class="l-data">${l.categoria||''} · ${fmtData(l.data_vencimento)}</div>
+        </div>
+        <div class="l-valor ${l.tipo==='receita'?'rec':'des'}">${l.tipo==='receita'?'+':'-'}${fmt(l.valor)}</div>
+      </div>`).join('')
+  }
+
+  carregarMes()
+</script>
+</body>
+</html>
