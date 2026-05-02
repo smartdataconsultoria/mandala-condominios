@@ -1,8 +1,1185 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="0; url=./login.html" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CondoGestor – Plataforma de Gestão de Condomínios</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0B1F3A;
+    --navy-light: #142D52;
+    --gold: #E8A320;
+    --gold-light: #F5C35A;
+    --gold-pale: #FDF3DC;
+    --white: #FFFFFF;
+    --off-white: #F7F6F2;
+    --text-dark: #0B1F3A;
+    --text-mid: #445571;
+    --text-light: #8899B4;
+    --border: #E2E8F0;
+    --radius: 14px;
+    --radius-lg: 22px;
+    --transition: 0.22s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--white);
+    color: var(--text-dark);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 0 2rem;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 800; font-size: 1.25rem; color: var(--navy);
+    text-decoration: none; letter-spacing: -0.5px;
+  }
+  .nav-logo .logo-icon {
+    width: 36px; height: 36px;
+    background: var(--navy);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-logo .logo-icon svg { width: 20px; height: 20px; fill: var(--gold); }
+  .nav-logo span.accent { color: var(--gold); }
+  .nav-links {
+    display: flex; align-items: center; gap: 2rem;
+    list-style: none;
+  }
+  .nav-links a {
+    text-decoration: none;
+    font-size: 0.9rem; font-weight: 500;
+    color: var(--text-mid);
+    transition: color var(--transition);
+  }
+  .nav-links a:hover { color: var(--navy); }
+  .nav-cta {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .btn-outline {
+    padding: 8px 20px;
+    border: 1.5px solid var(--navy);
+    border-radius: 8px;
+    font-size: 0.88rem; font-weight: 600;
+    color: var(--navy);
+    text-decoration: none;
+    transition: all var(--transition);
+  }
+  .btn-outline:hover { background: var(--navy); color: var(--white); }
+  .btn-primary {
+    padding: 9px 22px;
+    background: var(--navy);
+    border: none;
+    border-radius: 8px;
+    font-size: 0.88rem; font-weight: 600;
+    color: var(--white);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .btn-primary:hover { background: var(--navy-light); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(11,31,58,0.2); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    background: var(--navy);
+    padding: 120px 2rem 80px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg-pattern {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 70% 20%, rgba(232,163,32,0.12) 0%, transparent 50%),
+                      radial-gradient(circle at 20% 80%, rgba(232,163,32,0.07) 0%, transparent 40%);
+    pointer-events: none;
+  }
+  .hero-grid-pattern {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+  .hero-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(232,163,32,0.15);
+    border: 1px solid rgba(232,163,32,0.3);
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-size: 0.8rem; font-weight: 600;
+    color: var(--gold-light);
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.3px;
+  }
+  .hero-badge .dot {
+    width: 6px; height: 6px;
+    background: var(--gold);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2.4rem, 4.5vw, 3.6rem);
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--white);
+    letter-spacing: -1px;
+    margin-bottom: 1.25rem;
+  }
+  .hero h1 .highlight {
+    color: var(--gold);
+    font-style: italic;
+  }
+  .hero-desc {
+    font-size: 1.05rem;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.75;
+    margin-bottom: 2rem;
+    max-width: 480px;
+  }
+  .hero-actions {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  .btn-gold {
+    padding: 13px 28px;
+    background: var(--gold);
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem; font-weight: 700;
+    color: var(--navy);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--transition);
+    letter-spacing: -0.2px;
+  }
+  .btn-gold:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(232,163,32,0.35); }
+  .btn-ghost {
+    padding: 13px 28px;
+    background: transparent;
+    border: 1.5px solid rgba(255,255,255,0.25);
+    border-radius: 10px;
+    font-size: 0.95rem; font-weight: 600;
+    color: var(--white);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.06); }
+  .hero-stats {
+    display: flex; gap: 2.5rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .stat-item .stat-num {
+    font-family: 'Fraunces', serif;
+    font-size: 2rem; font-weight: 600;
+    color: var(--gold);
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+  .stat-item .stat-label {
+    font-size: 0.8rem; color: rgba(255,255,255,0.5);
+    margin-top: 4px;
+  }
+
+  /* HERO RIGHT - MOCK DASHBOARD */
+  .hero-visual {
+    position: relative;
+  }
+  .dashboard-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    padding: 24px;
+    backdrop-filter: blur(10px);
+  }
+  .dash-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .dash-title { font-size: 0.9rem; font-weight: 600; color: rgba(255,255,255,0.85); }
+  .dash-badge {
+    background: rgba(232,163,32,0.2);
+    color: var(--gold-light);
+    font-size: 0.75rem; font-weight: 600;
+    padding: 3px 10px; border-radius: 20px;
+  }
+  .metric-row {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px; margin-bottom: 18px;
+  }
+  .metric-box {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 14px 12px;
+  }
+  .metric-box .m-label { font-size: 0.72rem; color: rgba(255,255,255,0.45); margin-bottom: 6px; }
+  .metric-box .m-val { font-size: 1.2rem; font-weight: 700; color: var(--white); }
+  .metric-box .m-change { font-size: 0.72rem; color: #5DE0A0; margin-top: 2px; }
+  .metric-box .m-change.down { color: #FF7C7C; }
+  .bar-chart { margin-bottom: 18px; }
+  .bar-chart-label { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-bottom: 10px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
+  .bar-name { font-size: 0.75rem; color: rgba(255,255,255,0.6); width: 80px; text-align: right; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; background: var(--gold); }
+  .bar-fill.teal { background: #3DD5C5; }
+  .bar-fill.blue { background: #5E9BF4; }
+  .bar-pct { font-size: 0.72rem; color: rgba(255,255,255,0.5); width: 32px; }
+  .recent-list .r-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .recent-list .r-item:last-child { border-bottom: none; }
+  .r-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .r-text { font-size: 0.8rem; color: rgba(255,255,255,0.7); flex: 1; }
+  .r-time { font-size: 0.72rem; color: rgba(255,255,255,0.35); }
+
+  /* FLOATING ELEMENTS */
+  .float-card {
+    position: absolute;
+    background: white;
+    border-radius: 12px;
+    padding: 12px 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    font-size: 0.8rem;
+  }
+  .float-card.top-left {
+    top: -20px; left: -30px;
+  }
+  .float-card.bottom-right {
+    bottom: -16px; right: -20px;
+  }
+  .fc-label { font-size: 0.7rem; color: var(--text-light); margin-bottom: 2px; }
+  .fc-val { font-weight: 700; color: var(--navy); font-size: 1rem; }
+  .fc-tag { font-size: 0.7rem; background: #E8F5E9; color: #2E7D32; border-radius: 20px; padding: 2px 8px; margin-top: 4px; display: inline-block; }
+
+  /* CLIENTES STRIP */
+  .clients-strip {
+    background: var(--off-white);
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  .clients-strip p {
+    font-size: 0.82rem; font-weight: 600;
+    color: var(--text-light); letter-spacing: 1.5px; text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+  .clients-logos {
+    display: flex; align-items: center; justify-content: center;
+    gap: 3rem; flex-wrap: wrap;
+  }
+  .client-logo {
+    font-weight: 800; font-size: 1rem;
+    color: #B0BDD0;
+    letter-spacing: -0.5px;
+    transition: color var(--transition);
+  }
+  .client-logo:hover { color: var(--text-mid); }
+
+  /* SECTION COMMON */
+  section { padding: 6rem 2rem; }
+  .section-inner { max-width: 1180px; margin: 0 auto; }
+  .section-tag {
+    display: inline-block;
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 600;
+    color: var(--navy);
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    max-width: 600px;
+  }
+  .section-title .italic { font-style: italic; color: var(--gold); }
+  .section-desc {
+    font-size: 1rem; color: var(--text-mid);
+    line-height: 1.75; margin-top: 1rem;
+    max-width: 520px;
+  }
+
+  /* FEATURES */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 3.5rem;
+  }
+  .feature-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    transition: all var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--transition);
+  }
+  .feature-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(11,31,58,0.1); border-color: transparent; }
+  .feature-card:hover::before { transform: scaleX(1); }
+  .feature-icon {
+    width: 48px; height: 48px;
+    background: var(--gold-pale);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1.25rem;
+    font-size: 1.4rem;
+  }
+  .feature-card h3 {
+    font-size: 1.05rem; font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 0.6rem;
+  }
+  .feature-card p {
+    font-size: 0.88rem; color: var(--text-mid);
+    line-height: 1.65;
+  }
+
+  /* AUDIENCE TABS */
+  .audience-section { background: var(--off-white); }
+  .tabs {
+    display: flex; gap: 8px;
+    margin: 2.5rem 0 2rem;
+  }
+  .tab-btn {
+    padding: 10px 24px;
+    border-radius: 100px;
+    border: 1.5px solid var(--border);
+    font-size: 0.88rem; font-weight: 600;
+    color: var(--text-mid);
+    background: var(--white);
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .tab-btn.active {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: var(--white);
+  }
+  .tab-btn:hover:not(.active) { border-color: var(--navy); color: var(--navy); }
+  .tab-content {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 3rem; align-items: center;
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+  .tab-text h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.8rem; font-weight: 600;
+    color: var(--navy); margin-bottom: 1rem;
+    letter-spacing: -0.5px;
+  }
+  .tab-text p {
+    font-size: 0.92rem; color: var(--text-mid);
+    line-height: 1.75; margin-bottom: 1.5rem;
+  }
+  .check-list { list-style: none; }
+  .check-list li {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 0.9rem; color: var(--text-mid);
+    margin-bottom: 0.7rem;
+  }
+  .check-list li::before {
+    content: '';
+    width: 18px; height: 18px;
+    background: var(--navy);
+    border-radius: 50%;
+    flex-shrink: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M5 13l4 4L19 7' stroke='%23E8A320' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-size: cover;
+    margin-top: 2px;
+  }
+  .tab-visual {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 2rem;
+    border: 1px solid var(--border);
+    min-height: 280px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .mini-card {
+    background: var(--off-white);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .mini-card-icon { font-size: 1.3rem; }
+  .mini-card-text .mc-label { font-size: 0.72rem; color: var(--text-light); }
+  .mini-card-text .mc-val { font-size: 0.9rem; font-weight: 600; color: var(--navy); }
+  .status-pill {
+    margin-left: auto;
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 0.72rem; font-weight: 600;
+  }
+  .pill-green { background: #E8F5E9; color: #2E7D32; }
+  .pill-amber { background: #FFF8E1; color: #F57F17; }
+  .pill-blue { background: #E3F2FD; color: #1565C0; }
+
+  /* PLANOS */
+  .plans-section { background: var(--navy); }
+  .plans-section .section-tag { color: var(--gold-light); }
+  .plans-section .section-title { color: var(--white); max-width: 100%; }
+  .plans-section .section-title .italic { color: var(--gold); }
+  .plans-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem; margin-top: 3.5rem;
+  }
+  .plan-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    transition: all var(--transition);
+    position: relative;
+  }
+  .plan-card.featured {
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+  .plan-card:hover:not(.featured) { border-color: rgba(255,255,255,0.3); transform: translateY(-4px); }
+  .plan-badge {
+    display: inline-block;
+    background: var(--navy);
+    color: var(--gold);
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 20px;
+    margin-bottom: 1.5rem;
+  }
+  .plan-name {
+    font-size: 1.2rem; font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--white);
+  }
+  .plan-card.featured .plan-name { color: var(--navy); }
+  .plan-price {
+    font-family: 'Fraunces', serif;
+    font-size: 2.5rem; font-weight: 600;
+    color: var(--gold);
+    letter-spacing: -1px;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+  .plan-card.featured .plan-price { color: var(--navy); }
+  .plan-price span { font-size: 1rem; font-weight: 500; }
+  .plan-period { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-bottom: 1.5rem; }
+  .plan-card.featured .plan-period { color: rgba(11,31,58,0.6); }
+  .plan-divider { height: 1px; background: rgba(255,255,255,0.12); margin-bottom: 1.5rem; }
+  .plan-card.featured .plan-divider { background: rgba(11,31,58,0.15); }
+  .plan-features { list-style: none; margin-bottom: 2rem; }
+  .plan-features li {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.85rem; color: rgba(255,255,255,0.75);
+    margin-bottom: 0.7rem;
+  }
+  .plan-card.featured .plan-features li { color: var(--navy-light); }
+  .plan-features li::before {
+    content: '✓';
+    font-weight: 700; color: var(--gold);
+    font-size: 0.8rem;
+  }
+  .plan-card.featured .plan-features li::before { color: var(--navy); }
+  .btn-plan {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 0.9rem; font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition);
+    text-align: center;
+    display: block;
+    text-decoration: none;
+  }
+  .btn-plan-ghost {
+    background: transparent;
+    border: 1.5px solid rgba(255,255,255,0.25);
+    color: var(--white);
+  }
+  .btn-plan-ghost:hover { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.05); }
+  .btn-plan-navy {
+    background: var(--navy);
+    border: none;
+    color: var(--white);
+  }
+  .btn-plan-navy:hover { background: var(--navy-light); }
+
+  /* DEPOIMENTOS */
+  .testimonials-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem; margin-top: 3.5rem;
+  }
+  .testimonial-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+  }
+  .stars { color: var(--gold); font-size: 0.9rem; margin-bottom: 1rem; }
+  .testimonial-card blockquote {
+    font-size: 0.9rem; color: var(--text-mid);
+    line-height: 1.75;
+    margin-bottom: 1.5rem;
+    font-style: italic;
+  }
+  .testimonial-author {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .author-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.85rem;
+    color: var(--white);
+    flex-shrink: 0;
+  }
+  .author-name { font-weight: 700; font-size: 0.88rem; color: var(--navy); }
+  .author-role { font-size: 0.78rem; color: var(--text-light); }
+
+  /* CTA FINAL */
+  .cta-section {
+    background: var(--gold-pale);
+    text-align: center;
+    padding: 6rem 2rem;
+  }
+  .cta-section .section-title { max-width: 100%; text-align: center; }
+  .cta-section .section-desc { max-width: 480px; margin: 1rem auto 2.5rem; text-align: center; }
+  .cta-actions {
+    display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;
+  }
+  .btn-navy {
+    padding: 14px 32px;
+    background: var(--navy);
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem; font-weight: 700;
+    color: var(--white);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .btn-navy:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(11,31,58,0.2); }
+
+  /* FOOTER */
+  footer {
+    background: var(--navy);
+    padding: 4rem 2rem 2rem;
+  }
+  .footer-inner {
+    max-width: 1180px; margin: 0 auto;
+  }
+  .footer-top {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 3rem; margin-bottom: 3rem;
+  }
+  .footer-brand .nav-logo {
+    color: var(--white); margin-bottom: 1rem; display: inline-flex;
+  }
+  .footer-brand p {
+    font-size: 0.85rem; color: rgba(255,255,255,0.5);
+    line-height: 1.7; max-width: 280px;
+  }
+  .footer-col h4 {
+    font-size: 0.8rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+    color: rgba(255,255,255,0.4); margin-bottom: 1.2rem;
+  }
+  .footer-col ul { list-style: none; }
+  .footer-col ul li { margin-bottom: 0.65rem; }
+  .footer-col ul li a {
+    text-decoration: none; font-size: 0.88rem;
+    color: rgba(255,255,255,0.6);
+    transition: color var(--transition);
+  }
+  .footer-col ul li a:hover { color: var(--white); }
+  .footer-bottom {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 0.8rem; color: rgba(255,255,255,0.4);
+  }
+  .footer-bottom a { color: var(--gold); text-decoration: none; }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .hero-left > * {
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero-left > *:nth-child(1) { animation-delay: 0.1s; }
+  .hero-left > *:nth-child(2) { animation-delay: 0.2s; }
+  .hero-left > *:nth-child(3) { animation-delay: 0.3s; }
+  .hero-left > *:nth-child(4) { animation-delay: 0.4s; }
+  .hero-left > *:nth-child(5) { animation-delay: 0.5s; }
+  .hero-visual {
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+
+  @media (max-width: 900px) {
+    .hero-inner { grid-template-columns: 1fr; }
+    .hero-visual { display: none; }
+    .features-grid { grid-template-columns: 1fr 1fr; }
+    .plans-grid { grid-template-columns: 1fr; }
+    .testimonials-grid { grid-template-columns: 1fr; }
+    .footer-top { grid-template-columns: 1fr 1fr; }
+    .tab-panel.active { grid-template-columns: 1fr; }
+    nav .nav-links { display: none; }
+  }
+
+  @media (max-width: 600px) {
+    .features-grid { grid-template-columns: 1fr; }
+    .footer-top { grid-template-columns: 1fr; }
+  }
+</style>
 </head>
-<body></body>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="#E8A320" stroke-width="2" fill="none" stroke-linejoin="round"/><path d="M9 22V12h6v10" stroke="#E8A320" stroke-width="2" fill="none"/></svg>
+    </div>
+    Condo<span class="accent">Gestor</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Soluções</a></li>
+    <li><a href="#audience">Para quem é</a></li>
+    <li><a href="#plans">Planos</a></li>
+    <li><a href="#testimonials">Clientes</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="#" class="btn-outline">Entrar</a>
+    <a href="#" class="btn-primary">Teste grátis</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-pattern"></div>
+  <div class="hero-grid-pattern"></div>
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-badge">
+        <div class="dot"></div>
+        Mais de 5.000 condomínios gerenciados
+      </div>
+      <h1>A plataforma que <span class="highlight">transforma</span> a gestão do seu condomínio</h1>
+      <p class="hero-desc">Controle financeiro, comunicação, portaria e muito mais em um único sistema. Simplifique sua rotina e ofereça uma experiência moderna aos moradores.</p>
+      <div class="hero-actions">
+        <a href="#" class="btn-gold">Começar gratuitamente →</a>
+        <a href="#" class="btn-ghost">Ver demonstração</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-num">98%</div>
+          <div class="stat-label">satisfação dos clientes</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">5k+</div>
+          <div class="stat-label">condomínios ativos</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">4.9★</div>
+          <div class="stat-label">avaliação no app</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="float-card top-left">
+        <div class="fc-label">Inadimplência</div>
+        <div class="fc-val">↓ 32%</div>
+        <div class="fc-tag">vs. mês anterior</div>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="dash-header">
+          <span class="dash-title">Painel do Condomínio — Torre A</span>
+          <span class="dash-badge">Maio 2025</span>
+        </div>
+        <div class="metric-row">
+          <div class="metric-box">
+            <div class="m-label">Arrecadação</div>
+            <div class="m-val">R$48.2k</div>
+            <div class="m-change">↑ 8.4%</div>
+          </div>
+          <div class="metric-box">
+            <div class="m-label">Inadimplentes</div>
+            <div class="m-val">12</div>
+            <div class="m-change down">↓ 3</div>
+          </div>
+          <div class="metric-box">
+            <div class="m-label">Chamados</div>
+            <div class="m-val">7</div>
+            <div class="m-change">↑ abertos</div>
+          </div>
+        </div>
+        <div class="bar-chart">
+          <div class="bar-chart-label">Receita por bloco</div>
+          <div class="bar-row">
+            <div class="bar-name">Bloco A</div>
+            <div class="bar-track"><div class="bar-fill" style="width:87%"></div></div>
+            <div class="bar-pct">87%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-name">Bloco B</div>
+            <div class="bar-track"><div class="bar-fill teal" style="width:72%"></div></div>
+            <div class="bar-pct">72%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-name">Bloco C</div>
+            <div class="bar-track"><div class="bar-fill blue" style="width:64%"></div></div>
+            <div class="bar-pct">64%</div>
+          </div>
+        </div>
+        <div class="recent-list">
+          <div class="r-item">
+            <div class="r-dot" style="background:#3DD5C5"></div>
+            <div class="r-text">Boleto Apto 204 confirmado</div>
+            <div class="r-time">2min</div>
+          </div>
+          <div class="r-item">
+            <div class="r-dot" style="background:#E8A320"></div>
+            <div class="r-text">Chamado: Infiltração — Bloco B</div>
+            <div class="r-time">14min</div>
+          </div>
+          <div class="r-item">
+            <div class="r-dot" style="background:#5E9BF4"></div>
+            <div class="r-text">Reserva da churrasqueira aprovada</div>
+            <div class="r-time">1h</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="float-card bottom-right">
+        <div class="fc-label">Novo pagamento</div>
+        <div class="fc-val">R$ 520,00</div>
+        <div class="fc-tag">✓ Confirmado</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LOGOS CLIENTES -->
+<div class="clients-strip">
+  <p>Usado por administradoras e síndicos em todo o Brasil</p>
+  <div class="clients-logos">
+    <div class="client-logo">ResidênciaVerde</div>
+    <div class="client-logo">Condomax</div>
+    <div class="client-logo">SíndicoFácil</div>
+    <div class="client-logo">Urbano&Co</div>
+    <div class="client-logo">GestãoPlena</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-inner">
+    <span class="section-tag">Soluções completas</span>
+    <h2 class="section-title">Tudo que você precisa para gerir com <span class="italic">excelência</span></h2>
+    <p class="section-desc">Do financeiro à comunicação, do porteiro ao relatório — centralize tudo em uma plataforma intuitiva.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">💰</div>
+        <h3>Automação Financeira</h3>
+        <p>Emissão de boletos em lote, controle de inadimplência com cobrança automática, conciliação bancária e previsão orçamentária.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Relatórios e Power BI</h3>
+        <p>Relatórios gerenciais prontos e integração com Power BI para dashboards personalizados. Dados em tempo real na palma da mão.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💬</div>
+        <h3>Comunicação Integrada</h3>
+        <p>Avisos, chamados, assembleias e votações digitais. Tudo centralizado e com histórico completo de interações.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🚪</div>
+        <h3>Portaria Inteligente</h3>
+        <p>Controle de acesso digital, gestão de encomendas e entregas, registro de visitantes e prestadores de serviço.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🛠️</div>
+        <h3>Gestão Operacional</h3>
+        <p>Reserva de áreas comuns, agenda de manutenções preventivas, cadastro de moradores e gestão de documentos.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <h3>Assistente com IA</h3>
+        <p>Atendimento automatizado para dúvidas frequentes dos moradores via WhatsApp. Libere sua equipe para o que importa.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AUDIENCE -->
+<section id="audience" class="audience-section">
+  <div class="section-inner">
+    <span class="section-tag">Para quem é</span>
+    <h2 class="section-title">A solução <span class="italic">certa</span> para cada perfil</h2>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab(this, 'sindico')">Síndico</button>
+      <button class="tab-btn" onclick="switchTab(this, 'administradora')">Administradora</button>
+      <button class="tab-btn" onclick="switchTab(this, 'morador')">Morador</button>
+    </div>
+
+    <div id="tab-sindico" class="tab-panel active">
+      <div class="tab-text">
+        <h3>Para o síndico que quer ser eficiente</h3>
+        <p>Gerencie múltiplos condomínios com facilidade. O CondoGestor automatiza as tarefas repetitivas para que você possa focar no que realmente importa.</p>
+        <ul class="check-list">
+          <li>Envio de avisos com um clique para todos os moradores</li>
+          <li>Cobranças automáticas e notificações de vencimento</li>
+          <li>Agenda completa de manutenções preventivas</li>
+          <li>Relatórios financeiros prontos para assembleia</li>
+        </ul>
+        <a href="#" class="btn-primary" style="display:inline-block;margin-top:1.5rem;padding:12px 28px;">Explorar para síndicos →</a>
+      </div>
+      <div class="tab-visual">
+        <div style="font-size:0.8rem;font-weight:700;color:var(--text-light);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Painel do Síndico</div>
+        <div class="mini-card">
+          <div class="mini-card-icon">📋</div>
+          <div class="mini-card-text">
+            <div class="mc-label">Chamados abertos</div>
+            <div class="mc-val">7 pendentes</div>
+          </div>
+          <div class="status-pill pill-amber">Urgente: 2</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-icon">💳</div>
+          <div class="mini-card-text">
+            <div class="mc-label">Boletos do mês</div>
+            <div class="mc-val">142 gerados automaticamente</div>
+          </div>
+          <div class="status-pill pill-green">Concluído</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-icon">📅</div>
+          <div class="mini-card-text">
+            <div class="mc-label">Próxima manutenção</div>
+            <div class="mc-val">Elevador — 18 Jun</div>
+          </div>
+          <div class="status-pill pill-blue">Agendado</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-icon">🗳️</div>
+          <div class="mini-card-text">
+            <div class="mc-label">Assembleia virtual</div>
+            <div class="mc-val">23 Jun — 76% confirmados</div>
+          </div>
+          <div class="status-pill pill-green">Ativo</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-administradora" class="tab-panel">
+      <div class="tab-text">
+        <h3>Para a administradora crescer mais</h3>
+        <p>Centralize a gestão de dezenas de condomínios em uma única plataforma. Reduza custos operacionais e amplie sua carteira sem aumentar a equipe.</p>
+        <ul class="check-list">
+          <li>Multi-condomínio em um único painel centralizado</li>
+          <li>Prestação de contas transparente para cada cliente</li>
+          <li>Relatórios financeiros automatizados</li>
+          <li>Gestão de demandas e SLA de atendimento</li>
+        </ul>
+        <a href="#" class="btn-primary" style="display:inline-block;margin-top:1.5rem;padding:12px 28px;">Explorar para administradoras →</a>
+      </div>
+      <div class="tab-visual">
+        <div style="font-size:0.8rem;font-weight:700;color:var(--text-light);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Central da Administradora</div>
+        <div class="mini-card">
+          <div class="mini-card-icon">🏢</div>
+          <div class="mini-card-text">
+            <div class="mc-label">Condomínios gerenciados</div>
+            <div class="mc-val">38 ativos</div>
+          </div>
+          <div class="status-pill pill-green">+5 este mês</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-icon">📈</div>
+          <div class="mini-card-text">
+            <div class="mc-label">Receita total administrada</div>
+            <div class="mc-val">R$ 1.2M / mês</div>
+          </div>
+          <div class="status-pill pill-green">↑ 12%</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-icon">⚡</div>
+          <div class="mini-card-text">
+            <div class="mc-label">Automações ativas</div>
+            <div class="mc-val">Boletos, cobranças, avisos</div>
+          </div>
+          <div class="status-pill pill-blue">100%</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-morador" class="tab-panel">
+      <div class="tab-text">
+        <h3>Para o morador ter praticidade</h3>
+        <p>Resolva tudo pelo celular, sem precisar ligar para a administração. O aplicativo CondoGestor coloca o condomínio na palma da sua mão.</p>
+        <ul class="check-list">
+          <li>Pague boletos e acompanhe seu histórico financeiro</li>
+          <li>Abra chamados e acompanhe o status em tempo real</li>
+          <li>Reserve áreas comuns com facilidade</li>
+          <li>Receba avisos e participe de votações online</li>
+        </ul>
+        <a href="#" class="btn-primary" style="display:inline-block;margin-top:1.5rem;padding:12px 28px;">Baixar o aplicativo →</a>
+      </div>
+      <div class="tab-visual">
+        <div style="font-size:0.8rem;font-weight:700;color:var(--text-light);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">App do Morador</div>
+        <div class="mini-card">
+          <div class="mini-card-icon">🧾</div>
+          <div class="mini-card-text">
+            <div class="mc-label">Boleto Junho/2025</div>
+            <div class="mc-val">R$ 520,00 — vence em 10 dias</div>
+          </div>
+          <div class="status-pill pill-amber">Pagar</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-icon">📦</div>
+          <div class="mini-card-text">
+            <div class="mc-label">Encomenda recebida</div>
+            <div class="mc-val">1 volume na portaria</div>
+          </div>
+          <div class="status-pill pill-blue">Retirar</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-icon">🏊</div>
+          <div class="mini-card-text">
+            <div class="mc-label">Reserva da Piscina</div>
+            <div class="mc-val">Sábado, 14h–16h</div>
+          </div>
+          <div class="status-pill pill-green">Confirmado</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PLANOS -->
+<section id="plans" class="plans-section">
+  <div class="section-inner">
+    <span class="section-tag">Planos e preços</span>
+    <h2 class="section-title" style="color:var(--white)">Simples, transparente e <span class="italic">sem surpresas</span></h2>
+    <div class="plans-grid">
+      <div class="plan-card">
+        <div class="plan-name">Essencial</div>
+        <div class="plan-price">R$<span>199</span></div>
+        <div class="plan-period">por mês · até 50 unidades</div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li>Controle financeiro básico</li>
+          <li>Emissão de boletos</li>
+          <li>Comunicados e avisos</li>
+          <li>App para moradores</li>
+          <li>Suporte por e-mail</li>
+        </ul>
+        <a href="#" class="btn-plan btn-plan-ghost">Começar grátis</a>
+      </div>
+
+      <div class="plan-card featured">
+        <div class="plan-badge">Mais popular</div>
+        <div class="plan-name">Profissional</div>
+        <div class="plan-price">R$<span>399</span></div>
+        <div class="plan-period">por mês · até 200 unidades</div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li>Tudo do Essencial</li>
+          <li>Portaria inteligente</li>
+          <li>Chamados e SLA</li>
+          <li>Relatórios avançados</li>
+          <li>Integração Power BI</li>
+          <li>Suporte prioritário</li>
+        </ul>
+        <a href="#" class="btn-plan btn-plan-navy">Experimentar 30 dias grátis</a>
+      </div>
+
+      <div class="plan-card">
+        <div class="plan-name">Enterprise</div>
+        <div class="plan-price" style="font-size:2rem">Sob<br>consulta</div>
+        <div class="plan-period">multi-condomínio · ilimitado</div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li>Tudo do Profissional</li>
+          <li>Múltiplos condomínios</li>
+          <li>IA condominial</li>
+          <li>API e integrações custom</li>
+          <li>Gerente de conta dedicado</li>
+          <li>SLA garantido em contrato</li>
+        </ul>
+        <a href="#" class="btn-plan btn-plan-ghost">Falar com especialista</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEPOIMENTOS -->
+<section id="testimonials">
+  <div class="section-inner">
+    <span class="section-tag">Depoimentos</span>
+    <h2 class="section-title">O que nossos <span class="italic">clientes</span> dizem</h2>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <blockquote>"Reduzi meu tempo com boletos de 4 horas para 20 minutos. A automação do CondoGestor é impressionante. Nunca mais perdi um prazo."</blockquote>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background:#142D52">MO</div>
+          <div>
+            <div class="author-name">Marcos Oliveira</div>
+            <div class="author-role">Síndico, Condomínio Jardim Europa — SP</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <blockquote>"Administro 22 condomínios e o CondoGestor centralizou tudo. Consegui contratar menos funcionários e aumentar minha margem em 40%."</blockquote>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background:#E8A320">AC</div>
+          <div>
+            <div class="author-name">Ana Clara Ferreira</div>
+            <div class="author-role">Diretora, Nexus Administrações — PE</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <blockquote>"Como morador, adoro abrir chamados pelo app e acompanhar o status. A transparência com o financeiro do condomínio também é excelente."</blockquote>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background:#0F6E56">RS</div>
+          <div>
+            <div class="author-name">Roberto Souza</div>
+            <div class="author-role">Morador, Res. Parque das Águas — RJ</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-section">
+  <div class="section-inner">
+    <h2 class="section-title">Pronto para transformar a gestão do seu condomínio?</h2>
+    <p class="section-desc">Comece gratuitamente por 30 dias. Sem cartão de crédito, sem burocracia.</p>
+    <div class="cta-actions">
+      <a href="#" class="btn-navy">Criar conta gratuita →</a>
+      <a href="#" class="btn-outline">Agendar demonstração</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="#" class="nav-logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="#E8A320" stroke-width="2" fill="none" stroke-linejoin="round"/><path d="M9 22V12h6v10" stroke="#E8A320" stroke-width="2" fill="none"/></svg>
+          </div>
+          Condo<span class="accent">Gestor</span>
+        </a>
+        <p>A plataforma completa para gestão de condomínios residenciais e comerciais. Simples, eficiente e moderno.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Produto</h4>
+        <ul>
+          <li><a href="#">Funcionalidades</a></li>
+          <li><a href="#">Planos e preços</a></li>
+          <li><a href="#">Integrações</a></li>
+          <li><a href="#">Novidades</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Empresa</h4>
+        <ul>
+          <li><a href="#">Sobre nós</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Parceiros</a></li>
+          <li><a href="#">Carreiras</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Suporte</h4>
+        <ul>
+          <li><a href="#">Central de ajuda</a></li>
+          <li><a href="#">Documentação</a></li>
+          <li><a href="#">Contato</a></li>
+          <li><a href="#">Status do sistema</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 CondoGestor. Todos os direitos reservados.</span>
+      <span><a href="#">Política de Privacidade</a> · <a href="#">Termos de Uso</a></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+function switchTab(btn, tabId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + tabId).classList.add('active');
+}
+</script>
+
+</body>
 </html>
