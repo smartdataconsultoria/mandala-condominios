@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CondoGestor — Confirmação</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #0B1F3A; --gold: #E8A320;
+    --white: #FFFFFF; --off-white: #F7F6F2; --border: #E2E8F0;
+    --text-dark: #0B1F3A; --text-mid: #445571; --text-light: #8899B4;
+    --green: #16A34A; --green-bg: #DCFCE7;
+    --red: #DC2626; --red-bg: #FEF2F2;
+    --radius: 14px; --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+  }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--off-white);
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 2rem;
+  }
+  .card {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 100%; max-width: 420px;
+    box-shadow: 0 8px 40px rgba(11,31,58,0.1);
+    text-align: center;
+  }
+  .logo {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    margin-bottom: 2rem; text-decoration: none;
+  }
+  .logo-icon {
+    width: 40px; height: 40px; background: var(--navy);
+    border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  }
+  .logo-icon svg { width: 22px; height: 22px; }
+  .logo-text { font-size: 1.3rem; font-weight: 800; color: var(--navy); }
+  .logo-text span { color: var(--gold); }
+
+  .status-icon {
+    width: 64px; height: 64px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.25rem;
+  }
+  .status-icon svg { width: 28px; height: 28px; }
+  .status-icon.loading { background: var(--off-white); animation: pulse 1.5s infinite; }
+  .status-icon.success { background: var(--green-bg); }
+  .status-icon.error   { background: var(--red-bg); }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+  h2 { font-size: 1.3rem; font-weight: 800; color: var(--navy); margin-bottom: 0.5rem; }
+  p  { font-size: 0.9rem; color: var(--text-mid); line-height: 1.6; margin-bottom: 1.5rem; }
+
+  /* Form nova senha */
+  .form-box { text-align: left; }
+  .field { margin-bottom: 1rem; }
+  .field label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--navy); margin-bottom: 5px; }
+  .field input {
+    width: 100%; height: 46px; padding: 0 14px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    font-family: inherit; font-size: 0.9rem; color: var(--text-dark);
+    outline: none; transition: border-color var(--transition);
+  }
+  .field input:focus { border-color: var(--navy); }
+  .field .hint { font-size: 0.72rem; color: var(--text-light); margin-top: 4px; }
+
+  .btn {
+    width: 100%; height: 48px;
+    background: var(--navy); border: none; border-radius: 10px;
+    font-family: inherit; font-size: 0.95rem; font-weight: 700;
+    color: var(--white); cursor: pointer;
+    transition: all var(--transition);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-top: 0.5rem;
+  }
+  .btn:hover { background: #142D52; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(11,31,58,0.2); }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .error-msg {
+    background: var(--red-bg); border: 1px solid #FECACA;
+    border-radius: 8px; padding: 10px 14px;
+    font-size: 0.82rem; color: var(--red);
+    margin-bottom: 1rem; display: none;
+  }
+  .error-msg.show { display: block; }
+
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white; border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .link-login {
+    display: inline-block; margin-top: 1.25rem;
+    font-size: 0.85rem; color: var(--text-light);
+    text-decoration: none;
+  }
+  .link-login:hover { color: var(--navy); }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <a href="/public/index.html" class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="#E8A320" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M9 22V12h6v10" stroke="#E8A320" stroke-width="2"/>
+      </svg>
+    </div>
+    <span class="logo-text">Condo<span>Gestor</span></span>
+  </a>
+
+  <!-- Estado: carregando -->
+  <div id="estado-loading">
+    <div class="status-icon loading">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#8899B4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+      </svg>
+    </div>
+    <h2>Verificando...</h2>
+    <p>Aguarde enquanto processamos sua confirmação.</p>
+  </div>
+
+  <!-- Estado: criar nova senha -->
+  <div id="estado-senha" style="display:none">
+    <div class="status-icon success">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+    </div>
+    <h2>E-mail confirmado!</h2>
+    <p>Crie uma senha para acessar o CondoGestor.</p>
+
+    <div class="form-box">
+      <div class="error-msg" id="erro-senha"></div>
+      <div class="field">
+        <label>Nova senha *</label>
+        <input type="password" id="nova-senha" placeholder="Mínimo 6 caracteres" minlength="6">
+      </div>
+      <div class="field">
+        <label>Confirmar senha *</label>
+        <input type="password" id="confirmar-senha" placeholder="Repita a senha">
+        <div class="hint">Use pelo menos 6 caracteres</div>
+      </div>
+      <button class="btn" id="btn-senha" onclick="definirSenha()">
+        <span class="btn-text">Criar minha senha →</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Estado: sucesso final -->
+  <div id="estado-sucesso" style="display:none">
+    <div class="status-icon success">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+    </div>
+    <h2>Tudo pronto!</h2>
+    <p>Sua senha foi criada com sucesso. Você já pode entrar no sistema.</p>
+    <button class="btn" onclick="window.location.href='/login.html'">Ir para o login →</button>
+  </div>
+
+  <!-- Estado: erro -->
+  <div id="estado-erro" style="display:none">
+    <div class="status-icon error">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+      </svg>
+    </div>
+    <h2>Link inválido</h2>
+    <p id="erro-msg">Este link de confirmação expirou ou já foi usado. Solicite um novo cadastro à administradora.</p>
+    <button class="btn" onclick="window.location.href='/login.html'">Voltar ao login</button>
+  </div>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+  const supabase = createClient(
+    'https://siczyohqmlrmirqgzlxb.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw'
+  )
+
+  function mostrarEstado(id) {
+    ['estado-loading','estado-senha','estado-sucesso','estado-erro'].forEach(e => {
+      document.getElementById(e).style.display = e === id ? 'block' : 'none'
+    })
+  }
+
+  // Processa o token da URL
+  // O Supabase envia o token como hash fragment: #access_token=...&type=signup
+  async function processarCallback() {
+    const hash = window.location.hash.substring(1)
+    const params = new URLSearchParams(hash)
+
+    const accessToken  = params.get('access_token')
+    const refreshToken = params.get('refresh_token')
+    const type         = params.get('type')
+    const errorCode    = params.get('error_code')
+    const errorDesc    = params.get('error_description')
+
+    // Erro vindo da URL
+    if (errorCode) {
+      document.getElementById('erro-msg').textContent =
+        errorDesc?.replace(/\+/g,' ') || 'Link inválido ou expirado.'
+      mostrarEstado('estado-erro')
+      return
+    }
+
+    // Sem token
+    if (!accessToken) {
+      // Verifica se já há sessão ativa (usuário já confirmado)
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        redirecionarPorRole(session)
+      } else {
+        mostrarEstado('estado-erro')
+      }
+      return
+    }
+
+    // Define a sessão com o token recebido
+    const { data, error } = await supabase.auth.setSession({
+      access_token:  accessToken,
+      refresh_token: refreshToken,
+    })
+
+    if (error || !data.session) {
+      document.getElementById('erro-msg').textContent = 'Link expirado. Solicite um novo cadastro.'
+      mostrarEstado('estado-erro')
+      return
+    }
+
+    // Se é confirmação de signup, pede para criar senha
+    if (type === 'signup' || type === 'invite') {
+      mostrarEstado('estado-senha')
+      return
+    }
+
+    // Se é recovery (reset de senha)
+    if (type === 'recovery') {
+      mostrarEstado('estado-senha')
+      document.querySelector('#estado-senha h2').textContent = 'Redefinir senha'
+      document.querySelector('#estado-senha p').textContent = 'Digite sua nova senha abaixo.'
+      return
+    }
+
+    // Outros tipos — redireciona direto
+    redirecionarPorRole(data.session)
+  }
+
+  async function redirecionarPorRole(session) {
+    const { data: perfil } = await supabase
+      .from('usuarios').select('role')
+      .eq('id', session.user.id).single()
+
+    const destinos = {
+      administradora: '/admin/index.html',
+      sindico:        '/sindico/dashboard.html',
+      morador:        '/morador/avisos.html',
+    }
+    window.location.href = destinos[perfil?.role] || '/login.html'
+  }
+
+  window.definirSenha = async function() {
+    const senha    = document.getElementById('nova-senha').value
+    const confirma = document.getElementById('confirmar-senha').value
+    const erroEl   = document.getElementById('erro-senha')
+    const btn      = document.getElementById('btn-senha')
+
+    erroEl.classList.remove('show')
+
+    if (senha.length < 6) {
+      erroEl.textContent = 'A senha precisa ter pelo menos 6 caracteres.'
+      erroEl.classList.add('show'); return
+    }
+    if (senha !== confirma) {
+      erroEl.textContent = 'As senhas não coincidem.'
+      erroEl.classList.add('show'); return
+    }
+
+    btn.disabled = true
+    btn.innerHTML = '<div class="spinner"></div>'
+
+    const { error } = await supabase.auth.updateUser({ password: senha })
+
+    btn.disabled = false
+    btn.innerHTML = '<span class="btn-text">Criar minha senha →</span>'
+
+    if (error) {
+      erroEl.textContent = 'Erro ao definir senha: ' + error.message
+      erroEl.classList.add('show'); return
+    }
+
+    mostrarEstado('estado-sucesso')
+  }
+
+  // Inicia
+  await processarCallback()
+</script>
+
+</body>
+</html>
