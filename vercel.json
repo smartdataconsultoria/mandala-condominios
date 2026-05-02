@@ -2,23 +2,29 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/shared/:file",       "destination": "/shared/:file"             },
+    { "source": "/shared/supabase.js", "destination": "/shared/supabase.js" },
+    { "source": "/shared/auth.js",     "destination": "/shared/auth.js"     },
+    { "source": "/shared/router.js",   "destination": "/shared/router.js"   },
+
     { "source": "/login",              "destination": "/public/login.html"        },
     { "source": "/cadastro",           "destination": "/public/cadastro.html"     },
+
     { "source": "/admin",              "destination": "/admin/index.html"         },
     { "source": "/admin/condominios",  "destination": "/admin/condominios.html"   },
     { "source": "/admin/financeiro",   "destination": "/admin/financeiro.html"    },
     { "source": "/admin/usuarios",     "destination": "/admin/usuarios.html"      },
     { "source": "/admin/relatorios",   "destination": "/admin/relatorios.html"    },
-    { "source": "/sindico",            "destination": "/sindico/dashboard.html"   },
-    { "source": "/sindico/financeiro", "destination": "/sindico/financeiro.html"  },
-    { "source": "/sindico/moradores",  "destination": "/sindico/moradores.html"   },
-    { "source": "/sindico/chamados",   "destination": "/sindico/chamados.html"    },
-    { "source": "/sindico/documentos", "destination": "/sindico/documentos.html"  },
-    { "source": "/sindico/orcamento",  "destination": "/sindico/orcamento.html"   },
-    { "source": "/sindico/categorias", "destination": "/sindico/categorias.html"  },
-    { "source": "/sindico/metas",      "destination": "/sindico/metas.html"       },
-    { "source": "/sindico/transacoes", "destination": "/sindico/transacoes.html"  },
+
+    { "source": "/sindico",              "destination": "/sindico/dashboard.html"   },
+    { "source": "/sindico/financeiro",   "destination": "/sindico/financeiro.html"  },
+    { "source": "/sindico/moradores",    "destination": "/sindico/moradores.html"   },
+    { "source": "/sindico/chamados",     "destination": "/sindico/chamados.html"    },
+    { "source": "/sindico/documentos",   "destination": "/sindico/documentos.html"  },
+    { "source": "/sindico/orcamento",    "destination": "/sindico/orcamento.html"   },
+    { "source": "/sindico/categorias",   "destination": "/sindico/categorias.html"  },
+    { "source": "/sindico/metas",        "destination": "/sindico/metas.html"       },
+    { "source": "/sindico/transacoes",   "destination": "/sindico/transacoes.html"  },
+
     { "source": "/morador",            "destination": "/morador/avisos.html"      },
     { "source": "/morador/boleto",     "destination": "/morador/boleto.html"      },
     { "source": "/morador/chamados",   "destination": "/morador/chamados.html"    },
@@ -28,9 +34,10 @@
   ],
   "headers": [
     {
-      "source": "/shared/(.*).js",
+      "source": "/shared/(.*)\\.js",
       "headers": [
-        { "key": "Content-Type", "value": "application/javascript" }
+        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" },
+        { "key": "Cache-Control", "value": "no-cache" }
       ]
     }
   ]
