@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CondoGestor — Boletos</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #0B1F3A; --navy-light: #142D52; --gold: #E8A320;
+    --white: #FFFFFF; --off-white: #F7F6F2; --border: #E2E8F0;
+    --text-dark: #0B1F3A; --text-mid: #445571; --text-light: #8899B4;
+    --green: #16A34A; --green-bg: #DCFCE7;
+    --red: #DC2626; --red-bg: #FEF2F2;
+    --amber: #D97706; --amber-bg: #FEF3C7;
+    --blue: #2563EB; --blue-bg: #EFF6FF;
+    --sidebar-w: 240px; --radius: 12px; --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+  }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--off-white); color: var(--text-dark); display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar { width: var(--sidebar-w); background: var(--navy); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; overflow-y: auto; }
+  .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 1.5rem 1.25rem 1.25rem; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 0.5rem; }
+  .logo-icon { width: 34px; height: 34px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .logo-icon svg { width: 18px; height: 18px; }
+  .logo-name { font-size: 1.05rem; font-weight: 800; color: var(--white); }
+  .logo-name span { color: var(--gold); }
+  .sidebar-section { padding: 0 0.75rem; margin-bottom: 0.25rem; }
+  .sidebar-section-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0.75rem 0.5rem 0.4rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.6); transition: all var(--transition); margin-bottom: 2px; }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: var(--white); }
+  .nav-item.active { background: rgba(232,163,32,0.15); color: #F5C35A; }
+  .nav-item.active svg { opacity: 1; }
+  .sidebar-bottom { margin-top: auto; padding: 1rem 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); }
+  .user-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,0.06); }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--navy); flex-shrink: 0; }
+  .user-name { font-size: 0.82rem; font-weight: 600; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+  .user-sub { font-size: 0.7rem; color: rgba(255,255,255,0.4); }
+  .logout-btn { margin-left: auto; background: none; border: none; cursor: pointer; padding: 4px; color: rgba(255,255,255,0.4); }
+  .logout-btn:hover { color: var(--white); }
+  .logout-btn svg { width: 15px; height: 15px; }
+
+  /* MAIN */
+  .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+  .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 40; }
+  .topbar h1 { font-size: 1rem; font-weight: 700; color: var(--navy); }
+  .topbar p { font-size: 0.75rem; color: var(--text-light); }
+  .topbar-right { display: flex; gap: 10px; }
+  .btn-sm { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; font-family: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all var(--transition); text-decoration: none; border: none; }
+  .btn-sm svg { width: 14px; height: 14px; }
+  .btn-primary-sm { background: var(--navy); color: var(--white); }
+  .btn-primary-sm:hover { background: var(--navy-light); }
+  .btn-ghost-sm { background: var(--off-white); color: var(--text-mid); border: 1px solid var(--border); }
+  .btn-ghost-sm:hover { background: var(--border); }
+  .btn-success-sm { background: var(--green-bg); color: var(--green); border: 1px solid #BBF7D0; }
+  .btn-success-sm:hover { background: #BBF7D0; }
+  .content { padding: 1.75rem 2rem; flex: 1; }
+
+  /* MÉTRICAS */
+  .metrics-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1.75rem; }
+  .metric-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; }
+  .metric-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+  .metric-label { font-size: 0.78rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
+  .metric-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .metric-icon svg { width: 16px; height: 16px; }
+  .metric-value { font-size: 1.5rem; font-weight: 800; color: var(--navy); letter-spacing: -0.5px; line-height: 1; margin-bottom: 4px; }
+  .metric-change { font-size: 0.75rem; font-weight: 600; }
+  .change-up { color: var(--green); } .change-down { color: var(--red); } .change-neutral { color: var(--text-light); }
+
+  /* FILTROS */
+  .filters { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .search-box { display: flex; align-items: center; gap: 8px; background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 0 12px; height: 38px; flex: 1; max-width: 280px; }
+  .search-box:focus-within { border-color: var(--navy); }
+  .search-box svg { width: 15px; height: 15px; color: var(--text-light); flex-shrink: 0; }
+  .search-box input { border: none; outline: none; font-family: inherit; font-size: 0.85rem; color: var(--text-dark); background: transparent; width: 100%; }
+  .search-box input::placeholder { color: var(--text-light); }
+  .filter-select { height: 38px; padding: 0 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.82rem; color: var(--text-mid); background: var(--white); cursor: pointer; outline: none; }
+  .results-count { font-size: 0.8rem; color: var(--text-light); margin-left: auto; }
+
+  /* TABELA */
+  .table-wrap { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table th { text-align: left; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-light); padding: 10px 1.25rem; border-bottom: 1px solid var(--border); background: var(--off-white); white-space: nowrap; }
+  .data-table td { padding: 12px 1.25rem; font-size: 0.83rem; color: var(--text-mid); border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--off-white); }
+  .morador-cell { font-weight: 600; color: var(--navy); }
+  .morador-unidade { font-size: 0.75rem; color: var(--text-light); }
+  .valor-cell { font-weight: 700; color: var(--navy); }
+  .vencido { color: var(--red) !important; }
+
+  .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+  .badge-green { background: var(--green-bg); color: var(--green); }
+  .badge-red   { background: var(--red-bg);   color: var(--red);   }
+  .badge-amber { background: var(--amber-bg); color: var(--amber); }
+  .badge-gray  { background: #F1F5F9; color: #64748B; }
+
+  .empty-state { display: flex; flex-direction: column; align-items: center; padding: 3rem; gap: 0.75rem; text-align: center; }
+  .empty-state svg { width: 36px; height: 36px; opacity: 0.2; }
+  .empty-state h3 { font-size: 1rem; font-weight: 700; color: var(--navy); }
+  .empty-state p { font-size: 0.83rem; color: var(--text-light); }
+
+  /* MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(11,31,58,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity var(--transition); }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal { background: var(--white); border-radius: 16px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; transform: translateY(16px); transition: transform var(--transition); }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); }
+  .modal-title { font-size: 1rem; font-weight: 700; color: var(--navy); }
+  .modal-close { background: none; border: none; cursor: pointer; padding: 4px; color: var(--text-light); border-radius: 6px; }
+  .modal-close:hover { background: var(--off-white); }
+  .modal-close svg { width: 18px; height: 18px; }
+  .modal-body { padding: 1.5rem; }
+  .modal-footer { display: flex; gap: 8px; justify-content: flex-end; padding: 1rem 1.5rem; border-top: 1px solid var(--border); }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field.span2 { grid-column: span 2; }
+  .field label { font-size: 0.8rem; font-weight: 600; color: var(--navy); }
+  .field input, .field select { height: 40px; padding: 0 12px; border: 1.5px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.875rem; color: var(--text-dark); background: var(--white); outline: none; transition: border-color var(--transition); }
+  .field input:focus, .field select:focus { border-color: var(--navy); }
+  .field input::placeholder { color: var(--text-light); }
+
+  .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--navy); color: var(--white); padding: 12px 18px; border-radius: 10px; font-size: 0.85rem; font-weight: 500; z-index: 200; transform: translateY(80px); opacity: 0; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { background: var(--green); }
+  .toast.error { background: var(--red); }
+  .spinner { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (max-width: 1024px) { .metrics-grid { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width: 700px) { .sidebar { transform: translateX(-100%); } .main { margin-left: 0; } .form-grid { grid-template-columns: 1fr; } .field.span2 { grid-column: span 1; } }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <a href="/admin/index.html" class="sidebar-logo">
+    <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="#0B1F3A" stroke-width="2.5" stroke-linejoin="round"/><path d="M9 22V12h6v10" stroke="#0B1F3A" stroke-width="2.5"/></svg></div>
+    <span class="logo-name">Condo<span>Gestor</span></span>
+  </a>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Principal</div>
+    <a href="/admin/index.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
+    <a href="/admin/condominios.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path d="M9 22V12h6v10"/></svg>Condomínios</a>
+    <a href="/admin/usuarios.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Usuários</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Financeiro</div>
+    <a href="/admin/financeiro.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Financeiro</a>
+    <a href="/admin/boletos.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Boletos</a>
+    <a href="/admin/relatorios.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Relatórios</a>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-avatar" id="avatar-initials">--</div>
+      <div><div class="user-name" id="user-name">Carregando...</div><div class="user-sub">Administradora</div></div>
+      <button class="logout-btn" onclick="fazerLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div><h1>Boletos</h1><p id="subtitulo">Carregando...</p></div>
+    <div class="topbar-right">
+      <button class="btn-sm btn-ghost-sm" onclick="gerarEmLote()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Gerar em lote
+      </button>
+      <button class="btn-sm btn-primary-sm" onclick="abrirModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Novo boleto
+      </button>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-label">Total emitido</span>
+          <div class="metric-icon" style="background:var(--blue-bg)"><svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+        </div>
+        <div class="metric-value" id="m-total">—</div>
+        <div class="metric-change change-neutral" id="m-total-sub">boletos este mês</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-label">Valor recebido</span>
+          <div class="metric-icon" style="background:var(--green-bg)"><svg viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="metric-value" id="m-recebido">R$ —</div>
+        <div class="metric-change change-up" id="m-recebido-sub">pagos</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-label">Em aberto</span>
+          <div class="metric-icon" style="background:var(--amber-bg)"><svg viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        </div>
+        <div class="metric-value" id="m-aberto">R$ —</div>
+        <div class="metric-change change-neutral" id="m-aberto-sub">pendentes</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-label">Inadimplência</span>
+          <div class="metric-icon" style="background:var(--red-bg)"><svg viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+        </div>
+        <div class="metric-value" id="m-inadim">R$ —</div>
+        <div class="metric-change change-down" id="m-inadim-sub">em atraso</div>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="busca" placeholder="Buscar morador ou descrição..." oninput="filtrar()">
+      </div>
+      <select class="filter-select" id="filtro-status" onchange="filtrar()">
+        <option value="todos">Todos os status</option>
+        <option value="pendente">Pendente</option>
+        <option value="pago">Pago</option>
+        <option value="atrasado">Atrasado</option>
+        <option value="cancelado">Cancelado</option>
+      </select>
+      <select class="filter-select" id="filtro-condo" onchange="filtrar()">
+        <option value="todos">Todos os condomínios</option>
+      </select>
+      <select class="filter-select" id="filtro-mes" onchange="filtrar()">
+        <option value="todos">Todos os meses</option>
+      </select>
+      <span class="results-count" id="results-count"></span>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Morador</th>
+            <th>Condomínio</th>
+            <th>Descrição</th>
+            <th>Vencimento</th>
+            <th>Valor</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-boletos">
+          <tr><td colspan="7"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg><h3>Carregando...</h3></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NOVO BOLETO -->
+<div class="modal-overlay" id="modal-overlay" onclick="fecharModalFora(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-titulo">Novo boleto</span>
+      <button class="modal-close" onclick="fecharModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field">
+          <label>Condomínio *</label>
+          <select id="f-condo" onchange="carregarMoradores()"><option value="">Selecione</option></select>
+        </div>
+        <div class="field">
+          <label>Morador *</label>
+          <select id="f-morador"><option value="">Selecione o condomínio</option></select>
+        </div>
+        <div class="field span2">
+          <label>Descrição *</label>
+          <input type="text" id="f-descricao" placeholder="Ex: Taxa condominial Junho/2025">
+        </div>
+        <div class="field">
+          <label>Valor *</label>
+          <input type="number" id="f-valor" placeholder="0,00" min="0" step="0.01">
+        </div>
+        <div class="field">
+          <label>Vencimento *</label>
+          <input type="date" id="f-vencimento">
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <select id="f-status">
+            <option value="pendente">Pendente</option>
+            <option value="pago">Pago</option>
+            <option value="atrasado">Atrasado</option>
+          </select>
+        </div>
+        <div class="field" id="campo-pagamento" style="display:none">
+          <label>Data do pagamento</label>
+          <input type="date" id="f-pagamento">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm btn-ghost-sm" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-sm btn-primary-sm" id="btn-salvar" onclick="salvar()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Salvar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GERAR EM LOTE -->
+<div class="modal-overlay" id="modal-lote" onclick="fecharLoteFora(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Gerar boletos em lote</span>
+      <button class="modal-close" onclick="fecharLote()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:0.85rem;color:var(--text-mid);margin-bottom:1.25rem;line-height:1.6">Gera um boleto para cada morador ativo do condomínio selecionado.</p>
+      <div class="form-grid">
+        <div class="field span2">
+          <label>Condomínio *</label>
+          <select id="lote-condo"><option value="">Selecione</option></select>
+        </div>
+        <div class="field span2">
+          <label>Descrição *</label>
+          <input type="text" id="lote-descricao" placeholder="Ex: Taxa condominial Junho/2025">
+        </div>
+        <div class="field">
+          <label>Valor por unidade *</label>
+          <input type="number" id="lote-valor" placeholder="0,00" min="0" step="0.01">
+        </div>
+        <div class="field">
+          <label>Vencimento *</label>
+          <input type="date" id="lote-vencimento">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm btn-ghost-sm" onclick="fecharLote()">Cancelar</button>
+      <button class="btn-sm btn-primary-sm" id="btn-lote" onclick="salvarLote()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Gerar boletos
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="toast-msg"></span></div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+  const supabase = createClient(
+    'https://siczyohqmlrmirqgzlxb.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw'
+  )
+
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) { window.location.href = '/login.html'; throw new Error() }
+  const { data: perfil } = await supabase.from('usuarios').select('nome, role, administradora_id').eq('id', session.user.id).single()
+  if (!perfil || perfil.role !== 'administradora') {
+    const d = { sindico: '/sindico/dashboard.html', morador: '/morador/avisos.html' }
+    window.location.href = d[perfil?.role] || '/login.html'; throw new Error()
+  }
+
+  const adminId = perfil.administradora_id
+  document.getElementById('user-name').textContent = perfil.nome || session.user.email
+  document.getElementById('avatar-initials').textContent = (perfil.nome||session.user.email).split(' ').slice(0,2).map(p=>p[0].toUpperCase()).join('')
+  window.fazerLogout = async () => { await supabase.auth.signOut(); window.location.href = '/login.html' }
+
+  const fmt = (v) => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+  const fmtData = (d) => d ? new Date(d+'T00:00:00').toLocaleDateString('pt-BR') : '—'
+  const statusLabel = { pendente:'Pendente', pago:'Pago', atrasado:'Atrasado', cancelado:'Cancelado' }
+  const statusBadge = { pendente:'badge-amber', pago:'badge-green', atrasado:'badge-red', cancelado:'badge-gray' }
+
+  let boletos = [], condominios = [], moradores = [], editandoId = null
+
+  async function carregar() {
+    const { data: condos } = await supabase.from('condominios').select('id, nome').eq('administradora_id', adminId).order('nome')
+    condominios = condos || []
+    const opts = condominios.map(c => `<option value="${c.id}">${c.nome}</option>`).join('')
+    document.getElementById('filtro-condo').innerHTML = '<option value="todos">Todos os condomínios</option>' + opts
+    document.getElementById('f-condo').innerHTML = '<option value="">Selecione</option>' + opts
+    document.getElementById('lote-condo').innerHTML = '<option value="">Selecione</option>' + opts
+
+    const condIds = condominios.map(c => c.id)
+    if (condIds.length === 0) { renderizar([]); return }
+
+    const { data: mors } = await supabase.from('usuarios').select('id, nome, unidade, bloco, condominio_id').in('condominio_id', condIds).eq('role', 'morador')
+    moradores = mors || []
+
+    const { data } = await supabase.from('financeiro').select('*').in('condominio_id', condIds).eq('tipo', 'receita').order('data_vencimento', { ascending: false })
+    boletos = data || []
+
+    // Meses disponíveis
+    const meses = [...new Set(boletos.map(b => b.data_vencimento?.substring(0,7)).filter(Boolean))].sort().reverse()
+    const selMes = document.getElementById('filtro-mes')
+    selMes.innerHTML = '<option value="todos">Todos os meses</option>' + meses.map(m => {
+      const [ano, mes] = m.split('-')
+      const label = new Date(ano, mes-1).toLocaleDateString('pt-BR', { month:'long', year:'numeric' })
+      return `<option value="${m}">${label}</option>`
+    }).join('')
+
+    // Métricas
+    const pagos     = boletos.filter(b => b.status === 'pago')
+    const pendentes = boletos.filter(b => b.status === 'pendente')
+    const atrasados = boletos.filter(b => b.status === 'atrasado')
+    document.getElementById('m-total').textContent = boletos.length
+    document.getElementById('m-total-sub').textContent = `${boletos.length} boleto${boletos.length!==1?'s':''} no total`
+    document.getElementById('m-recebido').textContent = fmt(pagos.reduce((s,b) => s+Number(b.valor), 0))
+    document.getElementById('m-recebido-sub').textContent = `${pagos.length} pago${pagos.length!==1?'s':''}`
+    document.getElementById('m-aberto').textContent = fmt(pendentes.reduce((s,b) => s+Number(b.valor), 0))
+    document.getElementById('m-aberto-sub').textContent = `${pendentes.length} pendente${pendentes.length!==1?'s':''}`
+    document.getElementById('m-inadim').textContent = fmt(atrasados.reduce((s,b) => s+Number(b.valor), 0))
+    document.getElementById('m-inadim-sub').textContent = `${atrasados.length} em atraso`
+
+    renderizar(boletos)
+  }
+
+  function nomeCondo(id) { return condominios.find(c => c.id === id)?.nome || '—' }
+  function nomeMorador(id) {
+    const m = moradores.find(m => m.id === id)
+    return m ? { nome: m.nome||'—', unidade: [m.unidade, m.bloco].filter(Boolean).join(' · ') } : { nome: '—', unidade: '' }
+  }
+
+  function isVencido(data) {
+    if (!data) return false
+    return new Date(data+'T00:00:00') < new Date() 
+  }
+
+  function renderizar(lista) {
+    document.getElementById('results-count').textContent = lista.length === boletos.length
+      ? `${lista.length} boleto${lista.length!==1?'s':''}`
+      : `${lista.length} de ${boletos.length}`
+
+    const tbody = document.getElementById('tabela-boletos')
+    if (lista.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg><h3>Nenhum boleto encontrado</h3><p>Clique em "Novo boleto" para emitir.</p></div></td></tr>`
+      return
+    }
+    tbody.innerHTML = lista.map(b => {
+      const mor = nomeMorador(b.morador_id)
+      const vencido = b.status === 'pendente' && isVencido(b.data_vencimento)
+      return `<tr>
+        <td>
+          <div class="morador-cell">${mor.nome}</div>
+          ${mor.unidade ? `<div class="morador-unidade">${mor.unidade}</div>` : ''}
+        </td>
+        <td>${nomeCondo(b.condominio_id)}</td>
+        <td>${b.descricao}${b.categoria ? `<br><span style="font-size:0.72rem;color:var(--text-light)">${b.categoria}</span>` : ''}</td>
+        <td class="${vencido ? 'vencido' : ''}">${fmtData(b.data_vencimento)}</td>
+        <td class="valor-cell">${fmt(b.valor)}</td>
+        <td><span class="badge ${statusBadge[b.status]||'badge-gray'}">${statusLabel[b.status]||b.status}</span></td>
+        <td>
+          <div style="display:flex;gap:6px">
+            ${b.status !== 'pago' ? `<button class="btn-sm btn-success-sm" onclick="marcarPago('${b.id}')">✓ Pago</button>` : ''}
+            <button class="btn-sm btn-ghost-sm" onclick="editarBoleto('${b.id}')">Editar</button>
+          </div>
+        </td>
+      </tr>`
+    }).join('')
+  }
+
+  window.filtrar = function() {
+    const busca  = document.getElementById('busca').value.toLowerCase()
+    const status = document.getElementById('filtro-status').value
+    const condo  = document.getElementById('filtro-condo').value
+    const mes    = document.getElementById('filtro-mes').value
+    renderizar(boletos.filter(b => {
+      const mor = nomeMorador(b.morador_id)
+      const matchBusca = (mor.nome||'').toLowerCase().includes(busca) || (b.descricao||'').toLowerCase().includes(busca)
+      const matchStatus= status === 'todos' || b.status === status
+      const matchCondo = condo  === 'todos' || b.condominio_id === condo
+      const matchMes   = mes    === 'todos' || (b.data_vencimento||'').startsWith(mes)
+      return matchBusca && matchStatus && matchCondo && matchMes
+    }))
+  }
+
+  // Carrega moradores do condomínio selecionado no form
+  window.carregarMoradores = function() {
+    const condoId = document.getElementById('f-condo').value
+    const mors = moradores.filter(m => m.condominio_id === condoId)
+    document.getElementById('f-morador').innerHTML = mors.length === 0
+      ? '<option value="">Nenhum morador neste condomínio</option>'
+      : '<option value="">Selecione o morador</option>' + mors.map(m => `<option value="${m.id}">${m.nome||m.id}${m.unidade?' — '+m.unidade:''}</option>`).join('')
+  }
+
+  // Status muda → mostra/esconde campo de pagamento
+  document.getElementById('f-status').addEventListener('change', function() {
+    document.getElementById('campo-pagamento').style.display = this.value === 'pago' ? '' : 'none'
+  })
+
+  window.abrirModal = function(id = null) {
+    editandoId = id
+    document.getElementById('modal-titulo').textContent = id ? 'Editar boleto' : 'Novo boleto'
+    if (id) {
+      const b = boletos.find(x => x.id === id)
+      document.getElementById('f-condo').value      = b.condominio_id || ''
+      carregarMoradores()
+      setTimeout(() => { document.getElementById('f-morador').value = b.morador_id || '' }, 100)
+      document.getElementById('f-descricao').value  = b.descricao || ''
+      document.getElementById('f-valor').value      = b.valor || ''
+      document.getElementById('f-vencimento').value = b.data_vencimento || ''
+      document.getElementById('f-status').value     = b.status || 'pendente'
+      document.getElementById('f-pagamento').value  = b.data_pagamento || ''
+      document.getElementById('campo-pagamento').style.display = b.status === 'pago' ? '' : 'none'
+    } else {
+      document.getElementById('f-condo').value      = ''
+      document.getElementById('f-morador').innerHTML= '<option value="">Selecione o condomínio</option>'
+      document.getElementById('f-descricao').value  = ''
+      document.getElementById('f-valor').value      = ''
+      document.getElementById('f-vencimento').value = ''
+      document.getElementById('f-status').value     = 'pendente'
+      document.getElementById('f-pagamento').value  = ''
+      document.getElementById('campo-pagamento').style.display = 'none'
+    }
+    document.getElementById('modal-overlay').classList.add('open')
+  }
+  window.fecharModal     = () => { document.getElementById('modal-overlay').classList.remove('open'); editandoId = null }
+  window.fecharModalFora = (e) => { if (e.target===document.getElementById('modal-overlay')) fecharModal() }
+  window.editarBoleto    = (id) => abrirModal(id)
+
+  window.salvar = async function() {
+    const condo    = document.getElementById('f-condo').value
+    const morador  = document.getElementById('f-morador').value
+    const descricao= document.getElementById('f-descricao').value.trim()
+    const valor    = parseFloat(document.getElementById('f-valor').value)
+    const status   = document.getElementById('f-status').value
+    if (!condo || !morador || !descricao || !valor) { mostrarToast('Preencha todos os campos obrigatórios', 'error'); return }
+
+    const btn = document.getElementById('btn-salvar')
+    btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> Salvando...'
+
+    const dados = {
+      condominio_id: condo, morador_id: morador, descricao, valor, tipo: 'receita', status,
+      data_vencimento: document.getElementById('f-vencimento').value || null,
+      data_pagamento:  status === 'pago' ? (document.getElementById('f-pagamento').value || new Date().toISOString().split('T')[0]) : null,
+    }
+
+    let error
+    if (editandoId) {
+      ;({ error } = await supabase.from('financeiro').update(dados).eq('id', editandoId))
+    } else {
+      ;({ error } = await supabase.from('financeiro').insert(dados))
+    }
+
+    btn.disabled = false
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Salvar`
+
+    if (error) { mostrarToast('Erro: ' + error.message, 'error'); return }
+    mostrarToast(editandoId ? 'Boleto atualizado!' : 'Boleto criado!', 'success')
+    fecharModal(); await carregar()
+  }
+
+  window.marcarPago = async function(id) {
+    const { error } = await supabase.from('financeiro').update({
+      status: 'pago', data_pagamento: new Date().toISOString().split('T')[0]
+    }).eq('id', id)
+    if (error) { mostrarToast('Erro: ' + error.message, 'error'); return }
+    mostrarToast('Boleto marcado como pago!', 'success')
+    await carregar()
+  }
+
+  // Gerar em lote
+  window.gerarEmLote = () => document.getElementById('modal-lote').classList.add('open')
+  window.fecharLote  = () => document.getElementById('modal-lote').classList.remove('open')
+  window.fecharLoteFora = (e) => { if (e.target===document.getElementById('modal-lote')) fecharLote() }
+
+  window.salvarLote = async function() {
+    const condoId   = document.getElementById('lote-condo').value
+    const descricao = document.getElementById('lote-descricao').value.trim()
+    const valor     = parseFloat(document.getElementById('lote-valor').value)
+    const vencimento= document.getElementById('lote-vencimento').value
+    if (!condoId || !descricao || !valor || !vencimento) { mostrarToast('Preencha todos os campos', 'error'); return }
+
+    const morsLote = moradores.filter(m => m.condominio_id === condoId)
+    if (morsLote.length === 0) { mostrarToast('Nenhum morador neste condomínio', 'error'); return }
+
+    const btn = document.getElementById('btn-lote')
+    btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> Gerando...'
+
+    const inserir = morsLote.map(m => ({
+      condominio_id: condoId, morador_id: m.id, descricao, valor,
+      tipo: 'receita', status: 'pendente', data_vencimento: vencimento,
+    }))
+
+    const { error } = await supabase.from('financeiro').insert(inserir)
+    btn.disabled = false; btn.textContent = 'Gerar boletos'
+
+    if (error) { mostrarToast('Erro: ' + error.message, 'error'); return }
+    mostrarToast(`${morsLote.length} boleto${morsLote.length!==1?'s':''} gerado${morsLote.length!==1?'s':''}!`, 'success')
+    fecharLote(); await carregar()
+  }
+
+  function mostrarToast(msg, tipo = 'success') {
+    const t = document.getElementById('toast')
+    document.getElementById('toast-msg').textContent = msg
+    t.className = `toast ${tipo} show`
+    setTimeout(() => t.classList.remove('show'), 3000)
+  }
+
+  await carregar()
+</script>
+</body>
+</html>
