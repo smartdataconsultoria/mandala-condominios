@@ -1,0 +1,41 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/login",        "destination": "/public/login.html"        },
+    { "source": "/cadastro",     "destination": "/public/cadastro.html"     },
+
+    { "source": "/admin",              "destination": "/admin/index.html"         },
+    { "source": "/admin/condominios",  "destination": "/admin/condominios.html"   },
+    { "source": "/admin/financeiro",   "destination": "/admin/financeiro.html"    },
+    { "source": "/admin/usuarios",     "destination": "/admin/usuarios.html"      },
+    { "source": "/admin/relatorios",   "destination": "/admin/relatorios.html"    },
+
+    { "source": "/sindico",              "destination": "/sindico/dashboard.html"   },
+    { "source": "/sindico/financeiro",   "destination": "/sindico/financeiro.html"  },
+    { "source": "/sindico/moradores",    "destination": "/sindico/moradores.html"   },
+    { "source": "/sindico/chamados",     "destination": "/sindico/chamados.html"    },
+    { "source": "/sindico/documentos",   "destination": "/sindico/documentos.html"  },
+    { "source": "/sindico/orcamento",    "destination": "/sindico/orcamento.html"   },
+    { "source": "/sindico/manutencoes",  "destination": "/sindico/manutencoes.html" },
+    { "source": "/sindico/assembleias",  "destination": "/sindico/assembleias.html" },
+    { "source": "/sindico/categorias",   "destination": "/sindico/categorias.html"  },
+    { "source": "/sindico/metas",        "destination": "/sindico/metas.html"       },
+    { "source": "/sindico/transacoes",   "destination": "/sindico/transacoes.html"  },
+
+    { "source": "/morador",            "destination": "/morador/avisos.html"    },
+    { "source": "/morador/boleto",     "destination": "/morador/boleto.html"    },
+    { "source": "/morador/chamados",   "destination": "/morador/chamados.html"  },
+    { "source": "/morador/reservas",   "destination": "/morador/reservas.html"  },
+    { "source": "/morador/perfil",     "destination": "/morador/perfil.html"    },
+    { "source": "/morador/avisos",     "destination": "/morador/avisos.html"    }
+  ],
+  "headers": [
+    {
+      "source": "/shared/(.*).js",
+      "headers": [
+        { "key": "Content-Type", "value": "application/javascript" }
+      ]
+    }
+  ]
+}
