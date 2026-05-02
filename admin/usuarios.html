@@ -1,1 +1,505 @@
-gestão de acessos
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CondoGestor — Usuários</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #0B1F3A; --navy-light: #142D52; --gold: #E8A320; --gold-light: #F5C35A;
+    --white: #FFFFFF; --off-white: #F7F6F2; --border: #E2E8F0;
+    --text-dark: #0B1F3A; --text-mid: #445571; --text-light: #8899B4;
+    --green: #16A34A; --green-bg: #DCFCE7; --red: #DC2626; --red-bg: #FEF2F2;
+    --amber: #D97706; --amber-bg: #FEF3C7; --blue: #2563EB; --blue-bg: #EFF6FF;
+    --purple: #7C3AED; --purple-bg: #EDE9FE;
+    --sidebar-w: 240px; --radius: 12px; --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+  }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--off-white); color: var(--text-dark); display: flex; min-height: 100vh; }
+
+  .sidebar { width: var(--sidebar-w); background: var(--navy); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; overflow-y: auto; }
+  .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 1.5rem 1.25rem 1.25rem; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 0.5rem; }
+  .logo-icon { width: 34px; height: 34px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .logo-icon svg { width: 18px; height: 18px; }
+  .logo-name { font-size: 1.05rem; font-weight: 800; color: var(--white); letter-spacing: -0.3px; }
+  .logo-name span { color: var(--gold); }
+  .sidebar-section { padding: 0 0.75rem; margin-bottom: 0.25rem; }
+  .sidebar-section-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0.75rem 0.5rem 0.4rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.6); transition: all var(--transition); margin-bottom: 2px; cursor: pointer; border: none; background: none; width: 100%; text-align: left; font-family: inherit; }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: var(--white); }
+  .nav-item.active { background: rgba(232,163,32,0.15); color: var(--gold-light); }
+  .nav-item.active svg { opacity: 1; }
+  .sidebar-bottom { margin-top: auto; padding: 1rem 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); }
+  .user-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,0.06); }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--navy); flex-shrink: 0; }
+  .user-name { font-size: 0.82rem; font-weight: 600; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+  .user-role-label { font-size: 0.7rem; color: rgba(255,255,255,0.4); }
+  .logout-btn { margin-left: auto; background: none; border: none; cursor: pointer; padding: 4px; color: rgba(255,255,255,0.4); transition: color var(--transition); flex-shrink: 0; }
+  .logout-btn:hover { color: var(--white); }
+  .logout-btn svg { width: 15px; height: 15px; }
+
+  .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 40; }
+  .topbar-left h1 { font-size: 1rem; font-weight: 700; color: var(--navy); }
+  .topbar-left p { font-size: 0.75rem; color: var(--text-light); }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .btn-sm { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; font-family: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all var(--transition); text-decoration: none; border: none; }
+  .btn-sm svg { width: 14px; height: 14px; }
+  .btn-primary-sm { background: var(--navy); color: var(--white); }
+  .btn-primary-sm:hover { background: var(--navy-light); }
+  .btn-ghost-sm { background: var(--off-white); color: var(--text-mid); border: 1px solid var(--border); }
+  .btn-ghost-sm:hover { background: var(--border); }
+  .content { padding: 1.75rem 2rem; flex: 1; }
+
+  .filters { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .search-box { display: flex; align-items: center; gap: 8px; background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 0 12px; height: 38px; flex: 1; max-width: 320px; transition: border-color var(--transition); }
+  .search-box:focus-within { border-color: var(--navy); }
+  .search-box svg { width: 15px; height: 15px; color: var(--text-light); flex-shrink: 0; }
+  .search-box input { border: none; outline: none; font-family: inherit; font-size: 0.85rem; color: var(--text-dark); background: transparent; width: 100%; }
+  .search-box input::placeholder { color: var(--text-light); }
+  .filter-select { height: 38px; padding: 0 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.82rem; color: var(--text-mid); background: var(--white); cursor: pointer; outline: none; }
+  .results-count { font-size: 0.8rem; color: var(--text-light); margin-left: auto; }
+
+  .table-wrap { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table th { text-align: left; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-light); padding: 10px 1.25rem; border-bottom: 1px solid var(--border); background: var(--off-white); white-space: nowrap; }
+  .data-table td { padding: 13px 1.25rem; font-size: 0.83rem; color: var(--text-mid); border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--off-white); }
+
+  .user-cell { display: flex; align-items: center; gap: 10px; }
+  .u-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 700; color: var(--white); flex-shrink: 0; }
+  .u-name { font-weight: 600; color: var(--navy); font-size: 0.85rem; }
+  .u-email { font-size: 0.75rem; color: var(--text-light); }
+
+  .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+  .badge-green  { background: var(--green-bg);  color: var(--green);  }
+  .badge-red    { background: var(--red-bg);    color: var(--red);    }
+  .badge-blue   { background: var(--blue-bg);   color: var(--blue);   }
+  .badge-amber  { background: var(--amber-bg);  color: var(--amber);  }
+  .badge-purple { background: var(--purple-bg); color: var(--purple); }
+
+  .action-btns { display: flex; gap: 6px; }
+
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; gap: 1rem; text-align: center; }
+  .empty-icon { width: 56px; height: 56px; background: var(--border); border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+  .empty-icon svg { width: 24px; height: 24px; color: var(--text-light); }
+  .empty-state h3 { font-size: 1rem; font-weight: 700; color: var(--navy); }
+  .empty-state p { font-size: 0.85rem; color: var(--text-light); max-width: 280px; line-height: 1.6; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(11,31,58,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity var(--transition); }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal { background: var(--white); border-radius: 16px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; transform: translateY(16px); transition: transform var(--transition); }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); }
+  .modal-title { font-size: 1rem; font-weight: 700; color: var(--navy); }
+  .modal-close { background: none; border: none; cursor: pointer; padding: 4px; color: var(--text-light); border-radius: 6px; transition: all var(--transition); }
+  .modal-close:hover { background: var(--off-white); color: var(--navy); }
+  .modal-close svg { width: 18px; height: 18px; }
+  .modal-body { padding: 1.5rem; }
+  .modal-footer { display: flex; gap: 8px; justify-content: flex-end; padding: 1rem 1.5rem; border-top: 1px solid var(--border); }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field.span2 { grid-column: span 2; }
+  .field label { font-size: 0.8rem; font-weight: 600; color: var(--navy); }
+  .field input, .field select { height: 40px; padding: 0 12px; border: 1.5px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.875rem; color: var(--text-dark); background: var(--white); outline: none; transition: border-color var(--transition); }
+  .field input:focus, .field select:focus { border-color: var(--navy); }
+  .field input::placeholder { color: var(--text-light); }
+  .field-hint { font-size: 0.72rem; color: var(--text-light); }
+
+  .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--navy); color: var(--white); padding: 12px 18px; border-radius: 10px; font-size: 0.85rem; font-weight: 500; z-index: 200; transform: translateY(80px); opacity: 0; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { background: var(--green); }
+  .toast.error { background: var(--red); }
+  .toast svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .spinner { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (max-width: 700px) { .sidebar { transform: translateX(-100%); } .main { margin-left: 0; } .form-grid { grid-template-columns: 1fr; } .field.span2 { grid-column: span 1; } }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <a href="/admin/index.html" class="sidebar-logo">
+    <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="#0B1F3A" stroke-width="2.5" stroke-linejoin="round"/><path d="M9 22V12h6v10" stroke="#0B1F3A" stroke-width="2.5"/></svg></div>
+    <span class="logo-name">Condo<span>Gestor</span></span>
+  </a>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Principal</div>
+    <a href="/admin/index.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard
+    </a>
+    <a href="/admin/condominios.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path d="M9 22V12h6v10"/></svg>Condomínios
+    </a>
+    <a href="/admin/usuarios.html" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Usuários
+    </a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Financeiro</div>
+    <a href="/admin/financeiro.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Financeiro
+    </a>
+    <a href="/admin/relatorios.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Relatórios
+    </a>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-avatar" id="avatar-initials">--</div>
+      <div>
+        <div class="user-name" id="user-name">Carregando...</div>
+        <div class="user-role-label">Administradora</div>
+      </div>
+      <button class="logout-btn" onclick="fazerLogout()" title="Sair">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1>Usuários</h1>
+      <p id="subtitulo">Carregando...</p>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-sm btn-primary-sm" onclick="abrirModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Novo usuário
+      </button>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="filters">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="busca" placeholder="Buscar por nome ou e-mail..." oninput="filtrar()">
+      </div>
+      <select class="filter-select" id="filtro-role" onchange="filtrar()">
+        <option value="todos">Todos os perfis</option>
+        <option value="sindico">Síndico</option>
+        <option value="morador">Morador</option>
+      </select>
+      <select class="filter-select" id="filtro-condo" onchange="filtrar()">
+        <option value="todos">Todos os condomínios</option>
+      </select>
+      <span class="results-count" id="results-count"></span>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Usuário</th>
+            <th>Perfil</th>
+            <th>Condomínio</th>
+            <th>Unidade</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-usuarios">
+          <tr><td colspan="6">
+            <div class="empty-state">
+              <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+              <h3>Carregando usuários...</h3>
+            </div>
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="fecharModalFora(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-titulo">Novo usuário</span>
+      <button class="modal-close" onclick="fecharModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field span2">
+          <label>Nome completo *</label>
+          <input type="text" id="f-nome" placeholder="Ex: João da Silva">
+        </div>
+        <div class="field span2">
+          <label>E-mail *</label>
+          <input type="email" id="f-email" placeholder="email@exemplo.com">
+          <span class="field-hint">Uma senha provisória será enviada para este e-mail</span>
+        </div>
+        <div class="field">
+          <label>Perfil *</label>
+          <select id="f-role" onchange="toggleCamposRole()">
+            <option value="sindico">Síndico</option>
+            <option value="morador">Morador</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Condomínio *</label>
+          <select id="f-condo"></select>
+        </div>
+        <div class="field" id="campo-unidade">
+          <label>Unidade</label>
+          <input type="text" id="f-unidade" placeholder="Ex: Apto 204">
+        </div>
+        <div class="field" id="campo-bloco">
+          <label>Bloco</label>
+          <input type="text" id="f-bloco" placeholder="Ex: Bloco B">
+        </div>
+        <div class="field">
+          <label>Telefone</label>
+          <input type="text" id="f-telefone" placeholder="(81) 99999-9999">
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <select id="f-ativo">
+            <option value="true">Ativo</option>
+            <option value="false">Inativo</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm btn-ghost-sm" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-sm btn-primary-sm" id="btn-salvar" onclick="salvar()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Salvar
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  <span id="toast-msg"></span>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+  const supabase = createClient(
+    'https://siczyohqmlrmirqgzlxb.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw'
+  )
+
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) { window.location.href = '/public/login.html'; throw new Error() }
+
+  const { data: perfil } = await supabase.from('usuarios').select('nome, role, administradora_id').eq('id', session.user.id).single()
+  if (!perfil || perfil.role !== 'administradora') {
+    const d = { sindico: '/sindico/dashboard.html', morador: '/morador/avisos.html' }
+    window.location.href = d[perfil?.role] || '/public/login.html'; throw new Error()
+  }
+
+  const adminId = perfil.administradora_id
+  document.getElementById('user-name').textContent = perfil.nome || session.user.email
+  const iniciais = (perfil.nome || session.user.email).split(' ').slice(0,2).map(p=>p[0].toUpperCase()).join('')
+  document.getElementById('avatar-initials').textContent = iniciais
+  window.fazerLogout = async () => { await supabase.auth.signOut(); window.location.href = '/public/login.html' }
+
+  let usuarios = [], condominios = [], editandoId = null
+  const cores = ['#2563EB','#16A34A','#D97706','#9333EA','#DC2626','#0891B2']
+  const roleLabels = { sindico: 'Síndico', morador: 'Morador', administradora: 'Administradora' }
+  const roleBadge  = { sindico: 'badge-blue', morador: 'badge-purple', administradora: 'badge-amber' }
+
+  async function carregar() {
+    const { data: condos } = await supabase.from('condominios').select('id, nome').eq('administradora_id', adminId).order('nome')
+    condominios = condos || []
+
+    const selectFiltro = document.getElementById('filtro-condo')
+    const selectForm   = document.getElementById('f-condo')
+    const optsHtml = condominios.map(c => `<option value="${c.id}">${c.nome}</option>`).join('')
+    selectFiltro.innerHTML = '<option value="todos">Todos os condomínios</option>' + optsHtml
+    selectForm.innerHTML   = '<option value="">Selecione o condomínio</option>' + optsHtml
+
+    if (condominios.length === 0) {
+      document.getElementById('tabela-usuarios').innerHTML = `<tr><td colspan="6">
+        <div class="empty-state">
+          <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg></div>
+          <h3>Nenhum condomínio cadastrado</h3>
+          <p>Cadastre um condomínio primeiro para poder adicionar usuários.</p>
+        </div>
+      </td></tr>`
+      return
+    }
+
+    const condIds = condominios.map(c => c.id)
+    const { data } = await supabase.from('usuarios').select('*').in('condominio_id', condIds).order('nome')
+    usuarios = data || []
+
+    const total    = usuarios.length
+    const sindicos = usuarios.filter(u => u.role === 'sindico').length
+    const moradores= usuarios.filter(u => u.role === 'morador').length
+    document.getElementById('subtitulo').textContent =
+      total === 0 ? 'Nenhum usuário cadastrado'
+                  : `${total} usuário${total!==1?'s':''} · ${sindicos} síndico${sindicos!==1?'s':''} · ${moradores} morador${moradores!==1?'es':''}`
+
+    renderizar(usuarios)
+  }
+
+  function nomeCondo(id) { return condominios.find(c => c.id === id)?.nome || '—' }
+
+  function renderizar(lista) {
+    document.getElementById('results-count').textContent =
+      lista.length === usuarios.length ? `${lista.length} usuário${lista.length!==1?'s':''}`
+                                       : `${lista.length} de ${usuarios.length}`
+    const tbody = document.getElementById('tabela-usuarios')
+    if (lista.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">
+        <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+        <h3>Nenhum usuário encontrado</h3><p>Clique em "Novo usuário" para adicionar.</p>
+      </div></td></tr>`
+      return
+    }
+    tbody.innerHTML = lista.map((u, i) => {
+      const cor     = cores[i % cores.length]
+      const letra   = (u.nome || u.email).charAt(0).toUpperCase()
+      const unidade = u.unidade ? `${u.unidade}${u.bloco ? ' · ' + u.bloco : ''}` : '—'
+      return `<tr>
+        <td><div class="user-cell">
+          <div class="u-avatar" style="background:${cor}">${letra}</div>
+          <div><div class="u-name">${u.nome || '—'}</div><div class="u-email">${u.email}</div></div>
+        </div></td>
+        <td><span class="badge ${roleBadge[u.role]||'badge-amber'}">${roleLabels[u.role]||u.role}</span></td>
+        <td>${nomeCondo(u.condominio_id)}</td>
+        <td>${unidade}</td>
+        <td><span class="badge ${u.ativo ? 'badge-green' : 'badge-red'}">${u.ativo ? 'Ativo' : 'Inativo'}</span></td>
+        <td><div class="action-btns">
+          <button class="btn-sm btn-ghost-sm" onclick="editarUsuario('${u.id}')">Editar</button>
+          <button class="btn-sm btn-ghost-sm" onclick="toggleAtivo('${u.id}', ${u.ativo})">${u.ativo ? 'Desativar' : 'Ativar'}</button>
+        </div></td>
+      </tr>`
+    }).join('')
+  }
+
+  window.filtrar = function() {
+    const busca = document.getElementById('busca').value.toLowerCase()
+    const role  = document.getElementById('filtro-role').value
+    const condo = document.getElementById('filtro-condo').value
+    renderizar(usuarios.filter(u => {
+      const matchBusca = (u.nome||'').toLowerCase().includes(busca) || u.email.toLowerCase().includes(busca)
+      const matchRole  = role  === 'todos' || u.role === role
+      const matchCondo = condo === 'todos' || u.condominio_id === condo
+      return matchBusca && matchRole && matchCondo
+    }))
+  }
+
+  window.toggleCamposRole = function() {
+    const role = document.getElementById('f-role').value
+    const show = role === 'morador'
+    document.getElementById('campo-unidade').style.display = show ? '' : 'none'
+    document.getElementById('campo-bloco').style.display   = show ? '' : 'none'
+  }
+
+  window.abrirModal = function(id = null) {
+    editandoId = id
+    document.getElementById('modal-titulo').textContent = id ? 'Editar usuário' : 'Novo usuário'
+    document.getElementById('f-email').disabled = !!id
+    if (id) {
+      const u = usuarios.find(x => x.id === id)
+      document.getElementById('f-nome').value     = u.nome || ''
+      document.getElementById('f-email').value    = u.email
+      document.getElementById('f-role').value     = u.role
+      document.getElementById('f-condo').value    = u.condominio_id || ''
+      document.getElementById('f-unidade').value  = u.unidade || ''
+      document.getElementById('f-bloco').value    = u.bloco || ''
+      document.getElementById('f-telefone').value = u.telefone || ''
+      document.getElementById('f-ativo').value    = String(u.ativo)
+    } else {
+      document.getElementById('f-nome').value = ''
+      document.getElementById('f-email').value = ''
+      document.getElementById('f-role').value = 'sindico'
+      document.getElementById('f-condo').value = ''
+      document.getElementById('f-unidade').value = ''
+      document.getElementById('f-bloco').value = ''
+      document.getElementById('f-telefone').value = ''
+      document.getElementById('f-ativo').value = 'true'
+    }
+    toggleCamposRole()
+    document.getElementById('modal-overlay').classList.add('open')
+    setTimeout(() => document.getElementById('f-nome').focus(), 100)
+  }
+
+  window.fecharModal    = () => { document.getElementById('modal-overlay').classList.remove('open'); editandoId = null }
+  window.fecharModalFora= (e) => { if (e.target === document.getElementById('modal-overlay')) fecharModal() }
+  window.editarUsuario  = (id) => abrirModal(id)
+
+  window.salvar = async function() {
+    const nome  = document.getElementById('f-nome').value.trim()
+    const email = document.getElementById('f-email').value.trim()
+    const role  = document.getElementById('f-role').value
+    const condo = document.getElementById('f-condo').value
+    if (!nome || !condo) { mostrarToast('Preencha nome e condomínio', 'error'); return }
+    if (!editandoId && !email) { mostrarToast('Preencha o e-mail', 'error'); return }
+
+    const btn = document.getElementById('btn-salvar')
+    btn.disabled = true
+    btn.innerHTML = '<div class="spinner"></div> Salvando...'
+
+    try {
+      if (!editandoId) {
+        // Cria usuário no Auth e insere na tabela
+        const senha = Math.random().toString(36).slice(-8) + 'A1!'
+        const { data: authData, error: authErr } = await supabase.auth.admin
+          ? await supabase.auth.signUp({ email, password: senha })
+          : await supabase.auth.signUp({ email, password: senha })
+
+        if (authErr) { mostrarToast('Erro: ' + authErr.message, 'error'); return }
+
+        const { error } = await supabase.from('usuarios').insert({
+          id: authData.user.id, nome, email, role,
+          condominio_id: condo, administradora_id: adminId,
+          unidade:   document.getElementById('f-unidade').value.trim() || null,
+          bloco:     document.getElementById('f-bloco').value.trim()   || null,
+          telefone:  document.getElementById('f-telefone').value.trim()|| null,
+          ativo: true,
+        })
+        if (error) { mostrarToast('Erro ao salvar: ' + error.message, 'error'); return }
+        mostrarToast('Usuário criado! E-mail de confirmação enviado.', 'success')
+      } else {
+        const { error } = await supabase.from('usuarios').update({
+          nome, role, condominio_id: condo,
+          unidade:  document.getElementById('f-unidade').value.trim()  || null,
+          bloco:    document.getElementById('f-bloco').value.trim()    || null,
+          telefone: document.getElementById('f-telefone').value.trim() || null,
+          ativo: document.getElementById('f-ativo').value === 'true',
+        }).eq('id', editandoId)
+        if (error) { mostrarToast('Erro: ' + error.message, 'error'); return }
+        mostrarToast('Usuário atualizado!', 'success')
+      }
+      fecharModal()
+      await carregar()
+    } finally {
+      btn.disabled = false
+      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Salvar`
+    }
+  }
+
+  window.toggleAtivo = async function(id, atual) {
+    const { error } = await supabase.from('usuarios').update({ ativo: !atual }).eq('id', id)
+    if (error) { mostrarToast('Erro ao atualizar', 'error'); return }
+    mostrarToast(atual ? 'Usuário desativado' : 'Usuário ativado!', 'success')
+    await carregar()
+  }
+
+  function mostrarToast(msg, tipo = 'success') {
+    const t = document.getElementById('toast')
+    document.getElementById('toast-msg').textContent = msg
+    t.className = `toast ${tipo} show`
+    setTimeout(() => t.classList.remove('show'), 3500)
+  }
+
+  await carregar()
+</script>
+</body>
+</html>
