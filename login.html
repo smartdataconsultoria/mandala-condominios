@@ -507,7 +507,7 @@
       const destinos = {
         administradora: '/admin/index.html',
         sindico:        '/sindico/dashboard.html',
-        morador:        '/morador/avisos.html',
+        morador:        '/morador/index.html',
       }
 
       const destino = destinos[perfil.role]
@@ -571,7 +571,7 @@
       const destinos = {
         administradora: '/admin/index.html',
         sindico:        '/sindico/dashboard.html',
-        morador:        '/morador/avisos.html',
+        morador:        '/morador/index.html',
       }
       window.location.href = destinos[perfil.role] || '/'
     }
