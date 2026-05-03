@@ -1,64 +1,114 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Prestação de Contas — Edifício Mandala</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CondoGestor — Financeiro</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #0B1F3A; --navy-light: #142D52; --gold: #E8A320; --gold-light: #F5C35A;
+    --white: #FFFFFF; --off-white: #F7F6F2; --border: #E2E8F0;
+    --text-dark: #0B1F3A; --text-mid: #445571; --text-light: #8899B4;
+    --green: #16A34A; --green-bg: #DCFCE7; --red: #DC2626; --red-bg: #FEF2F2;
+    --amber: #D97706; --amber-bg: #FEF3C7; --blue: #2563EB; --blue-bg: #EFF6FF;
+    --sidebar-w: 240px; --radius: 12px; --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+  }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--off-white); color: var(--text-dark); display: flex; min-height: 100vh; }
+  .sidebar { width: var(--sidebar-w); background: var(--navy); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; overflow-y: auto; }
+  .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 1.5rem 1.25rem 1.25rem; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 0.5rem; }
+  .logo-icon { width: 34px; height: 34px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .logo-icon svg { width: 18px; height: 18px; }
+  .logo-name { font-size: 1.05rem; font-weight: 800; color: var(--white); }
+  .logo-name span { color: var(--gold); }
+  .condo-selector { margin: 0 0.75rem 0.5rem; background: rgba(255,255,255,0.06); border-radius: 8px; padding: 8px 10px; }
+  .condo-selector label { font-size: 0.68rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,0.3); display: block; margin-bottom: 4px; }
+  .condo-selector select { width: 100%; background: transparent; border: none; outline: none; color: var(--white); font-family: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+  .condo-selector select option { background: var(--navy); }
+  .sidebar-section { padding: 0 0.75rem; margin-bottom: 0.25rem; }
+  .sidebar-section-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0.75rem 0.5rem 0.4rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.6); transition: all var(--transition); margin-bottom: 2px; }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: var(--white); }
+  .nav-item.active { background: rgba(232,163,32,0.15); color: #F5C35A; }
+  .nav-item.active svg { opacity: 1; }
+  .sidebar-bottom { margin-top: auto; padding: 1rem 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); }
+  .user-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,0.06); }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--navy); flex-shrink: 0; }
+  .user-name { font-size: 0.82rem; font-weight: 600; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+  .user-role-lbl { font-size: 0.7rem; color: rgba(255,255,255,0.4); }
+  .logout-btn { margin-left: auto; background: none; border: none; cursor: pointer; padding: 4px; color: rgba(255,255,255,0.4); }
+  .logout-btn:hover { color: var(--white); }
+  .logout-btn svg { width: 15px; height: 15px; }
+  .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 40; }
+  .topbar h1 { font-size: 1rem; font-weight: 700; color: var(--navy); }
+  .topbar p { font-size: 0.75rem; color: var(--text-light); }
+  .topbar-right { display: flex; gap: 10px; }
+  .btn-sm { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; font-family: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all var(--transition); text-decoration: none; border: none; }
+  .btn-primary-sm { background: var(--navy); color: var(--white); }
+  .btn-primary-sm:hover { background: var(--navy-light); }
+  .btn-ghost-sm { background: var(--off-white); color: var(--text-mid); border: 1px solid var(--border); }
+  .btn-ghost-sm:hover { background: var(--border); }
+  .content { padding: 1.75rem 2rem; flex: 1; }
+
+
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',sans-serif;background:#0f1117;color:#f1f5f9;min-height:100vh}
-nav{background:#1a1d27;border-bottom:1px solid #2a2d3e;padding:0 24px;display:flex;align-items:center;height:60px;gap:0;position:sticky;top:0;z-index:100}
+
+
 .nav-brand{display:flex;align-items:center;gap:10px;margin-right:32px;text-decoration:none}
-.nav-logo{width:36px;height:36px;background:#f5a623;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
-.nav-brand-text{font-size:13px;font-weight:700;color:#f1f5f9;line-height:1.2}
-.nav-brand-text span{display:block;font-size:10px;color:#94a3b8;font-weight:400}
+.nav-logo{width:36px;height:36px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.nav-brand-text{font-size:13px;font-weight:700;color:var(--text-dark);line-height:1.2}
+.nav-brand-text span{display:block;font-size:10px;color:var(--text-light);font-weight:400}
 .nav-links{display:flex;gap:4px}
-.nav-links a{color:#94a3b8;text-decoration:none;padding:8px 14px;border-radius:6px;font-size:13px;transition:.2s}
-.nav-links a:hover{background:#2a2d3e;color:#f1f5f9}
-.nav-links a.active{background:#f5a623;color:#0f1117;font-weight:700}
+.nav-links a{color:var(--text-light);text-decoration:none;padding:8px 14px;border-radius:6px;font-size:13px;transition:.2s}
+.nav-links a:hover{background:var(--border);color:var(--text-dark)}
+.nav-links a.active{background:var(--gold);color:var(--off-white);font-weight:700}
 .nav-right{margin-left:auto;display:flex;align-items:center;gap:14px}
-.nav-role{background:#f5a62320;border:1px solid #f5a62340;color:#f5a623;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
-.nav-user{font-size:13px;color:#64748b}
+.nav-role{background:var(--gold)20;border:1px solid var(--gold)40;color:var(--gold);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+.nav-user{font-size:13px;color:var(--text-mid)}
 
 main{max-width:1200px;margin:0 auto;padding:28px 24px}
 
 /* HEADER */
 .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:16px;flex-wrap:wrap}
 .page-title{font-size:24px;font-weight:700}
-.page-sub{font-size:14px;color:#64748b;margin-top:4px}
+.page-sub{font-size:14px;color:var(--text-mid);margin-top:4px}
 
 /* FILTROS */
 .filtros-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;align-items:center}
-.btn-mes{padding:5px 12px;border-radius:20px;border:1px solid #2a2d3e;background:transparent;color:rgba(241,245,249,.55);font-size:12px;font-weight:600;cursor:pointer;transition:.2s;font-family:inherit}
-.btn-mes:hover:not(:disabled){border-color:#f5a623;color:#f5a623}
-.btn-mes.ativo{background:#f5a62320;border-color:#f5a623;color:#f5a623;font-weight:700}
+.btn-mes{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:rgba(241,245,249,.55);font-size:12px;font-weight:600;cursor:pointer;transition:.2s;font-family:inherit}
+.btn-mes:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+.btn-mes.ativo{background:var(--gold)20;border-color:var(--gold);color:var(--gold);font-weight:700}
 .btn-mes:disabled{opacity:.3;cursor:default}
-.btn-todos{padding:5px 14px;border-radius:20px;border:1px solid #f5a623;background:#f5a62320;color:#f5a623;font-size:12px;font-weight:700;cursor:pointer;transition:.2s;font-family:inherit}
-.sep{width:1px;height:20px;background:#2a2d3e}
+.btn-todos{padding:5px 14px;border-radius:20px;border:1px solid var(--gold);background:var(--gold)20;color:var(--gold);font-size:12px;font-weight:700;cursor:pointer;transition:.2s;font-family:inherit}
+.sep{width:1px;height:20px;background:var(--border)}
 
 /* MÉTRICAS */
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-.mc{background:#1a1d27;border:1px solid #2a2d3e;border-radius:12px;padding:16px 18px}
+.mc{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
 .mc-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:rgba(241,245,249,.3);margin-bottom:8px}
 .mc-val{font-size:24px;font-weight:700;line-height:1;margin-bottom:4px}
 .mc-sub{font-size:12px;color:rgba(241,245,249,.35)}
-.g{color:#22c55e}.r{color:#ef4444}.o{color:#f5a623}.b{color:#3b82f6}
+.g{color:#22c55e}.r{color:#ef4444}.o{color:var(--gold)}.b{color:#3b82f6}
 
 /* GRID */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
-.card{background:#1a1d27;border:1px solid #2a2d3e;border-radius:12px;padding:20px}
+.card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px}
 .ct{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(241,245,249,.35);margin-bottom:16px}
-.prog{height:6px;background:#2a2d3e;border-radius:99px;overflow:hidden;margin-bottom:2px}
+.prog{height:6px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:2px}
 
 /* TABELA COMPARATIVA */
 .comp-table{width:100%;border-collapse:collapse;font-size:12px}
-.comp-table th{text-align:right;padding:8px 10px;color:rgba(241,245,249,.35);font-weight:700;font-size:10px;text-transform:uppercase;border-bottom:1px solid #2a2d3e}
+.comp-table th{text-align:right;padding:8px 10px;color:rgba(241,245,249,.35);font-weight:700;font-size:10px;text-transform:uppercase;border-bottom:1px solid var(--border)}
 .comp-table th:first-child{text-align:left}
 .comp-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)}
-.comp-table td:first-child{text-align:left;font-weight:600;color:#f1f5f9}
+.comp-table td:first-child{text-align:left;font-weight:600;color:var(--text-dark)}
 .comp-table td:not(:first-child){text-align:right;color:rgba(241,245,249,.65)}
 .comp-table tr:hover td{background:rgba(245,166,35,.03)}
-.comp-table tfoot td{font-weight:700;color:#f5a623;border-top:2px solid #2a2d3e;background:rgba(245,166,35,.04)}
+.comp-table tfoot td{font-weight:700;color:var(--gold);border-top:2px solid var(--border);background:rgba(245,166,35,.04)}
 
 /* PROJEÇÃO */
 .proj-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04)}
@@ -76,29 +126,48 @@ main{max-width:1200px;margin:0 auto;padding:28px 24px}
   .metrics{grid-template-columns:1fr 1fr}
   .g2{grid-template-columns:1fr}
 }
+
 </style>
 </head>
 <body>
-
-<nav>
-  <a class="nav-brand" href="dashboard.html">
-    <div class="nav-logo">🏠</div>
-    <div class="nav-brand-text">EDIFÍCIO<span>Mandala</span></div>
+<aside class="sidebar">
+  <a href="/sindico/dashboard.html" class="sidebar-logo">
+    <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="#0B1F3A" stroke-width="2.5" stroke-linejoin="round"/><path d="M9 22V12h6v10" stroke="#0B1F3A" stroke-width="2.5"/></svg></div>
+    <span class="logo-name">Condo<span>Gestor</span></span>
   </a>
-  <div class="nav-links">
-    <a href="dashboard.html">Dashboard</a>
-    <a href="financeiro.html" class="active">Financeiro</a>
-    <a href="transacoes.html">Transações</a>
-    <a href="categorias.html">Categorias</a>
-    <a href="metas.html">Metas & Projetos</a>
+  <div class="condo-selector">
+    <label>Condomínio</label>
+    <select id="select-condo" onchange="trocarCondo()"><option>Carregando...</option></select>
   </div>
-  <div class="nav-right">
-    <span id="navRole" class="nav-role" style="display:none">🏛 Síndico</span>
-    <span class="nav-user" id="navUser"></span>
-    <a href="dashboard.html" style="color:#64748b;font-size:13px;text-decoration:none">⇤ Sair</a>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Principal</div>
+    <a href="/sindico/dashboard.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
+    <a href="/sindico/moradores.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Moradores</a>
+    <a href="/sindico/chamados.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Chamados</a>
+    <a href="/sindico/documentos.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documentos</a>
   </div>
-</nav>
-
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Financeiro</div>
+    <a href="/sindico/financeiro.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Financeiro</a>
+    <a href="/sindico/transacoes.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Transações</a>
+    <a href="/sindico/categorias.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Categorias</a>
+    <a href="/sindico/metas.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Metas & Projetos</a>
+    <a href="/sindico/orcamento.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Orçamento</a>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-avatar" id="avatar-initials">--</div>
+      <div><div class="user-name" id="user-name">Carregando...</div><div class="user-role-lbl">Síndico</div></div>
+      <button class="logout-btn" onclick="fazerLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+    </div>
+  </div>
+</aside>
+<div class="main">
+  <header class="topbar">
+    <div><h1>Financeiro</h1><p>Prestação de Contas</p></div>
+    <div class="topbar-right" id="topbar-right"></div>
+  </header>
+  <div class="content">
 <main>
   <div class="page-header">
     <div>
@@ -117,7 +186,8 @@ main{max-width:1200px;margin:0 auto;padding:28px 24px}
 
   <div id="conteudo"><div class="loader">⏳ Carregando dados...</div></div>
 </main>
-
+  </div>
+</div>
 <script>
 // ── CONFIG ────────────────────────────────────────────────
 const SB_URL  = 'https://rbahvyejqybajnufftio.supabase.co';
@@ -127,7 +197,7 @@ const ADMINS  = ['admrafaelcavalcanti@gmail.com','tecnologia@smartdataconsultori
 
 const MESES_ABREV = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const MESES_FULL  = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const CORES_CAT   = ['#f5a623','#3b82f6','#a855f7','#22c55e','#ef4444','#06b6d4','#f97316','#ec4899'];
+const CORES_CAT   = ['var(--gold)','#3b82f6','#a855f7','#22c55e','#ef4444','#06b6d4','#f97316','#ec4899'];
 
 // ── ESTADO ────────────────────────────────────────────────
 let _mesesSel = []; // [] = todos
@@ -181,9 +251,9 @@ function toggleMes(i){
 function atualizarBotoes(){
   const nenhum = _mesesSel.length===0;
   const btnT=document.getElementById('btnTodos');
-  btnT.style.background   = nenhum?'#f5a62320':'transparent';
-  btnT.style.borderColor  = nenhum?'#f5a623':'#2a2d3e';
-  btnT.style.color        = nenhum?'#f5a623':'rgba(241,245,249,.4)';
+  btnT.style.background   = nenhum?'var(--gold)20':'transparent';
+  btnT.style.borderColor  = nenhum?'var(--gold)':'var(--border)';
+  btnT.style.color        = nenhum?'var(--gold)':'rgba(241,245,249,.4)';
   for(let m=0;m<12;m++){
     const btn=document.getElementById('bm'+m); if(!btn) continue;
     const sel=_mesesSel.includes(m);
@@ -318,12 +388,12 @@ async function carregar(){
           <div class="mc-sub" style="color:${saldo>=0?'#22c55e':'#ef4444'}">${saldo>=0?'↑ Superávit':'↓ Déficit'}</div>
         </div>
         <div class="mc" style="background:rgba(245,166,35,.05);border:1px solid rgba(245,166,35,.15)">
-          <div class="mc-lbl" style="color:#f5a623">📈 Projeção — próximo mês</div>
+          <div class="mc-lbl" style="color:var(--gold)">📈 Projeção — próximo mês</div>
           <div style="display:flex;flex-direction:column;gap:5px;margin-top:4px">
             <div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:rgba(241,245,249,.4)">Receita est.</span><span style="font-size:13px;font-weight:700;color:#22c55e">${brl(mediaRec)}</span></div>
             <div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:rgba(241,245,249,.4)">Despesa est.</span><span style="font-size:13px;font-weight:700;color:#ef4444">${brl(mediaDes)}</span></div>
             <div style="border-top:1px solid rgba(245,166,35,.12);margin-top:3px;padding-top:5px;display:flex;justify-content:space-between">
-              <span style="font-size:11px;font-weight:700;color:#f5a623">Saldo proj.</span>
+              <span style="font-size:11px;font-weight:700;color:var(--gold)">Saldo proj.</span>
               <span style="font-size:15px;font-weight:800;color:${(mediaRec-mediaDes)>=0?'#22c55e':'#ef4444'}">${brl(mediaRec-mediaDes)}</span>
             </div>
           </div>
@@ -355,7 +425,7 @@ async function carregar(){
             <span><span style="display:inline-block;width:8px;height:8px;background:#ef4444;border-radius:2px;margin-right:4px"></span>Despesa</span>
           </div>
           ${ultimoMes<11&&!mesFiltrado?`<div style="margin-top:12px;padding:10px 12px;background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.15);border-radius:8px;font-size:12px">
-            <span style="color:#f5a623;font-weight:700">📈 Projeção ${MESES_FULL[ultimoMes+1]} – Dez:</span>
+            <span style="color:var(--gold);font-weight:700">📈 Projeção ${MESES_FULL[ultimoMes+1]} – Dez:</span>
             <span style="color:rgba(241,245,249,.45);margin-left:8px">~ ${brl(mediaDes)}/mês = ${brl(mediaDes*(11-ultimoMes))} em ${11-ultimoMes} meses</span>
           </div>`:''}
         </div>
@@ -431,10 +501,10 @@ async function carregar(){
                     ${d!==null&&v>0&&Math.abs(d)>5?`<div style="font-size:9px;color:${d>0?'#ef4444':'#22c55e'}">${d>0?'▲':'▼'}${Math.abs(Math.round(d))}%</div>`:''}
                   </td>`;
                 }).join('')}
-                <td style="font-weight:700;color:#f5a623">${brl(total)}</td>
+                <td style="font-weight:700;color:var(--gold)">${brl(total)}</td>
                 <td>
                   <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px">
-                    <div style="width:44px;height:4px;background:#2a2d3e;border-radius:99px;overflow:hidden">
+                    <div style="width:44px;height:4px;background:var(--border);border-radius:99px;overflow:hidden">
                       <div style="height:100%;width:${rep}%;background:${CORES_CAT[ri%CORES_CAT.length]};border-radius:99px"></div>
                     </div>
                     <span style="font-size:11px;color:rgba(241,245,249,.4);min-width:26px">${rep}%</span>
@@ -463,17 +533,17 @@ async function carregar(){
             const atual=i===ultimoMes;
             const des=futuro?mediaDes:porMes[i].des;
             return `<div class="proj-row">
-              <div class="proj-mes" style="color:${atual?'#f5a623':futuro?'rgba(241,245,249,.25)':'rgba(241,245,249,.55)'}">${MESES_ABREV[i]}</div>
+              <div class="proj-mes" style="color:${atual?'var(--gold)':futuro?'rgba(241,245,249,.25)':'rgba(241,245,249,.55)'}">${MESES_ABREV[i]}</div>
               <div class="proj-bar-wrap">
                 <div class="proj-bar" style="width:${Math.round(des/Math.max(mediaDes,1)*70)}%;background:${futuro?'rgba(239,68,68,.25)':'#ef4444'};${futuro?'border:1px dashed rgba(239,68,68,.4)':''}"></div>
               </div>
-              <div class="proj-val" style="color:${atual?'#f5a623':futuro?'rgba(241,245,249,.3)':'rgba(241,245,249,.65)'};font-weight:${atual?700:500};font-size:12px">${futuro?'~':''} ${brl(des)}</div>
+              <div class="proj-val" style="color:${atual?'var(--gold)':futuro?'rgba(241,245,249,.3)':'rgba(241,245,249,.65)'};font-weight:${atual?700:500};font-size:12px">${futuro?'~':''} ${brl(des)}</div>
               <div class="proj-ico" style="color:${futuro?'rgba(241,245,249,.2)':'#22c55e'}">${futuro?'📊':des>0?'✓':''}</div>
             </div>`;
           }).join('')}
-          <div style="margin-top:10px;padding:9px 12px;background:#0f1117;border-radius:8px;font-size:12px;display:flex;justify-content:space-between">
+          <div style="margin-top:10px;padding:9px 12px;background:var(--off-white);border-radius:8px;font-size:12px;display:flex;justify-content:space-between">
             <span style="color:rgba(241,245,249,.35)">Projeção total ${ano}:</span>
-            <strong style="color:#f5a623">${brl(totalDes + mediaDes*(11-ultimoMes))}</strong>
+            <strong style="color:var(--gold)">${brl(totalDes + mediaDes*(11-ultimoMes))}</strong>
           </div>
         </div>
 
@@ -501,5 +571,6 @@ async function carregar(){
   }
 }
 </script>
+
 </body>
 </html>
