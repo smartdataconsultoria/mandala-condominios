@@ -240,19 +240,19 @@
   )
 
   const { data: { session } } = await supabase.auth.getSession()
-  if (!session) { window.location.href = '/public/login.html'; throw new Error() }
+  if (!session) { window.location.href = 'login.html'; throw new Error() }
 
   const { data: perfil } = await supabase.from('usuarios').select('nome, role, condominio_id').eq('id', session.user.id).single()
   if (!perfil || perfil.role !== 'sindico') {
     const d = { administradora: '/admin/index.html', morador: '/morador/avisos.html' }
-    window.location.href = d[perfil?.role] || '/public/login.html'; throw new Error()
+    window.location.href = d[perfil?.role] || 'login.html'; throw new Error()
   }
 
   document.getElementById('user-name').textContent = perfil.nome || session.user.email
   const iniciais = (perfil.nome || session.user.email).split(' ').slice(0,2).map(p=>p[0].toUpperCase()).join('')
   document.getElementById('avatar-initials').textContent = iniciais
   document.getElementById('data-hoje').textContent = new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' })
-  window.fazerLogout = async () => { await supabase.auth.signOut(); window.location.href = '/public/login.html' }
+  window.fazerLogout = async () => { await supabase.auth.signOut(); window.location.href = 'login.html' }
 
   // Busca condomínios onde o síndico está vinculado
   let condoAtualId = perfil.condominio_id
