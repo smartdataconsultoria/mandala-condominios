@@ -592,7 +592,7 @@
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) {
     sessionStorage.setItem('redirectAfterLogin', window.location.pathname)
-    window.location.href = '/public/login.html'
+    window.location.href = 'login.html'
     throw new Error('não autenticado')
   }
 
@@ -605,7 +605,7 @@
 
   if (!perfil || perfil.role !== 'administradora') {
     const destinos = { sindico: '/sindico/dashboard.html', morador: '/morador/avisos.html' }
-    window.location.href = destinos[perfil?.role] || '/public/login.html'
+    window.location.href = destinos[perfil?.role] || 'login.html'
     throw new Error('acesso negado')
   }
 
@@ -625,7 +625,7 @@
   // ── Logout ────────────────────────────────────────────────
   window.fazerLogout = async function() {
     await supabase.auth.signOut()
-    window.location.href = '/public/login.html'
+    window.location.href = 'login.html'
   }
 
   // ── Carregar dados ────────────────────────────────────────
