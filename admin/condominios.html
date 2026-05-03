@@ -327,7 +327,7 @@
 
   // ── Auth ────────────────────────────────────────────────
   const { data: { session } } = await supabase.auth.getSession()
-  if (!session) { window.location.href = '/public/login.html'; throw new Error() }
+  if (!session) { window.location.href = 'login.html'; throw new Error() }
 
   const { data: perfil } = await supabase
     .from('usuarios').select('nome, role, administradora_id')
@@ -335,7 +335,7 @@
 
   if (!perfil || perfil.role !== 'administradora') {
     const d = { sindico: '/sindico/dashboard.html', morador: '/morador/avisos.html' }
-    window.location.href = d[perfil?.role] || '/public/login.html'
+    window.location.href = d[perfil?.role] || 'login.html'
     throw new Error()
   }
 
@@ -344,7 +344,7 @@
   const iniciais = (perfil.nome || session.user.email).split(' ').slice(0,2).map(p=>p[0].toUpperCase()).join('')
   document.getElementById('avatar-initials').textContent = iniciais
 
-  window.fazerLogout = async () => { await supabase.auth.signOut(); window.location.href = '/public/login.html' }
+  window.fazerLogout = async () => { await supabase.auth.signOut(); window.location.href = 'login.html' }
 
   // ── Estado ──────────────────────────────────────────────
   let condominios = []
