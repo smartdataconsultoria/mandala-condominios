@@ -303,17 +303,17 @@
   )
 
   const { data: { session } } = await supabase.auth.getSession()
-  if (!session) { window.location.href = '/public/login.html'; throw new Error() }
+  if (!session) { window.location.href = 'login.html'; throw new Error() }
   const { data: perfil } = await supabase.from('usuarios').select('nome, role, administradora_id').eq('id', session.user.id).single()
   if (!perfil || perfil.role !== 'administradora') {
     const d = { sindico: '/sindico/dashboard.html', morador: '/morador/avisos.html' }
-    window.location.href = d[perfil?.role] || '/public/login.html'; throw new Error()
+    window.location.href = d[perfil?.role] || 'login.html'; throw new Error()
   }
 
   const adminId = perfil.administradora_id
   document.getElementById('user-name').textContent = perfil.nome || session.user.email
   document.getElementById('avatar-initials').textContent = (perfil.nome||session.user.email).split(' ').slice(0,2).map(p=>p[0].toUpperCase()).join('')
-  window.fazerLogout = async () => { await supabase.auth.signOut(); window.location.href = '/public/login.html' }
+  window.fazerLogout = async () => { await supabase.auth.signOut(); window.location.href = 'login.html' }
 
   const fmt = (v) => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
   const fmtData = (d) => d ? new Date(d+'T00:00:00').toLocaleDateString('pt-BR') : '—'
