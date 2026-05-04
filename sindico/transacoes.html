@@ -338,7 +338,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
     box-shadow: 0 4px 20px rgba(11,31,58,0.3) !important;
   }
   .fab:hover { background: var(--navy-light) !important; transform: scale(1.07); }
-  .fab-action { display: none; } /* removido - usando .fab-item */
+  
 
   /* ── Dropdown de tipo (Todas / Despesas / Receitas) ── */
   .btn-tipo-wrap, .tipo-dropdown, [class*="tipo-menu"], [class*="dd-menu"] {
@@ -415,6 +415,64 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
   }
   .fab:hover { background: var(--navy-light) !important; transform: scale(1.07) !important; }
 
+
+  /* ══ FAB CORRIGIDO ══════════════════════════════════ */
+  .fab-wrap { position:fixed; right:32px; bottom:36px; z-index:950; display:flex; flex-direction:column; align-items:flex-end; gap:10px; }
+  
+  /* Botão + circular */
+  .fab {
+    width:56px !important; height:56px !important;
+    border-radius:50% !important; background:var(--navy) !important;
+    border:none !important; color:#fff !important; font-size:26px !important;
+    cursor:pointer !important; display:flex !important;
+    align-items:center !important; justify-content:center !important;
+    box-shadow:0 4px 20px rgba(11,31,58,0.35) !important;
+    transition:.3s !important; position:relative !important; z-index:2 !important;
+  }
+  .fab:hover { background:var(--navy-light) !important; transform:scale(1.07) !important; }
+  .fab .fab-icon { transition:.4s; display:inline-block; }
+  .fab.open .fab-icon { transform:rotate(45deg); }
+
+  /* Menu de itens */
+  .fab-menu {
+    display:flex !important; flex-direction:column !important;
+    gap:6px !important; align-items:flex-end !important;
+    opacity:0 !important; pointer-events:none !important;
+    transform:translateY(12px) scale(.95) !important;
+    transition:.25s cubic-bezier(.4,0,.2,1) !important;
+  }
+  .fab-menu.open {
+    opacity:1 !important; pointer-events:all !important;
+    transform:translateY(0) scale(1) !important;
+  }
+
+  /* Cada item do menu */
+  .fab-item {
+    display:flex !important; align-items:center !important; gap:12px !important;
+    background:var(--white) !important;
+    border:1.5px solid var(--border) !important;
+    border-radius:12px !important;
+    padding:10px 18px 10px 14px !important;
+    cursor:pointer !important; white-space:nowrap !important;
+    box-shadow:0 4px 16px rgba(11,31,58,0.08) !important;
+    transition:.2s !important;
+  }
+  .fab-item:hover {
+    background:var(--off-white) !important;
+    border-color:var(--navy) !important;
+    transform:translateX(-3px) !important;
+  }
+  .fab-item-icon {
+    width:34px !important; height:34px !important;
+    border-radius:9px !important; display:flex !important;
+    align-items:center !important; justify-content:center !important;
+    font-size:16px !important; flex-shrink:0 !important;
+  }
+  .fab-item-label {
+    font-size:14px !important; font-weight:600 !important;
+    color:var(--text-dark) !important;
+  }
+  /* ══════════════════════════════════════════════════ */
 </style>
 </head>
 <body>
