@@ -936,12 +936,44 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
   </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script>
-// ── CONFIG ───────────────────────────────────────────────
-const SUPA_URL = 'https://rbahvyejqybajnufftio.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiYWh2eWVqcXliYWpudWZmdGlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjA5MjIsImV4cCI6MjA4OTYzNjkyMn0.nUIo2CT3o41YL1TT8Hrp5kq-_ZS-bMMf-gvUMCEyYMw';
-const EMPRESA  = 'mandala';
+<script type="module">
 
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+const _sb = createClient('https://siczyohqmlrmirqgzlxb.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw')
+
+// Auth CondoGestor
+const { data: { session: _sess } } = await _sb.auth.getSession()
+if (!_sess) { window.location.href = '/login.html'; throw new Error() }
+const { data: _perfil } = await _sb.from('usuarios').select('nome, role, condominio_id').eq('id', _sess.user.id).single()
+if (!_perfil || _perfil.role !== 'sindico') {
+  const _d = { administradora: '/admin/index.html', morador: '/morador/index.html' }
+  window.location.href = _d[_perfil?.role] || '/login.html'; throw new Error()
+}
+
+// Variáveis globais compatíveis com o código existente
+const CONDO_ID = _perfil.condominio_id
+let EMPRESA = CONDO_ID  // usado como filtro onde antes era 'mandala'
+
+// Preenche nome e avatar na sidebar
+document.getElementById('user-name').textContent = _perfil.nome || _sess.user.email
+document.getElementById('avatar-initials').textContent = (_perfil.nome || _sess.user.email).split(' ').slice(0,2).map(p=>p[0].toUpperCase()).join('')
+
+// Busca nome do condomínio
+const { data: _condo } = await _sb.from('condominios').select('nome').eq('id', CONDO_ID).single()
+if (_condo) {
+  const selCondo = document.getElementById('select-condo')
+  if (selCondo) selCondo.innerHTML = `<option value="${CONDO_ID}">${_condo.nome}</option>`
+}
+
+window.fazerLogout = async () => { await _sb.auth.signOut(); window.location.href = '/login.html' }
+window.trocarCondo = () => {} // síndico tem só 1 condomínio
+
+
+
+const _h = {'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw', 'Content-Type': 'application/json', 'Prefer': 'return=representation'};
+const _BASE = 'https://siczyohqmlrmirqgzlxb.supabase.co/rest/v1';
+
+// ── CONFIG ───────────────────────────────────────────────
 // ── ESTADO ───────────────────────────────────────────────
 let _mes = new Date().getMonth();
 let _ano = new Date().getFullYear();
@@ -1006,8 +1038,8 @@ async function loadAll(){
   const h = hdrs();
   // categorias e contas em paralelo
   const [rc,rco] = await Promise.all([
-    fetch(`${SUPA_URL}/rest/v1/condo_categorias?empresa=eq.${EMPRESA}&order=tipo,categoria,nome`,{headers:h}),
-    fetch(`${SUPA_URL}/rest/v1/condo_contas?empresa=eq.${EMPRESA}&order=nome`,{headers:h})
+    fetch(`${_BASE}/condo_categorias?condominio_id=eq.${CONDO_ID}&order=tipo,categoria,nome`,{headers:_h}),
+    fetch(`${_BASE}/condo_contas?condominio_id=eq.${CONDO_ID}&order=nome`,{headers:_h})
   ]);
   _categorias = rc.ok ? await rc.json() : [];
   _contas     = rco.ok ? await rco.json() : [];
@@ -1047,8 +1079,8 @@ async function loadTransacoes(){
 
   // Busca mês atual e saldo acumulado dos meses anteriores em paralelo
   const [resMes, resSaldoAnt] = await Promise.all([
-    fetch(`${SUPA_URL}/rest/v1/condo_transacoes?empresa=eq.${EMPRESA}&data=gte.${primDia}&data=lte.${ultDia}&order=data.desc,id.desc`,{headers:h}),
-    fetch(`${SUPA_URL}/rest/v1/condo_transacoes?empresa=eq.${EMPRESA}&data=lt.${primDia}&select=tipo,valor`,{headers:h})
+    fetch(`${_BASE}/condo_transacoes?condominio_id=eq.${CONDO_ID}&data=gte.${primDia}&data=lte.${ultDia}&order=data.desc,id.desc`,{headers:_h}),
+    fetch(`${_BASE}/condo_transacoes?condominio_id=eq.${CONDO_ID}&data=lt.${primDia}&select=tipo,valor`,{headers:_h})
   ]);
   _transacoes = resMes.ok ? await resMes.json() : [];
 
@@ -1615,7 +1647,7 @@ async function salvarLancamento(){
       observacao:   document.getElementById('fObs').value.trim()||null,
     };
     try {
-      const res = await fetch(`${SUPA_URL}/rest/v1/condo_transacoes?id=eq.${_editId}&empresa=eq.${EMPRESA}`,{
+      const res = await fetch(`${_BASE}/condo_transacoes?id=eq.${_editId}&condominio_id=eq.${CONDO_ID}`,{
         method:'PATCH',
         headers:{...h,'Prefer':'return=representation'},
         body: JSON.stringify(patchPayload)
@@ -1641,11 +1673,11 @@ async function salvarLancamento(){
     const destino = document.getElementById('fContaDestino').value;
     if(!origem || !destino){ showAlert('Selecione a conta de origem e destino.','error'); btn.disabled=false; btn.textContent='Salvar lançamento'; return; }
     if(origem===destino){ showAlert('Conta de origem e destino não podem ser iguais.','error'); btn.disabled=false; btn.textContent='Salvar lançamento'; return; }
-    const base = {empresa:EMPRESA, descricao:desc, valor, data, situacao:'pago', observacao:document.getElementById('fObs').value.trim()||null};
+    const base = {condominio_id:CONDO_ID, descricao:desc, valor, data, situacao:'pago', observacao:document.getElementById('fObs').value.trim()||null};
     const h = hdrs();
     await Promise.all([
-      fetch(`${SUPA_URL}/rest/v1/condo_transacoes`,{method:'POST',headers:{...h,'Prefer':'return=representation'},body:JSON.stringify({...base,tipo:'despesa',conta_id:origem, descricao:`Transf. para ${_contas.find(ct=>ct.id==destino)?.nome||'conta'}: ${desc}`})}),
-      fetch(`${SUPA_URL}/rest/v1/condo_transacoes`,{method:'POST',headers:{...h,'Prefer':'return=representation'},body:JSON.stringify({...base,tipo:'receita',conta_id:destino, descricao:`Transf. de ${_contas.find(ct=>ct.id==origem)?.nome||'conta'}: ${desc}`})})
+      fetch(`${_BASE}/condo_transacoes`,{method:'POST',headers:{...h,'Prefer':'return=representation'},body:JSON.stringify({...base,tipo:'despesa',conta_id:origem, descricao:`Transf. para ${_contas.find(ct=>ct.id==destino)?.nome||'conta'}: ${desc}`})}),
+      fetch(`${_BASE}/condo_transacoes`,{method:'POST',headers:{...h,'Prefer':'return=representation'},body:JSON.stringify({...base,tipo:'receita',conta_id:destino, descricao:`Transf. de ${_contas.find(ct=>ct.id==origem)?.nome||'conta'}: ${desc}`})})
     ]);
     showAlert('Transferência registrada!');
     fecharModal(); await loadTransacoes();
@@ -1661,7 +1693,7 @@ async function salvarLancamento(){
   const diaVenc    = parseInt(document.getElementById('fDiaVenc').value)||null;
 
   const basePayload = {
-    empresa:      EMPRESA,
+    condominio_id: CONDO_ID,
     tipo:         (TIPO_CONFIG[_tipoAtual]?.tipoDB)||_tipoAtual,
     descricao:    desc,
     valor:        parcelado ? valor/nParcelas : valor,
@@ -1693,7 +1725,7 @@ async function salvarLancamento(){
           parcela_total: nParcelas,
           situacao: i===0 ? basePayload.situacao : 'agendado'
         };
-        promises.push(fetch(`${SUPA_URL}/rest/v1/condo_transacoes`,{
+        promises.push(fetch(`${_BASE}/condo_transacoes`,{
           method:'POST', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)
         }).then(r=>r.json()).then(d=>Array.isArray(d)?d[0]:d));
       }
@@ -1735,7 +1767,7 @@ async function salvarLancamento(){
           parcela_total: null,   // fixo nunca é parcelado
         };
         promises.push(
-          fetch(`${SUPA_URL}/rest/v1/condo_transacoes`, {
+          fetch(`${_BASE}/condo_transacoes`, {
             method:'POST',
             headers:{...h,'Prefer':'return=representation'},
             body: JSON.stringify(payload)
@@ -1749,7 +1781,7 @@ async function salvarLancamento(){
     } else {
       // Lançamento avulso normal
       const payload = {...basePayload, data};
-      const res = await fetch(`${SUPA_URL}/rest/v1/condo_transacoes`,{
+      const res = await fetch(`${_BASE}/condo_transacoes`,{
         method:'POST', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)
       });
       const json = await res.json();
@@ -1762,8 +1794,8 @@ async function salvarLancamento(){
     if(_anexoArquivo && idsGerados[0]){
       const url = await uploadAnexo(_anexoArquivo, idsGerados[0]);
       if(url){
-        await fetch(`${SUPA_URL}/rest/v1/condo_transacoes?id=eq.${idsGerados[0]}`,{
-          method:'PATCH', headers:h, body:JSON.stringify({anexo_url:url})
+        await fetch(`${_BASE}/condo_transacoes?id=eq.${idsGerados[0]}`,{
+          method:'PATCH', headers:_h, body:JSON.stringify({anexo_url:url})
         });
       }
     }
@@ -2011,7 +2043,7 @@ function processarArquivo(file){
         const catId   = catMap[cat+'|'+sub] || null;
         const contaId = contaMap[conta] || null;
 
-        _dadosImport.push({data:dataISO, tipo, descricao:desc, categoria_id:catId, conta_id:contaId, valor, situacao:sit, observacao:obs||null, empresa:EMPRESA});
+        _dadosImport.push({data:dataISO, tipo, descricao:desc, categoria_id:catId, conta_id:contaId, valor, situacao:sit, observacao:obs||null, condominio_id:CONDO_ID});
       }
 
       // Preview
@@ -2060,7 +2092,7 @@ async function confirmarImportacao(){
   const h = hdrs();
   let ok=0, erros=0;
   for(const row of _dadosImport){
-    const r = await fetch(`${SUPA_URL}/rest/v1/condo_transacoes`,{
+    const r = await fetch(`${_BASE}/condo_transacoes`,{
       method:'POST',
       headers:{...h,'Prefer':'return=minimal'},
       body: JSON.stringify(row)
@@ -2153,11 +2185,11 @@ async function executarDelete(){
       let url;
       if(t.parcela_total){
         // Parcelado: deleta todos com mesma descrição + parcela_total + tipo
-        url = `${SUPA_URL}/rest/v1/condo_transacoes?empresa=eq.${EMPRESA}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&parcela_total=eq.${t.parcela_total}`;
+        url = `${_BASE}/condo_transacoes?condominio_id=eq.${CONDO_ID}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&parcela_total=eq.${t.parcela_total}`;
       } else {
         // Fixo: deleta este mês e os próximos (data >= data do selecionado)
         const dataEnc = encodeURIComponent(t.data);
-        url = `${SUPA_URL}/rest/v1/condo_transacoes?empresa=eq.${EMPRESA}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&recorrente=eq.true&data=gte.${dataEnc}`;
+        url = `${_BASE}/condo_transacoes?condominio_id=eq.${CONDO_ID}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&recorrente=eq.true&data=gte.${dataEnc}`;
       }
       const res = await fetch(url, {method:'DELETE', headers:h});
       if(res.ok || res.status===204){
@@ -2169,7 +2201,7 @@ async function executarDelete(){
       }
     } else {
       // Excluir só este lançamento
-      const res = await fetch(`${SUPA_URL}/rest/v1/condo_transacoes?id=eq.${_deleteId}&empresa=eq.${EMPRESA}`,{
+      const res = await fetch(`${_BASE}/condo_transacoes?id=eq.${_deleteId}&condominio_id=eq.${CONDO_ID}`,{
         method:'DELETE', headers:h
       });
       const body = await res.text();
