@@ -935,7 +935,45 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 </div><!-- /modal-bg -->
   </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+// ── Expor funções globalmente (necessário para type="module") ──
+if (typeof abrirImportar !== "undefined") window.abrirImportar = abrirImportar;
+if (typeof baixarModelo !== "undefined") window.baixarModelo = baixarModelo;
+if (typeof calConfirmar !== "undefined") window.calConfirmar = calConfirmar;
+if (typeof calNavMes !== "undefined") window.calNavMes = calNavMes;
+if (typeof calSelecionarDia !== "undefined") window.calSelecionarDia = calSelecionarDia;
+if (typeof calToggleAno !== "undefined") window.calToggleAno = calToggleAno;
+if (typeof confirmarImportacao !== "undefined") window.confirmarImportacao = confirmarImportacao;
+if (typeof editarTransacao !== "undefined") window.editarTransacao = editarTransacao;
+if (typeof executarDelete !== "undefined") window.executarDelete = executarDelete;
+if (typeof exportarExcel !== "undefined") window.exportarExcel = exportarExcel;
+if (typeof fazerLogout !== "undefined") window.fazerLogout = fazerLogout;
+if (typeof fecharCal !== "undefined") window.fecharCal = fecharCal;
+if (typeof fecharConfirm !== "undefined") window.fecharConfirm = fecharConfirm;
+if (typeof fecharImportar !== "undefined") window.fecharImportar = fecharImportar;
+if (typeof fecharModal !== "undefined") window.fecharModal = fecharModal;
+if (typeof mudarMes !== "undefined") window.mudarMes = mudarMes;
+if (typeof removerAnexo !== "undefined") window.removerAnexo = removerAnexo;
+if (typeof salvarLancamento !== "undefined") window.salvarLancamento = salvarLancamento;
+if (typeof selecionarOpt !== "undefined") window.selecionarOpt = selecionarOpt;
+if (typeof setDataRapida !== "undefined") window.setDataRapida = setDataRapida;
+if (typeof setFiltro !== "undefined") window.setFiltro = setFiltro;
+if (typeof setTipoFiltro !== "undefined") window.setTipoFiltro = setTipoFiltro;
+if (typeof toggleCal !== "undefined") window.toggleCal = toggleCal;
+if (typeof toggleFab !== "undefined") window.toggleFab = toggleFab;
+if (typeof toggleSecao !== "undefined") window.toggleSecao = toggleSecao;
+if (typeof toggleTipoMenu !== "undefined") window.toggleTipoMenu = toggleTipoMenu;
+if (typeof fabAbre !== "undefined") window.fabAbre = fabAbre;
+if (typeof fecharFab !== "undefined") window.fecharFab = fecharFab;
+if (typeof handleDrop !== "undefined") window.handleDrop = handleDrop;
+if (typeof onAnexoChange !== "undefined") window.onAnexoChange = onAnexoChange;
+if (typeof setTipo !== "undefined") window.setTipo = setTipo;
+if (typeof toggleFixo !== "undefined") window.toggleFixo = toggleFixo;
+if (typeof toggleParcela !== "undefined") window.toggleParcela = toggleParcela;
+if (typeof verPDF !== "undefined") window.verPDF = verPDF;
+if (typeof uploadAnexo !== "undefined") window.uploadAnexo = uploadAnexo;
+
+</script>
 <script type="module">
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
