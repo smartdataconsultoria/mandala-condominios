@@ -105,7 +105,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 .card-val{font-size:22px;font-weight:700}
 .card-val.green{color:#22c55e}
 .card-val.red{color:#ef4444}
-.card-val.blue{color:#3b82f6}
+.card-val.blue{color:var(--blue)}
 
 /* FILTROS */
 .filters{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
@@ -134,14 +134,14 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 .sit-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600}
 .sit-badge.pago{background:#22c55e20;color:#22c55e}
 .sit-badge.pendente{background:var(--gold)20;color:var(--gold)}
-.sit-badge.agendado{background:#3b82f620;color:#3b82f6}
+.sit-badge.agendado{background:var(--blue)20;color:var(--blue)}
 .row-actions{display:flex;gap:6px;justify-content:flex-end;opacity:0;transition:.15s}
 .table-row:hover .row-actions{opacity:1}
 .btn-row{background:none;border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;transition:.2s;color:var(--text-light)}
 .btn-row:hover{background:var(--border);color:var(--text-dark)}
 .btn-row.del:hover{background:#ef444420;color:#ef4444;border-color:#ef4444}
 .empty-state{text-align:center;padding:60px 20px;color:#4a5568;font-size:14px}
-.parcela-tag{font-size:10px;background:#3b82f620;color:#3b82f6;padding:2px 6px;border-radius:8px;margin-left:6px;font-weight:600}
+.parcela-tag{font-size:10px;background:var(--blue)20;color:var(--blue);padding:2px 6px;border-radius:8px;margin-left:6px;font-weight:600}
 .fixa-tag{font-size:10px;background:#a855f720;color:#a855f7;padding:2px 6px;border-radius:8px;margin-left:6px;font-weight:600}
 .pdf-tag{font-size:10px;background:var(--gold)20;color:var(--gold);padding:2px 6px;border-radius:8px;margin-left:4px;cursor:pointer}
 .pdf-tag:hover{background:var(--gold)40}
@@ -166,7 +166,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 .tipo-badge.show{display:flex}
 .tipo-badge.des{background:#ef444415;color:#ef4444;border:1px solid #ef444425}
 .tipo-badge.rec{background:#22c55e15;color:#22c55e;border:1px solid #22c55e25}
-.tipo-badge.cartao{background:#3b82f615;color:#3b82f6;border:1px solid #3b82f625}
+.tipo-badge.cartao{background:var(--blue)15;color:var(--blue);border:1px solid var(--blue)25}
 .tipo-badge.transf{background:var(--gold)15;color:var(--gold);border:1px solid var(--gold)25}
 
 /* MODAL BODY */
@@ -200,7 +200,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 /* PARCELAMENTO */
 .parcela-box{background:var(--off-white);border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:12px;display:none}
 .parcela-box.show{display:block}
-.parcela-info{font-size:12px;color:var(--text-mid);margin-top:10px;padding:8px 12px;background:var(--white)80;border-radius:6px;border-left:3px solid #3b82f6}
+.parcela-info{font-size:12px;color:var(--text-mid);margin-top:10px;padding:8px 12px;background:var(--white)80;border-radius:6px;border-left:3px solid var(--blue)}
 
 /* RECORRENTE */
 .recorrente-box{background:var(--off-white);border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:12px;display:none}
@@ -304,6 +304,70 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
     background: rgba(11,31,58,0.5) !important;
   }
 
+
+  /* ── Seletor de mês ── */
+  .mes-nav { display:flex; align-items:center; gap:12px; justify-content:center; margin-bottom:1.25rem; }
+  .mes-btn {
+    background: var(--white) !important;
+    border: 1.5px solid var(--border) !important;
+    color: var(--text-mid) !important;
+    width: 34px; height: 34px;
+    border-radius: 8px; cursor: pointer;
+    font-size: 18px; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .mes-btn:hover {
+    border-color: var(--navy) !important;
+    color: var(--navy) !important;
+    background: var(--off-white) !important;
+  }
+  .mes-atual {
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    color: var(--navy) !important;
+    background: var(--white) !important;
+    border: 1.5px solid var(--border) !important;
+    border-radius: 20px !important;
+    padding: 6px 20px !important;
+    min-width: 160px; text-align: center;
+  }
+
+  /* ── FAB ── */
+  .fab {
+    background: var(--navy) !important;
+    box-shadow: 0 4px 20px rgba(11,31,58,0.3) !important;
+  }
+  .fab:hover { background: var(--navy-light) !important; transform: scale(1.07); }
+  .fab-action {
+    background: var(--white) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text-dark) !important;
+    box-shadow: 0 2px 8px rgba(11,31,58,0.1) !important;
+  }
+  .fab-action:hover { background: var(--off-white) !important; }
+  .fab-action span, .fab-action div, .fab-action p { color: var(--text-dark) !important; }
+
+  /* ── Dropdown de tipo (Todas / Despesas / Receitas) ── */
+  .btn-tipo-wrap, .tipo-dropdown, [class*="tipo-menu"], [class*="dd-menu"] {
+    background: var(--white) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 8px 24px rgba(11,31,58,0.12) !important;
+    border-radius: 12px !important;
+  }
+  [class*="tipo-btn"], [class*="filter-btn"] {
+    background: var(--gold) !important;
+    color: var(--navy) !important;
+    border: none !important;
+    border-radius: 20px !important;
+    font-weight: 700 !important;
+  }
+
+  /* Qualquer elemento com fundo escuro residual */
+  [style*="#0f1117"], [style*="#1a1d27"], [style*="#2a2d3e"] {
+    background: var(--white) !important;
+    color: var(--text-dark) !important;
+  }
+
 </style>
 </head>
 <body>
@@ -354,7 +418,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
       <button onclick="baixarModelo()" style="display:flex;align-items:center;gap:7px;background:var(--border);border:1px solid #3a3d4e;color:var(--text-light);border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='#3a3d4e';this.style.color='#94a3b8'">
         📥 Baixar Modelo
       </button>
-      <button onclick="abrirImportar()" style="display:flex;align-items:center;gap:7px;background:#3b82f620;border:1px solid #3b82f640;color:#3b82f6;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s" onmouseover="this.style.background='#3b82f630'" onmouseout="this.style.background='#3b82f620'">
+      <button onclick="abrirImportar()" style="display:flex;align-items:center;gap:7px;background:var(--blue)20;border:1px solid var(--blue)40;color:var(--blue);border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s" onmouseover="this.style.background='var(--blue)30'" onmouseout="this.style.background='var(--blue)20'">
         📤 Importar Planilha
       </button>
       <button onclick="exportarExcel()" style="display:flex;align-items:center;gap:7px;background:#22c55e20;border:1px solid #22c55e40;color:#22c55e;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s" onmouseover="this.style.background='#22c55e30'" onmouseout="this.style.background='#22c55e20'">
@@ -372,19 +436,19 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
       </div>
       <div style="padding:22px">
         <div style="background:var(--off-white);border:2px dashed var(--border);border-radius:10px;padding:24px;text-align:center;margin-bottom:16px;transition:.2s" id="dropZone"
-          ondragover="event.preventDefault();this.style.borderColor='#3b82f6'"
+          ondragover="event.preventDefault();this.style.borderColor='var(--blue)'"
           ondragleave="this.style.borderColor='var(--border)'"
           ondrop="handleDrop(event)">
           <div style="font-size:36px;margin-bottom:8px">📂</div>
           <div style="font-size:14px;color:var(--text-light);margin-bottom:8px">Arraste a planilha aqui ou</div>
-          <button onclick="document.getElementById('fileInput').click()" style="background:#3b82f620;border:1px solid #3b82f640;color:#3b82f6;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer">Selecionar arquivo .xlsx</button>
+          <button onclick="document.getElementById('fileInput').click()" style="background:var(--blue)20;border:1px solid var(--blue)40;color:var(--blue);border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer">Selecionar arquivo .xlsx</button>
           <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" onchange="processarArquivo(this.files[0])"/>
         </div>
         <div id="importStatus" style="display:none;background:var(--off-white);border-radius:8px;padding:12px 14px;font-size:13px;margin-bottom:16px"></div>
         <div id="importPreview" style="display:none"></div>
         <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px">
           <button onclick="fecharImportar()" style="background:var(--border);border:none;color:var(--text-light);border-radius:8px;padding:9px 18px;font-size:14px;font-weight:600;cursor:pointer">Cancelar</button>
-          <button id="btnConfirmarImport" onclick="confirmarImportacao()" style="display:none;background:#3b82f6;border:none;color:#fff;border-radius:8px;padding:9px 18px;font-size:14px;font-weight:700;cursor:pointer">Importar Lançamentos</button>
+          <button id="btnConfirmarImport" onclick="confirmarImportacao()" style="display:none;background:var(--blue);border:none;color:#fff;border-radius:8px;padding:9px 18px;font-size:14px;font-weight:700;cursor:pointer">Importar Lançamentos</button>
         </div>
       </div>
     </div>
@@ -402,7 +466,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
         <span class="fab-item-label">Receita</span>
       </div>
       <div class="fab-item" onclick="event.stopPropagation();fabAbre('cartao')">
-        <div class="fab-item-icon" style="background:#3b82f620;color:#3b82f6">💳</div>
+        <div class="fab-item-icon" style="background:var(--blue)20;color:var(--blue)">💳</div>
         <span class="fab-item-label">Despesa cartão</span>
       </div>
       <div class="fab-item" onclick="event.stopPropagation();fabAbre('transferencia')">
@@ -434,7 +498,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
         <div onclick="setTipoFiltro('todos','⬡','Todas','#a855f7')" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;transition:.15s" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='none'"><span style="width:10px;height:10px;border-radius:50%;background:#a855f7;display:inline-block"></span>Todas as transações</div>
         <div onclick="setTipoFiltro('despesa','↓','Despesas','#ef4444')" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;transition:.15s" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='none'"><span style="width:10px;height:10px;border-radius:50%;background:#ef4444;display:inline-block"></span>Despesas</div>
         <div onclick="setTipoFiltro('receita','↑','Receitas','#22c55e')" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;transition:.15s" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='none'"><span style="width:10px;height:10px;border-radius:50%;background:#22c55e;display:inline-block"></span>Receitas</div>
-        <div onclick="setTipoFiltro('transferencia','⇄','Transferências','#3b82f6')" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;transition:.15s" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='none'"><span style="width:10px;height:10px;border-radius:50%;background:#3b82f6;display:inline-block"></span>Transferências</div>
+        <div onclick="setTipoFiltro('transferencia','⇄','Transferências','var(--blue)')" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;transition:.15s" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='none'"><span style="width:10px;height:10px;border-radius:50%;background:var(--blue);display:inline-block"></span>Transferências</div>
       </div>
     </div>
     <div class="search-box">
@@ -501,7 +565,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 
     <!-- INFO CARTÃO -->
     <div id="infoCartao" style="display:none;margin-top:14px">
-      <div style="background:#3b82f615;border:1px solid #3b82f630;border-radius:8px;padding:11px 14px;font-size:13px;color:#3b82f6;display:flex;align-items:center;gap:8px">
+      <div style="background:var(--blue)15;border:1px solid var(--blue)30;border-radius:8px;padding:11px 14px;font-size:13px;color:var(--blue);display:flex;align-items:center;gap:8px">
         💳 <span>Lançamento no cartão de crédito — marque como <strong>Pendente</strong> até o vencimento da fatura.</span>
       </div>
     </div>
@@ -1088,7 +1152,7 @@ function renderTabela(){
 const TIPO_CONFIG = {
   despesa:      {label:'Nova Despesa',     icon:'↓', cls:'des', cor:'#ef4444', bg:'#ef444415', tipoDB:'despesa'},
   receita:      {label:'Nova Receita',     icon:'↑', cls:'rec', cor:'#22c55e', bg:'#22c55e15', tipoDB:'receita'},
-  cartao:       {label:'Despesa Cartão',   icon:'💳',cls:'des', cor:'#3b82f6', bg:'#3b82f615', tipoDB:'despesa'},
+  cartao:       {label:'Despesa Cartão',   icon:'💳',cls:'des', cor:'var(--blue)', bg:'var(--blue)15', tipoDB:'despesa'},
   transferencia:{label:'Transferência',    icon:'⇄', cls:'',    cor:'var(--gold)', bg:'var(--gold)15', tipoDB:'transferencia'},
 };
 
@@ -1906,7 +1970,7 @@ function deletar(id){
   document.getElementById('confirmTitle').textContent = 'Excluir lançamento?';
 
   let desc = `<strong style="color:var(--text-dark)">${t.descricao||'Lançamento'}</strong>`;
-  if(ehParcelado) desc += `<br><span style="color:#3b82f6">Parcela ${t.parcela_atual||'?'} de ${t.parcela_total}</span>`;
+  if(ehParcelado) desc += `<br><span style="color:var(--blue)">Parcela ${t.parcela_atual||'?'} de ${t.parcela_total}</span>`;
   if(ehFixo)      desc += `<br><span style="color:#a855f7">🔄 Lançamento fixo (recorrente)</span>`;
   document.getElementById('confirmDesc').innerHTML = desc;
 
