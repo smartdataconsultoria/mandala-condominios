@@ -936,44 +936,78 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
   </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
-// ── Expor funções globalmente (necessário para type="module") ──
-if (typeof abrirImportar !== "undefined") window.abrirImportar = abrirImportar;
-if (typeof baixarModelo !== "undefined") window.baixarModelo = baixarModelo;
-if (typeof calConfirmar !== "undefined") window.calConfirmar = calConfirmar;
-if (typeof calNavMes !== "undefined") window.calNavMes = calNavMes;
-if (typeof calSelecionarDia !== "undefined") window.calSelecionarDia = calSelecionarDia;
-if (typeof calToggleAno !== "undefined") window.calToggleAno = calToggleAno;
-if (typeof confirmarImportacao !== "undefined") window.confirmarImportacao = confirmarImportacao;
-if (typeof editarTransacao !== "undefined") window.editarTransacao = editarTransacao;
-if (typeof executarDelete !== "undefined") window.executarDelete = executarDelete;
-if (typeof exportarExcel !== "undefined") window.exportarExcel = exportarExcel;
-if (typeof fazerLogout !== "undefined") window.fazerLogout = fazerLogout;
-if (typeof fecharCal !== "undefined") window.fecharCal = fecharCal;
-if (typeof fecharConfirm !== "undefined") window.fecharConfirm = fecharConfirm;
-if (typeof fecharImportar !== "undefined") window.fecharImportar = fecharImportar;
-if (typeof fecharModal !== "undefined") window.fecharModal = fecharModal;
-if (typeof mudarMes !== "undefined") window.mudarMes = mudarMes;
-if (typeof removerAnexo !== "undefined") window.removerAnexo = removerAnexo;
-if (typeof salvarLancamento !== "undefined") window.salvarLancamento = salvarLancamento;
-if (typeof selecionarOpt !== "undefined") window.selecionarOpt = selecionarOpt;
-if (typeof setDataRapida !== "undefined") window.setDataRapida = setDataRapida;
-if (typeof setFiltro !== "undefined") window.setFiltro = setFiltro;
-if (typeof setTipoFiltro !== "undefined") window.setTipoFiltro = setTipoFiltro;
-if (typeof toggleCal !== "undefined") window.toggleCal = toggleCal;
-if (typeof toggleFab !== "undefined") window.toggleFab = toggleFab;
-if (typeof toggleSecao !== "undefined") window.toggleSecao = toggleSecao;
-if (typeof toggleTipoMenu !== "undefined") window.toggleTipoMenu = toggleTipoMenu;
-if (typeof fabAbre !== "undefined") window.fabAbre = fabAbre;
-if (typeof fecharFab !== "undefined") window.fecharFab = fecharFab;
-if (typeof handleDrop !== "undefined") window.handleDrop = handleDrop;
-if (typeof onAnexoChange !== "undefined") window.onAnexoChange = onAnexoChange;
-if (typeof setTipo !== "undefined") window.setTipo = setTipo;
-if (typeof toggleFixo !== "undefined") window.toggleFixo = toggleFixo;
-if (typeof toggleParcela !== "undefined") window.toggleParcela = toggleParcela;
-if (typeof verPDF !== "undefined") window.verPDF = verPDF;
-if (typeof uploadAnexo !== "undefined") window.uploadAnexo = uploadAnexo;
+
+// ── Expor funções para os stubs globais ──
+window._toggleFab = toggleFab;
+window._fabAbre = fabAbre;
+window._mudarMes = mudarMes;
+window._toggleTipoMenu = toggleTipoMenu;
+window._setTipoFiltro = setTipoFiltro;
+window._setFiltro = setFiltro;
+window._fecharModal = fecharModal;
+window._fecharConfirm = fecharConfirm;
+window._fecharCal = fecharCal;
+window._fecharImportar = fecharImportar;
+window._salvarLancamento = salvarLancamento;
+window._editarTransacao = editarTransacao;
+window._executarDelete = executarDelete;
+window._exportarExcel = exportarExcel;
+window._baixarModelo = baixarModelo;
+window._abrirImportar = abrirImportar;
+window._confirmarImportacao = confirmarImportacao;
+window._selecionarOpt = selecionarOpt;
+window._setDataRapida = setDataRapida;
+window._toggleCal = toggleCal;
+window._calNavMes = calNavMes;
+window._calToggleAno = calToggleAno;
+window._calSelecionarDia = calSelecionarDia;
+window._calConfirmar = calConfirmar;
+window._removerAnexo = removerAnexo;
+window._toggleSecao = toggleSecao;
+window._fazerLogout = typeof fazerLogout !== 'undefined' ? fazerLogout : () => {};
+window._toggleParcela = typeof toggleParcela !== 'undefined' ? toggleParcela : () => {};
+window._toggleFixo = typeof toggleFixo !== 'undefined' ? toggleFixo : () => {};
+window._verPDF = typeof verPDF !== 'undefined' ? verPDF : () => {};
+window._handleDrop = typeof handleDrop !== 'undefined' ? handleDrop : () => {};
+window._uploadAnexo = typeof uploadAnexo !== 'undefined' ? uploadAnexo : () => {};
 
 </script>
+<script>
+// Stubs globais — chamam as funções reais quando o módulo carregar
+function toggleFab(e) { if(window._toggleFab) window._toggleFab(e); }
+function fabAbre(t) { if(window._fabAbre) window._fabAbre(t); }
+function mudarMes(d) { if(window._mudarMes) window._mudarMes(d); }
+function toggleTipoMenu() { if(window._toggleTipoMenu) window._toggleTipoMenu(); }
+function setTipoFiltro(t,l,i) { if(window._setTipoFiltro) window._setTipoFiltro(t,l,i); }
+function setFiltro(t) { if(window._setFiltro) window._setFiltro(t); }
+function fecharModal() { if(window._fecharModal) window._fecharModal(); }
+function fecharConfirm() { if(window._fecharConfirm) window._fecharConfirm(); }
+function fecharCal() { if(window._fecharCal) window._fecharCal(); }
+function fecharImportar() { if(window._fecharImportar) window._fecharImportar(); }
+function salvarLancamento() { if(window._salvarLancamento) window._salvarLancamento(); }
+function editarTransacao(id) { if(window._editarTransacao) window._editarTransacao(id); }
+function executarDelete() { if(window._executarDelete) window._executarDelete(); }
+function exportarExcel() { if(window._exportarExcel) window._exportarExcel(); }
+function baixarModelo() { if(window._baixarModelo) window._baixarModelo(); }
+function abrirImportar() { if(window._abrirImportar) window._abrirImportar(); }
+function confirmarImportacao() { if(window._confirmarImportacao) window._confirmarImportacao(); }
+function selecionarOpt(e,v,l) { if(window._selecionarOpt) window._selecionarOpt(e,v,l); }
+function setDataRapida(v) { if(window._setDataRapida) window._setDataRapida(v); }
+function toggleCal() { if(window._toggleCal) window._toggleCal(); }
+function calNavMes(d) { if(window._calNavMes) window._calNavMes(d); }
+function calToggleAno() { if(window._calToggleAno) window._calToggleAno(); }
+function calSelecionarDia(d) { if(window._calSelecionarDia) window._calSelecionarDia(d); }
+function calConfirmar() { if(window._calConfirmar) window._calConfirmar(); }
+function removerAnexo() { if(window._removerAnexo) window._removerAnexo(); }
+function toggleSecao(id) { if(window._toggleSecao) window._toggleSecao(id); }
+function fazerLogout() { if(window._fazerLogout) window._fazerLogout(); }
+function toggleParcela(v) { if(window._toggleParcela) window._toggleParcela(v); }
+function toggleFixo(v) { if(window._toggleFixo) window._toggleFixo(v); }
+function verPDF(url) { if(window._verPDF) window._verPDF(url); }
+function handleDrop(e) { if(window._handleDrop) window._handleDrop(e); }
+function uploadAnexo() { if(window._uploadAnexo) window._uploadAnexo(); }
+</script>
+
 <script type="module">
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
