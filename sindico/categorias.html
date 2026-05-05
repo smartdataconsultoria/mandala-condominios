@@ -364,6 +364,17 @@
   </div>
 </div>
 <script>
+// ── AUTH & CONDOMÍNIO ─────────────────────────────────────
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb = createClient('https://siczyohqmlrmirqgzlxb.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw');
+let CONDO_ID = null;
+(async () => {
+  const { data: { session } } = await _sb.auth.getSession();
+  if(!session){ window.location.href='/login.html'; return; }
+  const { data: perfil } = await _sb.from('usuarios').select('condominio_id').eq('id', session.user.id).single();
+  CONDO_ID = perfil?.condominio_id;
+})();
+
 // ── CONFIGURAÇÃO ─────────────────────────────────────────
 const SUPA_URL = 'https://siczyohqmlrmirqgzlxb.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw'; // substitua pela sua anon key do Supabase
@@ -427,7 +438,7 @@ async function loadCategorias(){
   let res, data;
   try {
     res = await fetch(
-      `${SUPA_URL}/rest/v1/condo_categorias?empresa=eq.${EMPRESA}&order=tipo,categoria,nome`,
+      `${SUPA_URL}/rest/v1/condo_categorias?condominio_id=eq.${CONDO_ID}&order=tipo,categoria,nome`,
       {headers:h}
     );
     data = await res.json();
@@ -579,13 +590,13 @@ async function salvarCategoria(){
   const btn = document.getElementById('btnSalvar');
   btn.disabled = true; btn.textContent = 'Salvando...';
   const payload = {
-    empresa:   EMPRESA,
-    tipo:      document.getElementById('fTipo').value,
-    categoria: document.getElementById('fCategoria').value.trim(),
-    nome:      document.getElementById('fNome').value.trim(),
-    icone:     document.getElementById('fIcone').value.trim()||'🏷',
-    cor:       document.getElementById('fCor').value
-  };
+  condominio_id: CONDO_ID,
+  tipo: document.getElementById('fTipo').value,
+  categoria: document.getElementById('fCategoria').value.trim(),
+  nome: document.getElementById('fNome').value.trim(),
+  icone: document.getElementById('fIcone').value.trim() || '🏷',
+  cor: document.getElementById('fCor').value
+};
   if(!payload.nome||!payload.categoria){
     showAlert('Preencha Categoria e Nome.','error');
     btn.disabled=false; btn.textContent='Salvar'; return;
