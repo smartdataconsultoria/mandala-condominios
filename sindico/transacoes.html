@@ -959,8 +959,8 @@ function toggleFab(e) { _callWhenReady('toggleFab', [e]); }
 function fabAbre(t) { _callWhenReady('fabAbre', [t]); }
 function mudarMes(d) { _callWhenReady('mudarMes', [d]); }
 function toggleTipoMenu() { _callWhenReady('toggleTipoMenu', []); }
-function setTipoFiltro(t,l,i) { _callWhenReady('setTipoFiltro', [t,l,i]); }
-function setFiltro(t) { _callWhenReady('setFiltro', [t]); }
+function setTipoFiltro(t,i,l,c) { _callWhenReady('setTipoFiltro', [t,i,l,c]); }
+function setFiltro(t, el) { _callWhenReady('setFiltro', [t, el]); }
 function fecharModal() { _callWhenReady('fecharModal', []); }
 function fecharConfirm() { _callWhenReady('fecharConfirm', []); }
 function fecharCal() { _callWhenReady('fecharCal', []); }
@@ -973,7 +973,7 @@ function baixarModelo() { _callWhenReady('baixarModelo', []); }
 function abrirImportar() { _callWhenReady('abrirImportar', []); }
 function confirmarImportacao() { _callWhenReady('confirmarImportacao', []); }
 function selecionarOpt(e,v,l) { _callWhenReady('selecionarOpt', [e,v,l]); }
-function setDataRapida(v) { _callWhenReady('setDataRapida', [v]); }
+function setDataRapida(v, el) { _callWhenReady('setDataRapida', [v, el]); }
 function toggleCal() { _callWhenReady('toggleCal', []); }
 function calNavMes(d) { _callWhenReady('calNavMes', [d]); }
 function calToggleAno() { _callWhenReady('calToggleAno', []); }
@@ -1026,7 +1026,9 @@ window.trocarCondo = () => {} // síndico tem só 1 condomínio
 
 
 const _h = {'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw', 'Content-Type': 'application/json', 'Prefer': 'return=representation'};
-const _BASE = 'https://siczyohqmlrmirqgzlxb.supabase.co/rest/v1';
+const _BASE    = 'https://siczyohqmlrmirqgzlxb.supabase.co/rest/v1';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw';
+const SUPA_URL = 'https://siczyohqmlrmirqgzlxb.supabase.co';
 
 // ── CONFIG ───────────────────────────────────────────────
 // ── ESTADO ───────────────────────────────────────────────
@@ -1537,8 +1539,13 @@ document.addEventListener('click', e=>{
 });
 
 function setDataRapida(qual, el){
+  // el pode ser passado direto ou pelo id do botão
+  if(!el){
+    const map = {hoje:'dqHoje', ontem:'dqOntem', outro:'dqOutro'};
+    el = document.getElementById(map[qual]) || document.querySelector('.dq-btn');
+  }
   document.querySelectorAll('.dq-btn').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
+  if(el) el.classList.add('active');
   const input  = document.getElementById('fData');
   const calWrp = document.getElementById('calWrap');
   if(qual==='outro'){
@@ -1561,9 +1568,13 @@ function setDataRapida(qual, el){
   } else {
     calWrp.style.display='none';
     input.style.display='none';
-    const hoje = new Date();
-    if(qual==='ontem') hoje.setDate(hoje.getDate()-1);
-    input.value = hoje.toISOString().split('T')[0];
+    const ref = new Date();
+    if(qual==='ontem') ref.setDate(ref.getDate()-1);
+    // Usar data local (evita bug de fuso horário com toISOString)
+    const yy = ref.getFullYear();
+    const mm = String(ref.getMonth()+1).padStart(2,'0');
+    const dd = String(ref.getDate()).padStart(2,'0');
+    input.value = `${yy}-${mm}-${dd}`;
   }
 }
 
