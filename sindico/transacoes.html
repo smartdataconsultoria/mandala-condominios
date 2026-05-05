@@ -1029,14 +1029,32 @@ function btnEditar(id){
 }
 
 function btnExcluir(id){
-  console.log('[EXCLUIR] clicado id='+id+' | _deletar='+typeof window._deletar+' | _appTransacoes='+( window._appTransacoes ? window._appTransacoes.length : 'null'));
+  console.log('[EXCLUIR] clicado id='+id);
   if(window._deletar){ window._deletar(id); return; }
   var t = 0;
   var iv = setInterval(function(){
     if(window._deletar){ clearInterval(iv); window._deletar(id); return; }
-    if(++t > 50){ console.log('[EXCLUIR] timeout - _deletar nunca ficou disponível'); clearInterval(iv); }
+    if(++t > 50){ console.log('[EXCLUIR] timeout'); clearInterval(iv); }
   }, 100);
 }
+
+// Listener na tabela — captura cliques em botões com data-acao
+// Registrado no DOMContentLoaded para garantir que table-wrap existe
+document.addEventListener('DOMContentLoaded', function(){
+  var tableWrap = document.querySelector('.table-wrap');
+  if(!tableWrap){ console.log('[LISTENER] table-wrap não encontrado'); return; }
+  console.log('[LISTENER] registrado na table-wrap');
+  tableWrap.addEventListener('click', function(e){
+    var btn = e.target.closest('[data-acao]');
+    if(!btn) return;
+    e.stopPropagation();
+    var id = parseInt(btn.getAttribute('data-id'));
+    var acao = btn.getAttribute('data-acao');
+    console.log('[LISTENER] acao='+acao+' id='+id);
+    if(acao === 'excluir') btnExcluir(id);
+    if(acao === 'editar')  btnEditar(id);
+  });
+});
 </script>
 
 <script type="module">
@@ -1386,10 +1404,10 @@ function renderTabela(){
       <div class="val-cell ${tp}">${t.tipo==='despesa'?'- ':'+ '}${fmt(t.valor)}</div>
       <div><span class="sit-badge ${sit}">${sitLabel}</span></div>
       <div class="row-actions">
-        <button class="btn-row edit" onclick="btnEditar(${t.id})" title="Editar lançamento">
+        <button class="btn-row edit" data-acao="editar" data-id="${t.id}" title="Editar lançamento">
           ✏️ Editar
         </button>
-        <button class="btn-row del" onclick="btnExcluir(${t.id})" title="Excluir lançamento">
+        <button class="btn-row del" data-acao="excluir" data-id="${t.id}" title="Excluir lançamento">
           🗑 Excluir
         </button>
       </div>
