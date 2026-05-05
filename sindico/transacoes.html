@@ -1352,10 +1352,10 @@ function renderTabela(){
       <div class="val-cell ${tp}">${t.tipo==='despesa'?'- ':'+ '}${fmt(t.valor)}</div>
       <div><span class="sit-badge ${sit}">${sitLabel}</span></div>
       <div class="row-actions">
-        <button class="btn-row edit" onclick="event.stopPropagation();window._editarTransacao(${t.id})" title="Editar lançamento">
+        <button class="btn-row edit" data-action="editar" data-id="${t.id}" title="Editar lançamento">
           ✏️ Editar
         </button>
-        <button class="btn-row del" onclick="event.stopPropagation();window._deletar(${t.id})" title="Excluir lançamento">
+        <button class="btn-row del" data-action="excluir" data-id="${t.id}" title="Excluir lançamento">
           🗑 Excluir
         </button>
       </div>
@@ -2418,6 +2418,18 @@ function _deletarFn(id){
 
   document.getElementById('confirmBg').classList.add('open');
 }
+
+// ── Event delegation para botões da tabela ──────────────
+// Registrado UMA vez aqui, dentro do module, onde as funções reais existem
+document.addEventListener('click', function(ev){
+  const btn = ev.target.closest('[data-action]');
+  if(!btn) return;
+  ev.stopPropagation();
+  const id  = parseInt(btn.dataset.id);
+  const act = btn.dataset.action;
+  if(act === 'editar')  editarTransacao(id);
+  if(act === 'excluir') _deletarFn(id);
+});
 
 function selecionarOpt(opt){
   _deleteOpt = opt;
