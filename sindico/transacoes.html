@@ -1977,18 +1977,17 @@ async function baixarModelo(){
   const situacoes = ['pago','pendente','agendado'];
 
   const agrupamentos = [...new Set(categorias.map(c => c.categoria).filter(Boolean))].sort();
-  const subcategorias = [...new Set(categorias.map(c => c.nome).filter(Boolean))].sort();
+  const subcats = [...new Set(categorias.map(c => c.nome).filter(Boolean))].sort();
   const contasNomes = [...new Set(contas.map(c => c.nome).filter(Boolean))].sort();
 
   const listas = [['TIPO','SITUACAO','CATEGORIA','SUBCATEGORIA','CONTA']];
-  const max = Math.max(tipos.length, situacoes.length, agrupamentos.length, subcategorias.length, contasNomes.length, 1);
-
-  for(let i = 0; i < max; i++){
+  const max = Math.max(tipos.length, situacoes.length, agrupamentos.length, subcats.length, contasNomes.length, 1);
+  for(let i=0;i<max;i++){
     listas.push([
       tipos[i] || '',
       situacoes[i] || '',
       agrupamentos[i] || '',
-      subcategorias[i] || '',
+      subcats[i] || '',
       contasNomes[i] || ''
     ]);
   }
@@ -1999,15 +1998,26 @@ async function baixarModelo(){
   const dv = [];
   const rng = c => `${c}4:${c}1000`;
   const stop = { allowBlank:false, showErrorMessage:true, errorStyle:'stop', error:'Selecione um valor da lista.' };
-
-  if(tipos.length) dv.push({ sqref:rng('B'), type:'list', formula1:`Listas!$A$2:$A$${tipos.length+1}`, ...stop });
-  if(agrupamentos.length) dv.push({ sqref:rng('D'), type:'list', formula1:`Listas!$C$2:$C$${agrupamentos.length+1}`, ...stop });
-  if(subcategorias.length) dv.push({ sqref:rng('E'), type:'list', formula1:`Listas!$D$2:$D$${subcategorias.length+1}`, ...stop });
-  if(contasNomes.length) dv.push({ sqref:rng('F'), type:'list', formula1:`Listas!$E$2:$E$${contasNomes.length+1}`, ...stop });
-  if(situacoes.length) dv.push({ sqref:rng('H'), type:'list', formula1:`Listas!$B$2:$B$${situacoes.length+1}`, ...stop });
+  dv.push({ sqref:rng('B'), type:'list', formula1:`Listas!$A$2:$A$${tipos.length+1}`, ...stop });
+  dv.push({ sqref:rng('D'), type:'list', formula1:`Listas!$C$2:$C$${agrupamentos.length+1}`, ...stop });
+  dv.push({ sqref:rng('E'), type:'list', formula1:`Listas!$D$2:$D$${subcats.length+1}`, ...stop });
+  dv.push({ sqref:rng('F'), type:'list', formula1:`Listas!$E$2:$E$${contasNomes.length+1}`, ...stop });
+  dv.push({ sqref:rng('H'), type:'list', formula1:`Listas!$B$2:$B$${situacoes.length+1}`, ...stop });
 
   wsModelo['!dataValidations'] = dv;
   wsModelo['!dataValidation'] = dv;
+
+  // 🔒 Proteção
+  wsModelo['!protect'] = { password:'importacao', enable:true, selectLockedCells:false, selectUnlockedCells:true };
+  for(let C=0;C<=8;C++){
+    for(let R=3;R<=1000;R++){
+      const ref = XLSX.utils.encode_cell({r:R,c:C});
+      if(!wsModelo[ref]) wsModelo[ref] = {};
+      wsModelo[ref].s = { protection:{locked:false} };
+    }
+  }
+  wsList['!protect'] = { password:'importacao', enable:true };
+  wsList['!hidden'] = true;
 
   XLSX.writeFile(wb, `Modelo_Transacoes_${MESES[_mes]}_${_ano}.xlsx`);
 }
