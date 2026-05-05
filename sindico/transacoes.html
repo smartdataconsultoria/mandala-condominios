@@ -980,7 +980,6 @@ function salvarLancamento(){ return _call('_salvarLancamento'); }
 function editarTransacao(id){ return _call('_editarTransacao', id); }
 function executarDelete(){ return _call('_executarDelete'); }
 function exportarExcel(){ return _call('_exportarExcel'); }
-function baixarModelo(){ return _call('_baixarModelo'); }
 function abrirImportar(){ return _call('_abrirImportar'); }
 function confirmarImportacao(){ return _call('_confirmarImportacao'); }
 function selecionarOpt(opt, el){ return _call('_selecionarOpt', opt, el); }
@@ -1955,45 +1954,85 @@ async function editarTransacao(id){
 }
 
 // -- BAIXAR MODELO -----------------------------------------
-function baixarModelo(){
-  // Gera planilha modelo via SheetJS (XLSX) no browser
+async function baixarModelo(){
   const wb = XLSX.utils.book_new();
 
-  const instrucoes = [
+  // Aba principal
+  const wsModelo = XLSX.utils.aoa_to_sheet([
     ['EDIFÍCIO MANDALA — Planilha de Importação de Transações'],
-    ['Preencha somente as linhas de dados. DATA: DD/MM/AAAA | TIPO: despesa ou receita | SITUAÇÃO: pago, pendente, agendado'],
+    ['Preencha somente as linhas de dados.'],
     ['DATA','TIPO','DESCRIÇÃO','CATEGORIA (Agrupamento)','SUBCATEGORIA','CONTA','VALOR (R$)','SITUAÇÃO','OBSERVAÇÃO'],
-    ['30/04/2026','despesa','Administração','Manutenção - Contrato','Administração','Conta Corrente Principal',1386.00,'pendente','Exemplo'],
-    ['20/04/2026','despesa','Água','Consumo','Água','Conta Corrente Principal',1976.64,'pago',''],
-    ['13/04/2026','despesa','Manutenção Jardim','Manutenção - Contrato','Manutenção Jardim','Conta Corrente Principal',230.00,'pago',''],
+  ]);
+  wsModelo['!cols'] = [
+    {wch:14},{wch:12},{wch:30},{wch:25},{wch:22},{wch:30},{wch:14},{wch:14},{wch:30}
   ];
-
-  const wsModelo = XLSX.utils.aoa_to_sheet(instrucoes);
-  wsModelo['!cols'] = [{wch:14},{wch:12},{wch:30},{wch:25},{wch:20},{wch:25},{wch:14},{wch:14},{wch:30}];
   XLSX.utils.book_append_sheet(wb, wsModelo, 'Transações');
 
-  // Aba de categorias
-  const catRows = [
-    ['AGRUPAMENTO','SUBCATEGORIA','TIPO'],
-    ['Manutenção - Contrato','Administração','despesa'],
-    ['Manutenção - Contrato','Manutenção Jardim','despesa'],
-    ['Consumo','Água','despesa'],
-    ['Consumo','Energia','despesa'],
-    ['Funcionário','Adiantamento Salarial','despesa'],
-    ['Funcionário','Vale Transporte','despesa'],
-    ['Funcionário','Férias','despesa'],
-    ['Funcionário','INSS','despesa'],
-    ['Funcionário','FGTS','despesa'],
-    ['Funcionário','Cesta Básica','despesa'],
-    ['Conservação','Material Limpeza','despesa'],
-    ['Taxa','Taxa Condominial','receita'],
-    ['Taxa Ordinária','Taxa Ordinária','receita'],
-  ];
-  const wsCat = XLSX.utils.aoa_to_sheet(catRows);
-  wsCat['!cols'] = [{wch:28},{wch:28},{wch:14}];
-  XLSX.utils.book_append_sheet(wb, wsCat, 'Categorias Disponíveis');
+  // Dados reais do sistema
+  const categorias = _categorias || [];
+  const contas = _contas || [];
 
-  XLSX.writeFile(wb, `Modelo_Transacoes_${MESES[_mes]}_${_ano}.xlsx`);
+  const tipos = ['despesa','receita','transferencia'];
+  const situacoes = ['pago','pendente','agendado'];
+
+  const agrupamentos = [...new Set(
+    categorias.map(c => c.categoria).filter(Boolean)
+  )].sort();
+
+  const subcats = [...new Set(
+    categorias.map(c => c.nome).filter(Boolean)
+  )].sort();
+
+  const contasNomes = [...new Set(
+    contas.map(c => c.nome).filter(Boolean)
+  )].sort();
+
+  // Aba Listas (base das validações)
+  const listas = [['TIPO','SITUAÇÃO','AGRUPAMENTO','SUBCATEGORIA','CONTA']];
+  const max = Math.max(
+    tipos.length,
+    situacoes.length,
+    agrupamentos.length,
+    subcats.length,
+    contasNomes.length
+  );
+
+  for(let i=0;i<max;i++){
+    listas.push([
+      tipos[i] || '',
+      situacoes[i] || '',
+      agrupamentos[i] || '',
+      subcats[i] || '',
+      contasNomes[i] || ''
+    ]);
+  }
+
+  const wsList = XLSX.utils.aoa_to_sheet(listas);
+  XLSX.utils.book_append_sheet(wb, wsList, 'Listas');
+
+  // Validações do Excel (bloqueia valores inválidos)
+  const dv = [];
+  const rng = c => `${c}4:${c}1000`;
+  const stop = {
+    allowBlank: false,
+    showErrorMessage: true,
+    errorStyle: 'stop',
+    error: 'Selecione um valor da lista.'
+  };
+
+  dv.push({ sqref: rng('B'), type: 'list', formula1: `Listas!$A$2:$A$${tipos.length+1}`, ...stop });
+  dv.push({ sqref: rng('D'), type: 'list', formula1: `Listas!$C$2:$C$${agrupamentos.length+1}`, ...stop });
+  dv.push({ sqref: rng('E'), type: 'list', formula1: `Listas!$D$2:$D$${subcats.length+1}`, ...stop });
+  dv.push({ sqref: rng('F'), type: 'list', formula1: `Listas!$E$2:$E$${contasNomes.length+1}`, ...stop });
+  dv.push({ sqref: rng('H'), type: 'list', formula1: `Listas!$B$2:$B$${situacoes.length+1}`, ...stop });
+
+  wsModelo['!dataValidations'] = dv;
+  wsModelo['!dataValidation'] = dv;
+
+  XLSX.writeFile(
+    wb,
+    `Modelo_Transacoes_${MESES[_mes]}_${_ano}.xlsx`
+  );
 }
 
 // -- EXPORTAR MÊS -----------------------------------------
