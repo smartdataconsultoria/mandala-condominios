@@ -2217,21 +2217,21 @@ function deletar(id){
     opcoes.style.display = 'flex';
     opcoes.innerHTML = `
       <button class="confirm-opt selected" id="optEste" onclick="selecionarOpt('este')">
-        <span class="confirm-opt-icon">&#x1F4C4;</span>
+        <span class="confirm-opt-icon">\u{1F4C4}</span>
         <div>
           <div class="confirm-opt-label">Somente este ${tipoLabel}</div>
           <div class="confirm-opt-sub">Remove apenas ${mesRef}</div>
         </div>
       </button>
       <button class="confirm-opt" id="optProximos" onclick="selecionarOpt('proximos')">
-        <span class="confirm-opt-icon">&#x23ED;&#xFE0F;</span>
+        <span class="confirm-opt-icon">\u23ED\uFE0F</span>
         <div>
-          <div class="confirm-opt-label">Este e os próximos</div>
+          <div class="confirm-opt-label">Este e os pr\u00F3ximos</div>
           <div class="confirm-opt-sub">Remove ${mesRef} em diante</div>
         </div>
       </button>
       <button class="confirm-opt" id="optTodos" onclick="selecionarOpt('todos')">
-        <span class="confirm-opt-icon">&#x1F5C2;&#xFE0F;</span>
+        <span class="confirm-opt-icon">\u{1F5C2}\uFE0F</span>
         <div>
           <div class="confirm-opt-label">${todosLabel}</div>
           <div class="confirm-opt-sub">${todosDesc}</div>
