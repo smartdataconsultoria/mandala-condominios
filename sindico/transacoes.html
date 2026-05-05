@@ -1957,52 +1957,37 @@ async function editarTransacao(id){
 async function baixarModelo(){
   const wb = XLSX.utils.book_new();
 
-  // Aba principal
   const wsModelo = XLSX.utils.aoa_to_sheet([
     ['EDIFÍCIO MANDALA — Planilha de Importação de Transações'],
-    ['Preencha somente as linhas de dados.'],
-    ['DATA','TIPO','DESCRIÇÃO','CATEGORIA (Agrupamento)','SUBCATEGORIA','CONTA','VALOR (R$)','SITUAÇÃO','OBSERVAÇÃO'],
+    ['Preencha somente as linhas de dados a partir da linha 4.'],
+    ['DATA','TIPO','DESCRIÇÃO','CATEGORIA','SUBCATEGORIA','CONTA','VALOR (R$)','SITUAÇÃO','OBSERVAÇÃO'],
   ]);
+
   wsModelo['!cols'] = [
-    {wch:14},{wch:12},{wch:30},{wch:25},{wch:22},{wch:30},{wch:14},{wch:14},{wch:30}
+    {wch:14},{wch:12},{wch:32},{wch:26},{wch:24},{wch:28},{wch:14},{wch:14},{wch:32}
   ];
+
   XLSX.utils.book_append_sheet(wb, wsModelo, 'Transações');
 
-  // Dados reais do sistema
-  const categorias = _categorias || [];
-  const contas = _contas || [];
+  const categorias = Array.isArray(_categorias) ? _categorias : [];
+  const contas = Array.isArray(_contas) ? _contas : [];
 
   const tipos = ['despesa','receita','transferencia'];
   const situacoes = ['pago','pendente','agendado'];
 
-  const agrupamentos = [...new Set(
-    categorias.map(c => c.categoria).filter(Boolean)
-  )].sort();
+  const agrupamentos = [...new Set(categorias.map(c => c.categoria).filter(Boolean))].sort();
+  const subcategorias = [...new Set(categorias.map(c => c.nome).filter(Boolean))].sort();
+  const contasNomes = [...new Set(contas.map(c => c.nome).filter(Boolean))].sort();
 
-  const subcats = [...new Set(
-    categorias.map(c => c.nome).filter(Boolean)
-  )].sort();
+  const listas = [['TIPO','SITUACAO','CATEGORIA','SUBCATEGORIA','CONTA']];
+  const max = Math.max(tipos.length, situacoes.length, agrupamentos.length, subcategorias.length, contasNomes.length, 1);
 
-  const contasNomes = [...new Set(
-    contas.map(c => c.nome).filter(Boolean)
-  )].sort();
-
-  // Aba Listas (base das validações)
-  const listas = [['TIPO','SITUAÇÃO','AGRUPAMENTO','SUBCATEGORIA','CONTA']];
-  const max = Math.max(
-    tipos.length,
-    situacoes.length,
-    agrupamentos.length,
-    subcats.length,
-    contasNomes.length
-  );
-
-  for(let i=0;i<max;i++){
+  for(let i = 0; i < max; i++){
     listas.push([
       tipos[i] || '',
       situacoes[i] || '',
       agrupamentos[i] || '',
-      subcats[i] || '',
+      subcategorias[i] || '',
       contasNomes[i] || ''
     ]);
   }
@@ -2010,30 +1995,22 @@ async function baixarModelo(){
   const wsList = XLSX.utils.aoa_to_sheet(listas);
   XLSX.utils.book_append_sheet(wb, wsList, 'Listas');
 
-  // Validações do Excel (bloqueia valores inválidos)
   const dv = [];
   const rng = c => `${c}4:${c}1000`;
-  const stop = {
-    allowBlank: false,
-    showErrorMessage: true,
-    errorStyle: 'stop',
-    error: 'Selecione um valor da lista.'
-  };
+  const stop = { allowBlank:false, showErrorMessage:true, errorStyle:'stop', error:'Selecione um valor da lista.' };
 
-  dv.push({ sqref: rng('B'), type: 'list', formula1: `Listas!$A$2:$A$${tipos.length+1}`, ...stop });
-  dv.push({ sqref: rng('D'), type: 'list', formula1: `Listas!$C$2:$C$${agrupamentos.length+1}`, ...stop });
-  dv.push({ sqref: rng('E'), type: 'list', formula1: `Listas!$D$2:$D$${subcats.length+1}`, ...stop });
-  dv.push({ sqref: rng('F'), type: 'list', formula1: `Listas!$E$2:$E$${contasNomes.length+1}`, ...stop });
-  dv.push({ sqref: rng('H'), type: 'list', formula1: `Listas!$B$2:$B$${situacoes.length+1}`, ...stop });
+  if(tipos.length) dv.push({ sqref:rng('B'), type:'list', formula1:`Listas!$A$2:$A$${tipos.length+1}`, ...stop });
+  if(agrupamentos.length) dv.push({ sqref:rng('D'), type:'list', formula1:`Listas!$C$2:$C$${agrupamentos.length+1}`, ...stop });
+  if(subcategorias.length) dv.push({ sqref:rng('E'), type:'list', formula1:`Listas!$D$2:$D$${subcategorias.length+1}`, ...stop });
+  if(contasNomes.length) dv.push({ sqref:rng('F'), type:'list', formula1:`Listas!$E$2:$E$${contasNomes.length+1}`, ...stop });
+  if(situacoes.length) dv.push({ sqref:rng('H'), type:'list', formula1:`Listas!$B$2:$B$${situacoes.length+1}`, ...stop });
 
   wsModelo['!dataValidations'] = dv;
   wsModelo['!dataValidation'] = dv;
 
-  XLSX.writeFile(
-    wb,
-    `Modelo_Transacoes_${MESES[_mes]}_${_ano}.xlsx`
-  );
+  XLSX.writeFile(wb, `Modelo_Transacoes_${MESES[_mes]}_${_ano}.xlsx`);
 }
+
 
 // -- EXPORTAR MÊS -----------------------------------------
 function exportarExcel(){
