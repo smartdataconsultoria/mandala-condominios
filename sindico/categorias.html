@@ -364,17 +364,6 @@
   </div>
 </div>
 <script>
-// ── AUTH & CONDOMÍNIO ─────────────────────────────────────
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-const _sb = createClient('https://siczyohqmlrmirqgzlxb.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw');
-let CONDO_ID = null;
-(async () => {
-  const { data: { session } } = await _sb.auth.getSession();
-  if(!session){ window.location.href='/login.html'; return; }
-  const { data: perfil } = await _sb.from('usuarios').select('condominio_id').eq('id', session.user.id).single();
-  CONDO_ID = perfil?.condominio_id;
-})();
-
 // ── CONFIGURAÇÃO ─────────────────────────────────────────
 const SUPA_URL = 'https://siczyohqmlrmirqgzlxb.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw'; // substitua pela sua anon key do Supabase
@@ -431,6 +420,28 @@ function showAlert(msg, type='success'){
 let _todosData = [];
 let _filtroTipo = 'todos';
 let _filtroCat  = null;
+
+
+let CONDO_ID = null;
+
+async function loadCondoId(){
+  const tk = await getToken();
+  if(!tk){
+    window.location.href = '/login.html';
+    return;
+  }
+  const stored = Object.keys(localStorage).find(k => k.includes('auth-token'));
+  const sess = stored ? JSON.parse(localStorage.getItem(stored)) : null;
+  const userId = sess?.user?.id;
+  if(!userId) return;
+
+  const res = await fetch(
+    `${SUPA_URL}/rest/v1/usuarios?select=condominio_id&id=eq.${userId}`,
+    { headers: await headers() }
+  );
+  const data = await res.json();
+  CONDO_ID = data?.[0]?.condominio_id || null;
+}
 
 // ── LOAD CATEGORIAS ──────────────────────────────────────
 async function loadCategorias(){
@@ -727,6 +738,7 @@ window.addEventListener('DOMContentLoaded', async ()=>{
       document.getElementById('navUser').textContent = sess?.user?.email||'';
     } catch{}
   }
+  await loadCondoId();
   await loadCategorias();
 });
 
