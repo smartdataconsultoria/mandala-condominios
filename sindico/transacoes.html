@@ -268,9 +268,10 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .confirm-title{font-size:16px;font-weight:700;color:var(--text-dark);text-align:center;margin-bottom:8px}
 .confirm-desc{font-size:13px;color:var(--text-mid);text-align:center;line-height:1.6;margin-bottom:20px}
 .confirm-opcoes{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
-.confirm-opt{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:var(--off-white);border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s;text-align:left;width:100%}
+.confirm-opt{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:#f8fafc;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s;text-align:left;width:100%}
 .confirm-opt:hover{border-color:var(--gold);background:var(--gold)08}
-.confirm-opt.selected{border-color:var(--gold);background:var(--gold)12}
+.confirm-opt.selected{border-color:var(--gold);background:var(--gold)10;box-shadow:0 0 0 1px var(--gold)40}
+.confirm-opcoes{display:flex;flex-direction:column;gap:8px;margin:14px 0 0}
 .confirm-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px}
 .confirm-opt-label{font-size:14px;font-weight:700;color:var(--text-dark)}
 .confirm-opt-sub{font-size:12px;color:var(--text-mid);margin-top:2px}
@@ -2037,15 +2038,20 @@ async function editarTransacao(id){
   document.getElementById('fData').style.display='none';
   document.getElementById('dqOutro').classList.add('active');
   document.querySelectorAll('.dq-btn:not(#dqOutro)').forEach(b=>b.classList.remove('active'));
-  // Mostrar calendário com a data do lançamento
-  const calWrp = document.getElementById('calWrap');
-  if(calWrp){
-    calWrp.style.display='block';
-    if(t.data){
-      const [y,m,d] = t.data.split('-');
-      document.getElementById('calDisplayText').textContent = `${d}/${m}/${y}`;
-      _calData = new Date(parseInt(y), parseInt(m)-1, parseInt(d));
-      _calMes  = new Date(parseInt(y), parseInt(m)-1, 1);
+  // Mostrar data no botão "Outros..." e abrir o calendário
+  if(t.data){
+    const [y,m,d] = t.data.split('-');
+    _calData = new Date(parseInt(y), parseInt(m)-1, parseInt(d));
+    _calMes  = new Date(parseInt(y), parseInt(m)-1, 1);
+    // Mostrar data no botão Outros...
+    const dqOutroEl = document.getElementById('dqOutro');
+    if(dqOutroEl) dqOutroEl.textContent = `📅 ${d}/${m}/${y}`;
+    // Abrir calendário com a data do lançamento já selecionada
+    const calWrp = document.getElementById('calWrap');
+    if(calWrp){
+      calWrp.style.display = 'block';
+      document.getElementById('calPanel').style.display = 'block';
+      calRenderizar();
     }
   }
   document.getElementById('fDesc').value   = t.descricao||'';
@@ -2349,32 +2355,64 @@ function deletar(id){
   const opcoes = document.getElementById('confirmOpcoes');
   _deleteOpt = 'este';
 
+  const mesRef = t.data ? (()=>{ const p=t.data.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; })() : 'este lançamento';
+
   if(ehFixo){
-    // Fixo: mostra opção de excluir só este mês ou este + próximos
-    const mesRef = t.data ? (() => { const p=t.data.split('-'); return p[1]+'/'+p[0]; })() : 'este mês';
+    // FIXO: 3 opções — só este / este + próximos / todos da série
     opcoes.style.display = 'flex';
     opcoes.innerHTML = `
       <button class="confirm-opt selected" id="optEste" onclick="selecionarOpt('este')">
         <span class="confirm-opt-icon">📄</span>
         <div>
-          <div class="confirm-opt-label">Somente este mês</div>
-          <div class="confirm-opt-sub">Exclui apenas o lançamento de ${mesRef}</div>
+          <div class="confirm-opt-label">Somente este lançamento</div>
+          <div class="confirm-opt-sub">Remove apenas o de ${mesRef}</div>
+        </div>
+      </button>
+      <button class="confirm-opt" id="optProximos" onclick="selecionarOpt('proximos')">
+        <span class="confirm-opt-icon">⏭️</span>
+        <div>
+          <div class="confirm-opt-label">Este e os próximos</div>
+          <div class="confirm-opt-sub">Remove ${mesRef} e todos os lançamentos futuros</div>
         </div>
       </button>
       <button class="confirm-opt" id="optTodos" onclick="selecionarOpt('todos')">
-        <span class="confirm-opt-icon">🗂</span>
+        <span class="confirm-opt-icon">🗂️</span>
         <div>
-          <div class="confirm-opt-label">Este e os próximos meses</div>
-          <div class="confirm-opt-sub">Exclui ${mesRef} e todos os lançamentos futuros desta recorrência</div>
+          <div class="confirm-opt-label">Todos da série</div>
+          <div class="confirm-opt-sub">Remove todos os lançamentos fixos desta despesa/receita</div>
         </div>
       </button>`;
-    document.getElementById('confirmDesc').innerHTML += '<br><span style="color:var(--text-mid);font-size:12px">Esta ação não pode ser desfeita.</span>';
+  } else if(ehParcelado){
+    // PARCELADO: 3 opções — só esta parcela / esta + próximas / todas as parcelas
+    opcoes.style.display = 'flex';
+    opcoes.innerHTML = `
+      <button class="confirm-opt selected" id="optEste" onclick="selecionarOpt('este')">
+        <span class="confirm-opt-icon">📄</span>
+        <div>
+          <div class="confirm-opt-label">Somente esta parcela</div>
+          <div class="confirm-opt-sub">Remove apenas a parcela ${t.parcela_atual||'?'} de ${t.parcela_total}</div>
+        </div>
+      </button>
+      <button class="confirm-opt" id="optProximos" onclick="selecionarOpt('proximos')">
+        <span class="confirm-opt-icon">⏭️</span>
+        <div>
+          <div class="confirm-opt-label">Esta e as próximas parcelas</div>
+          <div class="confirm-opt-sub">Remove da parcela ${t.parcela_atual||'?'} até a ${t.parcela_total}</div>
+        </div>
+      </button>
+      <button class="confirm-opt" id="optTodos" onclick="selecionarOpt('todos')">
+        <span class="confirm-opt-icon">🗂️</span>
+        <div>
+          <div class="confirm-opt-label">Todas as parcelas</div>
+          <div class="confirm-opt-sub">Remove todas as ${t.parcela_total} parcelas desta série</div>
+        </div>
+      </button>`;
   } else {
-    // Avulso ou parcelado: só exclui este
+    // AVULSO: confirmação simples
     opcoes.style.display = 'none';
     opcoes.innerHTML = '';
-    document.getElementById('confirmDesc').innerHTML += '<br><span style="color:var(--text-mid);font-size:12px">Esta ação não pode ser desfeita.</span>';
   }
+  document.getElementById('confirmDesc').innerHTML += '<br><span style="color:#ef4444;font-size:12px;font-weight:600">⚠️ Esta ação não pode ser desfeita.</span>';
 
   document.getElementById('confirmBg').classList.add('open');
 }
@@ -2382,6 +2420,7 @@ function deletar(id){
 function selecionarOpt(opt){
   _deleteOpt = opt;
   document.getElementById('optEste')?.classList.toggle('selected', opt==='este');
+  document.getElementById('optProximos')?.classList.toggle('selected', opt==='proximos');
   document.getElementById('optTodos')?.classList.toggle('selected', opt==='todos');
 }
 
@@ -2399,25 +2438,39 @@ async function executarDelete(){
   const h = {...hdrs(), 'Prefer':'return=representation'};
 
   try {
+    const descEnc = encodeURIComponent(t.descricao);
     if(_deleteOpt === 'todos' && t && (t.parcela_total || t.recorrente)){
-      const descEnc = encodeURIComponent(t.descricao);
       let url;
       if(t.parcela_total){
-        // Parcelado: deleta todos com mesma descrição + parcela_total + tipo
+        // Todas as parcelas da série
         url = `${_BASE}/condo_transacoes?condominio_id=eq.${_condoAtivo}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&parcela_total=eq.${t.parcela_total}`;
       } else {
-        // Fixo: deleta este mês e os próximos (data >= data do selecionado)
-        const dataEnc = encodeURIComponent(t.data);
+        // Todos os lançamentos fixos (data qualquer)
+        url = `${_BASE}/condo_transacoes?condominio_id=eq.${_condoAtivo}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&recorrente=eq.true`;
+      }
+      const res = await fetch(url, {method:'DELETE', headers:h});
+      if(res.ok || res.status===204){
+        showAlert('✅ Toda a série excluída com sucesso.');
+        fecharConfirm(); await loadTransacoes();
+      } else { showAlert('Erro ao excluir série.','error'); }
+
+    } else if(_deleteOpt === 'proximos' && t && (t.parcela_total || t.recorrente)){
+      // Este + próximos: data >= data do lançamento selecionado
+      const dataEnc = encodeURIComponent(t.data);
+      let url;
+      if(t.parcela_total){
+        // Parcelas >= parcela_atual
+        url = `${_BASE}/condo_transacoes?condominio_id=eq.${_condoAtivo}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&parcela_total=eq.${t.parcela_total}&parcela_atual=gte.${t.parcela_atual}`;
+      } else {
+        // Fixos com data >= data selecionada
         url = `${_BASE}/condo_transacoes?condominio_id=eq.${_condoAtivo}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&recorrente=eq.true&data=gte.${dataEnc}`;
       }
       const res = await fetch(url, {method:'DELETE', headers:h});
       if(res.ok || res.status===204){
-        showAlert('✅ Série excluída com sucesso.');
-        fecharConfirm();
-        await loadTransacoes();
-      } else {
-        showAlert('Erro ao excluir série.','error');
-      }
+        showAlert('✅ Este e os próximos lançamentos excluídos.');
+        fecharConfirm(); await loadTransacoes();
+      } else { showAlert('Erro ao excluir.','error'); }
+
     } else {
       // Excluir só este lançamento
       const res = await fetch(`${_BASE}/condo_transacoes?id=eq.${_deleteId}&condominio_id=eq.${_condoAtivo}`,{
