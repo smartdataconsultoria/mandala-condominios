@@ -1029,13 +1029,12 @@ function btnEditar(id){
 }
 
 function btnExcluir(id){
-  // Tenta chamar direto se module já carregou
+  console.log('[EXCLUIR] clicado id='+id+' | _deletar='+typeof window._deletar+' | _appTransacoes='+( window._appTransacoes ? window._appTransacoes.length : 'null'));
   if(window._deletar){ window._deletar(id); return; }
-  // Module ainda carregando: polling com timeout de 5s
   var t = 0;
   var iv = setInterval(function(){
     if(window._deletar){ clearInterval(iv); window._deletar(id); return; }
-    if(++t > 50) clearInterval(iv);
+    if(++t > 50){ console.log('[EXCLUIR] timeout - _deletar nunca ficou disponível'); clearInterval(iv); }
   }, 100);
 }
 </script>
@@ -1208,7 +1207,7 @@ async function loadTransacoes(){
     fetch(`${_BASE}/condo_transacoes?condominio_id=eq.${_condoAtivo}&data=lt.${primDia}&select=tipo,valor`,{headers:_h})
   ]);
   _transacoes = resMes.ok ? await resMes.json() : [];
-  window._appTransacoes = _transacoes;  // sincronizar global
+  window._appTransacoes = _transacoes; console.log('[SYNC] _appTransacoes atualizado:', _transacoes.length, 'registros');
 
   // Calcula saldo acumulado anterior
   if(resSaldoAnt.ok){
@@ -2373,9 +2372,15 @@ let _deleteId   = null;
 let _deleteOpt  = 'este'; // 'este' | 'todos'
 
 function _deletarFn(id){
+  console.log('[_deletarFn] id='+id+' | appTransacoes.length='+(window._appTransacoes||[]).length);
   const transacoes = window._appTransacoes || [];
   const t = transacoes.find(x => x.id === id);
-  if(!t){ alert('Transação não encontrada. Recarregue a página.'); return; }
+  if(!t){ 
+    console.log('[_deletarFn] IDs disponíveis:', transacoes.map(x=>x.id));
+    alert('Transação não encontrada. Recarregue a página.'); 
+    return; 
+  }
+  console.log('[_deletarFn] Transação encontrada:', t.descricao);
 
   // Guardar no window para executarDelete usar
   window._appDeleteId  = id;
@@ -2557,7 +2562,7 @@ window._verPDF = verPDF;
 window._handleDrop = handleDrop;
 window._uploadAnexo = uploadAnexo;
 window._onAnexoChange = typeof onAnexoChange !== 'undefined' ? onAnexoChange : ()=>{};
-window._deletar = _deletarFn; // OK
+window._deletar = _deletarFn; console.log('[MODULE] window._deletar atribuído OK');
 window._flushPending(); // executa chamadas que ficaram em fila enquanto o module carregava
 
 // -- INIT -------------------------------------------------
