@@ -248,7 +248,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .secao-cols.open ~ .secao-col-sep{display:block}
 
 /* FOOTER */
-.modal-footer{background:#f8fafc;display:flex;gap:10px;justify-content:flex-end;padding:20px 24px;border-top:1px solid var(--border);margin-top:20px}
+.modal-footer{background:#f8fafc;display:flex;gap:10px;justify-content:space-between;align-items:center;padding:20px 24px;border-top:1px solid var(--border);margin-top:20px}
 .btn-cancel{background:none;border:1px solid var(--border);color:var(--text-light);padding:10px 20px;border-radius:8px;font-size:14px;cursor:pointer;transition:.2s}
 .btn-cancel:hover{background:var(--border)}
 .btn-save{background:var(--gold);color:var(--off-white);border:none;padding:10px 22px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:.2s}
@@ -954,8 +954,21 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   </div><!-- /modal-body -->
 
   <div class="modal-footer">
-    <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
-    <button class="btn-save" id="btnSalvar" onclick="salvarLancamento()">Salvar lançamento</button>
+    <div>
+      <button class="btn-del-modal" id="btnExcluirModal" style="display:none;
+      background:#fef2f2;color:#dc2626;border:1px solid #fecaca;
+      padding:10px 20px;border-radius:8px;font-family:inherit;font-size:14px;
+      font-weight:600;cursor:pointer;transition:.2s;"
+      onmouseover="this.style.background='#dc2626';this.style.color='#fff'"
+      onmouseout="this.style.background='#fef2f2';this.style.color='#dc2626'"
+      onclick="btnExcluirModal()">
+      🗑 Excluir lançamento
+      </button>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-save" id="btnSalvar" onclick="salvarLancamento()">Salvar lançamento</button>
+    </div>
   </div>
 </div>
 </div><!-- /modal-bg -->
@@ -1016,8 +1029,21 @@ function uploadAnexo() { _callWhenReady('uploadAnexo', []); }
 function onAnexoChange() { _callWhenReady('onAnexoChange', []); }
 function deletar(id) { _callWhenReady('deletar', [id]); }
 
-// -- Funções dos botões da tabela — executam imediatamente ----------
-// Abertura do modal de confirmação feita aqui, sem depender do module
+// -- Botão Excluir dentro do modal de edição --
+function btnExcluirModal(){
+  var btn = document.getElementById('btnExcluirModal');
+  var id = btn ? parseInt(btn.dataset.id) : null;
+  if(!id) return;
+  var modalBg = document.getElementById('modalBg');
+  if(modalBg) modalBg.classList.remove('open');
+  if(window._deletar){ window._deletar(id); return; }
+  var t=0, iv=setInterval(function(){
+    if(window._deletar){clearInterval(iv);window._deletar(id);}
+    if(++t>50)clearInterval(iv);
+  },100);
+}
+
+// -- Funções dos botões da tabela --
 function btnEditar(id){
   if(window._editarTransacao) { window._editarTransacao(id); return; }
   // Aguardar module e tentar novamente
@@ -1407,9 +1433,6 @@ function renderTabela(){
         <button class="btn-row edit" data-acao="editar" data-id="${t.id}" title="Editar lançamento">
           ✏️ Editar
         </button>
-        <button class="btn-row del" data-acao="excluir" data-id="${t.id}" title="Excluir lançamento">
-          🗑 Excluir
-        </button>
       </div>
     </div>`;
   }).join('');
@@ -1470,6 +1493,9 @@ function abrirModal(tipo){
   badge.className = `tipo-badge show ${cls}`;
   badge.innerHTML = `<span style="font-size:18px">${cfg.icon}</span> ${cfg.label}`;
 
+  // Esconder botão Excluir no modal de novo lançamento
+  const btnExcModal = document.getElementById('btnExcluirModal');
+  if(btnExcModal) btnExcModal.style.display = 'none';
   setTipo(_tipoAtual);
   // Garantir que fData já tem hoje como valor padrão
   const _hoje = new Date();
@@ -2146,6 +2172,9 @@ async function editarTransacao(id){
     if(lbl) lbl.textContent = 'Menos detalhes';
   }
   _editId = id; // setado aqui, após todas as chamadas que possam resetar
+  // Mostrar botão Excluir no footer do modal
+  const _btnExcl = document.getElementById('btnExcluirModal');
+  if(_btnExcl){ _btnExcl.style.display='block'; _btnExcl.dataset.id = id; }
   document.getElementById('modalBg').classList.add('open');
 }
 
