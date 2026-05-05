@@ -254,8 +254,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 .confirm-title{font-size:16px;font-weight:700;color:var(--text-dark);text-align:center;margin-bottom:8px}
 .confirm-desc{font-size:13px;color:var(--text-mid);text-align:center;line-height:1.6;margin-bottom:20px}
 .confirm-opcoes{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
-.confirm-opcoes{display:flex!important;flex-direction:column;gap:8px;margin-top:14px}
-.confirm-opt{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:#f8fafc;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s;text-align:left;width:100%}
+.confirm-opt{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:var(--off-white);border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s;text-align:left;width:100%}
 .confirm-opt:hover{border-color:var(--gold);background:var(--gold)08}
 .confirm-opt.selected{border-color:var(--gold);background:var(--gold)12}
 .confirm-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px}
@@ -929,24 +928,55 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
   </div><!-- /modal-body -->
 
   <div class="modal-footer" style="justify-content:space-between">
-    <button id="btnExcluirModal" style="display:none;background:#fef2f2;color:#dc2626;
-      border:1px solid #fecaca;padding:9px 18px;border-radius:8px;font-family:inherit;
-      font-size:13px;font-weight:600;cursor:pointer;transition:.2s"
-      onmouseover="this.style.background='#dc2626';this.style.color='#fff'"
-      onmouseout="this.style.background='#fef2f2';this.style.color='#dc2626'"
-      onclick="window._excluirDoModal && window._excluirDoModal()">
-      🗑 Excluir lançamento
+    <button id="btnExcluirModal" style="display:none;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;padding:9px 18px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer" onmouseover="this.style.background='#dc2626';this.style.color='#fff'" onmouseout="this.style.background='#fef2f2';this.style.color='#dc2626'" onclick="if(window._deletar&&window._editId_atual){var id=window._editId_atual;fecharModal();window._deletar(id);}">
+      Excluir lancamento
     </button>
     <div style="display:flex;gap:10px">
       <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
-      <button class="btn-save" id="btnSalvar" onclick="salvarLancamento()">Salvar lançamento</button>
+      <button class="btn-save" id="btnSalvar" onclick="salvarLancamento()">Salvar lancamento</button>
     </div>
   </div>
 </div>
 </div><!-- /modal-bg -->
   </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script><script>
+
+// ── Expor funções para os stubs globais ──
+window._toggleFab = toggleFab;
+window._fabAbre = fabAbre;
+window._mudarMes = mudarMes;
+window._toggleTipoMenu = toggleTipoMenu;
+window._setTipoFiltro = setTipoFiltro;
+window._setFiltro = setFiltro;
+window._fecharModal = fecharModal;
+window._fecharConfirm = fecharConfirm;
+window._fecharCal = fecharCal;
+window._fecharImportar = fecharImportar;
+window._salvarLancamento = salvarLancamento;
+window._editarTransacao = editarTransacao;
+window._executarDelete = executarDelete;
+window._exportarExcel = exportarExcel;
+window._baixarModelo = baixarModelo;
+window._abrirImportar = abrirImportar;
+window._confirmarImportacao = confirmarImportacao;
+window._selecionarOpt = selecionarOpt;
+window._setDataRapida = setDataRapida;
+window._toggleCal = toggleCal;
+window._calNavMes = calNavMes;
+window._calToggleAno = calToggleAno;
+window._calSelecionarDia = calSelecionarDia;
+window._calConfirmar = calConfirmar;
+window._removerAnexo = removerAnexo;
+window._toggleSecao = toggleSecao;
+window._fazerLogout = typeof fazerLogout !== 'undefined' ? fazerLogout : () => {};
+window._toggleParcela = typeof toggleParcela !== 'undefined' ? toggleParcela : () => {};
+window._toggleFixo = typeof toggleFixo !== 'undefined' ? toggleFixo : () => {};
+window._verPDF = typeof verPDF !== 'undefined' ? verPDF : () => {};
+window._handleDrop = typeof handleDrop !== 'undefined' ? handleDrop : () => {};
+window._uploadAnexo = typeof uploadAnexo !== 'undefined' ? uploadAnexo : () => {};
+
+</script>
 <script>
 // Stubs globais — chamam as funções reais quando o módulo carregar
 function toggleFab(e) { if(window._toggleFab) window._toggleFab(e); }
@@ -988,29 +1018,38 @@ function uploadAnexo() { if(window._uploadAnexo) window._uploadAnexo(); }
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 const _sb = createClient('https://siczyohqmlrmirqgzlxb.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw')
 
-// Auth
+// Auth CondoGestor
 const { data: { session: _sess } } = await _sb.auth.getSession()
-if (!_sess) { window.location.href = '/login.html'; throw new Error('sem sessão') }
+if (!_sess) { window.location.href = '/login.html'; throw new Error() }
 const { data: _perfil } = await _sb.from('usuarios').select('nome, role, condominio_id').eq('id', _sess.user.id).single()
 if (!_perfil || _perfil.role !== 'sindico') {
-  const _rd = { administradora: '/admin/index.html', morador: '/morador/index.html' }
-  window.location.href = _rd[_perfil?.role] || '/login.html'; throw new Error('role incorreto')
+  const _d = { administradora: '/admin/index.html', morador: '/morador/index.html' }
+  window.location.href = _d[_perfil?.role] || '/login.html'; throw new Error()
 }
+
+// Variáveis globais compatíveis com o código existente
 const CONDO_ID = _perfil.condominio_id
-let _condoAtivo = CONDO_ID
+let EMPRESA = CONDO_ID  // usado como filtro onde antes era 'mandala'
+
+// Preenche nome e avatar na sidebar
 document.getElementById('user-name').textContent = _perfil.nome || _sess.user.email
-document.getElementById('avatar-initials').textContent = (_perfil.nome||_sess.user.email).split(' ').slice(0,2).map(p=>p[0].toUpperCase()).join('')
+document.getElementById('avatar-initials').textContent = (_perfil.nome || _sess.user.email).split(' ').slice(0,2).map(p=>p[0].toUpperCase()).join('')
+
+// Busca nome do condomínio
 const { data: _condo } = await _sb.from('condominios').select('nome').eq('id', CONDO_ID).single()
-if(_condo){ const s=document.getElementById('select-condo'); if(s) s.innerHTML=`<option value="${CONDO_ID}">${_condo.nome}</option>`}
-window.fazerLogout = async()=>{ await _sb.auth.signOut(); window.location.href='/login.html' }
-window.trocarCondo = ()=>{}
+if (_condo) {
+  const selCondo = document.getElementById('select-condo')
+  if (selCondo) selCondo.innerHTML = `<option value="${CONDO_ID}">${_condo.nome}</option>`
+}
+
+window.fazerLogout = async () => { await _sb.auth.signOut(); window.location.href = '/login.html' }
+window.trocarCondo = () => {} // síndico tem só 1 condomínio
 
 
 
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw';
-const SUPA_URL = 'https://siczyohqmlrmirqgzlxb.supabase.co';
 const _h = {'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw', 'Content-Type': 'application/json', 'Prefer': 'return=representation'};
 const _BASE = 'https://siczyohqmlrmirqgzlxb.supabase.co/rest/v1';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw';
 
 // ── CONFIG ───────────────────────────────────────────────
 // ── ESTADO ───────────────────────────────────────────────
@@ -1301,7 +1340,7 @@ function renderTabela(){
       <div class="val-cell ${tp}">${t.tipo==='despesa'?'- ':'+ '}${fmt(t.valor)}</div>
       <div><span class="sit-badge ${sit}">${sitLabel}</span></div>
       <div class="row-actions">
-        <button class="btn-row edit" onclick="event.stopPropagation();window._editarTransacao && window._editarTransacao(${t.id})">✏️ Editar</button>
+        <button class="btn-row edit" onclick="event.stopPropagation();window._editarTransacao&&window._editarTransacao(${t.id})" style="background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Editar</button>
       </div>
     </div>`;
   }).join('');
@@ -1398,8 +1437,7 @@ function limparModal(){
   document.querySelectorAll('.dq-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('dqHoje').classList.add('active');
   document.getElementById('fData').style.display='none';
-  const _bExcNew = document.getElementById('btnExcluirModal');
-  if(_bExcNew) _bExcNew.style.display = 'none';
+  var bExcN=document.getElementById('btnExcluirModal'); if(bExcN) bExcN.style.display='none';
 }
 
 function setTipo(tipo){
@@ -1735,7 +1773,7 @@ async function salvarLancamento(){
   const diaVenc    = parseInt(document.getElementById('fDiaVenc').value)||null;
 
   const basePayload = {
-    condominio_id: _condoAtivo, empresa: _condoAtivo,
+    condominio_id: CONDO_ID,
     tipo:         (TIPO_CONFIG[_tipoAtual]?.tipoDB)||_tipoAtual,
     descricao:    desc,
     valor:        parcelado ? valor/nParcelas : valor,
@@ -1743,15 +1781,11 @@ async function salvarLancamento(){
     conta_id: document.getElementById('fConta').value ? parseInt(document.getElementById('fConta').value) : null,
     situacao:     document.getElementById('fSit').value,
     observacao:   document.getElementById('fObs').value.trim()||null,
-    recorrente:   fixo,
-    parcela_atual: null,
-    parcela_total: null,
+    recorrente:   fixo,          // true só para fixo, false para avulso/parcelado
+    parcela_atual: null,         // garantido null no base — só parcelado sobrescreve
+    parcela_total: null,         // garantido null no base — só parcelado sobrescreve
     autor_email:  getToken() ? null : null
   };
-  const _forma = document.getElementById('fForma')?.value||null;
-  const _fluxo = document.getElementById('fFluxo')?.value||null;
-  if(_forma) basePayload.forma = _forma;
-  if(_fluxo) basePayload.fluxo = _fluxo;
 
   const h = hdrs();
   let idsGerados = [];
@@ -1912,7 +1946,9 @@ async function editarTransacao(id){
     const lbl = document.getElementById('secLabel');
     if(lbl) lbl.textContent = 'Menos detalhes';
   }
-  _editId = id; // setado aqui, após todas as chamadas que possam resetar
+  _editId = id; window._editId_atual = id; // setado aqui
+  var bExc = document.getElementById('btnExcluirModal');
+  if(bExc) bExc.style.display = 'block';, após todas as chamadas que possam resetar
   document.getElementById('modalBg').classList.add('open');
 }
 
@@ -2170,37 +2206,35 @@ function deletar(id){
 
   let desc = `<strong style="color:var(--text-dark)">${t.descricao||'Lançamento'}</strong>`;
   if(ehParcelado) desc += `<br><span style="color:var(--blue)">Parcela ${t.parcela_atual||'?'} de ${t.parcela_total}</span>`;
-  if(ehFixo)      desc += `<br><span style="color:#a855f7">&#x1F504; Lan&#xE7;amento fixo</span>`;
-  desc += '<br><span style="color:#ef4444;font-size:12px;font-weight:600">&#x26A0;&#xFE0F; Esta a&#xE7;&#xE3;o n&#xE3;o pode ser desfeita.</span>';
+  if(ehFixo)      desc += `<br><span style="color:#a855f7">🔄 Lançamento fixo (recorrente)</span>`;
   document.getElementById('confirmDesc').innerHTML = desc;
 
   const opcoes = document.getElementById('confirmOpcoes');
   _deleteOpt = 'este';
 
-  const mesRef = t.data ? t.data.split('-').reverse().join('/') : 'este lançamento';
-  if(ehFixo || ehParcelado){
-    const tipoLabel = ehParcelado ? 'parcela' : 'lançamento';
-    const todosLabel = ehParcelado
-      ? `Todas as ${t.parcela_total} parcelas`
-      : 'Todos da série';
-    const todosDesc = ehParcelado
-      ? `Remove as ${t.parcela_total} parcelas desta série`
-      : 'Remove todos os lançamentos fixos desta série';
-
+  if(ehFixo){
+    // Fixo: mostra opção de excluir só este mês ou este + próximos
+    const mesRef = t.data ? (() => { const p=t.data.split('-'); return p[1]+'/'+p[0]; })() : 'este mês';
     opcoes.style.display = 'flex';
     opcoes.innerHTML = `
       <button class="confirm-opt selected" id="optEste" onclick="selecionarOpt('este')">
-        <div class="confirm-opt-label">Somente este ${tipoLabel}</div>
+        <div class="confirm-opt-label">Somente este lancamento</div>
+        <div class="confirm-opt-sub">Remove apenas ${mesRef}</div>
       </button>
       <button class="confirm-opt" id="optProximos" onclick="selecionarOpt('proximos')">
-        <div class="confirm-opt-label">Este e os próximos</div>
+        <div class="confirm-opt-label">Este e os proximos</div>
+        <div class="confirm-opt-sub">Remove ${mesRef} em diante</div>
       </button>
       <button class="confirm-opt" id="optTodos" onclick="selecionarOpt('todos')">
-        <div class="confirm-opt-label">${todosLabel}</div>
+        <div class="confirm-opt-label">Todos da serie</div>
+        <div class="confirm-opt-sub">Remove toda a serie</div>
       </button>`;
+    document.getElementById('confirmDesc').innerHTML += '<br><span style="color:var(--text-mid);font-size:12px">Esta ação não pode ser desfeita.</span>';
   } else {
+    // Avulso ou parcelado: só exclui este
     opcoes.style.display = 'none';
     opcoes.innerHTML = '';
+    document.getElementById('confirmDesc').innerHTML += '<br><span style="color:var(--text-mid);font-size:12px">Esta ação não pode ser desfeita.</span>';
   }
 
   document.getElementById('confirmBg').classList.add('open');
@@ -2208,13 +2242,8 @@ function deletar(id){
 
 function selecionarOpt(opt){
   _deleteOpt = opt;
-  ['optEste','optProximos','optTodos'].forEach(function(id){
-    const el = document.getElementById(id);
-    if(el) el.classList.remove('selected');
-  });
-  const map = {este:'optEste', proximos:'optProximos', todos:'optTodos'};
-  const el = document.getElementById(map[opt]);
-  if(el) el.classList.add('selected');
+  document.getElementById('optEste')?.classList.toggle('selected', opt==='este');
+  document.getElementById('optTodos')?.classList.toggle('selected', opt==='todos');
 }
 
 function fecharConfirm(){
@@ -2231,19 +2260,7 @@ async function executarDelete(){
   const h = {...hdrs(), 'Prefer':'return=representation'};
 
   try {
-    const descEnc = encodeURIComponent(t.descricao);
-
-  if(_deleteOpt === 'proximos' && t && (t.parcela_total || t.recorrente)){
-    const dataEnc = encodeURIComponent(t.data);
-    const urlProx = t.parcela_total
-      ? `${_BASE}/condo_transacoes?condominio_id=eq.${_condoAtivo}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&parcela_total=eq.${t.parcela_total}&parcela_atual=gte.${t.parcela_atual}`
-      : `${_BASE}/condo_transacoes?condominio_id=eq.${_condoAtivo}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&recorrente=eq.true&data=gte.${dataEnc}`;
-    const rProx = await fetch(urlProx, {method:'DELETE', headers:h});
-    if(rProx.ok || rProx.status===204){
-      showAlert('✅ Lançamentos excluídos!'); fecharConfirm(); await loadTransacoes();
-    } else { showAlert('Erro ao excluir.','error'); }
-
-  } else if(_deleteOpt === 'todos' && t && (t.parcela_total || t.recorrente)){
+    if(_deleteOpt === 'todos' && t && (t.parcela_total || t.recorrente)){
       const descEnc = encodeURIComponent(t.descricao);
       let url;
       if(t.parcela_total){
@@ -2322,51 +2339,19 @@ document.addEventListener('click', function(e){
 });
 
 // ── INIT ─────────────────────────────────────────────────
-// Expor window._excluirDoModal — usa o _editId do module
-window._excluirDoModal = function(){
-  if(!_editId){ alert('Nenhum lançamento selecionado'); return; }
-  const id = _editId;
-  fecharModal();
-  deletar(id);
-};
-
-// Expor funções para os stubs
-window._toggleFab = toggleFab;
-window._fabAbre = fabAbre;
-window._mudarMes = mudarMes;
-window._toggleTipoMenu = toggleTipoMenu;
-window._setTipoFiltro = setTipoFiltro;
-window._setFiltro = setFiltro;
-window._fecharModal = fecharModal;
-window._fecharConfirm = fecharConfirm;
-window._fecharCal = fecharCal;
-window._fecharImportar = fecharImportar;
-window._salvarLancamento = salvarLancamento;
-window._editarTransacao = editarTransacao;
-window._executarDelete = executarDelete;
-window._exportarExcel = exportarExcel;
-window._baixarModelo = baixarModelo;
-window._abrirImportar = abrirImportar;
-window._confirmarImportacao = confirmarImportacao;
-window._selecionarOpt = selecionarOpt;
-window._setDataRapida = setDataRapida;
-window._toggleCal = toggleCal;
-window._calNavMes = calNavMes;
-window._calToggleAno = calToggleAno;
-window._calSelecionarDia = calSelecionarDia;
-window._calConfirmar = calConfirmar;
-window._removerAnexo = removerAnexo;
-window._toggleSecao = toggleSecao;
-window._fazerLogout = fazerLogout;
-window._toggleParcela = toggleParcela;
-window._toggleFixo = toggleFixo;
-window._verPDF = verPDF;
-window._handleDrop = handleDrop;
-window._uploadAnexo = uploadAnexo;
-window._deletarFn = deletar;
-window._deletar = deletar;
-
-// module executa após DOM pronto — chamar diretamente
+window._toggleFab=toggleFab;window._fabAbre=fabAbre;window._mudarMes=mudarMes;
+window._toggleTipoMenu=toggleTipoMenu;window._setTipoFiltro=setTipoFiltro;window._setFiltro=setFiltro;
+window._fecharModal=fecharModal;window._fecharConfirm=fecharConfirm;window._fecharCal=fecharCal;
+window._fecharImportar=fecharImportar;window._salvarLancamento=salvarLancamento;
+window._editarTransacao=editarTransacao;window._executarDelete=executarDelete;
+window._exportarExcel=exportarExcel;window._baixarModelo=baixarModelo;window._abrirImportar=abrirImportar;
+window._confirmarImportacao=confirmarImportacao;window._selecionarOpt=selecionarOpt;
+window._setDataRapida=setDataRapida;window._toggleCal=toggleCal;window._calNavMes=calNavMes;
+window._calToggleAno=calToggleAno;window._calSelecionarDia=calSelecionarDia;window._calConfirmar=calConfirmar;
+window._removerAnexo=removerAnexo;window._toggleSecao=toggleSecao;window._fazerLogout=fazerLogout;
+window._toggleParcela=toggleParcela;window._toggleFixo=toggleFixo;window._verPDF=verPDF;
+window._handleDrop=handleDrop;window._uploadAnexo=uploadAnexo;window._deletar=deletar;
+window._flushPending();
 document.getElementById('mesAtual').textContent = `${MESES[_mes]} ${_ano}`;
 await loadAll();
 </script>
