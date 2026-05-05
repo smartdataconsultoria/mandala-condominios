@@ -2197,15 +2197,14 @@ function deletar(id){
 
   let desc = `<strong style="color:var(--text-dark)">${t.descricao||'Lançamento'}</strong>`;
   if(ehParcelado) desc += `<br><span style="color:var(--blue)">Parcela ${t.parcela_atual||'?'} de ${t.parcela_total}</span>`;
-  if(ehFixo)      desc += `<br><span style="color:#a855f7">🔄 Lançamento fixo (recorrente)</span>`;
+  if(ehFixo)      desc += `<br><span style="color:#a855f7">&#x1F504; Lan&#xE7;amento fixo</span>`;
+  desc += '<br><span style="color:#ef4444;font-size:12px;font-weight:600">&#x26A0;&#xFE0F; Esta a&#xE7;&#xE3;o n&#xE3;o pode ser desfeita.</span>';
   document.getElementById('confirmDesc').innerHTML = desc;
 
   const opcoes = document.getElementById('confirmOpcoes');
   _deleteOpt = 'este';
 
   const mesRef = t.data ? t.data.split('-').reverse().join('/') : 'este lançamento';
-  const aviso = '<br><span style="color:#ef4444;font-size:12px;font-weight:600">⚠️ Esta ação não pode ser desfeita.</span>';
-
   if(ehFixo || ehParcelado){
     const tipoLabel = ehParcelado ? 'parcela' : 'lançamento';
     const todosLabel = ehParcelado
@@ -2218,31 +2217,29 @@ function deletar(id){
     opcoes.style.display = 'flex';
     opcoes.innerHTML = `
       <button class="confirm-opt selected" id="optEste" onclick="selecionarOpt('este')">
-        <span class="confirm-opt-icon">📄</span>
+        <span class="confirm-opt-icon">&#x1F4C4;</span>
         <div>
           <div class="confirm-opt-label">Somente este ${tipoLabel}</div>
           <div class="confirm-opt-sub">Remove apenas ${mesRef}</div>
         </div>
       </button>
       <button class="confirm-opt" id="optProximos" onclick="selecionarOpt('proximos')">
-        <span class="confirm-opt-icon">⏭️</span>
+        <span class="confirm-opt-icon">&#x23ED;&#xFE0F;</span>
         <div>
           <div class="confirm-opt-label">Este e os próximos</div>
           <div class="confirm-opt-sub">Remove ${mesRef} em diante</div>
         </div>
       </button>
       <button class="confirm-opt" id="optTodos" onclick="selecionarOpt('todos')">
-        <span class="confirm-opt-icon">🗂️</span>
+        <span class="confirm-opt-icon">&#x1F5C2;&#xFE0F;</span>
         <div>
           <div class="confirm-opt-label">${todosLabel}</div>
           <div class="confirm-opt-sub">${todosDesc}</div>
         </div>
       </button>`;
-    document.getElementById('confirmDesc').innerHTML += aviso;
   } else {
     opcoes.style.display = 'none';
     opcoes.innerHTML = '';
-    document.getElementById('confirmDesc').innerHTML += aviso;
   }
 
   document.getElementById('confirmBg').classList.add('open');
