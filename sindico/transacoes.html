@@ -979,7 +979,7 @@ function exportarExcel() { if(window._exportarExcel) window._exportarExcel(); }
 function baixarModelo() { if(window._baixarModelo) window._baixarModelo(); }
 function abrirImportar() { if(window._abrirImportar) window._abrirImportar(); }
 function confirmarImportacao() { if(window._confirmarImportacao) window._confirmarImportacao(); }
-function selecionarOpt(e,v,l) { if(window._selecionarOpt) window._selecionarOpt(e,v,l); }
+function selecionarOpt(opt, el) { if(window._selecionarOpt) window._selecionarOpt(opt, el); }
 function setDataRapida(v) { if(window._setDataRapida) window._setDataRapida(v); }
 function toggleCal() { if(window._toggleCal) window._toggleCal(); }
 function calNavMes(d) { if(window._calNavMes) window._calNavMes(d); }
@@ -1031,6 +1031,7 @@ window.trocarCondo = () => {} // síndico tem só 1 condomínio
 
 
 // _h removido — usar hdrs() que pega o token real do usuario logado
+const SUPA_URL = 'https://siczyohqmlrmirqgzlxb.supabase.co';
 const _BASE = 'https://siczyohqmlrmirqgzlxb.supabase.co/rest/v1';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw';
 
@@ -2212,47 +2213,46 @@ function deletar(id) {
   const opcoes = document.getElementById('confirmOpcoes');
 
   if (ehFixo) {
-    opcoes.style.display = 'flex';
-    opcoes.innerHTML = `
-      <button class="confirm-opt selected" onclick="selecionarOpt('este')">
-        📄
-        <div>
-          <div class="confirm-opt-label">Somente este mês</div>
-          <div class="confirm-opt-sub">Remove apenas o lançamento de ${mesRef}</div>
-        </div>
-      </button>
+  opcoes.style.display = 'flex';
+  opcoes.innerHTML = `
+   <button class="confirm-opt selected" onclick="selecionarOpt('este', this)">
+    <span class="confirm-opt-icon">📄</span>
+    <div>
+     <div class="confirm-opt-label">Somente este mês</div>
+     <div class="confirm-opt-sub">Remove apenas o lançamento de ${mesRef}</div>
+    </div>
+   </button>
 
-      <button class="confirm-opt" onclick="selecionarOpt('proximos')">
-        📆
-        <div>
-          <div class="confirm-opt-label">Este e os próximos</div>
-          <div class="confirm-opt-sub">Remove a partir de ${mesRef}</div>
-        </div>
-      </button>
+   <button class="confirm-opt" onclick="selecionarOpt('proximos', this)">
+    <span class="confirm-opt-icon">📆</span>
+    <div>
+     <div class="confirm-opt-label">Este e os próximos</div>
+     <div class="confirm-opt-sub">Remove a partir de ${mesRef}</div>
+    </div>
+   </button>
 
-      <button class="confirm-opt" onclick="selecionarOpt('todos')">
-        🗂️
-        <div>
-          <div class="confirm-opt-label">Toda a recorrência</div>
-          <div class="confirm-opt-sub">Remove todos os lançamentos futuros</div>
-        </div>
-      </button>
-    `;
-  } else {
-    opcoes.style.display = 'none';
-    opcoes.innerHTML = '';
-    _deleteOpt = 'este';
-  }
+   <button class="confirm-opt" onclick="selecionarOpt('todos', this)">
+    <span class="confirm-opt-icon">🗂️</span>
+    <div>
+     <div class="confirm-opt-label">Toda a recorrência</div>
+     <div class="confirm-opt-sub">Remove todos os lançamentos futuros</div>
+    </div>
+   </button>
+  `;
+ } else {
+  opcoes.style.display = 'none';
+  opcoes.innerHTML = '';
+  _deleteOpt = 'este';
+ }
+ document.getElementById('confirmBg').classList.add('open');
 
-  document.getElementById('confirmBg').classList.add('open');
+
+function selecionarOpt(opt, el){
+ _deleteOpt = opt;
+ document.querySelectorAll('.confirm-opt').forEach(btn=>btn.classList.remove('selected'));
+ if(el) el.classList.add('selected');
 }
 
-
-function selecionarOpt(opt){
-  _deleteOpt = opt;
-  document.getElementById('optEste')?.classList.toggle('selected', opt==='este');
-  document.getElementById('optTodos')?.classList.toggle('selected', opt==='todos');
-}
 
 function fecharConfirm(){
   document.getElementById('confirmBg').classList.remove('open');
@@ -2294,7 +2294,7 @@ async function executarDelete(){
       });
       const body = await res.text();
       if(res.status===204 || (res.ok && body!=='[]' && body!=='')){
-        showAlert('Lançamento removido.');
+        showAlert('Lançamento excluído com sucesso.');
         fecharConfirm();
         await loadTransacoes();
       } else if(body==='[]' || body===''){
