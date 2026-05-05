@@ -1005,16 +1005,6 @@ if(_condo){ const s=document.getElementById('select-condo'); if(s) s.innerHTML=`
 window.fazerLogout = async()=>{ await _sb.auth.signOut(); window.location.href='/login.html' }
 window.trocarCondo = ()=>{}
 
-// Busca nome do condomínio
-const { data: _condo } = await _sb.from('condominios').select('nome').eq('id', CONDO_ID).single()
-if (_condo) {
-  const selCondo = document.getElementById('select-condo')
-  if (selCondo) selCondo.innerHTML = `<option value="${CONDO_ID}">${_condo.nome}</option>`
-}
-
-window.fazerLogout = async () => { await _sb.auth.signOut(); window.location.href = '/login.html' }
-window.trocarCondo = () => {} // síndico tem só 1 condomínio
-
 
 
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw';
