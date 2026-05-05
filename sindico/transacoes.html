@@ -734,17 +734,9 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <input type="date" id="fData" style="display:none"/>
       <!-- Calendário customizado — abre direto ao clicar em Outros... -->
       <div id="calWrap" style="display:none;position:relative;">
-        <!-- Badge de data selecionada (leitura) -->
-        <div id="calDisplay" style="
-          background:var(--white);border:1px solid var(--gold);border-radius:8px;
-          padding:10px 14px;font-size:14px;color:var(--text-dark);cursor:default;
-          display:flex;align-items:center;gap:8px;user-select:none;margin-bottom:8px;">
-          <span style="font-size:16px">📅</span>
-          <span id="calDisplayText">Selecionar data</span>
-        </div>
-        <div id="calPanel" style="display:block;position:relative;top:0;left:0;z-index:9999;
+        <div id="calPanel" style="display:none;position:absolute;top:0;left:0;z-index:9999;
           background:var(--white);border:1px solid var(--border);border-radius:12px;
-          box-shadow:0 8px 32px rgba(0,0,0,.6);padding:16px;width:300px;">
+          box-shadow:0 8px 32px rgba(0,0,0,.25);padding:16px;width:300px;">
           <!-- Header -->
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
             <button onclick="calNavMes(-1)" style="background:none;border:none;color:var(--text-light);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px;" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='none'">‹</button>
@@ -1609,28 +1601,37 @@ function toggleCal(){
 
 function fecharCal(){
   document.getElementById('calPanel').style.display='none';
+  document.getElementById('calWrap').style.display='none';
+  // Restaurar label do botão se não tem data selecionada
+  const fData = document.getElementById('fData');
+  const dqOutro = document.getElementById('dqOutro');
+  if(dqOutro && (!fData || !fData.value)) dqOutro.textContent = 'Outros...';
 }
 
 function calConfirmar(){
-  // Usa data local para evitar bug de fuso
+  // Data local para evitar bug de fuso
   const yy = _calData.getFullYear();
   const mm  = String(_calData.getMonth()+1).padStart(2,'0');
   const dd  = String(_calData.getDate()).padStart(2,'0');
   const iso = `${yy}-${mm}-${dd}`;
   document.getElementById('fData').value = iso;
-  // Atualiza o badge de data
-  document.getElementById('calDisplayText').textContent = `${dd}/${mm}/${yy}`;
-  // Oculta o calendário mas mantém o calWrap visível (mostra a data escolhida)
+  // Fechar calendário completamente
   document.getElementById('calPanel').style.display='none';
-  // Atualiza botão "Outros..." com a data escolhida
+  document.getElementById('calWrap').style.display='none';
+  // Mostrar data escolhida no botão "Outros..."
   const dqOutro = document.getElementById('dqOutro');
-  if(dqOutro) dqOutro.textContent = `${dd}/${mm}/${yy}`;
+  if(dqOutro) dqOutro.textContent = `📅 ${dd}/${mm}/${yy}`;
 }
 
-// Fechar calendário ao clicar fora
+// Fechar calendário ao clicar fora (exceto dentro do calPanel e botão Outros)
 document.addEventListener('click', e=>{
-  const wrap = document.getElementById('calWrap');
-  if(wrap && !wrap.contains(e.target)) fecharCal();
+  const panel = document.getElementById('calPanel');
+  const calWrp = document.getElementById('calWrap');
+  const dqOutro = document.getElementById('dqOutro');
+  if(!panel || panel.style.display==='none') return;
+  if(calWrp && calWrp.contains(e.target)) return;
+  if(dqOutro && dqOutro.contains(e.target)) return;
+  fecharCal();
 });
 
 function setDataRapida(qual, el){
@@ -1645,23 +1646,12 @@ function setDataRapida(qual, el){
   const calWrp = document.getElementById('calWrap');
   if(qual==='outro'){
     input.style.display='none';
-    calWrp.style.display='block';
-    // Inicializa calendário com data atual do input ou hoje
+    // Inicializa data: usa o que já está no input ou hoje
     const dataAtual = input.value ? new Date(input.value + 'T12:00:00') : new Date();
     _calData = new Date(dataAtual);
     _calMes  = new Date(dataAtual.getFullYear(), dataAtual.getMonth(), 1);
-    // Atualiza display se já tem valor
-    if(input.value){
-      const [y,m,d] = input.value.split('-');
-      document.getElementById('calDisplayText').textContent = `${d}/${m}/${y}`;
-    } else {
-      // Pré-seleciona hoje
-      const hoje = new Date();
-      _calData = new Date(hoje);
-      _calMes  = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-      document.getElementById('calDisplayText').textContent = 'Selecionar data';
-    }
-    // Calendário inline — já visível no calWrap (position:relative, display:block)
+    // Mostrar calWrap (container posicionado) e abrir panel
+    calWrp.style.display='block';
     document.getElementById('calPanel').style.display='block';
     calRenderizar();
   } else {
