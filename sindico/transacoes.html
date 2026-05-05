@@ -1012,7 +1012,7 @@ window.trocarCondo = () => {} // síndico tem só 1 condomínio
 // _h removido — usar hdrs() que pega o token real do usuario logado
 const _BASE = 'https://siczyohqmlrmirqgzlxb.supabase.co/rest/v1';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw';
-
+const SUPA_URL = 'https://siczyohqmlrmirqgzlxb.supabase.co';
 // -- CONFIG -----------------------------------------------
 // -- ESTADO -----------------------------------------------
 let _mes = new Date().getMonth();
@@ -2319,7 +2319,6 @@ window._calToggleAno=calToggleAno;window._calSelecionarDia=calSelecionarDia;wind
 window._removerAnexo=removerAnexo;window._toggleSecao=toggleSecao;window._fazerLogout=fazerLogout;
 window._toggleParcela=toggleParcela;window._toggleFixo=toggleFixo;window._verPDF=verPDF;
 window._handleDrop=handleDrop;window._uploadAnexo=uploadAnexo;window._deletar=deletar;
-window._flushPending();
 document.getElementById('mesAtual').textContent = `${MESES[_mes]} ${_ano}`;
 await loadAll();
 </script>
