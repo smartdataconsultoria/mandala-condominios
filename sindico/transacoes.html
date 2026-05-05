@@ -118,8 +118,8 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 
 /* TABELA */
 .table-wrap{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.table-head{display:grid;grid-template-columns:36px 100px 1fr 180px 140px 110px 100px 60px;gap:8px;padding:12px 20px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#4a5568}
-.table-row{display:grid;grid-template-columns:36px 100px 1fr 180px 140px 110px 100px 60px;gap:8px;padding:13px 20px;border-bottom:1px solid var(--border)20;align-items:center;transition:.15s;cursor:pointer}
+.table-head{display:grid;grid-template-columns:36px 100px 1fr 180px 140px 110px 100px 110px;gap:8px;padding:12px 20px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#4a5568}
+.table-row{display:grid;grid-template-columns:36px 100px 1fr 180px 140px 110px 100px 110px;gap:8px;padding:13px 20px;border-bottom:1px solid var(--border)20;align-items:center;transition:.15s;cursor:pointer}
 .table-row:hover{background:var(--border)30}
 .table-row:last-child{border-bottom:none}
 .tipo-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px}
@@ -135,11 +135,16 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 .sit-badge.pago{background:#22c55e20;color:#22c55e}
 .sit-badge.pendente{background:var(--gold)20;color:var(--gold)}
 .sit-badge.agendado{background:var(--blue)20;color:var(--blue)}
-.row-actions{display:flex;gap:6px;justify-content:flex-end;opacity:0;transition:.15s}
-.table-row:hover .row-actions{opacity:1}
-.btn-row{background:none;border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;transition:.2s;color:var(--text-light)}
-.btn-row:hover{background:var(--border);color:var(--text-dark)}
-.btn-row.del:hover{background:#ef444420;color:#ef4444;border-color:#ef4444}
+.row-actions{display:flex;gap:5px;justify-content:flex-end;align-items:center}
+.btn-row{
+  display:inline-flex;align-items:center;justify-content:center;gap:4px;
+  border-radius:7px;padding:5px 10px;font-size:12px;font-weight:600;
+  cursor:pointer;transition:.15s;border:none;white-space:nowrap;
+}
+.btn-row.edit{background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe}
+.btn-row.edit:hover{background:#2563eb;color:#fff;transform:translateY(-1px);box-shadow:0 3px 8px #2563eb40}
+.btn-row.del{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
+.btn-row.del:hover{background:#dc2626;color:#fff;transform:translateY(-1px);box-shadow:0 3px 8px #dc262640}
 .empty-state{text-align:center;padding:60px 20px;color:#4a5568;font-size:14px}
 .parcela-tag{font-size:10px;background:var(--blue)20;color:var(--blue);padding:2px 6px;border-radius:8px;margin-left:6px;font-weight:600}
 .fixa-tag{font-size:10px;background:#a855f720;color:#a855f7;padding:2px 6px;border-radius:8px;margin-left:6px;font-weight:600}
@@ -1328,7 +1333,7 @@ function renderTabela(){
     const parTag = ehParcelado ? `<span class="parcela-tag">${t.parcela_atual||1}/${t.parcela_total}</span>` : '';
     const fixaTag= t.recorrente ? `<span class="fixa-tag">🔄</span>` : '';
     const pdfTag = t.anexo_url     ? `<span class="pdf-tag" onclick="event.stopPropagation();verPDF('${t.anexo_url}')" title="Ver comprovante">📎</span>` : '';
-    return `<div class="table-row" onclick="editarTransacao(${t.id})">
+    return `<div class="table-row">
       <div><div class="tipo-icon ${tp}">${t.tipo==='receita'?'↑':'↓'}</div></div>
       <div style="font-size:13px;color:var(--text-light)">${fmtDate(t.data)}</div>
       <div class="desc-cell">
@@ -1346,7 +1351,12 @@ function renderTabela(){
       <div class="val-cell ${tp}">${t.tipo==='despesa'?'- ':'+ '}${fmt(t.valor)}</div>
       <div><span class="sit-badge ${sit}">${sitLabel}</span></div>
       <div class="row-actions">
-        <button class="btn-row del" onclick="event.stopPropagation();deletar(${t.id})">🗑</button>
+        <button class="btn-row edit" onclick="event.stopPropagation();editarTransacao(${t.id})" title="Editar lançamento">
+          ✏️ Editar
+        </button>
+        <button class="btn-row del" onclick="event.stopPropagation();deletar(${t.id})" title="Excluir lançamento">
+          🗑 Excluir
+        </button>
       </div>
     </div>`;
   }).join('');
@@ -1354,7 +1364,7 @@ function renderTabela(){
   // ── Rodapé totalizador ──────────────────────────────────
   const rodape = `<div style="
     display:grid;
-    grid-template-columns:36px 100px 1fr 180px 140px 110px 100px 60px;
+    grid-template-columns:36px 100px 1fr 180px 140px 110px 100px 110px;
     gap:8px;padding:14px 20px;
     background:var(--white);
     border-top:2px solid var(--border);
