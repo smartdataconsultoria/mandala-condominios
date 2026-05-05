@@ -2399,30 +2399,29 @@ function _deletarFn(id){
     const tipoLabel = ehParcelado ? 'parcela' : 'lançamento';
     const todosLabel = ehParcelado ? 'Todas as ' + t.parcela_total + ' parcelas' : 'Todos da série';
     opcoes.style.display = 'flex';
-    opcoes.innerHTML =
-      '<button class="confirm-opt selected" id="optEste" onclick="window._selecionarOpt('este')">' +
-        '<span class="confirm-opt-icon">📄</span>' +
-        '<div><div class="confirm-opt-label">Somente este ' + tipoLabel + '</div>' +
-        '<div class="confirm-opt-sub">Remove apenas ' + mesRef + '</div></div>' +
-      '</button>' +
-      '<button class="confirm-opt" id="optProximos" onclick="window._selecionarOpt('proximos')">' +
-        '<span class="confirm-opt-icon">⏭️</span>' +
-        '<div><div class="confirm-opt-label">Este e os próximos</div>' +
-        '<div class="confirm-opt-sub">Remove ' + mesRef + ' em diante</div></div>' +
-      '</button>' +
-      '<button class="confirm-opt" id="optTodos" onclick="window._selecionarOpt('todos')">' +
-        '<span class="confirm-opt-icon">🗂️</span>' +
-        '<div><div class="confirm-opt-label">' + todosLabel + '</div>' +
-        '<div class="confirm-opt-sub">Remove toda a série completa</div></div>' +
-      '</button>';
+    opcoes.innerHTML = `
+      <button class="confirm-opt selected" id="optEste" onclick="window._selecionarOpt('este')">
+        <span class="confirm-opt-icon">📄</span>
+        <div><div class="confirm-opt-label">Somente este ${tipoLabel}</div>
+        <div class="confirm-opt-sub">Remove apenas ${mesRef}</div></div>
+      </button>
+      <button class="confirm-opt" id="optProximos" onclick="window._selecionarOpt('proximos')">
+        <span class="confirm-opt-icon">⏭️</span>
+        <div><div class="confirm-opt-label">Este e os próximos</div>
+        <div class="confirm-opt-sub">Remove ${mesRef} em diante</div></div>
+      </button>
+      <button class="confirm-opt" id="optTodos" onclick="window._selecionarOpt('todos')">
+        <span class="confirm-opt-icon">🗂️</span>
+        <div><div class="confirm-opt-label">${todosLabel}</div>
+        <div class="confirm-opt-sub">Remove toda a série completa</div></div>
+      </button>``
   } else {
     opcoes.style.display = 'none';
     opcoes.innerHTML = '';
   }
-
+  document.getElementById('confirmDesc').innerHTML += '<br><span style="color:#ef4444;font-size:12px;font-weight:600">⚠️ Esta ação não pode ser desfeita.</span>';
   document.getElementById('confirmBg').classList.add('open');
 }
-
 window._selecionarOpt = function(opt){
   window._appDeleteOpt = opt;
   ['este','proximos','todos'].forEach(function(o){
