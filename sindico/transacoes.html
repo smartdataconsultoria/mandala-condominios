@@ -1016,14 +1016,27 @@ function uploadAnexo() { _callWhenReady('uploadAnexo', []); }
 function onAnexoChange() { _callWhenReady('onAnexoChange', []); }
 function deletar(id) { _callWhenReady('deletar', [id]); }
 
-// Funções globais diretas para os botões da tabela
+// ── Funções dos botões da tabela — executam imediatamente ──────────
+// Abertura do modal de confirmação feita aqui, sem depender do module
 function btnEditar(id){
-  if(window._editarTransacao) window._editarTransacao(id);
-  else _callWhenReady('editarTransacao', [id]);
+  if(window._editarTransacao) { window._editarTransacao(id); return; }
+  // Aguardar module e tentar novamente
+  var t = 0;
+  var iv = setInterval(function(){
+    if(window._editarTransacao){ clearInterval(iv); window._editarTransacao(id); }
+    if(++t > 50) clearInterval(iv);
+  }, 100);
 }
+
 function btnExcluir(id){
-  if(window._deletar) window._deletar(id);
-  else _callWhenReady('deletar', [id]);
+  // Tenta chamar direto se module já carregou
+  if(window._deletar){ window._deletar(id); return; }
+  // Module ainda carregando: polling com timeout de 5s
+  var t = 0;
+  var iv = setInterval(function(){
+    if(window._deletar){ clearInterval(iv); window._deletar(id); return; }
+    if(++t > 50) clearInterval(iv);
+  }, 100);
 }
 </script>
 
@@ -1031,6 +1044,14 @@ function btnExcluir(id){
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 const _sb = createClient('https://siczyohqmlrmirqgzlxb.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw')
+
+// ── Estado global — declarado ANTES dos awaits para ficar disponível imediatamente ──
+window._appTransacoes  = [];   // lista carregada de condo_transacoes
+window._appCondoAtivo  = null; // id do condomínio ativo
+window._appDeleteId    = null;
+window._appDeleteOpt   = 'este';
+window._appBase        = 'https://siczyohqmlrmirqgzlxb.supabase.co/rest/v1';
+window._appHdrs        = null; // será preenchido após auth
 
 // Auth CondoGestor
 const { data: { session: _sess } } = await _sb.auth.getSession()
@@ -1045,7 +1066,8 @@ if (!_perfil || _perfil.role !== 'sindico') {
 // Cada usuário (síndico) está vinculado a 1 condomínio via usuarios.condominio_id
 // No futuro, uma administradora pode gerenciar múltiplos → trocarCondo() habilitado
 const CONDO_ID = _perfil.condominio_id
-let _condoAtivo = CONDO_ID  // condomínio atualmente selecionado (para multi-condo futuro)
+let _condoAtivo = CONDO_ID
+window._appCondoAtivo = CONDO_ID  // sincronizar com global
 
 // Preenche nome e avatar na sidebar
 document.getElementById('user-name').textContent = _perfil.nome || _sess.user.email
@@ -1058,6 +1080,7 @@ if (_condo) {
   if (selCondo) selCondo.innerHTML = `<option value="${CONDO_ID}">${_condo.nome}</option>`
 }
 
+window._appHdrs = () => hdrs();  // expor hdrs para uso fora do module
 window.fazerLogout = async () => { await _sb.auth.signOut(); window.location.href = '/login.html' }
 // trocarCondo: preparado para multi-condomínio (administradoras com vários prédios)
 window.trocarCondo = () => {
@@ -1084,6 +1107,7 @@ let _categorias = [];
 let _contas = [];
 let _tipoAtual = 'despesa';
 let _editId = null;
+
 let _anexoArquivo = null;
 
 // ── AUTH ─────────────────────────────────────────────────
@@ -1184,6 +1208,7 @@ async function loadTransacoes(){
     fetch(`${_BASE}/condo_transacoes?condominio_id=eq.${_condoAtivo}&data=lt.${primDia}&select=tipo,valor`,{headers:_h})
   ]);
   _transacoes = resMes.ok ? await resMes.json() : [];
+  window._appTransacoes = _transacoes;  // sincronizar global
 
   // Calcula saldo acumulado anterior
   if(resSaldoAnt.ok){
@@ -2348,10 +2373,11 @@ let _deleteId   = null;
 let _deleteOpt  = 'este'; // 'este' | 'todos'
 
 function _deletarFn(id){
-  const t = _transacoes.find(t=>t.id===id);
-  if(!t) return;
-  _deleteId  = id;
-  _deleteOpt = 'este';
+  const _tr = window._appTransacoes || [];
+  const t = _tr.find(t=>t.id===id);
+  if(!t){ console.warn('[EXCLUIR] id='+id+' nao encontrado. Total:'+_tr.length); return; }
+  window._appDeleteId  = id;
+  window._appDeleteOpt = 'este';
 
   const ehParcelado = !!t.parcela_total;
   const ehFixo      = !!t.recorrente && !t.parcela_total;
@@ -2438,16 +2464,21 @@ function selecionarOpt(opt){
 
 function fecharConfirm(){
   document.getElementById('confirmBg').classList.remove('open');
-  _deleteId = null; _deleteOpt = 'este';
+  window._appDeleteId  = null;
+  window._appDeleteOpt = 'este';
 }
 
 async function executarDelete(){
+  const _deleteId  = window._appDeleteId;
+  const _deleteOpt = window._appDeleteOpt || 'este';
   if(!_deleteId) return;
   const btn = document.getElementById('confirmDelBtn');
   btn.disabled=true; btn.textContent='Excluindo...';
 
-  const t = _transacoes.find(t=>t.id===_deleteId);
-  const h = {...hdrs(), 'Prefer':'return=representation'};
+  const _tr = window._appTransacoes || [];
+  const t = _tr.find(t=>t.id===_deleteId);
+  const _condoId = window._appCondoAtivo;
+  const h = {...(window._appHdrs ? window._appHdrs() : hdrs()), 'Prefer':'return=representation'};
 
   try {
     const descEnc = encodeURIComponent(t.descricao);
@@ -2455,10 +2486,10 @@ async function executarDelete(){
       let url;
       if(t.parcela_total){
         // Todas as parcelas da série
-        url = `${_BASE}/condo_transacoes?condominio_id=eq.${_condoAtivo}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&parcela_total=eq.${t.parcela_total}`;
+        url = `${_BASE}/condo_transacoes?condominio_id=eq.${_condoId}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&parcela_total=eq.${t.parcela_total}`;
       } else {
         // Todos os lançamentos fixos (data qualquer)
-        url = `${_BASE}/condo_transacoes?condominio_id=eq.${_condoAtivo}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&recorrente=eq.true`;
+        url = `${_BASE}/condo_transacoes?condominio_id=eq.${_condoId}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&recorrente=eq.true`;
       }
       const res = await fetch(url, {method:'DELETE', headers:h});
       if(res.ok || res.status===204){
@@ -2472,10 +2503,10 @@ async function executarDelete(){
       let url;
       if(t.parcela_total){
         // Parcelas >= parcela_atual
-        url = `${_BASE}/condo_transacoes?condominio_id=eq.${_condoAtivo}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&parcela_total=eq.${t.parcela_total}&parcela_atual=gte.${t.parcela_atual}`;
+        url = `${_BASE}/condo_transacoes?condominio_id=eq.${_condoId}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&parcela_total=eq.${t.parcela_total}&parcela_atual=gte.${t.parcela_atual}`;
       } else {
         // Fixos com data >= data selecionada
-        url = `${_BASE}/condo_transacoes?condominio_id=eq.${_condoAtivo}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&recorrente=eq.true&data=gte.${dataEnc}`;
+        url = `${_BASE}/condo_transacoes?condominio_id=eq.${_condoId}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&recorrente=eq.true&data=gte.${dataEnc}`;
       }
       const res = await fetch(url, {method:'DELETE', headers:h});
       if(res.ok || res.status===204){
@@ -2485,7 +2516,7 @@ async function executarDelete(){
 
     } else {
       // Excluir só este lançamento
-      const res = await fetch(`${_BASE}/condo_transacoes?id=eq.${_deleteId}&condominio_id=eq.${_condoAtivo}`,{
+      const res = await fetch(`${_BASE}/condo_transacoes?id=eq.${_deleteId}&condominio_id=eq.${_condoId}`,{
         method:'DELETE', headers:h
       });
       const body = await res.text();
