@@ -677,8 +677,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   <div class="confirm-desc" id="confirmDesc">Esta ação não pode ser desfeita.</div>
   <div class="confirm-opcoes" id="confirmOpcoes"></div>
   <div class="confirm-footer">
-    <button class="confirm-cancel-btn" onclick="fecharConfirm()">Cancelar</button>
-    <button class="confirm-del-btn" id="confirmDelBtn" onclick="executarDelete()">🗑 Excluir</button>
+    <button class="confirm-cancel-btn" onclick="window._fecharConfirm()">Cancelar</button>
+    <button class="confirm-del-btn" id="confirmDelBtn" onclick="window._executarDelete()">🗑 Excluir</button>
   </div>
 </div>
 </div>
@@ -1352,10 +1352,10 @@ function renderTabela(){
       <div class="val-cell ${tp}">${t.tipo==='despesa'?'- ':'+ '}${fmt(t.valor)}</div>
       <div><span class="sit-badge ${sit}">${sitLabel}</span></div>
       <div class="row-actions">
-        <button class="btn-row edit" onclick="event.stopPropagation();editarTransacao(${t.id})" title="Editar lançamento">
+        <button class="btn-row edit" onclick="event.stopPropagation();window._editarTransacao(${t.id})" title="Editar lançamento">
           ✏️ Editar
         </button>
-        <button class="btn-row del" onclick="event.stopPropagation();deletar(${t.id})" title="Excluir lançamento">
+        <button class="btn-row del" onclick="event.stopPropagation();window._deletar(${t.id})" title="Excluir lançamento">
           🗑 Excluir
         </button>
       </div>
@@ -2337,7 +2337,7 @@ async function confirmarImportacao(){
 let _deleteId   = null;
 let _deleteOpt  = 'este'; // 'este' | 'todos'
 
-function deletar(id){
+function _deletarFn(id){
   const t = _transacoes.find(t=>t.id===id);
   if(!t) return;
   _deleteId  = id;
@@ -2363,21 +2363,21 @@ function deletar(id){
     // FIXO: 3 opções — só este / este + próximos / todos da série
     opcoes.style.display = 'flex';
     opcoes.innerHTML = `
-      <button class="confirm-opt selected" id="optEste" onclick="selecionarOpt('este')">
+      <button class="confirm-opt selected" id="optEste" onclick="window._selecionarOpt('este')">
         <span class="confirm-opt-icon">📄</span>
         <div>
           <div class="confirm-opt-label">Somente este lançamento</div>
           <div class="confirm-opt-sub">Remove apenas o de ${mesRef}</div>
         </div>
       </button>
-      <button class="confirm-opt" id="optProximos" onclick="selecionarOpt('proximos')">
+      <button class="confirm-opt" id="optProximos" onclick="window._selecionarOpt('proximos')">
         <span class="confirm-opt-icon">⏭️</span>
         <div>
           <div class="confirm-opt-label">Este e os próximos</div>
           <div class="confirm-opt-sub">Remove ${mesRef} e todos os lançamentos futuros</div>
         </div>
       </button>
-      <button class="confirm-opt" id="optTodos" onclick="selecionarOpt('todos')">
+      <button class="confirm-opt" id="optTodos" onclick="window._selecionarOpt('todos')">
         <span class="confirm-opt-icon">🗂️</span>
         <div>
           <div class="confirm-opt-label">Todos da série</div>
@@ -2388,21 +2388,21 @@ function deletar(id){
     // PARCELADO: 3 opções — só esta parcela / esta + próximas / todas as parcelas
     opcoes.style.display = 'flex';
     opcoes.innerHTML = `
-      <button class="confirm-opt selected" id="optEste" onclick="selecionarOpt('este')">
+      <button class="confirm-opt selected" id="optEste" onclick="window._selecionarOpt('este')">
         <span class="confirm-opt-icon">📄</span>
         <div>
           <div class="confirm-opt-label">Somente esta parcela</div>
           <div class="confirm-opt-sub">Remove apenas a parcela ${t.parcela_atual||'?'} de ${t.parcela_total}</div>
         </div>
       </button>
-      <button class="confirm-opt" id="optProximos" onclick="selecionarOpt('proximos')">
+      <button class="confirm-opt" id="optProximos" onclick="window._selecionarOpt('proximos')">
         <span class="confirm-opt-icon">⏭️</span>
         <div>
           <div class="confirm-opt-label">Esta e as próximas parcelas</div>
           <div class="confirm-opt-sub">Remove da parcela ${t.parcela_atual||'?'} até a ${t.parcela_total}</div>
         </div>
       </button>
-      <button class="confirm-opt" id="optTodos" onclick="selecionarOpt('todos')">
+      <button class="confirm-opt" id="optTodos" onclick="window._selecionarOpt('todos')">
         <span class="confirm-opt-icon">🗂️</span>
         <div>
           <div class="confirm-opt-label">Todas as parcelas</div>
@@ -2502,7 +2502,7 @@ async function executarDelete(){
 
 // Modal de confirmação fecha ao clicar no fundo
 document.getElementById('confirmBg').addEventListener('click',e=>{
-  if(e.target===document.getElementById('confirmBg')) fecharConfirm();
+  if(e.target===document.getElementById('confirmBg')) window._fecharConfirm && window._fecharConfirm();
 });
 
 // ── FAB ──────────────────────────────────────────────────
@@ -2566,7 +2566,7 @@ window._verPDF = verPDF;
 window._handleDrop = handleDrop;
 window._uploadAnexo = uploadAnexo;
 window._onAnexoChange = typeof onAnexoChange !== 'undefined' ? onAnexoChange : ()=>{};
-window._deletar = deletar;
+window._deletar = _deletarFn;
 window._flushPending(); // executa chamadas que ficaram em fila enquanto o module carregava
 
 // ── INIT ─────────────────────────────────────────────────
