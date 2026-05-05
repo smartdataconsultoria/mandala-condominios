@@ -149,28 +149,35 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 /* MODAL */
 .modal-bg{position:fixed;inset:0;background:#00000090;display:none;align-items:flex-start;justify-content:center;z-index:999;overflow-y:auto;padding:24px 16px}
 .modal-bg.open{display:flex}
-.modal{background:#13161f;border:1px solid var(--border);border-radius:16px;width:100%;max-width:620px;margin:auto;overflow:hidden;transition:max-width .3s ease}
+.modal{background:#fff;border:1px solid var(--border);border-radius:16px;width:100%;max-width:620px;margin:auto;overflow:hidden;transition:max-width .3s ease;box-shadow:0 20px 60px rgba(0,0,0,.35)}
 .modal.expandido{max-width:960px}
 
-/* MODAL HEADER */
-.modal-header{padding:20px 24px 0;display:flex;align-items:center;gap:12px}
-.modal-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
-.modal-icon.rec{background:#22c55e20}
-.modal-icon.des{background:#ef444420}
-.modal-title{font-size:18px;font-weight:700;flex:1}
-.modal-close{background:none;border:none;color:var(--text-mid);font-size:20px;cursor:pointer;padding:4px;border-radius:6px;transition:.2s;line-height:1}
-.modal-close:hover{background:var(--border);color:var(--text-dark)}
+/* MODAL HEADER com faixa colorida por tipo */
+.modal-header{padding:0;display:flex;align-items:stretch;gap:0;position:relative}
+.modal-header-bar{width:6px;flex-shrink:0;border-radius:0}
+.modal-header-bar.des{background:linear-gradient(180deg,#ef4444,#dc2626)}
+.modal-header-bar.rec{background:linear-gradient(180deg,#22c55e,#16a34a)}
+.modal-header-bar.cartao{background:linear-gradient(180deg,var(--blue),#1d4ed8)}
+.modal-header-bar.transf{background:linear-gradient(180deg,var(--gold),#d97706)}
+.modal-header-content{flex:1;display:flex;align-items:center;gap:12px;padding:18px 20px 18px 18px}
+.modal-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.modal-icon.rec{background:#dcfce7;color:#16a34a}
+.modal-icon.des{background:#fee2e2;color:#dc2626}
+.modal-title-wrap{flex:1}
+.modal-title{font-size:18px;font-weight:800;flex:1;line-height:1.1}
+.modal-title.des{color:#dc2626}
+.modal-title.rec{color:#16a34a}
+.modal-title.cartao{color:var(--blue)}
+.modal-title.transf{color:var(--gold)}
+.modal-subtitle{font-size:11px;font-weight:500;margin-top:2px;opacity:.7}
+.modal-close{background:none;border:none;color:#94a3b8;font-size:22px;cursor:pointer;padding:4px 6px;border-radius:6px;transition:.2s;line-height:1;align-self:flex-start}
+.modal-close:hover{background:#f1f5f9;color:#0f172a}
 
-/* TIPO BADGE — mostra o tipo escolhido no FAB */
-.tipo-badge{display:none;align-items:center;gap:10px;margin:14px 24px 0;padding:10px 16px;border-radius:10px;font-size:15px;font-weight:700}
-.tipo-badge.show{display:flex}
-.tipo-badge.des{background:#ef444415;color:#ef4444;border:1px solid #ef444425}
-.tipo-badge.rec{background:#22c55e15;color:#22c55e;border:1px solid #22c55e25}
-.tipo-badge.cartao{background:var(--blue)15;color:var(--blue);border:1px solid var(--blue)25}
-.tipo-badge.transf{background:var(--gold)15;color:var(--gold);border:1px solid var(--gold)25}
+/* TIPO BADGE — oculto, header já mostra o tipo */
+.tipo-badge{display:none!important}
 
 /* MODAL BODY */
-.modal-body{padding:20px 24px}
+.modal-body{padding:20px 24px;background:#fff}
 .field{margin-bottom:16px}
 .field label{display:block;font-size:11px;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px}
 .field input,.field select,.field textarea{width:100%;background:var(--off-white);border:1px solid var(--border);border-radius:8px;padding:10px 13px;color:var(--text-dark);font-size:14px;outline:none;transition:.2s;font-family:inherit}
@@ -234,7 +241,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 .secao-cols.open ~ .secao-col-sep{display:block}
 
 /* FOOTER */
-.modal-footer{display:flex;gap:10px;justify-content:flex-end;padding:20px 24px;border-top:1px solid var(--border);margin-top:20px}
+.modal-footer{background:#f8fafc;display:flex;gap:10px;justify-content:flex-end;padding:20px 24px;border-top:1px solid var(--border);margin-top:20px}
 .btn-cancel{background:none;border:1px solid var(--border);color:var(--text-light);padding:10px 20px;border-radius:8px;font-size:14px;cursor:pointer;transition:.2s}
 .btn-cancel:hover{background:var(--border)}
 .btn-save{background:var(--gold);color:var(--off-white);border:none;padding:10px 22px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:.2s}
@@ -673,13 +680,19 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 <div class="modal">
 
   <!-- HEADER -->
-  <div class="modal-header">
-    <div class="modal-icon rec" id="mIcone">➕</div>
-    <div class="modal-title" id="mTitulo">Novo Lançamento</div>
-    <button class="modal-close" onclick="fecharModal()">✕</button>
+  <div class="modal-header" id="modalHeader">
+    <div class="modal-header-bar des" id="mHeaderBar"></div>
+    <div class="modal-header-content">
+      <div class="modal-icon des" id="mIcone">↓</div>
+      <div class="modal-title-wrap">
+        <div class="modal-title des" id="mTitulo">Nova Despesa</div>
+        <div class="modal-subtitle" id="mSubtitulo">Registre uma saída financeira do condomínio</div>
+      </div>
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+    </div>
   </div>
 
-  <!-- BADGE FIXO (aparece quando vem de um tipo específico do FAB) -->
+  <!-- BADGE FIXO (oculto via CSS, header já exibe) -->
   <div class="tipo-badge" id="tipoBadge"></div>
 
   <div class="modal-body">
@@ -792,6 +805,26 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
         <option value="pendente">Pendente</option>
         <option value="agendado">Agendado</option>
       </select>
+    </div>
+
+    <!-- FORMA + FLUXO -->
+    <div class="grid2">
+      <div class="field">
+        <label>Forma</label>
+        <select id="fForma">
+          <option value="">Selecionar...</option>
+          <option value="contrato">📄 Contrato</option>
+          <option value="avulso">🔖 Avulso</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Fluxo</label>
+        <select id="fFluxo">
+          <option value="">Selecionar...</option>
+          <option value="fixo">🔒 Fixo</option>
+          <option value="variavel">📊 Variável</option>
+        </select>
+      </div>
     </div>
 
     <!-- TOGGLES AVANÇADOS -->
@@ -1108,12 +1141,12 @@ function preencherSelects(){
   const sCat  = document.getElementById('fCat');
   const sConta = document.getElementById('fConta');
 
-  // categorias agrupadas por tipo
+  // categorias agrupadas por tipo — labels em minúsculo para match no setTipo
   const rec = _categorias.filter(c=>c.tipo==='receita');
   const des = _categorias.filter(c=>c.tipo==='despesa');
   let opCat = '<option value="">Selecionar...</option>';
-  if(rec.length){ opCat+=`<optgroup label="Receitas">`; rec.forEach(c=>opCat+=`<option value="${c.id}">${c.icone||''} ${c.categoria ? c.categoria+' — ' : ''}${c.nome}</option>`); opCat+=`</optgroup>`; }
-  if(des.length){ opCat+=`<optgroup label="Despesas">`; des.forEach(c=>opCat+=`<option value="${c.id}">${c.icone||''} ${c.categoria ? c.categoria+' — ' : ''}${c.nome}</option>`); opCat+=`</optgroup>`; }
+  if(rec.length){ opCat+=`<optgroup label="receita">`; rec.forEach(c=>opCat+=`<option value="${c.id}">${c.icone||''} ${c.categoria ? c.categoria+' — ' : ''}${c.nome}</option>`); opCat+=`</optgroup>`; }
+  if(des.length){ opCat+=`<optgroup label="despesa">`; des.forEach(c=>opCat+=`<option value="${c.id}">${c.icone||''} ${c.categoria ? c.categoria+' — ' : ''}${c.nome}</option>`); opCat+=`</optgroup>`; }
   sCat.innerHTML = opCat;
 
   let opConta = '<option value="">Selecionar...</option>';
@@ -1394,6 +1427,8 @@ function fecharModal(){
 
 function limparModal(){
   ['fDesc','fValor','fObs','fDiaVenc'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  const fForma=document.getElementById('fForma'); if(fForma) fForma.value='';
+  const fFluxo=document.getElementById('fFluxo'); if(fFluxo) fFluxo.value='';
   document.getElementById('fSit').value='pago';
   document.getElementById('fCat').value='';
   document.getElementById('fConta').value='';
@@ -1421,14 +1456,37 @@ function setTipo(tipo){
   _tipoAtual = tipo;
   const cfg = TIPO_CONFIG[tipo] || TIPO_CONFIG.despesa;
 
-  // Ícone e cor do header do modal
+  // Mapa de subtítulos por tipo
+  const subtitulos = {
+    despesa:      'Registre uma saída financeira do condomínio',
+    receita:      'Registre uma entrada financeira do condomínio',
+    cartao:       'Despesa no cartão de crédito — marque como Pendente',
+    transferencia:'Movimentação entre contas do condomínio'
+  };
+
+  // Classe CSS pelo tipo (para cor do título)
+  const clsMap = {despesa:'des', receita:'rec', cartao:'cartao', transferencia:'transf'};
+  const cls = clsMap[tipo] || 'des';
+
+  // Ícone
   const icon = document.getElementById('mIcone');
   if(icon){
-    icon.textContent      = cfg.icon;
-    icon.style.background = cfg.bg;
-    icon.style.color      = cfg.cor;
-    icon.className        = 'modal-icon';
+    icon.textContent = cfg.icon;
+    icon.className   = `modal-icon ${cls}`;
+    icon.removeAttribute('style');
   }
+
+  // Título com cor
+  const titulo = document.getElementById('mTitulo');
+  if(titulo){ titulo.textContent = cfg.label; titulo.className = `modal-title ${cls}`; }
+
+  // Subtítulo
+  const sub = document.getElementById('mSubtitulo');
+  if(sub) sub.textContent = subtitulos[tipo] || '';
+
+  // Barra colorida lateral
+  const bar = document.getElementById('mHeaderBar');
+  if(bar) bar.className = `modal-header-bar ${cls}`;
 
   // Mostrar info extra para cartão
   const infoCartao = document.getElementById('infoCartao');
@@ -1438,14 +1496,27 @@ function setTipo(tipo){
   const infoTransf = document.getElementById('infoTransf');
   if(infoTransf) infoTransf.style.display = tipo==='transferencia' ? 'block' : 'none';
 
-  // Filtrar categorias pelo tipo real (receita/despesa)
+  // Filtrar categorias: mostrar/ocultar optgroups e options pelo tipoDB
   const tipoDB = cfg.tipoDB;
-  Array.from(document.getElementById('fCat').options).forEach(opt=>{
+  const sCat = document.getElementById('fCat');
+  // Ocultar optgroups que não são do tipo
+  Array.from(sCat.querySelectorAll('optgroup')).forEach(og => {
+    if(tipoDB === 'transferencia'){
+      og.style.display = '';
+    } else {
+      const ogLabel = og.label.toLowerCase();
+      const match = ogLabel.includes(tipoDB === 'despesa' ? 'despesa' : 'receita');
+      og.style.display = match ? '' : 'none';
+    }
+  });
+  // Ocultar options avulsas fora de optgroup
+  Array.from(sCat.options).forEach(opt => {
     if(!opt.value) return;
+    if(opt.parentElement.tagName === 'OPTGROUP') return; // já tratado acima
     const cat = _categorias.find(c=>c.id==opt.value);
     if(cat) opt.style.display = (tipoDB==='transferencia' || cat.tipo===tipoDB) ? '' : 'none';
   });
-  document.getElementById('fCat').value = '';
+  sCat.value = '';
 }
 
 // ── DATA RÁPIDA ──────────────────────────────────────────
@@ -1711,6 +1782,8 @@ async function salvarLancamento(){
       conta_id:     document.getElementById('fConta').value||null,
       situacao:     document.getElementById('fSit').value,
       observacao:   document.getElementById('fObs').value.trim()||null,
+      forma:        document.getElementById('fForma')?.value||null,
+      fluxo:        document.getElementById('fFluxo')?.value||null,
     };
     try {
       const res = await fetch(`${_BASE}/condo_transacoes?id=eq.${_editId}&condominio_id=eq.${CONDO_ID}`,{
@@ -1767,9 +1840,11 @@ async function salvarLancamento(){
     conta_id:     document.getElementById('fConta').value||null,
     situacao:     document.getElementById('fSit').value,
     observacao:   document.getElementById('fObs').value.trim()||null,
-    recorrente:   fixo,          // true só para fixo, false para avulso/parcelado
-    parcela_atual: null,         // garantido null no base — só parcelado sobrescreve
-    parcela_total: null,         // garantido null no base — só parcelado sobrescreve
+    forma:        document.getElementById('fForma')?.value||null,
+    fluxo:        document.getElementById('fFluxo')?.value||null,
+    recorrente:   fixo,
+    parcela_atual: null,
+    parcela_total: null,
     autor_email:  getToken() ? null : null
   };
 
@@ -1903,6 +1978,8 @@ async function editarTransacao(id){
   document.getElementById('fConta').value  = t.conta_id||'';
   document.getElementById('fSit').value    = t.situacao||'pago';
   document.getElementById('fObs').value    = t.observacao||'';
+  const _fForma = document.getElementById('fForma'); if(_fForma) _fForma.value = t.forma||'';
+  const _fFluxo = document.getElementById('fFluxo'); if(_fFluxo) _fFluxo.value = t.fluxo||'';
   // Fixo OU Parcelado — nunca os dois
   if(t.recorrente && !t.parcela_total){
     // É fixo (recorrente sem ser parcelado com valor dividido)
