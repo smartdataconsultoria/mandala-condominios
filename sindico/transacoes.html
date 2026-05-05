@@ -998,7 +998,7 @@ function exportarExcel() { _callWhenReady('exportarExcel', []); }
 function baixarModelo() { _callWhenReady('baixarModelo', []); }
 function abrirImportar() { _callWhenReady('abrirImportar', []); }
 function confirmarImportacao() { _callWhenReady('confirmarImportacao', []); }
-function selecionarOpt(e,v,l) { _callWhenReady('selecionarOpt', [e,v,l]); }
+function selecionarOpt(opt) { _callWhenReady('selecionarOpt', [opt]); }
 function setDataRapida(v, el) { _callWhenReady('setDataRapida', [v, el]); }
 function toggleCal() { _callWhenReady('toggleCal', []); }
 function calNavMes(d) { _callWhenReady('calNavMes', [d]); }
@@ -1425,6 +1425,11 @@ function abrirModal(tipo){
   const _mm = String(_hoje.getMonth()+1).padStart(2,'0');
   const _dd = String(_hoje.getDate()).padStart(2,'0');
   document.getElementById('fData').value = `${_yy}-${_mm}-${_dd}`;
+  // Fechar calendário ao abrir modal novo
+  const _calW = document.getElementById('calWrap');
+  const _calP = document.getElementById('calPanel');
+  if(_calW) _calW.style.display = 'none';
+  if(_calP) _calP.style.display = 'none';
   setDataRapida('hoje', document.getElementById('dqHoje'));
   document.getElementById('modalBg').classList.add('open');
 }
@@ -2038,21 +2043,18 @@ async function editarTransacao(id){
   document.getElementById('fData').style.display='none';
   document.getElementById('dqOutro').classList.add('active');
   document.querySelectorAll('.dq-btn:not(#dqOutro)').forEach(b=>b.classList.remove('active'));
-  // Mostrar data no botão "Outros..." e abrir o calendário
+  // Mostrar data no botão "Outros..." — calendário só abre se clicar
   if(t.data){
     const [y,m,d] = t.data.split('-');
     _calData = new Date(parseInt(y), parseInt(m)-1, parseInt(d));
     _calMes  = new Date(parseInt(y), parseInt(m)-1, 1);
-    // Mostrar data no botão Outros...
     const dqOutroEl = document.getElementById('dqOutro');
     if(dqOutroEl) dqOutroEl.textContent = `📅 ${d}/${m}/${y}`;
-    // Abrir calendário com a data do lançamento já selecionada
+    // Garantir que calendário está fechado
     const calWrp = document.getElementById('calWrap');
-    if(calWrp){
-      calWrp.style.display = 'block';
-      document.getElementById('calPanel').style.display = 'block';
-      calRenderizar();
-    }
+    if(calWrp) calWrp.style.display = 'none';
+    const calPnl = document.getElementById('calPanel');
+    if(calPnl) calPnl.style.display = 'none';
   }
   document.getElementById('fDesc').value   = t.descricao||'';
   document.getElementById('fValor').value  = t.valor ? parseFloat(t.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '';
@@ -2564,7 +2566,7 @@ window._verPDF = verPDF;
 window._handleDrop = handleDrop;
 window._uploadAnexo = uploadAnexo;
 window._onAnexoChange = typeof onAnexoChange !== 'undefined' ? onAnexoChange : ()=>{};
-window._deletar = typeof deletar !== 'undefined' ? deletar : ()=>{};
+window._deletar = deletar;
 window._flushPending(); // executa chamadas que ficaram em fila enquanto o module carregava
 
 // ── INIT ─────────────────────────────────────────────────
