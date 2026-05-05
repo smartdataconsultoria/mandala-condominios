@@ -149,7 +149,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 /* MODAL */
 .modal-bg{position:fixed;inset:0;background:#00000090;display:none;align-items:flex-start;justify-content:center;z-index:999;overflow-y:auto;padding:24px 16px}
 .modal-bg.open{display:flex}
-.modal{background:#13161f;border:1px solid var(--border);border-radius:16px;width:100%;max-width:620px;margin:auto;overflow:hidden;transition:max-width .3s ease}
+.modal{background:#fff;border:1px solid var(--border);border-radius:16px;width:100%;max-width:620px;margin:auto;overflow:hidden;transition:max-width .3s ease;box-shadow:0 20px 60px rgba(0,0,0,.3)}
 .modal.expandido{max-width:960px}
 
 /* MODAL HEADER */
@@ -673,11 +673,20 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 <div class="modal">
 
   <!-- HEADER -->
-  <div class="modal-header">
-    <div class="modal-icon rec" id="mIcone">➕</div>
-    <div class="modal-title" id="mTitulo">Novo Lançamento</div>
-    <button class="modal-close" onclick="fecharModal()">✕</button>
+  <div class="modal-header" id="modalHeader" style="padding:0;display:flex;align-items:stretch">
+    <div id="mHeaderBar" style="width:6px;background:#ef4444;flex-shrink:0;border-radius:0"></div>
+    <div style="flex:1;display:flex;align-items:center;gap:12px;padding:16px 20px">
+      <div class="modal-icon des" id="mIcone" style="width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;background:#fee2e2">↓</div>
+      <div style="flex:1">
+        <div class="modal-title" id="mTitulo" style="font-size:17px;font-weight:800;color:#dc2626">Nova Despesa</div>
+        <div id="mSubtitulo" style="font-size:11px;color:#94a3b8;margin-top:2px">Registre uma saída financeira</div>
+      </div>
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+    </div>
   </div>
+
+  <!-- BADGE FIXO (aparece quando vem de um tipo específico do FAB) -->
+  <div class="tipo-badge" id="tipoBadge"></div>
 
   <!-- BADGE FIXO (aparece quando vem de um tipo específico do FAB) -->
   <div class="tipo-badge" id="tipoBadge"></div>
@@ -869,13 +878,12 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
         <div class="grid2">
           <div class="field" style="margin-bottom:0">
             <label>Repetir por</label>
-            <select id="fRepetir" onchange="atualizarFixoResumo()">
-              <option value="0">Indefinidamente (12 meses)</option>
-              <option value="3">3 meses</option>
-              <option value="6">6 meses</option>
-              <option value="12">12 meses</option>
-              <option value="24">24 meses</option>
-            </select>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input type="number" id="fRepetir" min="1" max="360" value="12"
+                oninput="atualizarFixoResumo()" onchange="atualizarFixoResumo()"
+                style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;background:var(--off-white);outline:none"/>
+              <span style="font-size:13px;color:var(--text-mid);white-space:nowrap">meses</span>
+            </div>
           </div>
           <div class="field" style="margin-bottom:0">
             <label>Dia do vencimento</label>
@@ -928,8 +936,8 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
   </div><!-- /modal-body -->
 
   <div class="modal-footer" style="justify-content:space-between">
-    <button id="btnExcluirModal" style="display:none;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;padding:9px 18px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer" onmouseover="this.style.background='#dc2626';this.style.color='#fff'" onmouseout="this.style.background='#fef2f2';this.style.color='#dc2626'" onclick="if(window._deletar&&window._editId_atual){var id=window._editId_atual;fecharModal();window._deletar(id);}">
-      Excluir lancamento
+    <button id="btnExcluirModal" style="display:none;background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca;padding:9px 18px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:.2s" onmouseover="this.style.background='#dc2626';this.style.color='#fff';this.style.borderColor='#dc2626'" onmouseout="this.style.background='#fef2f2';this.style.color='#dc2626';this.style.borderColor='#fecaca'" onclick="if(window._deletar&&window._editId_atual){var id=window._editId_atual;document.getElementById('modalBg').classList.remove('open');window._deletar(id);}">
+      🗑 Excluir
     </button>
     <div style="display:flex;gap:10px">
       <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
@@ -1446,12 +1454,23 @@ function setTipo(tipo){
 
   // Ícone e cor do header do modal
   const icon = document.getElementById('mIcone');
+  const clsMap = {despesa:'des',receita:'rec',cartao:'cartao',transferencia:'transf'};
+  const cls = clsMap[tipo]||'des';
+  const corMap = {despesa:'#dc2626',receita:'#16a34a',cartao:'#2563eb',transferencia:'#d97706'};
+  const bgMap  = {despesa:'#fee2e2',receita:'#dcfce7',cartao:'#dbeafe',transferencia:'#fef3c7'};
+  const barMap = {despesa:'#ef4444',receita:'#22c55e',cartao:'#3b82f6',transferencia:'#f59e0b'};
+  const subMap = {despesa:'Registre uma saída financeira',receita:'Registre uma entrada financeira',cartao:'Despesa no cartão de crédito',transferencia:'Movimentação entre contas'};
   if(icon){
-    icon.textContent      = cfg.icon;
-    icon.style.background = cfg.bg;
-    icon.style.color      = cfg.cor;
-    icon.className        = 'modal-icon';
+    icon.textContent = cfg.icon;
+    icon.style.background = bgMap[tipo]||'#fee2e2';
+    icon.style.color = corMap[tipo]||'#dc2626';
   }
+  const bar = document.getElementById('mHeaderBar');
+  if(bar) bar.style.background = barMap[tipo]||'#ef4444';
+  const titulo = document.getElementById('mTitulo');
+  if(titulo){ titulo.textContent = cfg.label; titulo.style.color = corMap[tipo]||'#dc2626'; }
+  const sub = document.getElementById('mSubtitulo');
+  if(sub) sub.textContent = subMap[tipo]||'';
 
   // Mostrar info extra para cartão
   const infoCartao = document.getElementById('infoCartao');
@@ -1642,7 +1661,7 @@ function atualizarFixoResumo(){
   const el = document.getElementById('fixoResumo');
   if(!el) return;
   const n = parseInt(document.getElementById('fRepetir').value)||12;
-  el.textContent = `${n === 0 ? 12 : n} lançamentos`;
+  el.textContent = `${n} lançamento${n!==1?'s':''}`;
 }
 
 // ── SEÇÃO MAIS DETALHES ──────────────────────────────────
