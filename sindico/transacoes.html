@@ -2373,169 +2373,120 @@ let _deleteId   = null;
 let _deleteOpt  = 'este'; // 'este' | 'todos'
 
 function _deletarFn(id){
-  const _tr = window._appTransacoes || [];
-  const t = _tr.find(t=>t.id===id);
-  if(!t){ console.warn('[EXCLUIR] id='+id+' nao encontrado. Total:'+_tr.length); return; }
+  const transacoes = window._appTransacoes || [];
+  const t = transacoes.find(x => x.id === id);
+  if(!t){ alert('Transação não encontrada. Recarregue a página.'); return; }
+
+  // Guardar no window para executarDelete usar
   window._appDeleteId  = id;
   window._appDeleteOpt = 'este';
 
   const ehParcelado = !!t.parcela_total;
   const ehFixo      = !!t.recorrente && !t.parcela_total;
-  const temSeries   = ehParcelado || ehFixo;
+  const mesRef      = t.data ? t.data.split('-').reverse().join('/') : 'este lançamento';
 
+  // Preencher modal
   document.getElementById('confirmTitle').textContent = 'Excluir lançamento?';
-
-  let desc = `<strong style="color:var(--text-dark)">${t.descricao||'Lançamento'}</strong>`;
-  if(ehParcelado) desc += `<br><span style="color:var(--blue)">Parcela ${t.parcela_atual||'?'} de ${t.parcela_total}</span>`;
-  if(ehFixo)      desc += `<br><span style="color:#a855f7">🔄 Lançamento fixo (recorrente)</span>`;
+  let desc = '<strong>' + (t.descricao||'Lançamento') + '</strong>';
+  if(ehParcelado) desc += '<br><span style="color:#2563eb">Parcela ' + (t.parcela_atual||'?') + ' de ' + t.parcela_total + '</span>';
+  if(ehFixo)      desc += '<br><span style="color:#a855f7">🔄 Lançamento fixo</span>';
+  desc += '<br><span style="color:#ef4444;font-size:12px">⚠️ Esta ação não pode ser desfeita.</span>';
   document.getElementById('confirmDesc').innerHTML = desc;
 
   const opcoes = document.getElementById('confirmOpcoes');
-  _deleteOpt = 'este';
 
-  const mesRef = t.data ? (()=>{ const p=t.data.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; })() : 'este lançamento';
-
-  if(ehFixo){
-    // FIXO: 3 opções — só este / este + próximos / todos da série
+  if(ehFixo || ehParcelado){
+    const tipoLabel = ehParcelado ? 'parcela' : 'lançamento';
+    const todosLabel = ehParcelado ? 'Todas as ' + t.parcela_total + ' parcelas' : 'Todos da série';
     opcoes.style.display = 'flex';
-    opcoes.innerHTML = `
-      <button class="confirm-opt selected" id="optEste" onclick="window._selecionarOpt('este')">
-        <span class="confirm-opt-icon">📄</span>
-        <div>
-          <div class="confirm-opt-label">Somente este lançamento</div>
-          <div class="confirm-opt-sub">Remove apenas o de ${mesRef}</div>
-        </div>
-      </button>
-      <button class="confirm-opt" id="optProximos" onclick="window._selecionarOpt('proximos')">
-        <span class="confirm-opt-icon">⏭️</span>
-        <div>
-          <div class="confirm-opt-label">Este e os próximos</div>
-          <div class="confirm-opt-sub">Remove ${mesRef} e todos os lançamentos futuros</div>
-        </div>
-      </button>
-      <button class="confirm-opt" id="optTodos" onclick="window._selecionarOpt('todos')">
-        <span class="confirm-opt-icon">🗂️</span>
-        <div>
-          <div class="confirm-opt-label">Todos da série</div>
-          <div class="confirm-opt-sub">Remove todos os lançamentos fixos desta despesa/receita</div>
-        </div>
-      </button>`;
-  } else if(ehParcelado){
-    // PARCELADO: 3 opções — só esta parcela / esta + próximas / todas as parcelas
-    opcoes.style.display = 'flex';
-    opcoes.innerHTML = `
-      <button class="confirm-opt selected" id="optEste" onclick="window._selecionarOpt('este')">
-        <span class="confirm-opt-icon">📄</span>
-        <div>
-          <div class="confirm-opt-label">Somente esta parcela</div>
-          <div class="confirm-opt-sub">Remove apenas a parcela ${t.parcela_atual||'?'} de ${t.parcela_total}</div>
-        </div>
-      </button>
-      <button class="confirm-opt" id="optProximos" onclick="window._selecionarOpt('proximos')">
-        <span class="confirm-opt-icon">⏭️</span>
-        <div>
-          <div class="confirm-opt-label">Esta e as próximas parcelas</div>
-          <div class="confirm-opt-sub">Remove da parcela ${t.parcela_atual||'?'} até a ${t.parcela_total}</div>
-        </div>
-      </button>
-      <button class="confirm-opt" id="optTodos" onclick="window._selecionarOpt('todos')">
-        <span class="confirm-opt-icon">🗂️</span>
-        <div>
-          <div class="confirm-opt-label">Todas as parcelas</div>
-          <div class="confirm-opt-sub">Remove todas as ${t.parcela_total} parcelas desta série</div>
-        </div>
-      </button>`;
+    opcoes.innerHTML =
+      '<button class="confirm-opt selected" id="optEste" onclick="window._selecionarOpt('este')">' +
+        '<span class="confirm-opt-icon">📄</span>' +
+        '<div><div class="confirm-opt-label">Somente este ' + tipoLabel + '</div>' +
+        '<div class="confirm-opt-sub">Remove apenas ' + mesRef + '</div></div>' +
+      '</button>' +
+      '<button class="confirm-opt" id="optProximos" onclick="window._selecionarOpt('proximos')">' +
+        '<span class="confirm-opt-icon">⏭️</span>' +
+        '<div><div class="confirm-opt-label">Este e os próximos</div>' +
+        '<div class="confirm-opt-sub">Remove ' + mesRef + ' em diante</div></div>' +
+      '</button>' +
+      '<button class="confirm-opt" id="optTodos" onclick="window._selecionarOpt('todos')">' +
+        '<span class="confirm-opt-icon">🗂️</span>' +
+        '<div><div class="confirm-opt-label">' + todosLabel + '</div>' +
+        '<div class="confirm-opt-sub">Remove toda a série completa</div></div>' +
+      '</button>';
   } else {
-    // AVULSO: confirmação simples
     opcoes.style.display = 'none';
     opcoes.innerHTML = '';
   }
-  document.getElementById('confirmDesc').innerHTML += '<br><span style="color:#ef4444;font-size:12px;font-weight:600">⚠️ Esta ação não pode ser desfeita.</span>';
 
   document.getElementById('confirmBg').classList.add('open');
 }
 
-function selecionarOpt(opt){
-  _deleteOpt = opt;
-  document.getElementById('optEste')?.classList.toggle('selected', opt==='este');
-  document.getElementById('optProximos')?.classList.toggle('selected', opt==='proximos');
-  document.getElementById('optTodos')?.classList.toggle('selected', opt==='todos');
-}
+window._selecionarOpt = function(opt){
+  window._appDeleteOpt = opt;
+  ['este','proximos','todos'].forEach(function(o){
+    var el = document.getElementById('opt' + o.charAt(0).toUpperCase() + o.slice(1));
+    if(el) el.classList.toggle('selected', o === opt);
+  });
+};
 
-function fecharConfirm(){
+window._fecharConfirm = function(){
   document.getElementById('confirmBg').classList.remove('open');
   window._appDeleteId  = null;
   window._appDeleteOpt = 'este';
-}
+};
 
-async function executarDelete(){
-  const _deleteId  = window._appDeleteId;
-  const _deleteOpt = window._appDeleteOpt || 'este';
-  if(!_deleteId) return;
-  const btn = document.getElementById('confirmDelBtn');
-  btn.disabled=true; btn.textContent='Excluindo...';
+window._executarDelete = async function(){
+  var deleteId  = window._appDeleteId;
+  var deleteOpt = window._appDeleteOpt || 'este';
+  if(!deleteId) return;
 
-  const _tr = window._appTransacoes || [];
-  const t = _tr.find(t=>t.id===_deleteId);
-  const _condoId = window._appCondoAtivo;
-  const h = {...(window._appHdrs ? window._appHdrs() : hdrs()), 'Prefer':'return=representation'};
+  var btn = document.getElementById('confirmDelBtn');
+  btn.disabled = true; btn.textContent = 'Excluindo...';
+
+  var transacoes = window._appTransacoes || [];
+  var t       = transacoes.find(function(x){ return x.id === deleteId; });
+  var condoId = window._appCondoAtivo;
+  var BASE    = window._appBase || _BASE;
+  var h       = Object.assign({}, window._appHdrs ? window._appHdrs() : hdrs(), {'Prefer':'return=representation'});
 
   try {
-    const descEnc = encodeURIComponent(t.descricao);
-    if(_deleteOpt === 'todos' && t && (t.parcela_total || t.recorrente)){
-      let url;
-      if(t.parcela_total){
-        // Todas as parcelas da série
-        url = `${_BASE}/condo_transacoes?condominio_id=eq.${_condoId}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&parcela_total=eq.${t.parcela_total}`;
-      } else {
-        // Todos os lançamentos fixos (data qualquer)
-        url = `${_BASE}/condo_transacoes?condominio_id=eq.${_condoId}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&recorrente=eq.true`;
-      }
-      const res = await fetch(url, {method:'DELETE', headers:h});
-      if(res.ok || res.status===204){
-        showAlert('✅ Toda a série excluída com sucesso.');
-        fecharConfirm(); await loadTransacoes();
-      } else { showAlert('Erro ao excluir série.','error'); }
+    var descEnc = encodeURIComponent(t.descricao);
 
-    } else if(_deleteOpt === 'proximos' && t && (t.parcela_total || t.recorrente)){
-      // Este + próximos: data >= data do lançamento selecionado
-      const dataEnc = encodeURIComponent(t.data);
-      let url;
-      if(t.parcela_total){
-        // Parcelas >= parcela_atual
-        url = `${_BASE}/condo_transacoes?condominio_id=eq.${_condoId}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&parcela_total=eq.${t.parcela_total}&parcela_atual=gte.${t.parcela_atual}`;
-      } else {
-        // Fixos com data >= data selecionada
-        url = `${_BASE}/condo_transacoes?condominio_id=eq.${_condoId}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&recorrente=eq.true&data=gte.${dataEnc}`;
-      }
-      const res = await fetch(url, {method:'DELETE', headers:h});
-      if(res.ok || res.status===204){
-        showAlert('✅ Este e os próximos lançamentos excluídos.');
-        fecharConfirm(); await loadTransacoes();
-      } else { showAlert('Erro ao excluir.','error'); }
+    if(deleteOpt === 'todos' && (t.parcela_total || t.recorrente)){
+      var url = t.parcela_total
+        ? BASE + '/condo_transacoes?condominio_id=eq.' + condoId + '&descricao=eq.' + descEnc + '&tipo=eq.' + t.tipo + '&parcela_total=eq.' + t.parcela_total
+        : BASE + '/condo_transacoes?condominio_id=eq.' + condoId + '&descricao=eq.' + descEnc + '&tipo=eq.' + t.tipo + '&recorrente=eq.true';
+      var res = await fetch(url, {method:'DELETE', headers:h});
+      if(res.ok || res.status===204){ showAlert('✅ Série excluída!'); window._fecharConfirm(); await loadTransacoes(); }
+      else showAlert('Erro ao excluir série.','error');
+
+    } else if(deleteOpt === 'proximos' && (t.parcela_total || t.recorrente)){
+      var dataEnc = encodeURIComponent(t.data);
+      var url2 = t.parcela_total
+        ? BASE + '/condo_transacoes?condominio_id=eq.' + condoId + '&descricao=eq.' + descEnc + '&tipo=eq.' + t.tipo + '&parcela_total=eq.' + t.parcela_total + '&parcela_atual=gte.' + t.parcela_atual
+        : BASE + '/condo_transacoes?condominio_id=eq.' + condoId + '&descricao=eq.' + descEnc + '&tipo=eq.' + t.tipo + '&recorrente=eq.true&data=gte.' + dataEnc;
+      var res2 = await fetch(url2, {method:'DELETE', headers:h});
+      if(res2.ok || res2.status===204){ showAlert('✅ Lançamentos excluídos!'); window._fecharConfirm(); await loadTransacoes(); }
+      else showAlert('Erro ao excluir.','error');
 
     } else {
-      // Excluir só este lançamento
-      const res = await fetch(`${_BASE}/condo_transacoes?id=eq.${_deleteId}&condominio_id=eq.${_condoId}`,{
-        method:'DELETE', headers:h
-      });
-      const body = await res.text();
-      if(res.status===204 || (res.ok && body!=='[]' && body!=='')){
-        showAlert('Lançamento removido.');
-        fecharConfirm();
+      var res3 = await fetch(BASE + '/condo_transacoes?id=eq.' + deleteId + '&condominio_id=eq.' + condoId, {method:'DELETE', headers:h});
+      var body = await res3.text();
+      if(res3.status===204 || res3.ok){
+        showAlert('✅ Lançamento removido!');
+        window._fecharConfirm();
         await loadTransacoes();
-      } else if(body==='[]' || body===''){
-        showAlert('⚠️ Não foi possível apagar. Verifique o RLS no Supabase.','error');
       } else {
-        showAlert('Erro ao remover: ' + body, 'error');
+        showAlert('Erro: ' + body, 'error');
       }
     }
   } catch(e){
     showAlert('Erro: ' + e.message, 'error');
   }
-  btn.disabled=false;
-  btn.textContent='🗑 Excluir';
-}
+  btn.disabled = false; btn.textContent = '🗑 Excluir';
+};
 
 // ── FECHAR MODAL FORA ────────────────────────────────────
 // Modal de lançamento só fecha pelo botão Cancelar ou X
@@ -2581,17 +2532,17 @@ window._toggleTipoMenu = toggleTipoMenu;
 window._setTipoFiltro = setTipoFiltro;
 window._setFiltro = setFiltro;
 window._fecharModal = fecharModal;
-window._fecharConfirm = fecharConfirm;
+// window._fecharConfirm já definido acima
 window._fecharCal = fecharCal;
 window._fecharImportar = fecharImportar;
 window._salvarLancamento = salvarLancamento;
 window._editarTransacao = editarTransacao;
-window._executarDelete = executarDelete;
+// window._executarDelete já definido acima
 window._exportarExcel = exportarExcel;
 window._baixarModelo = baixarModelo;
 window._abrirImportar = abrirImportar;
 window._confirmarImportacao = confirmarImportacao;
-window._selecionarOpt = selecionarOpt;
+// window._selecionarOpt já definido acima
 window._setDataRapida = setDataRapida;
 window._toggleCal = toggleCal;
 window._calNavMes = calNavMes;
@@ -2607,7 +2558,7 @@ window._verPDF = verPDF;
 window._handleDrop = handleDrop;
 window._uploadAnexo = uploadAnexo;
 window._onAnexoChange = typeof onAnexoChange !== 'undefined' ? onAnexoChange : ()=>{};
-window._deletar = _deletarFn;
+window._deletar = _deletarFn; // OK
 window._flushPending(); // executa chamadas que ficaram em fila enquanto o module carregava
 
 // ── INIT ─────────────────────────────────────────────────
