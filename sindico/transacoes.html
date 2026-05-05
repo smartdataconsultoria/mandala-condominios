@@ -1976,9 +1976,9 @@ async function baixarModelo(){
   const tipos = ['despesa','receita','transferencia'];
   const situacoes = ['pago','pendente','agendado'];
 
-  const agrupamentos = [...new Set(categorias.map(c => c.categoria).filter(Boolean))].sort();
-  const subcats = [...new Set(categorias.map(c => c.nome).filter(Boolean))].sort();
-  const contasNomes = [...new Set(contas.map(c => c.nome).filter(Boolean))].sort();
+  const agrupamentos = [...new Set(categorias.map(c=>c.categoria).filter(Boolean))].sort();
+  const subcats = [...new Set(categorias.map(c=>c.nome).filter(Boolean))].sort();
+  const contasNomes = [...new Set(contas.map(c=>c.nome).filter(Boolean))].sort();
 
   const listas = [['TIPO','SITUACAO','CATEGORIA','SUBCATEGORIA','CONTA']];
   const max = Math.max(tipos.length, situacoes.length, agrupamentos.length, subcats.length, contasNomes.length, 1);
@@ -2007,16 +2007,21 @@ async function baixarModelo(){
   wsModelo['!dataValidations'] = dv;
   wsModelo['!dataValidation'] = dv;
 
-  // 🔒 Proteção
-  wsModelo['!protect'] = { password:'importacao', enable:true, selectLockedCells:false, selectUnlockedCells:true };
-  for(let C=0;C<=8;C++){
-    for(let R=3;R<=1000;R++){
-      const ref = XLSX.utils.encode_cell({r:R,c:C});
-      if(!wsModelo[ref]) wsModelo[ref] = {};
-      wsModelo[ref].s = { protection:{locked:false} };
-    }
-  }
-  wsList['!protect'] = { password:'importacao', enable:true };
+  // 🔒 Proteção correta com AllowEditRanges
+  wsModelo['!protect'] = {
+    password: 'importacao',
+    sheet: true,
+    selectLockedCells: false,
+    selectUnlockedCells: true
+  };
+
+  wsModelo['!editable'] = [{
+    ref: 'A4:I1000',
+    name: 'Dados',
+    password: 'importacao'
+  }];
+
+  wsList['!protect'] = { password:'importacao', sheet:true };
   wsList['!hidden'] = true;
 
   XLSX.writeFile(wb, `Modelo_Transacoes_${MESES[_mes]}_${_ano}.xlsx`);
