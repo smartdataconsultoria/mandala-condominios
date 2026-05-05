@@ -118,8 +118,8 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 
 /* TABELA */
 .table-wrap{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.table-head{display:grid;grid-template-columns:36px 100px 1fr 180px 140px 110px 100px 110px;gap:8px;padding:12px 20px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#4a5568}
-.table-row{display:grid;grid-template-columns:36px 100px 1fr 180px 140px 110px 100px 110px;gap:8px;padding:13px 20px;border-bottom:1px solid var(--border)20;align-items:center;transition:.15s;cursor:pointer}
+.table-head{display:grid;grid-template-columns:36px 100px 1fr 180px 140px 110px 100px 60px;gap:8px;padding:12px 20px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#4a5568}
+.table-row{display:grid;grid-template-columns:36px 100px 1fr 180px 140px 110px 100px 60px;gap:8px;padding:13px 20px;border-bottom:1px solid var(--border)20;align-items:center;transition:.15s;cursor:pointer}
 .table-row:hover{background:var(--border)30}
 .table-row:last-child{border-bottom:none}
 .tipo-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px}
@@ -135,16 +135,11 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 .sit-badge.pago{background:#22c55e20;color:#22c55e}
 .sit-badge.pendente{background:var(--gold)20;color:var(--gold)}
 .sit-badge.agendado{background:var(--blue)20;color:var(--blue)}
-.row-actions{display:flex;gap:5px;justify-content:flex-end;align-items:center}
-.btn-row{
-  display:inline-flex;align-items:center;justify-content:center;gap:4px;
-  border-radius:7px;padding:5px 10px;font-size:12px;font-weight:600;
-  cursor:pointer;transition:.15s;border:none;white-space:nowrap;
-}
-.btn-row.edit{background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe}
-.btn-row.edit:hover{background:#2563eb;color:#fff;transform:translateY(-1px);box-shadow:0 3px 8px #2563eb40}
-.btn-row.del{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
-.btn-row.del:hover{background:#dc2626;color:#fff;transform:translateY(-1px);box-shadow:0 3px 8px #dc262640}
+.row-actions{display:flex;gap:6px;justify-content:flex-end;opacity:0;transition:.15s}
+.table-row:hover .row-actions{opacity:1}
+.btn-row{background:none;border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;transition:.2s;color:var(--text-light)}
+.btn-row:hover{background:var(--border);color:var(--text-dark)}
+.btn-row.del:hover{background:#ef444420;color:#ef4444;border-color:#ef4444}
 .empty-state{text-align:center;padding:60px 20px;color:#4a5568;font-size:14px}
 .parcela-tag{font-size:10px;background:var(--blue)20;color:var(--blue);padding:2px 6px;border-radius:8px;margin-left:6px;font-weight:600}
 .fixa-tag{font-size:10px;background:#a855f720;color:#a855f7;padding:2px 6px;border-radius:8px;margin-left:6px;font-weight:600}
@@ -154,32 +149,25 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 /* MODAL */
 .modal-bg{position:fixed;inset:0;background:#00000090;display:none;align-items:flex-start;justify-content:center;z-index:999;overflow-y:auto;padding:24px 16px}
 .modal-bg.open{display:flex}
-.modal{background:#fff;border:1px solid var(--border);border-radius:16px;width:100%;max-width:620px;margin:auto;overflow:hidden;transition:max-width .3s ease;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.modal{background:#13161f;border:1px solid var(--border);border-radius:16px;width:100%;max-width:620px;margin:auto;overflow:hidden;transition:max-width .3s ease}
 .modal.expandido{max-width:960px}
 
-/* MODAL HEADER com faixa colorida por tipo */
-.modal-header{padding:0;display:flex;align-items:stretch;gap:0;position:relative}
-.modal-header-bar{width:6px;flex-shrink:0;border-radius:0}
-.modal-header-bar.des{background:linear-gradient(180deg,#ef4444,#dc2626)}
-.modal-header-bar.rec{background:linear-gradient(180deg,#22c55e,#16a34a)}
-.modal-header-bar.cartao{background:linear-gradient(180deg,var(--blue),#1d4ed8)}
-.modal-header-bar.transf{background:linear-gradient(180deg,var(--gold),#d97706)}
-.modal-header-content{flex:1;display:flex;align-items:center;gap:12px;padding:18px 20px 18px 18px}
-.modal-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.modal-icon.rec{background:#dcfce7;color:#16a34a}
-.modal-icon.des{background:#fee2e2;color:#dc2626}
-.modal-title-wrap{flex:1}
-.modal-title{font-size:18px;font-weight:800;flex:1;line-height:1.1}
-.modal-title.des{color:#dc2626}
-.modal-title.rec{color:#16a34a}
-.modal-title.cartao{color:var(--blue)}
-.modal-title.transf{color:var(--gold)}
-.modal-subtitle{font-size:11px;font-weight:500;margin-top:2px;opacity:.7}
-.modal-close{background:none;border:none;color:#94a3b8;font-size:22px;cursor:pointer;padding:4px 6px;border-radius:6px;transition:.2s;line-height:1;align-self:flex-start}
-.modal-close:hover{background:#f1f5f9;color:#0f172a}
+/* MODAL HEADER */
+.modal-header{padding:20px 24px 0;display:flex;align-items:center;gap:12px}
+.modal-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.modal-icon.rec{background:#22c55e20}
+.modal-icon.des{background:#ef444420}
+.modal-title{font-size:18px;font-weight:700;flex:1}
+.modal-close{background:none;border:none;color:var(--text-mid);font-size:20px;cursor:pointer;padding:4px;border-radius:6px;transition:.2s;line-height:1}
+.modal-close:hover{background:var(--border);color:var(--text-dark)}
 
-/* TIPO BADGE — oculto, header já mostra o tipo */
-.tipo-badge{display:none!important}
+/* TIPO BADGE — mostra o tipo escolhido no FAB */
+.tipo-badge{display:none;align-items:center;gap:10px;margin:14px 24px 0;padding:10px 16px;border-radius:10px;font-size:15px;font-weight:700}
+.tipo-badge.show{display:flex}
+.tipo-badge.des{background:#ef444415;color:#ef4444;border:1px solid #ef444425}
+.tipo-badge.rec{background:#22c55e15;color:#22c55e;border:1px solid #22c55e25}
+.tipo-badge.cartao{background:var(--blue)15;color:var(--blue);border:1px solid var(--blue)25}
+.tipo-badge.transf{background:var(--gold)15;color:var(--gold);border:1px solid var(--gold)25}
 
 /* MODAL BODY */
 .modal-body{padding:20px 24px;background:#fff}
@@ -187,8 +175,6 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 .field label{display:block;font-size:11px;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px}
 .field input,.field select,.field textarea{width:100%;background:var(--off-white);border:1px solid var(--border);border-radius:8px;padding:10px 13px;color:var(--text-dark);font-size:14px;outline:none;transition:.2s;font-family:inherit}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold)}
-input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{opacity:1}
-#calPanel{border-radius:12px;border:1px solid var(--border);background:var(--white);box-shadow:0 4px 20px rgba(0,0,0,.12);padding:16px}
 .field select option{background:var(--white)}
 .field textarea{resize:vertical;min-height:70px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -248,7 +234,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .secao-cols.open ~ .secao-col-sep{display:block}
 
 /* FOOTER */
-.modal-footer{background:#f8fafc;display:flex;gap:10px;justify-content:space-between;align-items:center;padding:20px 24px;border-top:1px solid var(--border);margin-top:20px}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;padding:20px 24px;border-top:1px solid var(--border);margin-top:20px}
 .btn-cancel{background:none;border:1px solid var(--border);color:var(--text-light);padding:10px 20px;border-radius:8px;font-size:14px;cursor:pointer;transition:.2s}
 .btn-cancel:hover{background:var(--border)}
 .btn-save{background:var(--gold);color:var(--off-white);border:none;padding:10px 22px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:.2s}
@@ -268,10 +254,10 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .confirm-title{font-size:16px;font-weight:700;color:var(--text-dark);text-align:center;margin-bottom:8px}
 .confirm-desc{font-size:13px;color:var(--text-mid);text-align:center;line-height:1.6;margin-bottom:20px}
 .confirm-opcoes{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.confirm-opcoes{display:flex!important;flex-direction:column;gap:8px;margin-top:14px}
 .confirm-opt{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:#f8fafc;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s;text-align:left;width:100%}
 .confirm-opt:hover{border-color:var(--gold);background:var(--gold)08}
-.confirm-opt.selected{border-color:var(--gold);background:var(--gold)10;box-shadow:0 0 0 1px var(--gold)40}
-.confirm-opcoes{display:flex;flex-direction:column;gap:8px;margin:14px 0 0}
+.confirm-opt.selected{border-color:var(--gold);background:var(--gold)12}
 .confirm-opt-icon{font-size:22px;flex-shrink:0;margin-top:1px}
 .confirm-opt-label{font-size:14px;font-weight:700;color:var(--text-dark)}
 .confirm-opt-sub{font-size:12px;color:var(--text-mid);margin-top:2px}
@@ -677,8 +663,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   <div class="confirm-desc" id="confirmDesc">Esta ação não pode ser desfeita.</div>
   <div class="confirm-opcoes" id="confirmOpcoes"></div>
   <div class="confirm-footer">
-    <button class="confirm-cancel-btn" onclick="window._fecharConfirm()">Cancelar</button>
-    <button class="confirm-del-btn" id="confirmDelBtn" onclick="window._executarDelete()">🗑 Excluir</button>
+    <button class="confirm-cancel-btn" onclick="fecharConfirm()">Cancelar</button>
+    <button class="confirm-del-btn" id="confirmDelBtn" onclick="executarDelete()">🗑 Excluir</button>
   </div>
 </div>
 </div>
@@ -688,19 +674,13 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <div class="modal">
 
   <!-- HEADER -->
-  <div class="modal-header" id="modalHeader">
-    <div class="modal-header-bar des" id="mHeaderBar"></div>
-    <div class="modal-header-content">
-      <div class="modal-icon des" id="mIcone">↓</div>
-      <div class="modal-title-wrap">
-        <div class="modal-title des" id="mTitulo">Nova Despesa</div>
-        <div class="modal-subtitle" id="mSubtitulo">Registre uma saída financeira do condomínio</div>
-      </div>
-      <button class="modal-close" onclick="fecharModal()">✕</button>
-    </div>
+  <div class="modal-header">
+    <div class="modal-icon rec" id="mIcone">➕</div>
+    <div class="modal-title" id="mTitulo">Novo Lançamento</div>
+    <button class="modal-close" onclick="fecharModal()">✕</button>
   </div>
 
-  <!-- BADGE FIXO (oculto via CSS, header já exibe) -->
+  <!-- BADGE FIXO (aparece quando vem de um tipo específico do FAB) -->
   <div class="tipo-badge" id="tipoBadge"></div>
 
   <div class="modal-body">
@@ -738,11 +718,19 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <button class="dq-btn" id="dqOutro" onclick="setDataRapida('outro',this)">Outros...</button>
       </div>
       <input type="date" id="fData" style="display:none"/>
-      <!-- Calendário customizado — abre direto ao clicar em Outros... -->
+      <!-- Calendário customizado -->
       <div id="calWrap" style="display:none;position:relative;">
-        <div id="calPanel" style="display:none;position:absolute;top:0;left:0;z-index:9999;
+        <div id="calDisplay" onclick="toggleCal()" style="
+          background:var(--white);border:1px solid var(--gold);border-radius:8px;
+          padding:10px 14px;font-size:14px;color:var(--text-dark);cursor:pointer;
+          display:flex;align-items:center;gap:8px;user-select:none;">
+          <span style="font-size:16px">📅</span>
+          <span id="calDisplayText">Selecionar data</span>
+          <span style="margin-left:auto;color:var(--text-mid);font-size:12px">▼</span>
+        </div>
+        <div id="calPanel" style="display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:9999;
           background:var(--white);border:1px solid var(--border);border-radius:12px;
-          box-shadow:0 8px 32px rgba(0,0,0,.25);padding:16px;width:300px;">
+          box-shadow:0 8px 32px rgba(0,0,0,.6);padding:16px;width:300px;">
           <!-- Header -->
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
             <button onclick="calNavMes(-1)" style="background:none;border:none;color:var(--text-light);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px;" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='none'">‹</button>
@@ -807,26 +795,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       </select>
     </div>
 
-    <!-- FORMA + FLUXO -->
-    <div class="grid2">
-      <div class="field">
-        <label>Forma</label>
-        <select id="fForma">
-          <option value="">Selecionar...</option>
-          <option value="contrato">📄 Contrato</option>
-          <option value="avulso">🔖 Avulso</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Fluxo</label>
-        <select id="fFluxo">
-          <option value="">Selecionar...</option>
-          <option value="fixo">🔒 Fixo</option>
-          <option value="variavel">📊 Variável</option>
-        </select>
-      </div>
-    </div>
-
     <!-- TOGGLES AVANÇADOS -->
     <div style="margin:4px 0 0">
       <!-- PARCELADO -->
@@ -845,39 +813,50 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       </div>
       <!-- BOX PARCELAMENTO -->
       <div class="parcela-box" id="parcelaBox">
-        <div class="grid2">
+        <div class="grid3">
           <div class="field" style="margin-bottom:0">
             <label>Nº de parcelas</label>
-            <div style="display:flex;align-items:center;gap:8px">
-              <input type="number" id="fParcelas" min="2" max="360" value="2"
-                oninput="calcParcela()" onchange="calcParcela()"
-                style="width:100%;background:var(--off-white);border:1px solid var(--border);
-                border-radius:8px;padding:10px 13px;font-size:14px;color:var(--text-dark);
-                outline:none;font-family:inherit;transition:.2s"
-                placeholder="Ex: 12"/>
-              <span style="font-size:13px;color:var(--text-mid);white-space:nowrap;font-weight:600">mensais</span>
-            </div>
+            <select id="fParcelas" onchange="calcParcela()">
+              <option value="2">2x</option>
+              <option value="3">3x</option>
+              <option value="4">4x</option>
+              <option value="5">5x</option>
+              <option value="6">6x</option>
+              <option value="7">7x</option>
+              <option value="8">8x</option>
+              <option value="9">9x</option>
+              <option value="10">10x</option>
+              <option value="11">11x</option>
+              <option value="12">12x</option>
+              <option value="18">18x</option>
+              <option value="24">24x</option>
+              <option value="36">36x</option>
+            </select>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label>Intervalo</label>
+            <select id="fIntervalo">
+              <option value="mensal">Mensal</option>
+              <option value="quinzenal">Quinzenal</option>
+              <option value="semanal">Semanal</option>
+            </select>
           </div>
           <div class="field" style="margin-bottom:0">
             <label>Valor por parcela</label>
-            <input type="text" id="fValParcela" readonly
-              style="background:#f0fdf4;border:1px solid #bbf7d0;color:#16a34a;font-weight:700;
-              border-radius:8px;padding:10px 13px;font-size:14px;width:100%;font-family:inherit"/>
+            <input type="text" id="fValParcela" readonly style="background:var(--border);color:var(--gold);font-weight:700"/>
           </div>
         </div>
-        <!-- input oculto para manter compatibilidade com fIntervalo -->
-        <input type="hidden" id="fIntervalo" value="mensal"/>
         <div class="parcela-info" id="parcelaInfo">
-          Informe o valor total e o número de parcelas para calcular.
+          Será criado 1 lançamento por parcela, totalizando 0 lançamentos.
         </div>
       </div>
 
-      <!-- LANÇAMENTO FIXO (label dinâmico por tipo) -->
+      <!-- DESPESA FIXA -->
       <div class="toggle-row">
         <div class="toggle-label">
-          <span class="tlabel-icon" id="fixoIcon">🔄</span>
+          <span class="tlabel-icon">🔄</span>
           <div>
-            <div style="font-weight:600;color:var(--text-dark)" id="fixoLabel">🔄 Despesa Fixa</div>
+            <div style="font-weight:600;color:var(--text-dark)">🔄 Despesa / Receita Fixa</div>
             <div style="font-size:12px;color:var(--text-mid)">Mesmo valor lançado todo mês (não divide)</div>
           </div>
         </div>
@@ -890,22 +869,18 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="recorrente-box" id="recorrenteBox">
         <div class="grid2">
           <div class="field" style="margin-bottom:0">
-            <label>Repetir por (meses)</label>
-            <div style="display:flex;align-items:center;gap:8px">
-              <input type="number" id="fRepetir" min="1" max="360" value="12"
-                oninput="atualizarFixoResumo()" onchange="atualizarFixoResumo()"
-                style="width:100%;background:var(--off-white);border:1px solid var(--border);
-                border-radius:8px;padding:10px 13px;font-size:14px;color:var(--text-dark);
-                outline:none;font-family:inherit;transition:.2s"
-                placeholder="Ex: 12"/>
-              <span style="font-size:13px;color:var(--text-mid);white-space:nowrap;font-weight:600">meses</span>
-            </div>
+            <label>Repetir por</label>
+            <select id="fRepetir" onchange="atualizarFixoResumo()">
+              <option value="0">Indefinidamente (12 meses)</option>
+              <option value="3">3 meses</option>
+              <option value="6">6 meses</option>
+              <option value="12">12 meses</option>
+              <option value="24">24 meses</option>
+            </select>
           </div>
           <div class="field" style="margin-bottom:0">
             <label>Dia do vencimento</label>
-            <input type="number" id="fDiaVenc" min="1" max="31" placeholder="Ex: 10"
-              style="background:var(--off-white);border:1px solid var(--border);border-radius:8px;
-              padding:10px 13px;font-size:14px;color:var(--text-dark);outline:none;width:100%;font-family:inherit"/>
+            <input type="number" id="fDiaVenc" min="1" max="31" placeholder="Ex: 10"/>
           </div>
         </div>
         <div class="parcela-info" style="border-left-color:#a855f7;margin-top:10px">
@@ -953,19 +928,16 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
   </div><!-- /modal-body -->
 
-  <div class="modal-footer">
-    <div>
-      <button class="btn-del-modal" id="btnExcluirModal" style="display:none;
-      background:#fef2f2;color:#dc2626;border:1px solid #fecaca;
-      padding:10px 20px;border-radius:8px;font-family:inherit;font-size:14px;
-      font-weight:600;cursor:pointer;transition:.2s;"
+  <div class="modal-footer" style="justify-content:space-between">
+    <button id="btnExcluirModal" style="display:none;background:#fef2f2;color:#dc2626;
+      border:1px solid #fecaca;padding:9px 18px;border-radius:8px;font-family:inherit;
+      font-size:13px;font-weight:600;cursor:pointer;transition:.2s"
       onmouseover="this.style.background='#dc2626';this.style.color='#fff'"
       onmouseout="this.style.background='#fef2f2';this.style.color='#dc2626'"
-      onclick="btnExcluirModal()">
+      onclick="window._excluirDoModal && window._excluirDoModal()">
       🗑 Excluir lançamento
-      </button>
-    </div>
-    <div style="display:flex;gap:10px;">
+    </button>
+    <div style="display:flex;gap:10px">
       <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
       <button class="btn-save" id="btnSalvar" onclick="salvarLancamento()">Salvar lançamento</button>
     </div>
@@ -976,111 +948,39 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-// -- Bridge pattern: enfileira chamadas enquanto o module ainda carrega --
-window._moduleReady = false;
-window._pendingCalls = [];
-function _callWhenReady(fn, args) {
-  if (window._moduleReady && window['_' + fn]) {
-    window['_' + fn](...args);
-  } else {
-    window._pendingCalls.push({fn, args});
-  }
-}
-window._flushPending = function() {
-  window._moduleReady = true;
-  window._pendingCalls.forEach(({fn, args}) => {
-    if (window['_' + fn]) window['_' + fn](...args);
-  });
-  window._pendingCalls = [];
-};
-
-function toggleFab(e) { _callWhenReady('toggleFab', [e]); }
-function fabAbre(t) { _callWhenReady('fabAbre', [t]); }
-function mudarMes(d) { _callWhenReady('mudarMes', [d]); }
-function toggleTipoMenu() { _callWhenReady('toggleTipoMenu', []); }
-function setTipoFiltro(t,i,l,c) { _callWhenReady('setTipoFiltro', [t,i,l,c]); }
-function setFiltro(t, el) { _callWhenReady('setFiltro', [t, el]); }
-function fecharModal() { _callWhenReady('fecharModal', []); }
-function fecharConfirm() { _callWhenReady('fecharConfirm', []); }
-function fecharCal() { _callWhenReady('fecharCal', []); }
-function fecharImportar() { _callWhenReady('fecharImportar', []); }
-function salvarLancamento() { _callWhenReady('salvarLancamento', []); }
-function editarTransacao(id) { _callWhenReady('editarTransacao', [id]); }
-function executarDelete() { _callWhenReady('executarDelete', []); }
-function exportarExcel() { _callWhenReady('exportarExcel', []); }
-function baixarModelo() { _callWhenReady('baixarModelo', []); }
-function abrirImportar() { _callWhenReady('abrirImportar', []); }
-function confirmarImportacao() { _callWhenReady('confirmarImportacao', []); }
-function selecionarOpt(opt) { _callWhenReady('selecionarOpt', [opt]); }
-function setDataRapida(v, el) { _callWhenReady('setDataRapida', [v, el]); }
-function toggleCal() { _callWhenReady('toggleCal', []); }
-function calNavMes(d) { _callWhenReady('calNavMes', [d]); }
-function calToggleAno() { _callWhenReady('calToggleAno', []); }
-function calSelecionarDia(d) { _callWhenReady('calSelecionarDia', [d]); }
-function calConfirmar() { _callWhenReady('calConfirmar', []); }
-function removerAnexo() { _callWhenReady('removerAnexo', []); }
-function toggleSecao(id) { _callWhenReady('toggleSecao', [id]); }
-function fazerLogout() { _callWhenReady('fazerLogout', []); }
-function toggleParcela(v) { _callWhenReady('toggleParcela', [v]); }
-function toggleFixo(v) { _callWhenReady('toggleFixo', [v]); }
-function verPDF(url) { _callWhenReady('verPDF', [url]); }
-function handleDrop(e) { _callWhenReady('handleDrop', [e]); }
-function uploadAnexo() { _callWhenReady('uploadAnexo', []); }
-function onAnexoChange() { _callWhenReady('onAnexoChange', []); }
-function deletar(id) { _callWhenReady('deletar', [id]); }
-
-// -- Botão Excluir dentro do modal de edição --
-function btnExcluirModal(){
-  var btn = document.getElementById('btnExcluirModal');
-  var id = btn ? parseInt(btn.dataset.id) : null;
-  if(!id) return;
-  var modalBg = document.getElementById('modalBg');
-  if(modalBg) modalBg.classList.remove('open');
-  if(window._deletar){ window._deletar(id); return; }
-  var t=0, iv=setInterval(function(){
-    if(window._deletar){clearInterval(iv);window._deletar(id);}
-    if(++t>50)clearInterval(iv);
-  },100);
-}
-
-// -- Funções dos botões da tabela --
-function btnEditar(id){
-  if(window._editarTransacao) { window._editarTransacao(id); return; }
-  // Aguardar module e tentar novamente
-  var t = 0;
-  var iv = setInterval(function(){
-    if(window._editarTransacao){ clearInterval(iv); window._editarTransacao(id); }
-    if(++t > 50) clearInterval(iv);
-  }, 100);
-}
-
-function btnExcluir(id){
-  console.log('[EXCLUIR] clicado id='+id);
-  if(window._deletar){ window._deletar(id); return; }
-  var t = 0;
-  var iv = setInterval(function(){
-    if(window._deletar){ clearInterval(iv); window._deletar(id); return; }
-    if(++t > 50){ console.log('[EXCLUIR] timeout'); clearInterval(iv); }
-  }, 100);
-}
-
-// Listener na tabela — captura cliques em botões com data-acao
-// Registrado no DOMContentLoaded para garantir que table-wrap existe
-document.addEventListener('DOMContentLoaded', function(){
-  var tableWrap = document.querySelector('.table-wrap');
-  if(!tableWrap){ console.log('[LISTENER] table-wrap não encontrado'); return; }
-  console.log('[LISTENER] registrado na table-wrap');
-  tableWrap.addEventListener('click', function(e){
-    var btn = e.target.closest('[data-acao]');
-    if(!btn) return;
-    e.stopPropagation();
-    var id = parseInt(btn.getAttribute('data-id'));
-    var acao = btn.getAttribute('data-acao');
-    console.log('[LISTENER] acao='+acao+' id='+id);
-    if(acao === 'excluir') btnExcluir(id);
-    if(acao === 'editar')  btnEditar(id);
-  });
-});
+// Stubs globais — chamam as funções reais quando o módulo carregar
+function toggleFab(e) { if(window._toggleFab) window._toggleFab(e); }
+function fabAbre(t) { if(window._fabAbre) window._fabAbre(t); }
+function mudarMes(d) { if(window._mudarMes) window._mudarMes(d); }
+function toggleTipoMenu() { if(window._toggleTipoMenu) window._toggleTipoMenu(); }
+function setTipoFiltro(t,l,i) { if(window._setTipoFiltro) window._setTipoFiltro(t,l,i); }
+function setFiltro(t) { if(window._setFiltro) window._setFiltro(t); }
+function fecharModal() { if(window._fecharModal) window._fecharModal(); }
+function fecharConfirm() { if(window._fecharConfirm) window._fecharConfirm(); }
+function fecharCal() { if(window._fecharCal) window._fecharCal(); }
+function fecharImportar() { if(window._fecharImportar) window._fecharImportar(); }
+function salvarLancamento() { if(window._salvarLancamento) window._salvarLancamento(); }
+function editarTransacao(id) { if(window._editarTransacao) window._editarTransacao(id); }
+function executarDelete() { if(window._executarDelete) window._executarDelete(); }
+function exportarExcel() { if(window._exportarExcel) window._exportarExcel(); }
+function baixarModelo() { if(window._baixarModelo) window._baixarModelo(); }
+function abrirImportar() { if(window._abrirImportar) window._abrirImportar(); }
+function confirmarImportacao() { if(window._confirmarImportacao) window._confirmarImportacao(); }
+function selecionarOpt(e,v,l) { if(window._selecionarOpt) window._selecionarOpt(e,v,l); }
+function setDataRapida(v) { if(window._setDataRapida) window._setDataRapida(v); }
+function toggleCal() { if(window._toggleCal) window._toggleCal(); }
+function calNavMes(d) { if(window._calNavMes) window._calNavMes(d); }
+function calToggleAno() { if(window._calToggleAno) window._calToggleAno(); }
+function calSelecionarDia(d) { if(window._calSelecionarDia) window._calSelecionarDia(d); }
+function calConfirmar() { if(window._calConfirmar) window._calConfirmar(); }
+function removerAnexo() { if(window._removerAnexo) window._removerAnexo(); }
+function toggleSecao(id) { if(window._toggleSecao) window._toggleSecao(id); }
+function fazerLogout() { if(window._fazerLogout) window._fazerLogout(); }
+function toggleParcela(v) { if(window._toggleParcela) window._toggleParcela(v); }
+function toggleFixo(v) { if(window._toggleFixo) window._toggleFixo(v); }
+function verPDF(url) { if(window._verPDF) window._verPDF(url); }
+function handleDrop(e) { if(window._handleDrop) window._handleDrop(e); }
+function uploadAnexo() { if(window._uploadAnexo) window._uploadAnexo(); }
 </script>
 
 <script type="module">
@@ -1088,13 +988,22 @@ document.addEventListener('DOMContentLoaded', function(){
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 const _sb = createClient('https://siczyohqmlrmirqgzlxb.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw')
 
-// -- Estado global — declarado ANTES dos awaits para ficar disponível imediatamente --
-window._appTransacoes  = [];   // lista carregada de condo_transacoes
-window._appCondoAtivo  = null; // id do condomínio ativo
-window._appDeleteId    = null;
-window._appDeleteOpt   = 'este';
-window._appBase        = 'https://siczyohqmlrmirqgzlxb.supabase.co/rest/v1';
-window._appHdrs        = null; // será preenchido após auth
+// Auth
+const { data: { session: _sess } } = await _sb.auth.getSession()
+if (!_sess) { window.location.href = '/login.html'; throw new Error('sem sessão') }
+const { data: _perfil } = await _sb.from('usuarios').select('nome, role, condominio_id').eq('id', _sess.user.id).single()
+if (!_perfil || _perfil.role !== 'sindico') {
+  const _rd = { administradora: '/admin/index.html', morador: '/morador/index.html' }
+  window.location.href = _rd[_perfil?.role] || '/login.html'; throw new Error('role incorreto')
+}
+const CONDO_ID = _perfil.condominio_id
+let _condoAtivo = CONDO_ID
+document.getElementById('user-name').textContent = _perfil.nome || _sess.user.email
+document.getElementById('avatar-initials').textContent = (_perfil.nome||_sess.user.email).split(' ').slice(0,2).map(p=>p[0].toUpperCase()).join('')
+const { data: _condo } = await _sb.from('condominios').select('nome').eq('id', CONDO_ID).single()
+if(_condo){ const s=document.getElementById('select-condo'); if(s) s.innerHTML=`<option value="${CONDO_ID}">${_condo.nome}</option>`}
+window.fazerLogout = async()=>{ await _sb.auth.signOut(); window.location.href='/login.html' }
+window.trocarCondo = ()=>{}
 
 // Auth CondoGestor
 const { data: { session: _sess } } = await _sb.auth.getSession()
@@ -1105,41 +1014,33 @@ if (!_perfil || _perfil.role !== 'sindico') {
   window.location.href = _d[_perfil?.role] || '/login.html'; throw new Error()
 }
 
-// -- Multi-tenant: CONDO_ID vem do perfil do usuário logado ----------
-// Cada usuário (síndico) está vinculado a 1 condomínio via usuarios.condominio_id
-// No futuro, uma administradora pode gerenciar múltiplos -> trocarCondo() habilitado
+// Variáveis globais compatíveis com o código existente
 const CONDO_ID = _perfil.condominio_id
-let _condoAtivo = CONDO_ID
-window._appCondoAtivo = CONDO_ID  // sincronizar com global
+let EMPRESA = CONDO_ID  // usado como filtro onde antes era 'mandala'
 
 // Preenche nome e avatar na sidebar
 document.getElementById('user-name').textContent = _perfil.nome || _sess.user.email
 document.getElementById('avatar-initials').textContent = (_perfil.nome || _sess.user.email).split(' ').slice(0,2).map(p=>p[0].toUpperCase()).join('')
 
-// Busca nome do condomínio ativo
+// Busca nome do condomínio
 const { data: _condo } = await _sb.from('condominios').select('nome').eq('id', CONDO_ID).single()
 if (_condo) {
   const selCondo = document.getElementById('select-condo')
   if (selCondo) selCondo.innerHTML = `<option value="${CONDO_ID}">${_condo.nome}</option>`
 }
 
-window._appHdrs = () => hdrs();  // expor hdrs para uso fora do module
 window.fazerLogout = async () => { await _sb.auth.signOut(); window.location.href = '/login.html' }
-// trocarCondo: preparado para multi-condomínio (administradoras com vários prédios)
-window.trocarCondo = () => {
-  const sel = document.getElementById('select-condo')
-  if(sel){ _condoAtivo = sel.value; loadAll(); }
-}
+window.trocarCondo = () => {} // síndico tem só 1 condomínio
 
 
 
-const _h = {'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw', 'Content-Type': 'application/json', 'Prefer': 'return=representation'};
-const _BASE    = 'https://siczyohqmlrmirqgzlxb.supabase.co/rest/v1';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw';
 const SUPA_URL = 'https://siczyohqmlrmirqgzlxb.supabase.co';
+const _h = {'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw', 'Content-Type': 'application/json', 'Prefer': 'return=representation'};
+const _BASE = 'https://siczyohqmlrmirqgzlxb.supabase.co/rest/v1';
 
-// -- CONFIG -----------------------------------------------
-// -- ESTADO -----------------------------------------------
+// ── CONFIG ───────────────────────────────────────────────
+// ── ESTADO ───────────────────────────────────────────────
 let _mes = new Date().getMonth();
 let _ano = new Date().getFullYear();
 let _filtro = 'todos';
@@ -1150,10 +1051,9 @@ let _categorias = [];
 let _contas = [];
 let _tipoAtual = 'despesa';
 let _editId = null;
-
 let _anexoArquivo = null;
 
-// -- AUTH -------------------------------------------------
+// ── AUTH ─────────────────────────────────────────────────
 function getToken(){
   const k = Object.keys(localStorage).find(k=>k.includes('auth-token'));
   if(!k) return null;
@@ -1162,7 +1062,7 @@ function getToken(){
     const token = sess?.access_token;
     const exp   = sess?.expires_at;
     if(!token) return null;
-    if(exp && Date.now()/1000 > exp) return null; // expirado -> usa anon key
+    if(exp && Date.now()/1000 > exp) return null; // expirado → usa anon key
     return token;
   } catch{ return null; }
 }
@@ -1171,7 +1071,7 @@ function hdrs(){
   return {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${tk||SUPA_KEY}`};
 }
 
-// -- UTILS ------------------------------------------------
+// ── UTILS ────────────────────────────────────────────────
 const fmt = v => 'R$ '+parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtDate = d => { if(!d) return '—'; const p=d.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; };
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -1179,12 +1079,10 @@ const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Ag
 function showAlert(msg,type='success'){
   const el=document.getElementById('alert');
   el.textContent=msg; el.className=`alert ${type}`; el.style.display='block';
-  // Erros ficam mais tempo na tela
-  const dur = type==='error' ? 8000 : 4000;
-  setTimeout(()=>el.style.display='none',dur);
+  setTimeout(()=>el.style.display='none',4000);
 }
 
-// -- MÊS --------------------------------------------------
+// ── MÊS ──────────────────────────────────────────────────
 function mudarMes(d){
   _mes+=d;
   if(_mes<0){_mes=11;_ano--;}
@@ -1193,7 +1091,7 @@ function mudarMes(d){
   loadTransacoes();
 }
 
-// -- FILTRO -----------------------------------------------
+// ── FILTRO ───────────────────────────────────────────────
 function setFiltro(f,el){
   _filtro=f;
   document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
@@ -1201,13 +1099,13 @@ function setFiltro(f,el){
   renderTabela();
 }
 
-// -- LOAD DADOS -------------------------------------------
+// ── LOAD DADOS ───────────────────────────────────────────
 async function loadAll(){
   const h = hdrs();
   // categorias e contas em paralelo
   const [rc,rco] = await Promise.all([
-    fetch(`${_BASE}/condo_categorias?condominio_id=eq.${_condoAtivo}&order=tipo,categoria,nome`,{headers:_h}),
-    fetch(`${_BASE}/condo_contas?condominio_id=eq.${_condoAtivo}&order=nome`,{headers:_h})
+    fetch(`${_BASE}/condo_categorias?condominio_id=eq.${CONDO_ID}&order=tipo,categoria,nome`,{headers:_h}),
+    fetch(`${_BASE}/condo_contas?condominio_id=eq.${CONDO_ID}&order=nome`,{headers:_h})
   ]);
   _categorias = rc.ok ? await rc.json() : [];
   _contas     = rco.ok ? await rco.json() : [];
@@ -1219,12 +1117,12 @@ function preencherSelects(){
   const sCat  = document.getElementById('fCat');
   const sConta = document.getElementById('fConta');
 
-  // categorias agrupadas por tipo — labels em minúsculo para match no setTipo
+  // categorias agrupadas por tipo
   const rec = _categorias.filter(c=>c.tipo==='receita');
   const des = _categorias.filter(c=>c.tipo==='despesa');
   let opCat = '<option value="">Selecionar...</option>';
-  if(rec.length){ opCat+=`<optgroup label="receita">`; rec.forEach(c=>opCat+=`<option value="${c.id}">${c.icone||''} ${c.categoria ? c.categoria+' — ' : ''}${c.nome}</option>`); opCat+=`</optgroup>`; }
-  if(des.length){ opCat+=`<optgroup label="despesa">`; des.forEach(c=>opCat+=`<option value="${c.id}">${c.icone||''} ${c.categoria ? c.categoria+' — ' : ''}${c.nome}</option>`); opCat+=`</optgroup>`; }
+  if(rec.length){ opCat+=`<optgroup label="Receitas">`; rec.forEach(c=>opCat+=`<option value="${c.id}">${c.icone||''} ${c.categoria ? c.categoria+' — ' : ''}${c.nome}</option>`); opCat+=`</optgroup>`; }
+  if(des.length){ opCat+=`<optgroup label="Despesas">`; des.forEach(c=>opCat+=`<option value="${c.id}">${c.icone||''} ${c.categoria ? c.categoria+' — ' : ''}${c.nome}</option>`); opCat+=`</optgroup>`; }
   sCat.innerHTML = opCat;
 
   let opConta = '<option value="">Selecionar...</option>';
@@ -1247,11 +1145,11 @@ async function loadTransacoes(){
 
   // Busca mês atual e saldo acumulado dos meses anteriores em paralelo
   const [resMes, resSaldoAnt] = await Promise.all([
-    fetch(`${_BASE}/condo_transacoes?condominio_id=eq.${_condoAtivo}&data=gte.${primDia}&data=lte.${ultDia}&order=data.desc,id.desc`,{headers:_h}),
-    fetch(`${_BASE}/condo_transacoes?condominio_id=eq.${_condoAtivo}&data=lt.${primDia}&select=tipo,valor`,{headers:_h})
+    fetch(`${_BASE}/condo_transacoes?condominio_id=eq.${CONDO_ID}&data=gte.${primDia}&data=lte.${ultDia}&order=data.desc,id.desc`,{headers:_h}),
+    fetch(`${_BASE}/condo_transacoes?condominio_id=eq.${CONDO_ID}&data=lt.${primDia}&select=tipo,valor`,{headers:_h})
   ]);
   _transacoes = resMes.ok ? await resMes.json() : [];
-  window._appTransacoes = _transacoes; console.log('[SYNC] _appTransacoes atualizado:', _transacoes.length, 'registros');
+  window._appTransacoes = _transacoes;
 
   // Calcula saldo acumulado anterior
   if(resSaldoAnt.ok){
@@ -1267,7 +1165,7 @@ async function loadTransacoes(){
   renderTabela();
 }
 
-// -- TIPO FILTRO DROPDOWN ---------------------------------
+// ── TIPO FILTRO DROPDOWN ─────────────────────────────────
 function toggleTipoMenu(){
   const m = document.getElementById('tipoMenu');
   m.style.display = m.style.display==='none' ? 'block' : 'none';
@@ -1296,7 +1194,7 @@ function setTipoFiltro(tipo, icon, label, cor){
   renderTabela();
 }
 
-// -- CARDS -------------------------------------------------
+// ── CARDS ─────────────────────────────────────────────────
 function renderCards(){
   const rec    = _transacoes.filter(t=>t.tipo==='receita').reduce((s,t)=>s+parseFloat(t.valor||0),0);
   const des    = _transacoes.filter(t=>t.tipo==='despesa').reduce((s,t)=>s+parseFloat(t.valor||0),0);
@@ -1365,7 +1263,7 @@ function renderCards(){
   }
 }
 
-// -- TABELA -----------------------------------------------
+// ── TABELA ───────────────────────────────────────────────
 function renderTabela(){
   const busca   = document.getElementById('busca').value.toLowerCase();
   const catMap  = Object.fromEntries(_categorias.map(c=>[c.id,c]));
@@ -1396,7 +1294,7 @@ function renderTabela(){
   }
 
 
-  // -- Calcular totais da lista filtrada ------------------
+  // ── Calcular totais da lista filtrada ──────────────────
   const totalRec = lista.filter(t=>t.tipo==='receita').reduce((s,t)=>s+parseFloat(t.valor||0),0);
   const totalDes = lista.filter(t=>t.tipo==='despesa').reduce((s,t)=>s+parseFloat(t.valor||0),0);
   const totalLiq = totalRec - totalDes;
@@ -1412,7 +1310,7 @@ function renderTabela(){
     const parTag = ehParcelado ? `<span class="parcela-tag">${t.parcela_atual||1}/${t.parcela_total}</span>` : '';
     const fixaTag= t.recorrente ? `<span class="fixa-tag">🔄</span>` : '';
     const pdfTag = t.anexo_url     ? `<span class="pdf-tag" onclick="event.stopPropagation();verPDF('${t.anexo_url}')" title="Ver comprovante">📎</span>` : '';
-    return `<div class="table-row">
+    return `<div class="table-row" onclick="editarTransacao(${t.id})">
       <div><div class="tipo-icon ${tp}">${t.tipo==='receita'?'↑':'↓'}</div></div>
       <div style="font-size:13px;color:var(--text-light)">${fmtDate(t.data)}</div>
       <div class="desc-cell">
@@ -1430,17 +1328,15 @@ function renderTabela(){
       <div class="val-cell ${tp}">${t.tipo==='despesa'?'- ':'+ '}${fmt(t.valor)}</div>
       <div><span class="sit-badge ${sit}">${sitLabel}</span></div>
       <div class="row-actions">
-        <button class="btn-row edit" data-acao="editar" data-id="${t.id}" title="Editar lançamento">
-          ✏️ Editar
-        </button>
+        <button class="btn-row edit" onclick="event.stopPropagation();window._editarTransacao && window._editarTransacao(${t.id})">✏️ Editar</button>
       </div>
     </div>`;
   }).join('');
 
-  // -- Rodapé totalizador ----------------------------------
+  // ── Rodapé totalizador ──────────────────────────────────
   const rodape = `<div style="
     display:grid;
-    grid-template-columns:36px 100px 1fr 180px 140px 110px 100px 110px;
+    grid-template-columns:36px 100px 1fr 180px 140px 110px 100px 60px;
     gap:8px;padding:14px 20px;
     background:var(--white);
     border-top:2px solid var(--border);
@@ -1472,12 +1368,12 @@ function renderTabela(){
   document.getElementById('listaTransacoes').innerHTML = linhas + rodape;
 }
 
-// -- MODAL ------------------------------------------------
+// ── MODAL ────────────────────────────────────────────────
 const TIPO_CONFIG = {
   despesa:      {label:'Nova Despesa',     icon:'↓', cls:'des', cor:'#ef4444', bg:'#ef444415', tipoDB:'despesa'},
   receita:      {label:'Nova Receita',     icon:'↑', cls:'rec', cor:'#22c55e', bg:'#22c55e15', tipoDB:'receita'},
   cartao:       {label:'Despesa Cartão',   icon:'💳',cls:'des', cor:'var(--blue)', bg:'var(--blue)15', tipoDB:'despesa'},
-  transferencia:{label:'Transferência',    icon:'<->', cls:'',    cor:'var(--gold)', bg:'var(--gold)15', tipoDB:'transferencia'},
+  transferencia:{label:'Transferência',    icon:'⇄', cls:'',    cor:'var(--gold)', bg:'var(--gold)15', tipoDB:'transferencia'},
 };
 
 function abrirModal(tipo){
@@ -1493,21 +1389,7 @@ function abrirModal(tipo){
   badge.className = `tipo-badge show ${cls}`;
   badge.innerHTML = `<span style="font-size:18px">${cfg.icon}</span> ${cfg.label}`;
 
-  // Esconder botão Excluir no modal de novo lançamento
-  const btnExcModal = document.getElementById('btnExcluirModal');
-  if(btnExcModal) btnExcModal.style.display = 'none';
   setTipo(_tipoAtual);
-  // Garantir que fData já tem hoje como valor padrão
-  const _hoje = new Date();
-  const _yy = _hoje.getFullYear();
-  const _mm = String(_hoje.getMonth()+1).padStart(2,'0');
-  const _dd = String(_hoje.getDate()).padStart(2,'0');
-  document.getElementById('fData').value = `${_yy}-${_mm}-${_dd}`;
-  // Fechar calendário ao abrir modal novo
-  const _calW = document.getElementById('calWrap');
-  const _calP = document.getElementById('calPanel');
-  if(_calW) _calW.style.display = 'none';
-  if(_calP) _calP.style.display = 'none';
   setDataRapida('hoje', document.getElementById('dqHoje'));
   document.getElementById('modalBg').classList.add('open');
 }
@@ -1522,8 +1404,6 @@ function fecharModal(){
 
 function limparModal(){
   ['fDesc','fValor','fObs','fDiaVenc'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-  const fForma=document.getElementById('fForma'); if(fForma) fForma.value='';
-  const fFluxo=document.getElementById('fFluxo'); if(fFluxo) fFluxo.value='';
   document.getElementById('fSit').value='pago';
   document.getElementById('fCat').value='';
   document.getElementById('fConta').value='';
@@ -1531,7 +1411,7 @@ function limparModal(){
   document.getElementById('togFixo').checked=false;
   document.getElementById('parcelaBox').classList.remove('show');
   document.getElementById('recorrenteBox').classList.remove('show');
-  document.getElementById('fParcelas').value='2'; document.getElementById('fRepetir').value='12';
+  document.getElementById('fParcelas').value='2';
   document.getElementById('fValParcela').value='';
   document.getElementById('parcelaInfo').textContent='Será criado 1 lançamento por parcela, totalizando 0 lançamentos.';
   removerAnexo();
@@ -1545,50 +1425,22 @@ function limparModal(){
   document.querySelectorAll('.dq-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('dqHoje').classList.add('active');
   document.getElementById('fData').style.display='none';
-  // Resetar label "Outros..." e fechar calendário
-  const dqOutroEl = document.getElementById('dqOutro');
-  if(dqOutroEl) dqOutroEl.textContent = 'Outros...';
-  const calWrpEl = document.getElementById('calWrap');
-  if(calWrpEl) calWrpEl.style.display = 'none';
-  const calPanelEl = document.getElementById('calPanel');
-  if(calPanelEl) calPanelEl.style.display = 'none';
+  const _bExcNew = document.getElementById('btnExcluirModal');
+  if(_bExcNew) _bExcNew.style.display = 'none';
 }
 
 function setTipo(tipo){
   _tipoAtual = tipo;
   const cfg = TIPO_CONFIG[tipo] || TIPO_CONFIG.despesa;
 
-  // Mapa de subtítulos por tipo
-  const subtitulos = {
-    despesa:      'Registre uma saída financeira do condomínio',
-    receita:      'Registre uma entrada financeira do condomínio',
-    cartao:       'Despesa no cartão de crédito — marque como Pendente',
-    transferencia:'Movimentação entre contas do condomínio'
-  };
-
-  // Classe CSS pelo tipo (para cor do título)
-  const clsMap = {despesa:'des', receita:'rec', cartao:'cartao', transferencia:'transf'};
-  const cls = clsMap[tipo] || 'des';
-
-  // Ícone
+  // Ícone e cor do header do modal
   const icon = document.getElementById('mIcone');
   if(icon){
-    icon.textContent = cfg.icon;
-    icon.className   = `modal-icon ${cls}`;
-    icon.removeAttribute('style');
+    icon.textContent      = cfg.icon;
+    icon.style.background = cfg.bg;
+    icon.style.color      = cfg.cor;
+    icon.className        = 'modal-icon';
   }
-
-  // Título com cor
-  const titulo = document.getElementById('mTitulo');
-  if(titulo){ titulo.textContent = cfg.label; titulo.className = `modal-title ${cls}`; }
-
-  // Subtítulo
-  const sub = document.getElementById('mSubtitulo');
-  if(sub) sub.textContent = subtitulos[tipo] || '';
-
-  // Barra colorida lateral
-  const bar = document.getElementById('mHeaderBar');
-  if(bar) bar.className = `modal-header-bar ${cls}`;
 
   // Mostrar info extra para cartão
   const infoCartao = document.getElementById('infoCartao');
@@ -1598,47 +1450,18 @@ function setTipo(tipo){
   const infoTransf = document.getElementById('infoTransf');
   if(infoTransf) infoTransf.style.display = tipo==='transferencia' ? 'block' : 'none';
 
-  // Atualizar label do toggle fixo conforme tipo selecionado
-  const fixoLabel = document.getElementById('fixoLabel');
-  const fixoIcon  = document.getElementById('fixoIcon');
-  if(fixoLabel){
-    if(tipo === 'receita'){
-      fixoLabel.textContent = '🔄 Receita Fixa';
-      if(fixoIcon) fixoIcon.textContent = '🔄';
-    } else if(tipo === 'cartao'){
-      fixoLabel.textContent = '🔄 Fatura Fixa (Cartão)';
-      if(fixoIcon) fixoIcon.textContent = '🔄';
-    } else {
-      fixoLabel.textContent = '🔄 Despesa Fixa';
-      if(fixoIcon) fixoIcon.textContent = '🔄';
-    }
-  }
-
-  // Filtrar categorias: mostrar/ocultar optgroups e options pelo tipoDB
+  // Filtrar categorias pelo tipo real (receita/despesa)
   const tipoDB = cfg.tipoDB;
-  const sCat = document.getElementById('fCat');
-  // Ocultar optgroups que não são do tipo
-  Array.from(sCat.querySelectorAll('optgroup')).forEach(og => {
-    if(tipoDB === 'transferencia'){
-      og.style.display = '';
-    } else {
-      const ogLabel = og.label.toLowerCase();
-      const match = ogLabel.includes(tipoDB === 'despesa' ? 'despesa' : 'receita');
-      og.style.display = match ? '' : 'none';
-    }
-  });
-  // Ocultar options avulsas fora de optgroup
-  Array.from(sCat.options).forEach(opt => {
+  Array.from(document.getElementById('fCat').options).forEach(opt=>{
     if(!opt.value) return;
-    if(opt.parentElement.tagName === 'OPTGROUP') return; // já tratado acima
     const cat = _categorias.find(c=>c.id==opt.value);
     if(cat) opt.style.display = (tipoDB==='transferencia' || cat.tipo===tipoDB) ? '' : 'none';
   });
-  sCat.value = '';
+  document.getElementById('fCat').value = '';
 }
 
-// -- DATA RÁPIDA ------------------------------------------
-// -- CALENDÁRIO CUSTOMIZADO -------------------------------
+// ── DATA RÁPIDA ──────────────────────────────────────────
+// ── CALENDÁRIO CUSTOMIZADO ───────────────────────────────
 let _calData = new Date(); // data temporária selecionada no calendário
 let _calMes  = new Date(); // mês sendo exibido
 
@@ -1709,73 +1532,56 @@ function toggleCal(){
 
 function fecharCal(){
   document.getElementById('calPanel').style.display='none';
-  document.getElementById('calWrap').style.display='none';
-  // Restaurar label do botão se não tem data selecionada
-  const fData = document.getElementById('fData');
-  const dqOutro = document.getElementById('dqOutro');
-  if(dqOutro && (!fData || !fData.value)) dqOutro.textContent = 'Outros...';
 }
 
 function calConfirmar(){
-  // Data local para evitar bug de fuso
-  const yy = _calData.getFullYear();
-  const mm  = String(_calData.getMonth()+1).padStart(2,'0');
-  const dd  = String(_calData.getDate()).padStart(2,'0');
-  const iso = `${yy}-${mm}-${dd}`;
+  // Aplica a data selecionada no input hidden
+  const iso = _calData.toISOString().split('T')[0];
   document.getElementById('fData').value = iso;
-  // Fechar calendário completamente
-  document.getElementById('calPanel').style.display='none';
-  document.getElementById('calWrap').style.display='none';
-  // Mostrar data escolhida no botão "Outros..."
-  const dqOutro = document.getElementById('dqOutro');
-  if(dqOutro) dqOutro.textContent = `📅 ${dd}/${mm}/${yy}`;
+  // Atualiza o display
+  const [y,m,d] = iso.split('-');
+  document.getElementById('calDisplayText').textContent = `${d}/${m}/${y}`;
+  fecharCal();
 }
 
-// Fechar calendário ao clicar fora (exceto dentro do calPanel e botão Outros)
+// Fechar calendário ao clicar fora
 document.addEventListener('click', e=>{
-  const panel = document.getElementById('calPanel');
-  const calWrp = document.getElementById('calWrap');
-  const dqOutro = document.getElementById('dqOutro');
-  if(!panel || panel.style.display==='none') return;
-  if(calWrp && calWrp.contains(e.target)) return;
-  if(dqOutro && dqOutro.contains(e.target)) return;
-  fecharCal();
+  const wrap = document.getElementById('calWrap');
+  if(wrap && !wrap.contains(e.target)) fecharCal();
 });
 
 function setDataRapida(qual, el){
-  // el pode ser passado direto ou pelo id do botão
-  if(!el){
-    const map = {hoje:'dqHoje', ontem:'dqOntem', outro:'dqOutro'};
-    el = document.getElementById(map[qual]) || document.querySelector('.dq-btn');
-  }
   document.querySelectorAll('.dq-btn').forEach(b=>b.classList.remove('active'));
-  if(el) el.classList.add('active');
+  el.classList.add('active');
   const input  = document.getElementById('fData');
   const calWrp = document.getElementById('calWrap');
   if(qual==='outro'){
     input.style.display='none';
-    // Inicializa data: usa o que já está no input ou hoje
+    calWrp.style.display='block';
+    // Inicializa calendário com data atual do input ou hoje
     const dataAtual = input.value ? new Date(input.value + 'T12:00:00') : new Date();
     _calData = new Date(dataAtual);
     _calMes  = new Date(dataAtual.getFullYear(), dataAtual.getMonth(), 1);
-    // Mostrar calWrap (container posicionado) e abrir panel
-    calWrp.style.display='block';
+    // Atualiza display se já tem valor
+    if(input.value){
+      const [y,m,d] = input.value.split('-');
+      document.getElementById('calDisplayText').textContent = `${d}/${m}/${y}`;
+    } else {
+      document.getElementById('calDisplayText').textContent = 'Selecionar data';
+    }
+    // Abre direto
     document.getElementById('calPanel').style.display='block';
     calRenderizar();
   } else {
     calWrp.style.display='none';
     input.style.display='none';
-    const ref = new Date();
-    if(qual==='ontem') ref.setDate(ref.getDate()-1);
-    // Usar data local (evita bug de fuso horário com toISOString)
-    const yy = ref.getFullYear();
-    const mm = String(ref.getMonth()+1).padStart(2,'0');
-    const dd = String(ref.getDate()).padStart(2,'0');
-    input.value = `${yy}-${mm}-${dd}`;
+    const hoje = new Date();
+    if(qual==='ontem') hoje.setDate(hoje.getDate()-1);
+    input.value = hoje.toISOString().split('T')[0];
   }
 }
 
-// -- PARCELAMENTO -----------------------------------------
+// ── PARCELAMENTO ─────────────────────────────────────────
 function toggleParcela(){
   const on = document.getElementById('togParcela').checked;
   document.getElementById('parcelaBox').classList.toggle('show',on);
@@ -1798,18 +1604,18 @@ function toggleParcela(){
 function calcParcela(){
   const valStr = document.getElementById('fValor').value;
   const val = parseFloat(valStr.replace(/R\$\s*/g,'').replace(/\./g,'').replace(',','.'))||0;
-  const n   = Math.max(2, parseInt(document.getElementById('fParcelas').value)||2);
+  const n   = parseInt(document.getElementById('fParcelas').value)||2;
   const vparcela = val > 0 ? val/n : 0;
-  document.getElementById('fValParcela').value = vparcela>0 ? fmt(vparcela) : '—';
+  document.getElementById('fValParcela').value = vparcela>0 ? 'R$ '+vparcela.toLocaleString('pt-BR',{minimumFractionDigits:2}) : '—';
   document.getElementById('parcelaInfo').textContent = val > 0
-    ? `💡 Total de ${fmt(val)} ÷ ${n}x = ${fmt(vparcela)} por parcela (mensal)`
-    : 'Informe o valor total e o número de parcelas para calcular.';
+    ? `Total de ${fmt(val)} ÷ ${n}x = ${fmt(vparcela)} por parcela`
+    : 'Informe o valor total acima para calcular as parcelas.';
 }
 
 // Recalcular ao mudar valor
 document.getElementById('fValor').addEventListener('input', ()=>{ if(document.getElementById('togParcela').checked) calcParcela(); });
 
-// -- FIXO -------------------------------------------------
+// ── FIXO ─────────────────────────────────────────────────
 function toggleFixo(){
   const on = document.getElementById('togFixo').checked;
   document.getElementById('recorrenteBox').classList.toggle('show',on);
@@ -1825,10 +1631,10 @@ function atualizarFixoResumo(){
   const el = document.getElementById('fixoResumo');
   if(!el) return;
   const n = parseInt(document.getElementById('fRepetir').value)||12;
-  el.textContent = `${n} lançamento${n!==1?'s':''}`;
+  el.textContent = `${n === 0 ? 12 : n} lançamentos`;
 }
 
-// -- SEÇÃO MAIS DETALHES ----------------------------------
+// ── SEÇÃO MAIS DETALHES ──────────────────────────────────
 function toggleSecao(){
   const cols   = document.getElementById('secCols');
   const toggle = document.getElementById('secDetalhes');
@@ -1848,14 +1654,14 @@ function toggleSecao(){
   }
 }
 
-// -- ANEXO ------------------------------------------------
+// ── ANEXO ────────────────────────────────────────────────
 function onAnexoChange(){
   const input = document.getElementById('fAnexo');
   const file  = input.files[0];
   if(!file) return;
   if(file.size > 5*1024*1024){ showAlert('Arquivo muito grande. Máximo 5MB.','error'); return; }
   _anexoArquivo = file;
-  const icons = {'application/pdf':'[doc]','image/png':'🖼','image/jpeg':'🖼'};
+  const icons = {'application/pdf':'📄','image/png':'🖼','image/jpeg':'🖼'};
   document.getElementById('pdfPreviewIcon').textContent = icons[file.type]||'📎';
   document.getElementById('pdfPreviewName').textContent = file.name;
   document.getElementById('pdfPreviewSize').textContent = (file.size/1024).toFixed(1)+' KB';
@@ -1870,7 +1676,7 @@ function removerAnexo(){
 }
 function verPDF(url){ window.open(url,'_blank'); }
 
-// -- UPLOAD ARQUIVO ----------------------------------------
+// ── UPLOAD ARQUIVO ────────────────────────────────────────
 async function uploadAnexo(file, transId){
   const ext = file.name.split('.').pop();
   const path = `mandala/transacoes/${transId}.${ext}`;
@@ -1884,28 +1690,20 @@ async function uploadAnexo(file, transId){
   return null;
 }
 
-// -- SALVAR -----------------------------------------------
+// ── SALVAR ───────────────────────────────────────────────
 async function salvarLancamento(){
   const btn = document.getElementById('btnSalvar');
   const desc  = document.getElementById('fDesc').value.trim();
   const valor = parseFloat((document.getElementById('fValor').value||'0').replace(/R\$\s*/g,'').replace(/\./g,'').replace(',','.'))||0;
-  // Se fData ainda vazio (ex: selecionou "Hoje" mas não preencheu), usa hoje
-  let data = document.getElementById('fData').value;
-  if(!data){
-    const ref = new Date();
-    const yy = ref.getFullYear();
-    const mm = String(ref.getMonth()+1).padStart(2,'0');
-    const dd = String(ref.getDate()).padStart(2,'0');
-    data = `${yy}-${mm}-${dd}`;
-    document.getElementById('fData').value = data;
-  }
+  const data  = document.getElementById('fData').value;
   if(!desc){ showAlert('Informe a descrição.','error'); return; }
   if(!valor){ showAlert('Informe o valor.','error'); return; }
+  if(!data){ showAlert('Informe a data.','error'); return; }
 
   btn.disabled=true; btn.textContent='Salvando...';
   console.log('[DEBUG] _editId ao salvar:', _editId);
 
-  // -- EDIÇÃO: atualiza apenas este lançamento pelo id ------
+  // ── EDIÇÃO: atualiza apenas este lançamento pelo id ──────
   if(_editId){
     const h = hdrs();
     const patchPayload = {
@@ -1913,22 +1711,18 @@ async function salvarLancamento(){
       valor:        valor,
       data:         data,
       categoria_id: document.getElementById('fCat').value ? parseInt(document.getElementById('fCat').value) : null,
-      conta_id:     document.getElementById('fConta').value ? parseInt(document.getElementById('fConta').value) : null,
+      conta_id: document.getElementById('fConta').value ? parseInt(document.getElementById('fConta').value) : null,
       situacao:     document.getElementById('fSit').value,
       observacao:   document.getElementById('fObs').value.trim()||null,
     };
-    const _pForma = document.getElementById('fForma')?.value||null;
-    const _pFluxo = document.getElementById('fFluxo')?.value||null;
-    if(_pForma !== null) patchPayload.forma = _pForma;
-    if(_pFluxo !== null) patchPayload.fluxo = _pFluxo;
     try {
-      const res = await fetch(`${_BASE}/condo_transacoes?id=eq.${_editId}&condominio_id=eq.${_condoAtivo}`,{
+      const res = await fetch(`${_BASE}/condo_transacoes?id=eq.${_editId}&condominio_id=eq.${CONDO_ID}`,{
         method:'PATCH',
         headers:{...h,'Prefer':'return=representation'},
         body: JSON.stringify(patchPayload)
       });
       if(res.ok || res.status===204){
-        showAlert('[OK] Lançamento atualizado com sucesso!');
+        showAlert('✅ Lançamento atualizado com sucesso!');
         fecharModal();
         await loadTransacoes();
       } else {
@@ -1948,7 +1742,7 @@ async function salvarLancamento(){
     const destino = document.getElementById('fContaDestino').value;
     if(!origem || !destino){ showAlert('Selecione a conta de origem e destino.','error'); btn.disabled=false; btn.textContent='Salvar lançamento'; return; }
     if(origem===destino){ showAlert('Conta de origem e destino não podem ser iguais.','error'); btn.disabled=false; btn.textContent='Salvar lançamento'; return; }
-    const base = {condominio_id:_condoAtivo, empresa:_condoAtivo, descricao:desc, valor, data, situacao:'pago'};
+    const base = {condominio_id:CONDO_ID, descricao:desc, valor, data, situacao:'pago', observacao:document.getElementById('fObs').value.trim()||null};
     const h = hdrs();
     await Promise.all([
       fetch(`${_BASE}/condo_transacoes`,{method:'POST',headers:{...h,'Prefer':'return=representation'},body:JSON.stringify({...base,tipo:'despesa',conta_id:origem, descricao:`Transf. para ${_contas.find(ct=>ct.id==destino)?.nome||'conta'}: ${desc}`})}),
@@ -1967,34 +1761,24 @@ async function salvarLancamento(){
   const repetir    = parseInt(document.getElementById('fRepetir').value)||0;
   const diaVenc    = parseInt(document.getElementById('fDiaVenc').value)||null;
 
-  // -- Payload com apenas colunas garantidamente existentes na tabela --
-  // Colunas confirmadas: id, empresa/condominio_id, tipo, descricao, valor, data, categoria_id, conta_id, situacao
-  // Colunas opcionais (adicionadas só se existirem): observacao, recorrente, parcela_atual, parcela_total, forma, fluxo
-  // -- Payload multi-tenant: condominio_id isola os dados por condomínio --
-  // CONDO_ID vem do perfil do usuário logado (usuarios.condominio_id)
-  // Cada registro fica associado ao condomínio correto automaticamente
   const basePayload = {
-    condominio_id: _condoAtivo,  // coluna principal multi-tenant
-    empresa:       _condoAtivo,  // coluna legada — mantida para compatibilidade
-    tipo:          (TIPO_CONFIG[_tipoAtual]?.tipoDB)||_tipoAtual,
-    descricao:     desc,
-    valor:         parcelado ? valor/nParcelas : valor,
-    situacao:      document.getElementById('fSit').value,
-    data:          data,
+    condominio_id: _condoAtivo, empresa: _condoAtivo,
+    tipo:         (TIPO_CONFIG[_tipoAtual]?.tipoDB)||_tipoAtual,
+    descricao:    desc,
+    valor:        parcelado ? valor/nParcelas : valor,
+    categoria_id: document.getElementById('fCat').value ? parseInt(document.getElementById('fCat').value) : null,
+    conta_id: document.getElementById('fConta').value ? parseInt(document.getElementById('fConta').value) : null,
+    situacao:     document.getElementById('fSit').value,
+    observacao:   document.getElementById('fObs').value.trim()||null,
+    recorrente:   fixo,
+    parcela_atual: null,
+    parcela_total: null,
+    autor_email:  getToken() ? null : null
   };
-  // Opcionais — só adiciona se não forem nulos/vazios
-  const _catId  = document.getElementById('fCat').value ? parseInt(document.getElementById('fCat').value) : null;
-  const _contaId= document.getElementById('fConta').value ? parseInt(document.getElementById('fConta').value) : null;
-  const _obs    = document.getElementById('fObs').value.trim()||null;
-  const _forma  = document.getElementById('fForma')?.value||null;
-  const _fluxo  = document.getElementById('fFluxo')?.value||null;
-  if(_catId)   basePayload.categoria_id  = _catId;
-  if(_contaId) basePayload.conta_id      = _contaId;
-  if(_obs)     basePayload.observacao    = _obs;
-  if(_forma)   basePayload.forma         = _forma;
-  if(_fluxo)   basePayload.fluxo         = _fluxo;
-  if(fixo)     basePayload.recorrente    = true;
-  if(parcelado){ basePayload.parcela_atual = null; basePayload.parcela_total = null; }
+  const _forma = document.getElementById('fForma')?.value||null;
+  const _fluxo = document.getElementById('fFluxo')?.value||null;
+  if(_forma) basePayload.forma = _forma;
+  if(_fluxo) basePayload.fluxo = _fluxo;
 
   const h = hdrs();
   let idsGerados = [];
@@ -2023,7 +1807,7 @@ async function salvarLancamento(){
       showAlert(`${nParcelas} parcelas criadas com sucesso!`);
     } else if(fixo){
       // DESPESA/RECEITA FIXA: cria 1 lançamento por mês
-      // repetir: 0=indefinido->12 meses, ou o valor escolhido
+      // repetir: 0=indefinido→12 meses, ou o valor escolhido
       const nMeses    = repetir > 0 ? repetir : 12;
       const diaVencNum = diaVenc || new Date(data).getDate();
       const hoje      = new Date();
@@ -2065,30 +1849,18 @@ async function salvarLancamento(){
       }
       const results = await Promise.all(promises);
       idsGerados = results.map(r=>r?.id).filter(Boolean);
-      showAlert(`[OK] ${nMeses} lançamentos fixos criados (${nMeses} meses)!`);
+      showAlert(`✅ ${nMeses} lançamentos fixos criados (${nMeses} meses)!`);
 
     } else {
-      // Lançamento avulso normal — data já está no basePayload
-      const payload = {...basePayload};
+      // Lançamento avulso normal
+      const payload = {...basePayload, data};
       const res = await fetch(`${_BASE}/condo_transacoes`,{
         method:'POST', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)
       });
-      if(!res.ok){
-        const errTxt = await res.text();
-        console.error('[SALVAR] Erro HTTP', res.status, errTxt);
-        let msgErro = errTxt;
-        try {
-          const errJson = JSON.parse(errTxt);
-          msgErro = errJson.message || errJson.hint || errJson.details || errTxt;
-        } catch{}
-        showAlert(`❌ Erro ${res.status}: ${msgErro}`, 'error');
-        btn.disabled=false; btn.textContent='Salvar lançamento';
-        return;
-      }
       const json = await res.json();
       const novo = Array.isArray(json)?json[0]:json;
       if(novo?.id) idsGerados = [novo.id];
-      showAlert('[OK] Lançamento salvo com sucesso!');
+      showAlert('Lançamento salvo!');
     }
 
     // upload do anexo na primeira transação criada
@@ -2109,7 +1881,7 @@ async function salvarLancamento(){
   btn.disabled=false; btn.textContent='Salvar lançamento';
 }
 
-// -- EDITAR -----------------------------------------------
+// ── EDITAR ───────────────────────────────────────────────
 async function editarTransacao(id){
   const t = _transacoes.find(t=>t.id===id);
   if(!t) return;
@@ -2121,18 +1893,16 @@ async function editarTransacao(id){
   document.getElementById('fData').style.display='none';
   document.getElementById('dqOutro').classList.add('active');
   document.querySelectorAll('.dq-btn:not(#dqOutro)').forEach(b=>b.classList.remove('active'));
-  // Mostrar data no botão "Outros..." — calendário só abre se clicar
-  if(t.data){
-    const [y,m,d] = t.data.split('-');
-    _calData = new Date(parseInt(y), parseInt(m)-1, parseInt(d));
-    _calMes  = new Date(parseInt(y), parseInt(m)-1, 1);
-    const dqOutroEl = document.getElementById('dqOutro');
-    if(dqOutroEl) dqOutroEl.textContent = `📅 ${d}/${m}/${y}`;
-    // Garantir que calendário está fechado
-    const calWrp = document.getElementById('calWrap');
-    if(calWrp) calWrp.style.display = 'none';
-    const calPnl = document.getElementById('calPanel');
-    if(calPnl) calPnl.style.display = 'none';
+  // Mostrar calendário com a data do lançamento
+  const calWrp = document.getElementById('calWrap');
+  if(calWrp){
+    calWrp.style.display='block';
+    if(t.data){
+      const [y,m,d] = t.data.split('-');
+      document.getElementById('calDisplayText').textContent = `${d}/${m}/${y}`;
+      _calData = new Date(parseInt(y), parseInt(m)-1, parseInt(d));
+      _calMes  = new Date(parseInt(y), parseInt(m)-1, 1);
+    }
   }
   document.getElementById('fDesc').value   = t.descricao||'';
   document.getElementById('fValor').value  = t.valor ? parseFloat(t.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '';
@@ -2140,8 +1910,6 @@ async function editarTransacao(id){
   document.getElementById('fConta').value  = t.conta_id||'';
   document.getElementById('fSit').value    = t.situacao||'pago';
   document.getElementById('fObs').value    = t.observacao||'';
-  const _fForma = document.getElementById('fForma'); if(_fForma) _fForma.value = t.forma||'';
-  const _fFluxo = document.getElementById('fFluxo'); if(_fFluxo) _fFluxo.value = t.fluxo||'';
   // Fixo OU Parcelado — nunca os dois
   if(t.recorrente && !t.parcela_total){
     // É fixo (recorrente sem ser parcelado com valor dividido)
@@ -2172,13 +1940,10 @@ async function editarTransacao(id){
     if(lbl) lbl.textContent = 'Menos detalhes';
   }
   _editId = id; // setado aqui, após todas as chamadas que possam resetar
-  // Mostrar botão Excluir no footer do modal
-  const _btnExcl = document.getElementById('btnExcluirModal');
-  if(_btnExcl){ _btnExcl.style.display='block'; _btnExcl.dataset.id = id; }
   document.getElementById('modalBg').classList.add('open');
 }
 
-// -- BAIXAR MODELO -----------------------------------------
+// ── BAIXAR MODELO ─────────────────────────────────────────
 function baixarModelo(){
   // Gera planilha modelo via SheetJS (XLSX) no browser
   const wb = XLSX.utils.book_new();
@@ -2220,7 +1985,7 @@ function baixarModelo(){
   XLSX.writeFile(wb, `Modelo_Transacoes_${MESES[_mes]}_${_ano}.xlsx`);
 }
 
-// -- EXPORTAR MÊS -----------------------------------------
+// ── EXPORTAR MÊS ─────────────────────────────────────────
 function exportarExcel(){
   if(!_transacoes.length){ showAlert('Nenhuma transação para exportar.','error'); return; }
 
@@ -2265,10 +2030,10 @@ function exportarExcel(){
   ws['!cols'] = [{wch:14},{wch:12},{wch:30},{wch:25},{wch:20},{wch:25},{wch:14},{wch:12},{wch:8},{wch:30}];
   XLSX.utils.book_append_sheet(wb, ws, `${MESES[_mes]} ${_ano}`);
   XLSX.writeFile(wb, `Transacoes_${MESES[_mes]}_${_ano}.xlsx`);
-  showAlert(`[OK] Exportado: ${_transacoes.length} lançamentos de ${MESES[_mes]} ${_ano}`);
+  showAlert(`✅ Exportado: ${_transacoes.length} lançamentos de ${MESES[_mes]} ${_ano}`);
 }
 
-// -- IMPORTAR ---------------------------------------------
+// ── IMPORTAR ─────────────────────────────────────────────
 let _dadosImport = [];
 
 function abrirImportar(){
@@ -2351,7 +2116,7 @@ function processarArquivo(file){
         const catId   = catMap[cat+'|'+sub] || null;
         const contaId = contaMap[conta] || null;
 
-        _dadosImport.push({data:dataISO, tipo, descricao:desc, categoria_id:catId, conta_id:contaId, valor, situacao:sit, observacao:obs||null, condominio_id:_condoAtivo, empresa:_condoAtivo});
+        _dadosImport.push({data:dataISO, tipo, descricao:desc, categoria_id:catId, conta_id:contaId, valor, situacao:sit, observacao:obs||null, condominio_id:CONDO_ID});
       }
 
       // Preview
@@ -2362,7 +2127,7 @@ function processarArquivo(file){
         document.getElementById('btnConfirmarImport').style.display='none';
         return;
       }
-      st.innerHTML=`<span style="color:#22c55e">[OK] ${_dadosImport.length} lançamento(s) encontrado(s) para importar.</span>`;
+      st.innerHTML=`<span style="color:#22c55e">✅ ${_dadosImport.length} lançamento(s) encontrado(s) para importar.</span>`;
 
       // Tabela preview
       const prev = document.getElementById('importPreview');
@@ -2409,146 +2174,169 @@ async function confirmarImportacao(){
   }
   fecharImportar();
   await loadTransacoes();
-  showAlert(`[OK] Importação concluída: ${ok} lançamento(s) inserido(s)${erros>0?' | ⚠ '+erros+' erro(s)':''}`);
+  showAlert(`✅ Importação concluída: ${ok} lançamento(s) inserido(s)${erros>0?' | ⚠ '+erros+' erro(s)':''}`);
   btn.disabled=false;
 }
 
-// -- DELETAR -----------------------------------------------
-// -- ESTADO DE EXCLUSÃO -----------------------------------
+// ── DELETAR ───────────────────────────────────────────────
+// ── ESTADO DE EXCLUSÃO ───────────────────────────────────
 let _deleteId   = null;
 let _deleteOpt  = 'este'; // 'este' | 'todos'
 
-function _deletarFn(id){
-  console.log('[_deletarFn] id='+id+' | appTransacoes.length='+(window._appTransacoes||[]).length);
-  const transacoes = window._appTransacoes || [];
-  const t = transacoes.find(x => x.id === id);
-  if(!t){ 
-    console.log('[_deletarFn] IDs disponíveis:', transacoes.map(x=>x.id));
-    alert('Transação não encontrada. Recarregue a página.'); 
-    return; 
-  }
-  console.log('[_deletarFn] Transação encontrada:', t.descricao);
-
-  // Guardar no window para executarDelete usar
-  window._appDeleteId  = id;
-  window._appDeleteOpt = 'este';
+function deletar(id){
+  const t = _transacoes.find(t=>t.id===id);
+  if(!t) return;
+  _deleteId  = id;
+  _deleteOpt = 'este';
 
   const ehParcelado = !!t.parcela_total;
   const ehFixo      = !!t.recorrente && !t.parcela_total;
-  const mesRef      = t.data ? t.data.split('-').reverse().join('/') : 'este lançamento';
+  const temSeries   = ehParcelado || ehFixo;
 
-  // Preencher modal
   document.getElementById('confirmTitle').textContent = 'Excluir lançamento?';
-  let desc = '<strong>' + (t.descricao||'Lançamento') + '</strong>';
-  if(ehParcelado) desc += '<br><span style="color:#2563eb">Parcela ' + (t.parcela_atual||'?') + ' de ' + t.parcela_total + '</span>';
-  if(ehFixo)      desc += '<br><span style="color:#a855f7">🔄 Lançamento fixo</span>';
-  desc += '<br><span style="color:#ef4444;font-size:12px">[!] Esta ação não pode ser desfeita.</span>';
+
+  let desc = `<strong style="color:var(--text-dark)">${t.descricao||'Lançamento'}</strong>`;
+  if(ehParcelado) desc += `<br><span style="color:var(--blue)">Parcela ${t.parcela_atual||'?'} de ${t.parcela_total}</span>`;
+  if(ehFixo)      desc += `<br><span style="color:#a855f7">🔄 Lançamento fixo (recorrente)</span>`;
   document.getElementById('confirmDesc').innerHTML = desc;
 
   const opcoes = document.getElementById('confirmOpcoes');
+  _deleteOpt = 'este';
+
+  const mesRef = t.data ? t.data.split('-').reverse().join('/') : 'este lançamento';
+  const aviso = '<br><span style="color:#ef4444;font-size:12px;font-weight:600">⚠️ Esta ação não pode ser desfeita.</span>';
 
   if(ehFixo || ehParcelado){
     const tipoLabel = ehParcelado ? 'parcela' : 'lançamento';
-    const todosLabel = ehParcelado ? 'Todas as ' + t.parcela_total + ' parcelas' : 'Todos da série';
+    const todosLabel = ehParcelado
+      ? `Todas as ${t.parcela_total} parcelas`
+      : 'Todos da série';
+    const todosDesc = ehParcelado
+      ? `Remove as ${t.parcela_total} parcelas desta série`
+      : 'Remove todos os lançamentos fixos desta série';
+
     opcoes.style.display = 'flex';
     opcoes.innerHTML = `
-      <button class="confirm-opt selected" id="optEste" onclick="window._selecionarOpt('este')">
-        <span class="confirm-opt-icon">[doc]</span>
-        <div><div class="confirm-opt-label">Somente este ${tipoLabel}</div>
-        <div class="confirm-opt-sub">Remove apenas ${mesRef}</div></div>
+      <button class="confirm-opt selected" id="optEste" onclick="selecionarOpt('este')">
+        <span class="confirm-opt-icon">📄</span>
+        <div>
+          <div class="confirm-opt-label">Somente este ${tipoLabel}</div>
+          <div class="confirm-opt-sub">Remove apenas ${mesRef}</div>
+        </div>
       </button>
-      <button class="confirm-opt" id="optProximos" onclick="window._selecionarOpt('proximos')">
-        <span class="confirm-opt-icon">>></span>
-        <div><div class="confirm-opt-label">Este e os próximos</div>
-        <div class="confirm-opt-sub">Remove ${mesRef} em diante</div></div>
+      <button class="confirm-opt" id="optProximos" onclick="selecionarOpt('proximos')">
+        <span class="confirm-opt-icon">⏭️</span>
+        <div>
+          <div class="confirm-opt-label">Este e os próximos</div>
+          <div class="confirm-opt-sub">Remove ${mesRef} em diante</div>
+        </div>
       </button>
-      <button class="confirm-opt" id="optTodos" onclick="window._selecionarOpt('todos')">
-        <span class="confirm-opt-icon">[serie]</span>
-        <div><div class="confirm-opt-label">${todosLabel}</div>
-        <div class="confirm-opt-sub">Remove toda a série completa</div></div>
+      <button class="confirm-opt" id="optTodos" onclick="selecionarOpt('todos')">
+        <span class="confirm-opt-icon">🗂️</span>
+        <div>
+          <div class="confirm-opt-label">${todosLabel}</div>
+          <div class="confirm-opt-sub">${todosDesc}</div>
+        </div>
       </button>`;
+    document.getElementById('confirmDesc').innerHTML += aviso;
   } else {
     opcoes.style.display = 'none';
     opcoes.innerHTML = '';
+    document.getElementById('confirmDesc').innerHTML += aviso;
   }
-  document.getElementById('confirmDesc').innerHTML += '<br><span style="color:#ef4444;font-size:12px;font-weight:600">[!] Esta ação não pode ser desfeita.</span>';
+
   document.getElementById('confirmBg').classList.add('open');
 }
-window._selecionarOpt = function(opt){
-  window._appDeleteOpt = opt;
-  ['este','proximos','todos'].forEach(function(o){
-    var el = document.getElementById('opt' + o.charAt(0).toUpperCase() + o.slice(1));
-    if(el) el.classList.toggle('selected', o === opt);
+
+function selecionarOpt(opt){
+  _deleteOpt = opt;
+  ['optEste','optProximos','optTodos'].forEach(function(id){
+    const el = document.getElementById(id);
+    if(el) el.classList.remove('selected');
   });
-};
+  const map = {este:'optEste', proximos:'optProximos', todos:'optTodos'};
+  const el = document.getElementById(map[opt]);
+  if(el) el.classList.add('selected');
+}
 
-window._fecharConfirm = function(){
+function fecharConfirm(){
   document.getElementById('confirmBg').classList.remove('open');
-  window._appDeleteId  = null;
-  window._appDeleteOpt = 'este';
-};
+  _deleteId = null; _deleteOpt = 'este';
+}
 
-window._executarDelete = async function(){
-  var deleteId  = window._appDeleteId;
-  var deleteOpt = window._appDeleteOpt || 'este';
-  if(!deleteId) return;
+async function executarDelete(){
+  if(!_deleteId) return;
+  const btn = document.getElementById('confirmDelBtn');
+  btn.disabled=true; btn.textContent='Excluindo...';
 
-  var btn = document.getElementById('confirmDelBtn');
-  btn.disabled = true; btn.textContent = 'Excluindo...';
-
-  var transacoes = window._appTransacoes || [];
-  var t       = transacoes.find(function(x){ return x.id === deleteId; });
-  var condoId = window._appCondoAtivo;
-  var BASE    = window._appBase || _BASE;
-  var h       = Object.assign({}, window._appHdrs ? window._appHdrs() : hdrs(), {'Prefer':'return=representation'});
+  const t = _transacoes.find(t=>t.id===_deleteId);
+  const h = {...hdrs(), 'Prefer':'return=representation'};
 
   try {
-    var descEnc = encodeURIComponent(t.descricao);
+    const descEnc = encodeURIComponent(t.descricao);
 
-    if(deleteOpt === 'todos' && (t.parcela_total || t.recorrente)){
-      var url = t.parcela_total
-        ? BASE + '/condo_transacoes?condominio_id=eq.' + condoId + '&descricao=eq.' + descEnc + '&tipo=eq.' + t.tipo + '&parcela_total=eq.' + t.parcela_total
-        : BASE + '/condo_transacoes?condominio_id=eq.' + condoId + '&descricao=eq.' + descEnc + '&tipo=eq.' + t.tipo + '&recorrente=eq.true';
-      var res = await fetch(url, {method:'DELETE', headers:h});
-      if(res.ok || res.status===204){ showAlert('[OK] Série excluída!'); window._fecharConfirm(); await loadTransacoes(); }
-      else showAlert('Erro ao excluir série.','error');
+  if(_deleteOpt === 'proximos' && t && (t.parcela_total || t.recorrente)){
+    const dataEnc = encodeURIComponent(t.data);
+    const urlProx = t.parcela_total
+      ? `${_BASE}/condo_transacoes?condominio_id=eq.${_condoAtivo}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&parcela_total=eq.${t.parcela_total}&parcela_atual=gte.${t.parcela_atual}`
+      : `${_BASE}/condo_transacoes?condominio_id=eq.${_condoAtivo}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&recorrente=eq.true&data=gte.${dataEnc}`;
+    const rProx = await fetch(urlProx, {method:'DELETE', headers:h});
+    if(rProx.ok || rProx.status===204){
+      showAlert('✅ Lançamentos excluídos!'); fecharConfirm(); await loadTransacoes();
+    } else { showAlert('Erro ao excluir.','error'); }
 
-    } else if(deleteOpt === 'proximos' && (t.parcela_total || t.recorrente)){
-      var dataEnc = encodeURIComponent(t.data);
-      var url2 = t.parcela_total
-        ? BASE + '/condo_transacoes?condominio_id=eq.' + condoId + '&descricao=eq.' + descEnc + '&tipo=eq.' + t.tipo + '&parcela_total=eq.' + t.parcela_total + '&parcela_atual=gte.' + t.parcela_atual
-        : BASE + '/condo_transacoes?condominio_id=eq.' + condoId + '&descricao=eq.' + descEnc + '&tipo=eq.' + t.tipo + '&recorrente=eq.true&data=gte.' + dataEnc;
-      var res2 = await fetch(url2, {method:'DELETE', headers:h});
-      if(res2.ok || res2.status===204){ showAlert('[OK] Lançamentos excluídos!'); window._fecharConfirm(); await loadTransacoes(); }
-      else showAlert('Erro ao excluir.','error');
-
-    } else {
-      var res3 = await fetch(BASE + '/condo_transacoes?id=eq.' + deleteId + '&condominio_id=eq.' + condoId, {method:'DELETE', headers:h});
-      var body = await res3.text();
-      if(res3.status===204 || res3.ok){
-        showAlert('[OK] Lançamento removido!');
-        window._fecharConfirm();
+  } else if(_deleteOpt === 'todos' && t && (t.parcela_total || t.recorrente)){
+      const descEnc = encodeURIComponent(t.descricao);
+      let url;
+      if(t.parcela_total){
+        // Parcelado: deleta todos com mesma descrição + parcela_total + tipo
+        url = `${_BASE}/condo_transacoes?condominio_id=eq.${CONDO_ID}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&parcela_total=eq.${t.parcela_total}`;
+      } else {
+        // Fixo: deleta este mês e os próximos (data >= data do selecionado)
+        const dataEnc = encodeURIComponent(t.data);
+        url = `${_BASE}/condo_transacoes?condominio_id=eq.${CONDO_ID}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&recorrente=eq.true&data=gte.${dataEnc}`;
+      }
+      const res = await fetch(url, {method:'DELETE', headers:h});
+      if(res.ok || res.status===204){
+        showAlert('✅ Série excluída com sucesso.');
+        fecharConfirm();
         await loadTransacoes();
       } else {
-        showAlert('Erro: ' + body, 'error');
+        showAlert('Erro ao excluir série.','error');
+      }
+    } else {
+      // Excluir só este lançamento
+      const res = await fetch(`${_BASE}/condo_transacoes?id=eq.${_deleteId}&condominio_id=eq.${CONDO_ID}`,{
+        method:'DELETE', headers:h
+      });
+      const body = await res.text();
+      if(res.status===204 || (res.ok && body!=='[]' && body!=='')){
+        showAlert('Lançamento removido.');
+        fecharConfirm();
+        await loadTransacoes();
+      } else if(body==='[]' || body===''){
+        showAlert('⚠️ Não foi possível apagar. Verifique o RLS no Supabase.','error');
+      } else {
+        showAlert('Erro ao remover: ' + body, 'error');
       }
     }
   } catch(e){
     showAlert('Erro: ' + e.message, 'error');
   }
-  btn.disabled = false; btn.textContent = '🗑 Excluir';
-};
+  btn.disabled=false;
+  btn.textContent='🗑 Excluir';
+}
 
-// -- FECHAR MODAL FORA ------------------------------------
+// ── FECHAR MODAL FORA ────────────────────────────────────
 // Modal de lançamento só fecha pelo botão Cancelar ou X
 // document.getElementById('modalBg').addEventListener('click',...) removido intencionalmente
 
 // Modal de confirmação fecha ao clicar no fundo
 document.getElementById('confirmBg').addEventListener('click',e=>{
-  if(e.target===document.getElementById('confirmBg')) window._fecharConfirm && window._fecharConfirm();
+  if(e.target===document.getElementById('confirmBg')) fecharConfirm();
 });
 
-// -- FAB --------------------------------------------------
+// ── FAB ──────────────────────────────────────────────────
 function fabAbre(tipo){
   fecharFab();
   abrirModal(tipo);
@@ -2575,7 +2363,16 @@ document.addEventListener('click', function(e){
   }
 });
 
-// -- Expor funções para os stubs e sinalizar que o module está pronto --
+// ── INIT ─────────────────────────────────────────────────
+// Expor window._excluirDoModal — usa o _editId do module
+window._excluirDoModal = function(){
+  if(!_editId){ alert('Nenhum lançamento selecionado'); return; }
+  const id = _editId;
+  fecharModal();
+  deletar(id);
+};
+
+// Expor funções para os stubs
 window._toggleFab = toggleFab;
 window._fabAbre = fabAbre;
 window._mudarMes = mudarMes;
@@ -2583,17 +2380,17 @@ window._toggleTipoMenu = toggleTipoMenu;
 window._setTipoFiltro = setTipoFiltro;
 window._setFiltro = setFiltro;
 window._fecharModal = fecharModal;
-// window._fecharConfirm já definido acima
+window._fecharConfirm = fecharConfirm;
 window._fecharCal = fecharCal;
 window._fecharImportar = fecharImportar;
 window._salvarLancamento = salvarLancamento;
 window._editarTransacao = editarTransacao;
-// window._executarDelete já definido acima
+window._executarDelete = executarDelete;
 window._exportarExcel = exportarExcel;
 window._baixarModelo = baixarModelo;
 window._abrirImportar = abrirImportar;
 window._confirmarImportacao = confirmarImportacao;
-// window._selecionarOpt já definido acima
+window._selecionarOpt = selecionarOpt;
 window._setDataRapida = setDataRapida;
 window._toggleCal = toggleCal;
 window._calNavMes = calNavMes;
@@ -2608,12 +2405,10 @@ window._toggleFixo = toggleFixo;
 window._verPDF = verPDF;
 window._handleDrop = handleDrop;
 window._uploadAnexo = uploadAnexo;
-window._onAnexoChange = typeof onAnexoChange !== 'undefined' ? onAnexoChange : ()=>{};
-window._deletar = _deletarFn; console.log('[MODULE] window._deletar atribuído OK');
-window._flushPending(); // executa chamadas que ficaram em fila enquanto o module carregava
+window._deletarFn = deletar;
+window._deletar = deletar;
 
-// -- INIT -------------------------------------------------
-// script type="module" executa após DOM estar pronto — chama diretamente
+// module executa após DOM pronto — chamar diretamente
 document.getElementById('mesAtual').textContent = `${MESES[_mes]} ${_ano}`;
 await loadAll();
 </script>
