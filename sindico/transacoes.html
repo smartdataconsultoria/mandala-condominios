@@ -963,7 +963,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-// ── Bridge pattern: enfileira chamadas enquanto o module ainda carrega ──
+// -- Bridge pattern: enfileira chamadas enquanto o module ainda carrega --
 window._moduleReady = false;
 window._pendingCalls = [];
 function _callWhenReady(fn, args) {
@@ -1016,7 +1016,7 @@ function uploadAnexo() { _callWhenReady('uploadAnexo', []); }
 function onAnexoChange() { _callWhenReady('onAnexoChange', []); }
 function deletar(id) { _callWhenReady('deletar', [id]); }
 
-// ── Funções dos botões da tabela — executam imediatamente ──────────
+// -- Funções dos botões da tabela — executam imediatamente ----------
 // Abertura do modal de confirmação feita aqui, sem depender do module
 function btnEditar(id){
   if(window._editarTransacao) { window._editarTransacao(id); return; }
@@ -1045,7 +1045,7 @@ function btnExcluir(id){
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 const _sb = createClient('https://siczyohqmlrmirqgzlxb.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw')
 
-// ── Estado global — declarado ANTES dos awaits para ficar disponível imediatamente ──
+// -- Estado global — declarado ANTES dos awaits para ficar disponível imediatamente --
 window._appTransacoes  = [];   // lista carregada de condo_transacoes
 window._appCondoAtivo  = null; // id do condomínio ativo
 window._appDeleteId    = null;
@@ -1062,9 +1062,9 @@ if (!_perfil || _perfil.role !== 'sindico') {
   window.location.href = _d[_perfil?.role] || '/login.html'; throw new Error()
 }
 
-// ── Multi-tenant: CONDO_ID vem do perfil do usuário logado ──────────
+// -- Multi-tenant: CONDO_ID vem do perfil do usuário logado ----------
 // Cada usuário (síndico) está vinculado a 1 condomínio via usuarios.condominio_id
-// No futuro, uma administradora pode gerenciar múltiplos → trocarCondo() habilitado
+// No futuro, uma administradora pode gerenciar múltiplos -> trocarCondo() habilitado
 const CONDO_ID = _perfil.condominio_id
 let _condoAtivo = CONDO_ID
 window._appCondoAtivo = CONDO_ID  // sincronizar com global
@@ -1095,8 +1095,8 @@ const _BASE    = 'https://siczyohqmlrmirqgzlxb.supabase.co/rest/v1';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw';
 const SUPA_URL = 'https://siczyohqmlrmirqgzlxb.supabase.co';
 
-// ── CONFIG ───────────────────────────────────────────────
-// ── ESTADO ───────────────────────────────────────────────
+// -- CONFIG -----------------------------------------------
+// -- ESTADO -----------------------------------------------
 let _mes = new Date().getMonth();
 let _ano = new Date().getFullYear();
 let _filtro = 'todos';
@@ -1110,7 +1110,7 @@ let _editId = null;
 
 let _anexoArquivo = null;
 
-// ── AUTH ─────────────────────────────────────────────────
+// -- AUTH -------------------------------------------------
 function getToken(){
   const k = Object.keys(localStorage).find(k=>k.includes('auth-token'));
   if(!k) return null;
@@ -1119,7 +1119,7 @@ function getToken(){
     const token = sess?.access_token;
     const exp   = sess?.expires_at;
     if(!token) return null;
-    if(exp && Date.now()/1000 > exp) return null; // expirado → usa anon key
+    if(exp && Date.now()/1000 > exp) return null; // expirado -> usa anon key
     return token;
   } catch{ return null; }
 }
@@ -1128,7 +1128,7 @@ function hdrs(){
   return {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${tk||SUPA_KEY}`};
 }
 
-// ── UTILS ────────────────────────────────────────────────
+// -- UTILS ------------------------------------------------
 const fmt = v => 'R$ '+parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtDate = d => { if(!d) return '—'; const p=d.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; };
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -1141,7 +1141,7 @@ function showAlert(msg,type='success'){
   setTimeout(()=>el.style.display='none',dur);
 }
 
-// ── MÊS ──────────────────────────────────────────────────
+// -- MÊS --------------------------------------------------
 function mudarMes(d){
   _mes+=d;
   if(_mes<0){_mes=11;_ano--;}
@@ -1150,7 +1150,7 @@ function mudarMes(d){
   loadTransacoes();
 }
 
-// ── FILTRO ───────────────────────────────────────────────
+// -- FILTRO -----------------------------------------------
 function setFiltro(f,el){
   _filtro=f;
   document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
@@ -1158,7 +1158,7 @@ function setFiltro(f,el){
   renderTabela();
 }
 
-// ── LOAD DADOS ───────────────────────────────────────────
+// -- LOAD DADOS -------------------------------------------
 async function loadAll(){
   const h = hdrs();
   // categorias e contas em paralelo
@@ -1224,7 +1224,7 @@ async function loadTransacoes(){
   renderTabela();
 }
 
-// ── TIPO FILTRO DROPDOWN ─────────────────────────────────
+// -- TIPO FILTRO DROPDOWN ---------------------------------
 function toggleTipoMenu(){
   const m = document.getElementById('tipoMenu');
   m.style.display = m.style.display==='none' ? 'block' : 'none';
@@ -1253,7 +1253,7 @@ function setTipoFiltro(tipo, icon, label, cor){
   renderTabela();
 }
 
-// ── CARDS ─────────────────────────────────────────────────
+// -- CARDS -------------------------------------------------
 function renderCards(){
   const rec    = _transacoes.filter(t=>t.tipo==='receita').reduce((s,t)=>s+parseFloat(t.valor||0),0);
   const des    = _transacoes.filter(t=>t.tipo==='despesa').reduce((s,t)=>s+parseFloat(t.valor||0),0);
@@ -1322,7 +1322,7 @@ function renderCards(){
   }
 }
 
-// ── TABELA ───────────────────────────────────────────────
+// -- TABELA -----------------------------------------------
 function renderTabela(){
   const busca   = document.getElementById('busca').value.toLowerCase();
   const catMap  = Object.fromEntries(_categorias.map(c=>[c.id,c]));
@@ -1353,7 +1353,7 @@ function renderTabela(){
   }
 
 
-  // ── Calcular totais da lista filtrada ──────────────────
+  // -- Calcular totais da lista filtrada ------------------
   const totalRec = lista.filter(t=>t.tipo==='receita').reduce((s,t)=>s+parseFloat(t.valor||0),0);
   const totalDes = lista.filter(t=>t.tipo==='despesa').reduce((s,t)=>s+parseFloat(t.valor||0),0);
   const totalLiq = totalRec - totalDes;
@@ -1397,7 +1397,7 @@ function renderTabela(){
     </div>`;
   }).join('');
 
-  // ── Rodapé totalizador ──────────────────────────────────
+  // -- Rodapé totalizador ----------------------------------
   const rodape = `<div style="
     display:grid;
     grid-template-columns:36px 100px 1fr 180px 140px 110px 100px 110px;
@@ -1432,12 +1432,12 @@ function renderTabela(){
   document.getElementById('listaTransacoes').innerHTML = linhas + rodape;
 }
 
-// ── MODAL ────────────────────────────────────────────────
+// -- MODAL ------------------------------------------------
 const TIPO_CONFIG = {
   despesa:      {label:'Nova Despesa',     icon:'↓', cls:'des', cor:'#ef4444', bg:'#ef444415', tipoDB:'despesa'},
   receita:      {label:'Nova Receita',     icon:'↑', cls:'rec', cor:'#22c55e', bg:'#22c55e15', tipoDB:'receita'},
   cartao:       {label:'Despesa Cartão',   icon:'💳',cls:'des', cor:'var(--blue)', bg:'var(--blue)15', tipoDB:'despesa'},
-  transferencia:{label:'Transferência',    icon:'⇄', cls:'',    cor:'var(--gold)', bg:'var(--gold)15', tipoDB:'transferencia'},
+  transferencia:{label:'Transferência',    icon:'<->', cls:'',    cor:'var(--gold)', bg:'var(--gold)15', tipoDB:'transferencia'},
 };
 
 function abrirModal(tipo){
@@ -1594,8 +1594,8 @@ function setTipo(tipo){
   sCat.value = '';
 }
 
-// ── DATA RÁPIDA ──────────────────────────────────────────
-// ── CALENDÁRIO CUSTOMIZADO ───────────────────────────────
+// -- DATA RÁPIDA ------------------------------------------
+// -- CALENDÁRIO CUSTOMIZADO -------------------------------
 let _calData = new Date(); // data temporária selecionada no calendário
 let _calMes  = new Date(); // mês sendo exibido
 
@@ -1732,7 +1732,7 @@ function setDataRapida(qual, el){
   }
 }
 
-// ── PARCELAMENTO ─────────────────────────────────────────
+// -- PARCELAMENTO -----------------------------------------
 function toggleParcela(){
   const on = document.getElementById('togParcela').checked;
   document.getElementById('parcelaBox').classList.toggle('show',on);
@@ -1766,7 +1766,7 @@ function calcParcela(){
 // Recalcular ao mudar valor
 document.getElementById('fValor').addEventListener('input', ()=>{ if(document.getElementById('togParcela').checked) calcParcela(); });
 
-// ── FIXO ─────────────────────────────────────────────────
+// -- FIXO -------------------------------------------------
 function toggleFixo(){
   const on = document.getElementById('togFixo').checked;
   document.getElementById('recorrenteBox').classList.toggle('show',on);
@@ -1785,7 +1785,7 @@ function atualizarFixoResumo(){
   el.textContent = `${n} lançamento${n!==1?'s':''}`;
 }
 
-// ── SEÇÃO MAIS DETALHES ──────────────────────────────────
+// -- SEÇÃO MAIS DETALHES ----------------------------------
 function toggleSecao(){
   const cols   = document.getElementById('secCols');
   const toggle = document.getElementById('secDetalhes');
@@ -1805,14 +1805,14 @@ function toggleSecao(){
   }
 }
 
-// ── ANEXO ────────────────────────────────────────────────
+// -- ANEXO ------------------------------------------------
 function onAnexoChange(){
   const input = document.getElementById('fAnexo');
   const file  = input.files[0];
   if(!file) return;
   if(file.size > 5*1024*1024){ showAlert('Arquivo muito grande. Máximo 5MB.','error'); return; }
   _anexoArquivo = file;
-  const icons = {'application/pdf':'📄','image/png':'🖼','image/jpeg':'🖼'};
+  const icons = {'application/pdf':'[doc]','image/png':'🖼','image/jpeg':'🖼'};
   document.getElementById('pdfPreviewIcon').textContent = icons[file.type]||'📎';
   document.getElementById('pdfPreviewName').textContent = file.name;
   document.getElementById('pdfPreviewSize').textContent = (file.size/1024).toFixed(1)+' KB';
@@ -1827,7 +1827,7 @@ function removerAnexo(){
 }
 function verPDF(url){ window.open(url,'_blank'); }
 
-// ── UPLOAD ARQUIVO ────────────────────────────────────────
+// -- UPLOAD ARQUIVO ----------------------------------------
 async function uploadAnexo(file, transId){
   const ext = file.name.split('.').pop();
   const path = `mandala/transacoes/${transId}.${ext}`;
@@ -1841,7 +1841,7 @@ async function uploadAnexo(file, transId){
   return null;
 }
 
-// ── SALVAR ───────────────────────────────────────────────
+// -- SALVAR -----------------------------------------------
 async function salvarLancamento(){
   const btn = document.getElementById('btnSalvar');
   const desc  = document.getElementById('fDesc').value.trim();
@@ -1862,7 +1862,7 @@ async function salvarLancamento(){
   btn.disabled=true; btn.textContent='Salvando...';
   console.log('[DEBUG] _editId ao salvar:', _editId);
 
-  // ── EDIÇÃO: atualiza apenas este lançamento pelo id ──────
+  // -- EDIÇÃO: atualiza apenas este lançamento pelo id ------
   if(_editId){
     const h = hdrs();
     const patchPayload = {
@@ -1885,7 +1885,7 @@ async function salvarLancamento(){
         body: JSON.stringify(patchPayload)
       });
       if(res.ok || res.status===204){
-        showAlert('✅ Lançamento atualizado com sucesso!');
+        showAlert('[OK] Lançamento atualizado com sucesso!');
         fecharModal();
         await loadTransacoes();
       } else {
@@ -1924,10 +1924,10 @@ async function salvarLancamento(){
   const repetir    = parseInt(document.getElementById('fRepetir').value)||0;
   const diaVenc    = parseInt(document.getElementById('fDiaVenc').value)||null;
 
-  // ── Payload com apenas colunas garantidamente existentes na tabela ──
+  // -- Payload com apenas colunas garantidamente existentes na tabela --
   // Colunas confirmadas: id, empresa/condominio_id, tipo, descricao, valor, data, categoria_id, conta_id, situacao
   // Colunas opcionais (adicionadas só se existirem): observacao, recorrente, parcela_atual, parcela_total, forma, fluxo
-  // ── Payload multi-tenant: condominio_id isola os dados por condomínio ──
+  // -- Payload multi-tenant: condominio_id isola os dados por condomínio --
   // CONDO_ID vem do perfil do usuário logado (usuarios.condominio_id)
   // Cada registro fica associado ao condomínio correto automaticamente
   const basePayload = {
@@ -1980,7 +1980,7 @@ async function salvarLancamento(){
       showAlert(`${nParcelas} parcelas criadas com sucesso!`);
     } else if(fixo){
       // DESPESA/RECEITA FIXA: cria 1 lançamento por mês
-      // repetir: 0=indefinido→12 meses, ou o valor escolhido
+      // repetir: 0=indefinido->12 meses, ou o valor escolhido
       const nMeses    = repetir > 0 ? repetir : 12;
       const diaVencNum = diaVenc || new Date(data).getDate();
       const hoje      = new Date();
@@ -2022,7 +2022,7 @@ async function salvarLancamento(){
       }
       const results = await Promise.all(promises);
       idsGerados = results.map(r=>r?.id).filter(Boolean);
-      showAlert(`✅ ${nMeses} lançamentos fixos criados (${nMeses} meses)!`);
+      showAlert(`[OK] ${nMeses} lançamentos fixos criados (${nMeses} meses)!`);
 
     } else {
       // Lançamento avulso normal — data já está no basePayload
@@ -2045,7 +2045,7 @@ async function salvarLancamento(){
       const json = await res.json();
       const novo = Array.isArray(json)?json[0]:json;
       if(novo?.id) idsGerados = [novo.id];
-      showAlert('✅ Lançamento salvo com sucesso!');
+      showAlert('[OK] Lançamento salvo com sucesso!');
     }
 
     // upload do anexo na primeira transação criada
@@ -2066,7 +2066,7 @@ async function salvarLancamento(){
   btn.disabled=false; btn.textContent='Salvar lançamento';
 }
 
-// ── EDITAR ───────────────────────────────────────────────
+// -- EDITAR -----------------------------------------------
 async function editarTransacao(id){
   const t = _transacoes.find(t=>t.id===id);
   if(!t) return;
@@ -2132,7 +2132,7 @@ async function editarTransacao(id){
   document.getElementById('modalBg').classList.add('open');
 }
 
-// ── BAIXAR MODELO ─────────────────────────────────────────
+// -- BAIXAR MODELO -----------------------------------------
 function baixarModelo(){
   // Gera planilha modelo via SheetJS (XLSX) no browser
   const wb = XLSX.utils.book_new();
@@ -2174,7 +2174,7 @@ function baixarModelo(){
   XLSX.writeFile(wb, `Modelo_Transacoes_${MESES[_mes]}_${_ano}.xlsx`);
 }
 
-// ── EXPORTAR MÊS ─────────────────────────────────────────
+// -- EXPORTAR MÊS -----------------------------------------
 function exportarExcel(){
   if(!_transacoes.length){ showAlert('Nenhuma transação para exportar.','error'); return; }
 
@@ -2219,10 +2219,10 @@ function exportarExcel(){
   ws['!cols'] = [{wch:14},{wch:12},{wch:30},{wch:25},{wch:20},{wch:25},{wch:14},{wch:12},{wch:8},{wch:30}];
   XLSX.utils.book_append_sheet(wb, ws, `${MESES[_mes]} ${_ano}`);
   XLSX.writeFile(wb, `Transacoes_${MESES[_mes]}_${_ano}.xlsx`);
-  showAlert(`✅ Exportado: ${_transacoes.length} lançamentos de ${MESES[_mes]} ${_ano}`);
+  showAlert(`[OK] Exportado: ${_transacoes.length} lançamentos de ${MESES[_mes]} ${_ano}`);
 }
 
-// ── IMPORTAR ─────────────────────────────────────────────
+// -- IMPORTAR ---------------------------------------------
 let _dadosImport = [];
 
 function abrirImportar(){
@@ -2316,7 +2316,7 @@ function processarArquivo(file){
         document.getElementById('btnConfirmarImport').style.display='none';
         return;
       }
-      st.innerHTML=`<span style="color:#22c55e">✅ ${_dadosImport.length} lançamento(s) encontrado(s) para importar.</span>`;
+      st.innerHTML=`<span style="color:#22c55e">[OK] ${_dadosImport.length} lançamento(s) encontrado(s) para importar.</span>`;
 
       // Tabela preview
       const prev = document.getElementById('importPreview');
@@ -2363,12 +2363,12 @@ async function confirmarImportacao(){
   }
   fecharImportar();
   await loadTransacoes();
-  showAlert(`✅ Importação concluída: ${ok} lançamento(s) inserido(s)${erros>0?' | ⚠ '+erros+' erro(s)':''}`);
+  showAlert(`[OK] Importação concluída: ${ok} lançamento(s) inserido(s)${erros>0?' | ⚠ '+erros+' erro(s)':''}`);
   btn.disabled=false;
 }
 
-// ── DELETAR ───────────────────────────────────────────────
-// ── ESTADO DE EXCLUSÃO ───────────────────────────────────
+// -- DELETAR -----------------------------------------------
+// -- ESTADO DE EXCLUSÃO -----------------------------------
 let _deleteId   = null;
 let _deleteOpt  = 'este'; // 'este' | 'todos'
 
@@ -2390,7 +2390,7 @@ function _deletarFn(id){
   let desc = '<strong>' + (t.descricao||'Lançamento') + '</strong>';
   if(ehParcelado) desc += '<br><span style="color:#2563eb">Parcela ' + (t.parcela_atual||'?') + ' de ' + t.parcela_total + '</span>';
   if(ehFixo)      desc += '<br><span style="color:#a855f7">🔄 Lançamento fixo</span>';
-  desc += '<br><span style="color:#ef4444;font-size:12px">⚠️ Esta ação não pode ser desfeita.</span>';
+  desc += '<br><span style="color:#ef4444;font-size:12px">[!] Esta ação não pode ser desfeita.</span>';
   document.getElementById('confirmDesc').innerHTML = desc;
 
   const opcoes = document.getElementById('confirmOpcoes');
@@ -2401,25 +2401,25 @@ function _deletarFn(id){
     opcoes.style.display = 'flex';
     opcoes.innerHTML = `
       <button class="confirm-opt selected" id="optEste" onclick="window._selecionarOpt('este')">
-        <span class="confirm-opt-icon">📄</span>
+        <span class="confirm-opt-icon">[doc]</span>
         <div><div class="confirm-opt-label">Somente este ${tipoLabel}</div>
         <div class="confirm-opt-sub">Remove apenas ${mesRef}</div></div>
       </button>
       <button class="confirm-opt" id="optProximos" onclick="window._selecionarOpt('proximos')">
-        <span class="confirm-opt-icon">⏭️</span>
+        <span class="confirm-opt-icon">>></span>
         <div><div class="confirm-opt-label">Este e os próximos</div>
         <div class="confirm-opt-sub">Remove ${mesRef} em diante</div></div>
       </button>
       <button class="confirm-opt" id="optTodos" onclick="window._selecionarOpt('todos')">
-        <span class="confirm-opt-icon">🗂️</span>
+        <span class="confirm-opt-icon">[serie]</span>
         <div><div class="confirm-opt-label">${todosLabel}</div>
         <div class="confirm-opt-sub">Remove toda a série completa</div></div>
-      </button>``
+      </button>`;
   } else {
     opcoes.style.display = 'none';
     opcoes.innerHTML = '';
   }
-  document.getElementById('confirmDesc').innerHTML += '<br><span style="color:#ef4444;font-size:12px;font-weight:600">⚠️ Esta ação não pode ser desfeita.</span>';
+  document.getElementById('confirmDesc').innerHTML += '<br><span style="color:#ef4444;font-size:12px;font-weight:600">[!] Esta ação não pode ser desfeita.</span>';
   document.getElementById('confirmBg').classList.add('open');
 }
 window._selecionarOpt = function(opt){
@@ -2458,7 +2458,7 @@ window._executarDelete = async function(){
         ? BASE + '/condo_transacoes?condominio_id=eq.' + condoId + '&descricao=eq.' + descEnc + '&tipo=eq.' + t.tipo + '&parcela_total=eq.' + t.parcela_total
         : BASE + '/condo_transacoes?condominio_id=eq.' + condoId + '&descricao=eq.' + descEnc + '&tipo=eq.' + t.tipo + '&recorrente=eq.true';
       var res = await fetch(url, {method:'DELETE', headers:h});
-      if(res.ok || res.status===204){ showAlert('✅ Série excluída!'); window._fecharConfirm(); await loadTransacoes(); }
+      if(res.ok || res.status===204){ showAlert('[OK] Série excluída!'); window._fecharConfirm(); await loadTransacoes(); }
       else showAlert('Erro ao excluir série.','error');
 
     } else if(deleteOpt === 'proximos' && (t.parcela_total || t.recorrente)){
@@ -2467,14 +2467,14 @@ window._executarDelete = async function(){
         ? BASE + '/condo_transacoes?condominio_id=eq.' + condoId + '&descricao=eq.' + descEnc + '&tipo=eq.' + t.tipo + '&parcela_total=eq.' + t.parcela_total + '&parcela_atual=gte.' + t.parcela_atual
         : BASE + '/condo_transacoes?condominio_id=eq.' + condoId + '&descricao=eq.' + descEnc + '&tipo=eq.' + t.tipo + '&recorrente=eq.true&data=gte.' + dataEnc;
       var res2 = await fetch(url2, {method:'DELETE', headers:h});
-      if(res2.ok || res2.status===204){ showAlert('✅ Lançamentos excluídos!'); window._fecharConfirm(); await loadTransacoes(); }
+      if(res2.ok || res2.status===204){ showAlert('[OK] Lançamentos excluídos!'); window._fecharConfirm(); await loadTransacoes(); }
       else showAlert('Erro ao excluir.','error');
 
     } else {
       var res3 = await fetch(BASE + '/condo_transacoes?id=eq.' + deleteId + '&condominio_id=eq.' + condoId, {method:'DELETE', headers:h});
       var body = await res3.text();
       if(res3.status===204 || res3.ok){
-        showAlert('✅ Lançamento removido!');
+        showAlert('[OK] Lançamento removido!');
         window._fecharConfirm();
         await loadTransacoes();
       } else {
@@ -2487,7 +2487,7 @@ window._executarDelete = async function(){
   btn.disabled = false; btn.textContent = '🗑 Excluir';
 };
 
-// ── FECHAR MODAL FORA ────────────────────────────────────
+// -- FECHAR MODAL FORA ------------------------------------
 // Modal de lançamento só fecha pelo botão Cancelar ou X
 // document.getElementById('modalBg').addEventListener('click',...) removido intencionalmente
 
@@ -2496,7 +2496,7 @@ document.getElementById('confirmBg').addEventListener('click',e=>{
   if(e.target===document.getElementById('confirmBg')) window._fecharConfirm && window._fecharConfirm();
 });
 
-// ── FAB ──────────────────────────────────────────────────
+// -- FAB --------------------------------------------------
 function fabAbre(tipo){
   fecharFab();
   abrirModal(tipo);
@@ -2523,7 +2523,7 @@ document.addEventListener('click', function(e){
   }
 });
 
-// ── Expor funções para os stubs e sinalizar que o module está pronto ──
+// -- Expor funções para os stubs e sinalizar que o module está pronto --
 window._toggleFab = toggleFab;
 window._fabAbre = fabAbre;
 window._mudarMes = mudarMes;
@@ -2560,7 +2560,7 @@ window._onAnexoChange = typeof onAnexoChange !== 'undefined' ? onAnexoChange : (
 window._deletar = _deletarFn; // OK
 window._flushPending(); // executa chamadas que ficaram em fila enquanto o module carregava
 
-// ── INIT ─────────────────────────────────────────────────
+// -- INIT -------------------------------------------------
 // script type="module" executa após DOM estar pronto — chama diretamente
 document.getElementById('mesAtual').textContent = `${MESES[_mes]} ${_ano}`;
 await loadAll();
