@@ -743,7 +743,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
       <input type="date" id="fData" style="display:none"/>
       <!-- Calendário customizado -->
       <div id="calWrap" style="display:none;position:relative;">
-        <div id="calDisplay" onclick="toggleCal()" style="
+        <div id="calDisplay" onclick="toggleCal(event)" style="
           background:var(--white);border:1px solid var(--gold);border-radius:8px;
           padding:10px 14px;font-size:14px;color:var(--text-dark);cursor:pointer;
           display:flex;align-items:center;gap:8px;user-select:none;">
@@ -979,37 +979,16 @@ function exportarExcel() { if(window._exportarExcel) window._exportarExcel(); }
 function baixarModelo() { if(window._baixarModelo) window._baixarModelo(); }
 function abrirImportar() { if(window._abrirImportar) window._abrirImportar(); }
 function confirmarImportacao() { if(window._confirmarImportacao) window._confirmarImportacao(); }
-function selecionarOpt(opt, el) { if(window._selecionarOpt) window._selecionarOpt(opt, el); }
+function selecionarOpt(e,v,l) { if(window._selecionarOpt) window._selecionarOpt(e,v,l); }
 function setDataRapida(v) { if(window._setDataRapida) window._setDataRapida(v); }
-function toggleCal() { if(window._toggleCal) window._toggleCal(); }
-function calNavMes(d) { if(window._calNavMes) window._calNavMes(d); }
-function calToggleAno() { if(window._calToggleAno) window._calToggleAno(); }
-function calSelecionarDia(d) { if(window._calSelecionarDia) window._calSelecionarDia(d); }
-function calConfirmar() { if(window._calConfirmar) window._calConfirmar(); }
-function removerAnexo() { if(window._removerAnexo) window._removerAnexo(); }
-function toggleSecao(id) { if(window._toggleSecao) window._toggleSecao(id); }
-function fazerLogout() { if(window._fazerLogout) window._fazerLogout(); }
-function toggleParcela(v) { if(window._toggleParcela) window._toggleParcela(v); }
-function toggleFixo(v) { if(window._toggleFixo) window._toggleFixo(v); }
-function verPDF(url) { if(window._verPDF) window._verPDF(url); }
-function handleDrop(e) { if(window._handleDrop) window._handleDrop(e); }
-function uploadAnexo() { if(window._uploadAnexo) window._uploadAnexo(); }
-</script>
-
-<script type="module">
-
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-(async () => {
-const _sb = createClient('https://siczyohqmlrmirqgzlxb.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw')
-
-// Auth CondoGestor
-const { data: { session: _sess } } = await _sb.auth.getSession()
-if (!_sess) { window.location.href = '/login.html'; throw new Error() }
-const { data: _perfil } = await _sb.from('usuarios').select('nome, role, condominio_id').eq('id', _sess.user.id).single()
-if (!_perfil || _perfil.role !== 'sindico') {
-  const _d = { administradora: '/admin/index.html', morador: '/morador/index.html' }
-  window.location.href = _d[_perfil?.role] || '/login.html'; throw new Error()
+function toggleCal(e){
+ if(e) e.stopPropagation();
+ const panel = document.getElementById('calPanel');
+ const aberto = panel.style.display !== 'none';
+ panel.style.display = aberto ? 'none' : 'block';
+ if(!aberto) calRenderizar();
 }
+
 
 // Variáveis globais compatíveis com o código existente
 const CONDO_ID = _perfil.condominio_id
@@ -1032,7 +1011,6 @@ window.trocarCondo = () => {} // síndico tem só 1 condomínio
 
 
 // _h removido — usar hdrs() que pega o token real do usuario logado
-const SUPA_URL = 'https://siczyohqmlrmirqgzlxb.supabase.co';
 const _BASE = 'https://siczyohqmlrmirqgzlxb.supabase.co/rest/v1';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw';
 
@@ -1074,16 +1052,11 @@ const fmtDate = d => { if(!d) return '—'; const p=d.split('-'); return `${p[2]
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
 function showAlert(msg,type='success'){
- const el=document.getElementById('alert');
- el.className=`alert ${type}`;
- el.style.display='flex';
- el.style.opacity='1';
- el.innerHTML=msg;
- setTimeout(()=>{
-  el.style.opacity='0';
-  setTimeout(()=>{ el.style.display='none'; el.style.opacity='1'; },250);
- },3000);
+  const el=document.getElementById('alert');
+  el.textContent=msg; el.className=`alert ${type}`; el.style.display='block';
+  setTimeout(()=>el.style.display='none',4000);
 }
+
 // -- MÊS --------------------------------------------------
 function mudarMes(d){
   _mes+=d;
@@ -1172,387 +1145,15 @@ function toggleTipoMenu(){
   const m = document.getElementById('tipoMenu');
   m.style.display = m.style.display==='none' ? 'block' : 'none';
 }
-document.addEventListener('click', e=>{
-  const menu = document.getElementById('tipoMenu');
-  const btn  = document.getElementById('btnTipoFiltro');
-  if(menu && btn && !btn.contains(e.target) && !menu.contains(e.target)){
-    menu.style.display='none';
-  }
-});
-function setTipoFiltro(tipo, icon, label, cor){
-  _tipoFiltro = tipo;
-  const btn = document.getElementById('btnTipoFiltro');
-  document.getElementById('tipoFiltroIcon').textContent  = icon;
-  document.getElementById('tipoFiltroLabel').textContent = label;
-  btn.style.background = cor;
-  btn.style.color = '#fff';
-  if(cor==='var(--gold)'||cor==='#22c55e') btn.style.color='var(--off-white)';
-  document.getElementById('tipoMenu').style.display='none';
-  // Reset filtro secundário
-  _filtro='todos';
-  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
-  document.querySelector('.filter-chip')?.classList.add('active');
-  renderCards();
-  renderTabela();
-}
-
-// -- CARDS -------------------------------------------------
-function renderCards(){
-  const rec    = _transacoes.filter(t=>t.tipo==='receita').reduce((s,t)=>s+parseFloat(t.valor||0),0);
-  const des    = _transacoes.filter(t=>t.tipo==='despesa').reduce((s,t)=>s+parseFloat(t.valor||0),0);
-  const saldo  = rec - des;
-  const saldoTotal = _saldoAnterior + saldo; // saldo acumulado com meses anteriores
-
-  const desPend = _transacoes.filter(t=>t.tipo==='despesa'&&t.situacao==='pendente').reduce((s,t)=>s+parseFloat(t.valor||0),0);
-  const desPaga = _transacoes.filter(t=>t.tipo==='despesa'&&t.situacao!=='pendente').reduce((s,t)=>s+parseFloat(t.valor||0),0);
-  const recPend = _transacoes.filter(t=>t.tipo==='receita'&&t.situacao==='pendente').reduce((s,t)=>s+parseFloat(t.valor||0),0);
-  const recPaga = _transacoes.filter(t=>t.tipo==='receita'&&t.situacao!=='pendente').reduce((s,t)=>s+parseFloat(t.valor||0),0);
-
-  const wrap = document.getElementById('cardsWrap');
-  if(!wrap) return;
-
-  if(_tipoFiltro==='despesa'){
-    wrap.style.gridTemplateColumns='repeat(3,1fr)';
-    wrap.innerHTML=`
-      <div class="card">
-        <div class="card-label">⏳ Despesas Pendentes</div>
-        <div class="card-val red">${fmt(desPend)}</div>
-      </div>
-      <div class="card">
-        <div class="card-label">✓ Despesas Pagas</div>
-        <div class="card-val" style="color:#f97316">${fmt(desPaga)}</div>
-      </div>
-      <div class="card">
-        <div class="card-label">📊 Total Despesas</div>
-        <div class="card-val red">${fmt(des)}</div>
-      </div>`;
-  } else if(_tipoFiltro==='receita'){
-    wrap.style.gridTemplateColumns='repeat(3,1fr)';
-    wrap.innerHTML=`
-      <div class="card">
-        <div class="card-label">⏳ Receitas Pendentes</div>
-        <div class="card-val" style="color:var(--gold)">${fmt(recPend)}</div>
-      </div>
-      <div class="card">
-        <div class="card-label">✓ Receitas Recebidas</div>
-        <div class="card-val green">${fmt(recPaga)}</div>
-      </div>
-      <div class="card">
-        <div class="card-label">📊 Total Receitas</div>
-        <div class="card-val green">${fmt(rec)}</div>
-      </div>`;
-  } else {
-    // Todos — mostra saldo com mês anterior
-    wrap.style.gridTemplateColumns='repeat(4,1fr)';
-    wrap.innerHTML=`
-      <div class="card">
-        <div class="card-label">💰 Receitas</div>
-        <div class="card-val green">${fmt(rec)}</div>
-      </div>
-      <div class="card">
-        <div class="card-label">💸 Despesas</div>
-        <div class="card-val red">${fmt(des)}</div>
-      </div>
-      <div class="card">
-        <div class="card-label">📊 Saldo do Mês</div>
-        <div class="card-val ${saldo>=0?'green':'red'}">${fmt(saldo)}</div>
-      </div>
-      <div class="card" title="Saldo acumulado incluindo meses anteriores">
-        <div class="card-label">🏦 Saldo Total</div>
-        <div class="card-val ${saldoTotal>=0?'blue':'red'}">${fmt(saldoTotal)}</div>
-        <div style="font-size:10px;color:var(--text-mid);margin-top:3px">inclui meses anteriores</div>
-      </div>`;
-  }
-}
-
-// -- TABELA -----------------------------------------------
-function renderTabela(){
-  const busca   = document.getElementById('busca').value.toLowerCase();
-  const catMap  = Object.fromEntries(_categorias.map(c=>[c.id,c]));
-  const contaMap= Object.fromEntries(_contas.map(c=>[c.id,c]));
-  let lista = _transacoes.filter(t=>{
-    // Filtro de tipo principal (dropdown)
-    if(_tipoFiltro==='despesa'      && t.tipo!=='despesa') return false;
-    if(_tipoFiltro==='receita'      && t.tipo!=='receita') return false;
-    if(_tipoFiltro==='transferencia'&& t.tipo!=='transferencia') return false;
-    // Filtros secundários
-    if(_filtro==='pendente' && t.situacao!=='pendente') return false;
-    if(_filtro==='parcelado'&& !t.parcela_total) return false;
-    if(_filtro==='fixo'     && !t.recorrente) return false;
-    if(busca){
-      const cat = catMap[t.categoria_id];
-      const catNome  = (cat?.categoria||'').toLowerCase();
-      const subNome  = (cat?.nome||'').toLowerCase();
-      const descNome = (t.descricao||'').toLowerCase();
-      if(!descNome.includes(busca) && !catNome.includes(busca) && !subNome.includes(busca)) return false;
-    }
-    return true;
-  });
-
-  if(lista.length===0){
-    document.getElementById('listaTransacoes').innerHTML=
-      `<div class="empty-state">Nenhuma transação encontrada para este período.</div>`;
-    return;
-  }
-
-
-  // -- Calcular totais da lista filtrada ------------------
-  const totalRec = lista.filter(t=>t.tipo==='receita').reduce((s,t)=>s+parseFloat(t.valor||0),0);
-  const totalDes = lista.filter(t=>t.tipo==='despesa').reduce((s,t)=>s+parseFloat(t.valor||0),0);
-  const totalLiq = totalRec - totalDes;
-  const qtd      = lista.length;
-
-  const linhas = lista.map(t=>{
-    const cat   = catMap[t.categoria_id];
-    const conta = contaMap[t.conta_id];
-    const tp    = t.tipo==='receita' ? 'rec' : 'des';
-    const sit   = t.situacao||'pago';
-    const sitLabel = {pago:'Pago',pendente:'Pendente',agendado:'Agendado'}[sit]||sit;
-    const ehParcelado = t.parcela_total && !t.recorrente;
-    const parTag = ehParcelado ? `<span class="parcela-tag">${t.parcela_atual||1}/${t.parcela_total}</span>` : '';
-    const fixaTag= t.recorrente ? `<span class="fixa-tag">🔄</span>` : '';
-    const pdfTag = t.anexo_url     ? `<span class="pdf-tag" onclick="event.stopPropagation();verPDF('${t.anexo_url}')" title="Ver comprovante">📎</span>` : '';
-    return `<div class="table-row" onclick="editarTransacao(${t.id})">
-      <div><div class="tipo-icon ${tp}">${t.tipo==='receita'?'↑':'↓'}</div></div>
-      <div style="font-size:13px;color:var(--text-light)">${fmtDate(t.data)}</div>
-      <div class="desc-cell">
-        <div class="desc-main">${t.descricao||'—'}${parTag}${fixaTag}${pdfTag}</div>
-        ${t.observacao ? `<div class="desc-sub">${t.observacao.substring(0,50)}</div>` : ''}
-      </div>
-      <div>
-        ${cat ? `
-          <div style="display:flex;flex-direction:column;gap:3px">
-            ${cat.categoria ? `<span style="font-size:10px;color:var(--text-mid);font-weight:600;text-transform:uppercase;letter-spacing:.04em">${cat.categoria}</span>` : ''}
-            <span class="cat-badge">${cat.icone||''} ${cat.nome}</span>
-          </div>` : '<span style="color:#4a5568">—</span>'}
-      </div>
-      <div style="font-size:13px;color:var(--text-light)">${conta ? conta.nome : '—'}</div>
-      <div class="val-cell ${tp}">${t.tipo==='despesa'?'- ':'+ '}${fmt(t.valor)}</div>
-      <div><span class="sit-badge ${sit}">${sitLabel}</span></div>
-      <div class="row-actions">
-        <button onclick="event.stopPropagation();window._editarTransacao&&window._editarTransacao(${t.id})" style="background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Editar</button>
-      </div>
-    </div>`;
-  }).join('');
-
-  // -- Rodapé totalizador ----------------------------------
-  const rodape = `<div style="
-    display:grid;
-    grid-template-columns:36px 100px 1fr 180px 140px 110px 100px 60px;
-    gap:8px;padding:14px 20px;
-    background:var(--white);
-    border-top:2px solid var(--border);
-    border-radius:0 0 12px 12px;
-    align-items:center;
-  ">
-    <div></div>
-    <div style="font-size:11px;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:.05em">
-      ${qtd} lançamento${qtd!==1?'s':''}
-    </div>
-    <div style="font-size:12px;color:var(--text-mid)">Total filtrado</div>
-    <div></div>
-    <div></div>
-    <div style="text-align:right">
-      ${totalRec>0 && totalDes>0 ? `
-        <div style="font-size:11px;color:#22c55e;margin-bottom:2px">+ ${fmt(totalRec)}</div>
-        <div style="font-size:11px;color:#ef4444;margin-bottom:2px">- ${fmt(totalDes)}</div>
-        <div style="font-size:13px;font-weight:800;color:${totalLiq>=0?'#22c55e':'#ef4444'};border-top:1px solid var(--border);padding-top:3px">${totalLiq>=0?'+':'-'} ${fmt(Math.abs(totalLiq))}</div>
-      ` : totalDes>0 ? `
-        <div style="font-size:15px;font-weight:800;color:#ef4444">- ${fmt(totalDes)}</div>
-      ` : `
-        <div style="font-size:15px;font-weight:800;color:#22c55e">+ ${fmt(totalRec)}</div>
-      `}
-    </div>
-    <div></div>
-    <div></div>
-  </div>`;
-
-  document.getElementById('listaTransacoes').innerHTML = linhas + rodape;
-}
-
-// -- MODAL ------------------------------------------------
-const TIPO_CONFIG = {
-  despesa:      {label:'Nova Despesa',     icon:'↓', cls:'des', cor:'#ef4444', bg:'#ef444415', tipoDB:'despesa'},
-  receita:      {label:'Nova Receita',     icon:'↑', cls:'rec', cor:'#22c55e', bg:'#22c55e15', tipoDB:'receita'},
-  cartao:       {label:'Despesa Cartão',   icon:'💳',cls:'des', cor:'var(--blue)', bg:'var(--blue)15', tipoDB:'despesa'},
-  transferencia:{label:'Transferência',    icon:'⇄', cls:'',    cor:'var(--gold)', bg:'var(--gold)15', tipoDB:'transferencia'},
-};
-
-function abrirModal(tipo){
-  _editId = null;
-  _tipoAtual = tipo||'despesa';
-  const cfg = TIPO_CONFIG[_tipoAtual] || TIPO_CONFIG.despesa;
-  document.getElementById('mTitulo').textContent = cfg.label;
-  limparModal();
-
-  const badge = document.getElementById('tipoBadge');
-  const clsMap = {despesa:'des',receita:'rec',cartao:'cartao',transferencia:'transf'};
-  const cls = clsMap[tipo]||'des';
-  badge.className = `tipo-badge show ${cls}`;
-  badge.innerHTML = `<span style="font-size:18px">${cfg.icon}</span> ${cfg.label}`;
-
-  setTipo(_tipoAtual);
-  setDataRapida('hoje', document.getElementById('dqHoje'));
-  document.getElementById('modalBg').classList.add('open');
-}
-
-function fecharModal(){
-  document.getElementById('modalBg').classList.remove('open');
-  _editId=null; _anexoArquivo=null;
-  document.getElementById('btnSalvar').textContent = 'Salvar lançamento';
-  const calWrpF = document.getElementById('calWrap'); if(calWrpF) calWrpF.style.display='none';
-  const calPnlF = document.getElementById('calPanel'); if(calPnlF) calPnlF.style.display='none';
-}
-
-function limparModal(){
-  ['fDesc','fValor','fObs','fDiaVenc'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-  document.getElementById('fSit').value='pago';
-  document.getElementById('fCat').value='';
-  document.getElementById('fConta').value='';
-  document.getElementById('togParcela').checked=false;
-  document.getElementById('togFixo').checked=false;
-  document.getElementById('parcelaBox').classList.remove('show');
-  document.getElementById('recorrenteBox').classList.remove('show');
-  document.getElementById('fParcelas').value='2';
-  document.getElementById('fValParcela').value='';
-  document.getElementById('parcelaInfo').textContent='Será criado 1 lançamento por parcela, totalizando 0 lançamentos.';
-  removerAnexo();
-  // fechar seção detalhes
-  document.getElementById('secCols').classList.remove('open');
-  document.getElementById('secDetalhes').classList.remove('open');
-  document.querySelector('.modal').classList.remove('expandido');
-  const lbl = document.getElementById('secLabel');
-  if(lbl) lbl.textContent = 'Mais detalhes';
-  // data rápida reset
-  document.querySelectorAll('.dq-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('dqHoje').classList.add('active');
-  document.getElementById('fData').style.display='none';
-  var bxn=document.getElementById('btnExcluirModal'); if(bxn) bxn.style.display='none';
-}
-
-function setTipo(tipo){
-  _tipoAtual = tipo;
-  const cfg = TIPO_CONFIG[tipo] || TIPO_CONFIG.despesa;
-
-  // Ícone e cor do header do modal
-  const icon = document.getElementById('mIcone');
-  const corMap={despesa:'#dc2626',receita:'#16a34a',cartao:'#2563eb',transferencia:'#d97706'};
-  const bgMap={despesa:'#fee2e2',receita:'#dcfce7',cartao:'#dbeafe',transferencia:'#fef3c7'};
-  const barMap={despesa:'#ef4444',receita:'#22c55e',cartao:'#3b82f6',transferencia:'#f59e0b'};
-  const subMap={despesa:'Saida financeira',receita:'Entrada financeira',cartao:'Despesa cartao',transferencia:'Transferencia entre contas'};
-  const labelMap={despesa:'Nova Despesa',receita:'Nova Receita',cartao:'Novo Cartao',transferencia:'Transferencia'};
-  if(icon){ icon.textContent=cfg.icon; icon.style.background=bgMap[tipo]||'#fee2e2'; icon.style.color=corMap[tipo]||'#dc2626'; }
-  const bar=document.getElementById('mHeaderBar'); if(bar) bar.style.background=barMap[tipo]||'#ef4444';
-  const tit=document.getElementById('mTitulo'); if(tit){ tit.textContent=labelMap[tipo]||cfg.label; tit.style.color=corMap[tipo]||'#dc2626'; }
-  const sub=document.getElementById('mSubtitulo'); if(sub) sub.textContent=subMap[tipo]||'';
-
-  // Mostrar info extra para cartão
-  const infoCartao = document.getElementById('infoCartao');
-  if(infoCartao) infoCartao.style.display = tipo==='cartao' ? 'block' : 'none';
-
-  // Mostrar info extra para transferência
-  const infoTransf = document.getElementById('infoTransf');
-  if(infoTransf) infoTransf.style.display = tipo==='transferencia' ? 'block' : 'none';
-
-  // Filtrar categorias pelo tipo real (receita/despesa)
-  const tipoDB = cfg.tipoDB;
-  Array.from(document.getElementById('fCat').options).forEach(opt=>{
-    if(!opt.value) return;
-    const cat = _categorias.find(c=>c.id==opt.value);
-    if(cat) opt.style.display = (tipoDB==='transferencia' || cat.tipo===tipoDB) ? '' : 'none';
-  });
-  document.getElementById('fCat').value = '';
-}
-
-// -- DATA RÁPIDA ------------------------------------------
-// -- CALENDÁRIO CUSTOMIZADO -------------------------------
-let _calData = new Date(); // data temporária selecionada no calendário
-let _calMes  = new Date(); // mês sendo exibido
-
-const MESES_CAL = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
-
-function calRenderizar(){
-  const ano = _calMes.getFullYear();
-  const mes = _calMes.getMonth();
-  document.getElementById('calAno').textContent = ano;
-  document.getElementById('calMesNome').textContent = MESES_CAL[mes] + ' ' + ano;
-
-  const grid = document.getElementById('calGrid');
-  grid.innerHTML = '';
-
-  const primeiroDia = new Date(ano, mes, 1).getDay(); // 0=dom
-  const diasNoMes   = new Date(ano, mes+1, 0).getDate();
-
-  // Células vazias antes do dia 1
-  for(let i=0; i<primeiroDia; i++){
-    grid.innerHTML += '<div></div>';
-  }
-
-  const hoje = new Date();
-  const selY = _calData.getFullYear(), selM = _calData.getMonth(), selD = _calData.getDate();
-
-  for(let d=1; d<=diasNoMes; d++){
-    const isHoje   = d===hoje.getDate() && mes===hoje.getMonth() && ano===hoje.getFullYear();
-    const isSel    = d===selD && mes===selM && ano===selY;
-    const bg       = isSel ? 'var(--gold)' : isHoje ? 'var(--gold)30' : 'transparent';
-    const cor      = isSel ? '#000' : isHoje ? 'var(--gold)' : '#f1f5f9';
-    const fw       = isSel || isHoje ? '700' : '400';
-    grid.innerHTML += `<div onclick="calSelecionarDia(${d})" 
-      data-bg="${bg}" data-sel="${isSel ? 1 : 0}"
-      style="text-align:center;padding:6px 2px;border-radius:50%;cursor:pointer;
-      font-size:13px;background:${bg};color:${cor};font-weight:${fw};transition:.15s;"
-      onmouseover="if(!parseInt(this.dataset.sel))this.style.background='var(--border)'"
-      onmouseout="this.style.background=this.dataset.bg">${d}</div>`;
-  }
-}
-
-function calSelecionarDia(d){
-  _calData = new Date(_calMes.getFullYear(), _calMes.getMonth(), d);
-  calRenderizar();
-  // Confirma automaticamente ao clicar no dia
-  calConfirmar();
-}
-
-function calNavMes(dir){
-  _calMes = new Date(_calMes.getFullYear(), _calMes.getMonth() + dir, 1);
-  calRenderizar();
-}
-
-function calToggleAno(){
-  // Navega 1 ano para frente/trás com duplo clique — simples
-  const input = prompt('Digite o ano:', _calMes.getFullYear());
-  if(input && !isNaN(input)){
-    _calMes = new Date(parseInt(input), _calMes.getMonth(), 1);
-    calRenderizar();
-  }
-}
-
-function toggleCal(){
-  const panel = document.getElementById('calPanel');
-  const aberto = panel.style.display !== 'none';
-  panel.style.display = aberto ? 'none' : 'block';
-  if(!aberto) calRenderizar();
-}
-
-function fecharCal(){
-  document.getElementById('calPanel').style.display='none';
-}
-
-function calConfirmar(){
-  // Aplica a data selecionada no input hidden
-  const iso = _calData.toISOString().split('T')[0];
-  document.getElementById('fData').value = iso;
-  // Atualiza o display
-  const [y,m,d] = iso.split('-');
-  document.getElementById('calDisplayText').textContent = `${d}/${m}/${y}`;
+document.addEventListener('click', e => {
+ const wrap = document.getElementById('calWrap');
+ const panel = document.getElementById('calPanel');
+ if(!wrap || !panel) return;
+ if(!wrap.contains(e.target) && !panel.contains(e.target)){
   fecharCal();
-}
-
-// Fechar calendário ao clicar fora
-document.addEventListener('click', e=>{
-  const wrap = document.getElementById('calWrap');
-  if(wrap && !wrap.contains(e.target)) fecharCal();
+ }
 });
+
 
 function setDataRapida(qual, el){
   document.querySelectorAll('.dq-btn').forEach(b=>b.classList.remove('active'));
@@ -2221,24 +1822,24 @@ function deletar(id) {
   if (ehFixo) {
     opcoes.style.display = 'flex';
     opcoes.innerHTML = `
-      <button class="confirm-opt selected" onclick="selecionarOpt('este', this)">
- <span class=\"confirm-opt-icon\">📄</span>
+      <button class="confirm-opt selected" onclick="selecionarOpt('este')">
+        📄
         <div>
           <div class="confirm-opt-label">Somente este mês</div>
           <div class="confirm-opt-sub">Remove apenas o lançamento de ${mesRef}</div>
         </div>
       </button>
 
-      <button class="confirm-opt" onclick="selecionarOpt('proximos', this)">
- <span class=\"confirm-opt-icon\">📆</span>
+      <button class="confirm-opt" onclick="selecionarOpt('proximos')">
+        📆
         <div>
           <div class="confirm-opt-label">Este e os próximos</div>
           <div class="confirm-opt-sub">Remove a partir de ${mesRef}</div>
         </div>
       </button>
 
-      <button class="confirm-opt" onclick="selecionarOpt('todos', this)">
- <span class=\"confirm-opt-icon\">🗂️</span>
+      <button class="confirm-opt" onclick="selecionarOpt('todos')">
+        🗂️
         <div>
           <div class="confirm-opt-label">Toda a recorrência</div>
           <div class="confirm-opt-sub">Remove todos os lançamentos futuros</div>
@@ -2255,12 +1856,11 @@ function deletar(id) {
 }
 
 
-function selecionarOpt(opt, el){
- _deleteOpt = opt;
- document.querySelectorAll('.confirm-opt').forEach(btn=>btn.classList.remove('selected'));
- if(el) el.classList.add('selected');
+function selecionarOpt(opt){
+  _deleteOpt = opt;
+  document.getElementById('optEste')?.classList.toggle('selected', opt==='este');
+  document.getElementById('optTodos')?.classList.toggle('selected', opt==='todos');
 }
-
 
 function fecharConfirm(){
   document.getElementById('confirmBg').classList.remove('open');
@@ -2302,7 +1902,7 @@ async function executarDelete(){
       });
       const body = await res.text();
       if(res.status===204 || (res.ok && body!=='[]' && body!=='')){
-        showAlert('Lançamento excluído com sucesso.');
+        showAlert('Lançamento removido.');
         fecharConfirm();
         await loadTransacoes();
       } else if(body==='[]' || body===''){
@@ -2369,7 +1969,7 @@ window._toggleParcela=toggleParcela;window._toggleFixo=toggleFixo;window._verPDF
 window._handleDrop=handleDrop;window._uploadAnexo=uploadAnexo;window._deletar=deletar;
 document.getElementById('mesAtual').textContent = `${MESES[_mes]} ${_ano}`;
 await loadAll();
-})().catch(e => { console.error(e); });</script>
+</script>
 
 </body>
 </html>
