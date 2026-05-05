@@ -935,77 +935,60 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 </div><!-- /modal-bg -->
   </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
-
-// ── Expor funções para os stubs globais ──
-window._toggleFab = toggleFab;
-window._fabAbre = fabAbre;
-window._mudarMes = mudarMes;
-window._toggleTipoMenu = toggleTipoMenu;
-window._setTipoFiltro = setTipoFiltro;
-window._setFiltro = setFiltro;
-window._fecharModal = fecharModal;
-window._fecharConfirm = fecharConfirm;
-window._fecharCal = fecharCal;
-window._fecharImportar = fecharImportar;
-window._salvarLancamento = salvarLancamento;
-window._editarTransacao = editarTransacao;
-window._executarDelete = executarDelete;
-window._exportarExcel = exportarExcel;
-window._baixarModelo = baixarModelo;
-window._abrirImportar = abrirImportar;
-window._confirmarImportacao = confirmarImportacao;
-window._selecionarOpt = selecionarOpt;
-window._setDataRapida = setDataRapida;
-window._toggleCal = toggleCal;
-window._calNavMes = calNavMes;
-window._calToggleAno = calToggleAno;
-window._calSelecionarDia = calSelecionarDia;
-window._calConfirmar = calConfirmar;
-window._removerAnexo = removerAnexo;
-window._toggleSecao = toggleSecao;
-window._fazerLogout = typeof fazerLogout !== 'undefined' ? fazerLogout : () => {};
-window._toggleParcela = typeof toggleParcela !== 'undefined' ? toggleParcela : () => {};
-window._toggleFixo = typeof toggleFixo !== 'undefined' ? toggleFixo : () => {};
-window._verPDF = typeof verPDF !== 'undefined' ? verPDF : () => {};
-window._handleDrop = typeof handleDrop !== 'undefined' ? handleDrop : () => {};
-window._uploadAnexo = typeof uploadAnexo !== 'undefined' ? uploadAnexo : () => {};
-
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-// Stubs globais — chamam as funções reais quando o módulo carregar
-function toggleFab(e) { if(window._toggleFab) window._toggleFab(e); }
-function fabAbre(t) { if(window._fabAbre) window._fabAbre(t); }
-function mudarMes(d) { if(window._mudarMes) window._mudarMes(d); }
-function toggleTipoMenu() { if(window._toggleTipoMenu) window._toggleTipoMenu(); }
-function setTipoFiltro(t,l,i) { if(window._setTipoFiltro) window._setTipoFiltro(t,l,i); }
-function setFiltro(t) { if(window._setFiltro) window._setFiltro(t); }
-function fecharModal() { if(window._fecharModal) window._fecharModal(); }
-function fecharConfirm() { if(window._fecharConfirm) window._fecharConfirm(); }
-function fecharCal() { if(window._fecharCal) window._fecharCal(); }
-function fecharImportar() { if(window._fecharImportar) window._fecharImportar(); }
-function salvarLancamento() { if(window._salvarLancamento) window._salvarLancamento(); }
-function editarTransacao(id) { if(window._editarTransacao) window._editarTransacao(id); }
-function executarDelete() { if(window._executarDelete) window._executarDelete(); }
-function exportarExcel() { if(window._exportarExcel) window._exportarExcel(); }
-function baixarModelo() { if(window._baixarModelo) window._baixarModelo(); }
-function abrirImportar() { if(window._abrirImportar) window._abrirImportar(); }
-function confirmarImportacao() { if(window._confirmarImportacao) window._confirmarImportacao(); }
-function selecionarOpt(e,v,l) { if(window._selecionarOpt) window._selecionarOpt(e,v,l); }
-function setDataRapida(v) { if(window._setDataRapida) window._setDataRapida(v); }
-function toggleCal() { if(window._toggleCal) window._toggleCal(); }
-function calNavMes(d) { if(window._calNavMes) window._calNavMes(d); }
-function calToggleAno() { if(window._calToggleAno) window._calToggleAno(); }
-function calSelecionarDia(d) { if(window._calSelecionarDia) window._calSelecionarDia(d); }
-function calConfirmar() { if(window._calConfirmar) window._calConfirmar(); }
-function removerAnexo() { if(window._removerAnexo) window._removerAnexo(); }
-function toggleSecao(id) { if(window._toggleSecao) window._toggleSecao(id); }
-function fazerLogout() { if(window._fazerLogout) window._fazerLogout(); }
-function toggleParcela(v) { if(window._toggleParcela) window._toggleParcela(v); }
-function toggleFixo(v) { if(window._toggleFixo) window._toggleFixo(v); }
-function verPDF(url) { if(window._verPDF) window._verPDF(url); }
-function handleDrop(e) { if(window._handleDrop) window._handleDrop(e); }
-function uploadAnexo() { if(window._uploadAnexo) window._uploadAnexo(); }
+// ── Bridge pattern: enfileira chamadas enquanto o module ainda carrega ──
+window._moduleReady = false;
+window._pendingCalls = [];
+function _callWhenReady(fn, args) {
+  if (window._moduleReady && window['_' + fn]) {
+    window['_' + fn](...args);
+  } else {
+    window._pendingCalls.push({fn, args});
+  }
+}
+window._flushPending = function() {
+  window._moduleReady = true;
+  window._pendingCalls.forEach(({fn, args}) => {
+    if (window['_' + fn]) window['_' + fn](...args);
+  });
+  window._pendingCalls = [];
+};
+
+function toggleFab(e) { _callWhenReady('toggleFab', [e]); }
+function fabAbre(t) { _callWhenReady('fabAbre', [t]); }
+function mudarMes(d) { _callWhenReady('mudarMes', [d]); }
+function toggleTipoMenu() { _callWhenReady('toggleTipoMenu', []); }
+function setTipoFiltro(t,l,i) { _callWhenReady('setTipoFiltro', [t,l,i]); }
+function setFiltro(t) { _callWhenReady('setFiltro', [t]); }
+function fecharModal() { _callWhenReady('fecharModal', []); }
+function fecharConfirm() { _callWhenReady('fecharConfirm', []); }
+function fecharCal() { _callWhenReady('fecharCal', []); }
+function fecharImportar() { _callWhenReady('fecharImportar', []); }
+function salvarLancamento() { _callWhenReady('salvarLancamento', []); }
+function editarTransacao(id) { _callWhenReady('editarTransacao', [id]); }
+function executarDelete() { _callWhenReady('executarDelete', []); }
+function exportarExcel() { _callWhenReady('exportarExcel', []); }
+function baixarModelo() { _callWhenReady('baixarModelo', []); }
+function abrirImportar() { _callWhenReady('abrirImportar', []); }
+function confirmarImportacao() { _callWhenReady('confirmarImportacao', []); }
+function selecionarOpt(e,v,l) { _callWhenReady('selecionarOpt', [e,v,l]); }
+function setDataRapida(v) { _callWhenReady('setDataRapida', [v]); }
+function toggleCal() { _callWhenReady('toggleCal', []); }
+function calNavMes(d) { _callWhenReady('calNavMes', [d]); }
+function calToggleAno() { _callWhenReady('calToggleAno', []); }
+function calSelecionarDia(d) { _callWhenReady('calSelecionarDia', [d]); }
+function calConfirmar() { _callWhenReady('calConfirmar', []); }
+function removerAnexo() { _callWhenReady('removerAnexo', []); }
+function toggleSecao(id) { _callWhenReady('toggleSecao', [id]); }
+function fazerLogout() { _callWhenReady('fazerLogout', []); }
+function toggleParcela(v) { _callWhenReady('toggleParcela', [v]); }
+function toggleFixo(v) { _callWhenReady('toggleFixo', [v]); }
+function verPDF(url) { _callWhenReady('verPDF', [url]); }
+function handleDrop(e) { _callWhenReady('handleDrop', [e]); }
+function uploadAnexo() { _callWhenReady('uploadAnexo', []); }
+function onAnexoChange() { _callWhenReady('onAnexoChange', []); }
+function deletar(id) { _callWhenReady('deletar', [id]); }
 </script>
 
 <script type="module">
@@ -2330,13 +2313,47 @@ document.addEventListener('click', function(e){
   }
 });
 
+// ── Expor funções para os stubs e sinalizar que o module está pronto ──
+window._toggleFab = toggleFab;
+window._fabAbre = fabAbre;
+window._mudarMes = mudarMes;
+window._toggleTipoMenu = toggleTipoMenu;
+window._setTipoFiltro = setTipoFiltro;
+window._setFiltro = setFiltro;
+window._fecharModal = fecharModal;
+window._fecharConfirm = fecharConfirm;
+window._fecharCal = fecharCal;
+window._fecharImportar = fecharImportar;
+window._salvarLancamento = salvarLancamento;
+window._editarTransacao = editarTransacao;
+window._executarDelete = executarDelete;
+window._exportarExcel = exportarExcel;
+window._baixarModelo = baixarModelo;
+window._abrirImportar = abrirImportar;
+window._confirmarImportacao = confirmarImportacao;
+window._selecionarOpt = selecionarOpt;
+window._setDataRapida = setDataRapida;
+window._toggleCal = toggleCal;
+window._calNavMes = calNavMes;
+window._calToggleAno = calToggleAno;
+window._calSelecionarDia = calSelecionarDia;
+window._calConfirmar = calConfirmar;
+window._removerAnexo = removerAnexo;
+window._toggleSecao = toggleSecao;
+window._fazerLogout = fazerLogout;
+window._toggleParcela = toggleParcela;
+window._toggleFixo = toggleFixo;
+window._verPDF = verPDF;
+window._handleDrop = handleDrop;
+window._uploadAnexo = uploadAnexo;
+window._onAnexoChange = typeof onAnexoChange !== 'undefined' ? onAnexoChange : ()=>{};
+window._deletar = typeof deletar !== 'undefined' ? deletar : ()=>{};
+window._flushPending(); // executa chamadas que ficaram em fila enquanto o module carregava
+
 // ── INIT ─────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded',async()=>{
-  document.getElementById('mesAtual').textContent = `${MESES[_mes]} ${_ano}`;
-  const k = Object.keys(localStorage).find(k=>k.includes('auth-token'));
-  if(k){ try{ document.getElementById('navUser').textContent=JSON.parse(localStorage.getItem(k))?.user?.email||''; }catch{} }
-  await loadAll();
-});
+// script type="module" executa após DOM estar pronto — chama diretamente
+document.getElementById('mesAtual').textContent = `${MESES[_mes]} ${_ano}`;
+await loadAll();
 </script>
 
 </body>
