@@ -149,7 +149,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 /* MODAL */
 .modal-bg{position:fixed;inset:0;background:#00000090;display:none;align-items:flex-start;justify-content:center;z-index:999;overflow-y:auto;padding:24px 16px}
 .modal-bg.open{display:flex}
-.modal{background:#fff;border:1px solid var(--border);border-radius:16px;width:100%;max-width:620px;margin:auto;overflow:hidden;transition:max-width .3s ease;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal{background:#fff;box-shadow:0 20px 60px rgba(0,0,0,.3);border:1px solid var(--border);border-radius:16px;width:100%;max-width:620px;margin:auto;overflow:hidden;transition:max-width .3s ease}
 .modal.expandido{max-width:960px}
 
 /* MODAL HEADER */
@@ -268,7 +268,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 .confirm-del-btn:disabled{opacity:.4;cursor:not-allowed}
 
 
-  /* ── Correções de tema nos dropdowns e menus ── */
+  /* -- Correções de tema nos dropdowns e menus -- */
   .dd-menu, .dropdown-menu, [class*="dropdown"], .tipo-menu, .fab-menu,
   .ctx-menu, .modal, .modal-body, .modal-content, .sheet, .popover {
     background: var(--white) !important;
@@ -305,7 +305,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
   }
 
 
-  /* ── Seletor de mês ── */
+  /* -- Seletor de mês -- */
   .mes-nav { display:flex; align-items:center; gap:12px; justify-content:center; margin-bottom:1.25rem; }
   .mes-btn {
     background: var(--white) !important;
@@ -332,7 +332,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
     min-width: 160px; text-align: center;
   }
 
-  /* ── FAB ── */
+  /* -- FAB -- */
   .fab {
     background: var(--navy) !important;
     box-shadow: 0 4px 20px rgba(11,31,58,0.3) !important;
@@ -340,7 +340,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
   .fab:hover { background: var(--navy-light) !important; transform: scale(1.07); }
   
 
-  /* ── Dropdown de tipo (Todas / Despesas / Receitas) ── */
+  /* -- Dropdown de tipo (Todas / Despesas / Receitas) -- */
   .btn-tipo-wrap, .tipo-dropdown, [class*="tipo-menu"], [class*="dd-menu"] {
     background: var(--white) !important;
     border: 1px solid var(--border) !important;
@@ -362,7 +362,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
   }
 
 
-  /* ── FAB items (menu flutuante de ações) ── */
+  /* -- FAB items (menu flutuante de ações) -- */
   .fab-item {
     display: flex !important;
     align-items: center !important;
@@ -416,7 +416,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
   .fab:hover { background: var(--navy-light) !important; transform: scale(1.07) !important; }
 
 
-  /* ══ FAB CORRIGIDO ══════════════════════════════════ */
+  /* -- FAB CORRIGIDO ---------------------------------- */
   .fab-wrap { position:fixed; right:32px; bottom:36px; z-index:950; display:flex; flex-direction:column; align-items:flex-end; gap:10px; }
   
   /* Botão + circular */
@@ -472,7 +472,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
     font-size:14px !important; font-weight:600 !important;
     color:var(--text-dark) !important;
   }
-  /* ══════════════════════════════════════════════════ */
+  /* -------------------------------------------------- */
 
   .fab-menu {
     display:flex !important; flex-direction:column !important;
@@ -654,7 +654,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
   </div>
 </main>
 
-<!-- ══════ MODAL CONFIRMAÇÃO EXCLUSÃO ══════ -->
+<!-- ------ MODAL CONFIRMAÇÃO EXCLUSÃO ------ -->
 <div class="confirm-bg" id="confirmBg">
 <div class="confirm-box">
   <div class="confirm-icon">🗑</div>
@@ -668,25 +668,16 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 </div>
 </div>
 
-<!-- ══════════ MODAL ══════════ -->
+<!-- ---------- MODAL ---------- -->
 <div class="modal-bg" id="modalBg">
 <div class="modal">
 
   <!-- HEADER -->
-  <div class="modal-header" id="modalHeader" style="padding:0;display:flex;align-items:stretch">
-    <div id="mHeaderBar" style="width:6px;background:#ef4444;flex-shrink:0;border-radius:0"></div>
-    <div style="flex:1;display:flex;align-items:center;gap:12px;padding:16px 20px">
-      <div class="modal-icon des" id="mIcone" style="width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;background:#fee2e2">↓</div>
-      <div style="flex:1">
-        <div class="modal-title" id="mTitulo" style="font-size:17px;font-weight:800;color:#dc2626">Nova Despesa</div>
-        <div id="mSubtitulo" style="font-size:11px;color:#94a3b8;margin-top:2px">Registre uma saída financeira</div>
-      </div>
-      <button class="modal-close" onclick="fecharModal()">✕</button>
-    </div>
+  <div class="modal-header">
+    <div class="modal-icon rec" id="mIcone">➕</div>
+    <div class="modal-title" id="mTitulo">Novo Lançamento</div>
+    <button class="modal-close" onclick="fecharModal()">✕</button>
   </div>
-
-  <!-- BADGE FIXO (aparece quando vem de um tipo específico do FAB) -->
-  <div class="tipo-badge" id="tipoBadge"></div>
 
   <!-- BADGE FIXO (aparece quando vem de um tipo específico do FAB) -->
   <div class="tipo-badge" id="tipoBadge"></div>
@@ -878,12 +869,13 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
         <div class="grid2">
           <div class="field" style="margin-bottom:0">
             <label>Repetir por</label>
-            <div style="display:flex;align-items:center;gap:8px">
-              <input type="number" id="fRepetir" min="1" max="360" value="12"
-                oninput="atualizarFixoResumo()" onchange="atualizarFixoResumo()"
-                style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;background:var(--off-white);outline:none"/>
-              <span style="font-size:13px;color:var(--text-mid);white-space:nowrap">meses</span>
-            </div>
+            <select id="fRepetir" onchange="atualizarFixoResumo()">
+              <option value="0">Indefinidamente (12 meses)</option>
+              <option value="3">3 meses</option>
+              <option value="6">6 meses</option>
+              <option value="12">12 meses</option>
+              <option value="24">24 meses</option>
+            </select>
           </div>
           <div class="field" style="margin-bottom:0">
             <label>Dia do vencimento</label>
@@ -935,14 +927,9 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 
   </div><!-- /modal-body -->
 
-  <div class="modal-footer" style="justify-content:space-between">
-    <button id="btnExcluirModal" style="display:none;background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca;padding:9px 18px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:.2s" onmouseover="this.style.background='#dc2626';this.style.color='#fff';this.style.borderColor='#dc2626'" onmouseout="this.style.background='#fef2f2';this.style.color='#dc2626';this.style.borderColor='#fecaca'" onclick="if(window._deletar&&window._editId_atual){var id=window._editId_atual;document.getElementById('modalBg').classList.remove('open');window._deletar(id);}">
-      🗑 Excluir
-    </button>
-    <div style="display:flex;gap:10px">
-      <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
-      <button class="btn-save" id="btnSalvar" onclick="salvarLancamento()">Salvar lancamento</button>
-    </div>
+  <div class="modal-footer">
+    <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+    <button class="btn-save" id="btnSalvar" onclick="salvarLancamento()">Salvar lançamento</button>
   </div>
 </div>
 </div><!-- /modal-bg -->
@@ -950,7 +937,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script><script>
 
-// ── Expor funções para os stubs globais ──
+// -- Expor funções para os stubs globais --
 window._toggleFab = toggleFab;
 window._fabAbre = fabAbre;
 window._mudarMes = mudarMes;
@@ -1059,8 +1046,8 @@ const _h = {'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const _BASE = 'https://siczyohqmlrmirqgzlxb.supabase.co/rest/v1';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw';
 
-// ── CONFIG ───────────────────────────────────────────────
-// ── ESTADO ───────────────────────────────────────────────
+// -- CONFIG -----------------------------------------------
+// -- ESTADO -----------------------------------------------
 let _mes = new Date().getMonth();
 let _ano = new Date().getFullYear();
 let _filtro = 'todos';
@@ -1073,7 +1060,7 @@ let _tipoAtual = 'despesa';
 let _editId = null;
 let _anexoArquivo = null;
 
-// ── AUTH ─────────────────────────────────────────────────
+// -- AUTH -------------------------------------------------
 function getToken(){
   const k = Object.keys(localStorage).find(k=>k.includes('auth-token'));
   if(!k) return null;
@@ -1091,7 +1078,7 @@ function hdrs(){
   return {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${tk||SUPA_KEY}`};
 }
 
-// ── UTILS ────────────────────────────────────────────────
+// -- UTILS ------------------------------------------------
 const fmt = v => 'R$ '+parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtDate = d => { if(!d) return '—'; const p=d.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; };
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -1102,7 +1089,7 @@ function showAlert(msg,type='success'){
   setTimeout(()=>el.style.display='none',4000);
 }
 
-// ── MÊS ──────────────────────────────────────────────────
+// -- MÊS --------------------------------------------------
 function mudarMes(d){
   _mes+=d;
   if(_mes<0){_mes=11;_ano--;}
@@ -1111,7 +1098,7 @@ function mudarMes(d){
   loadTransacoes();
 }
 
-// ── FILTRO ───────────────────────────────────────────────
+// -- FILTRO -----------------------------------------------
 function setFiltro(f,el){
   _filtro=f;
   document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
@@ -1119,7 +1106,7 @@ function setFiltro(f,el){
   renderTabela();
 }
 
-// ── LOAD DADOS ───────────────────────────────────────────
+// -- LOAD DADOS -------------------------------------------
 async function loadAll(){
   const h = hdrs();
   // categorias e contas em paralelo
@@ -1185,7 +1172,7 @@ async function loadTransacoes(){
   renderTabela();
 }
 
-// ── TIPO FILTRO DROPDOWN ─────────────────────────────────
+// -- TIPO FILTRO DROPDOWN ---------------------------------
 function toggleTipoMenu(){
   const m = document.getElementById('tipoMenu');
   m.style.display = m.style.display==='none' ? 'block' : 'none';
@@ -1214,7 +1201,7 @@ function setTipoFiltro(tipo, icon, label, cor){
   renderTabela();
 }
 
-// ── CARDS ─────────────────────────────────────────────────
+// -- CARDS -------------------------------------------------
 function renderCards(){
   const rec    = _transacoes.filter(t=>t.tipo==='receita').reduce((s,t)=>s+parseFloat(t.valor||0),0);
   const des    = _transacoes.filter(t=>t.tipo==='despesa').reduce((s,t)=>s+parseFloat(t.valor||0),0);
@@ -1283,7 +1270,7 @@ function renderCards(){
   }
 }
 
-// ── TABELA ───────────────────────────────────────────────
+// -- TABELA -----------------------------------------------
 function renderTabela(){
   const busca   = document.getElementById('busca').value.toLowerCase();
   const catMap  = Object.fromEntries(_categorias.map(c=>[c.id,c]));
@@ -1314,7 +1301,7 @@ function renderTabela(){
   }
 
 
-  // ── Calcular totais da lista filtrada ──────────────────
+  // -- Calcular totais da lista filtrada ------------------
   const totalRec = lista.filter(t=>t.tipo==='receita').reduce((s,t)=>s+parseFloat(t.valor||0),0);
   const totalDes = lista.filter(t=>t.tipo==='despesa').reduce((s,t)=>s+parseFloat(t.valor||0),0);
   const totalLiq = totalRec - totalDes;
@@ -1348,12 +1335,12 @@ function renderTabela(){
       <div class="val-cell ${tp}">${t.tipo==='despesa'?'- ':'+ '}${fmt(t.valor)}</div>
       <div><span class="sit-badge ${sit}">${sitLabel}</span></div>
       <div class="row-actions">
-        <button class="btn-row edit" onclick="event.stopPropagation();window._editarTransacao&&window._editarTransacao(${t.id})" style="background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Editar</button>
+        <button class="btn-row del" onclick="event.stopPropagation();deletar(${t.id})">🗑</button>
       </div>
     </div>`;
   }).join('');
 
-  // ── Rodapé totalizador ──────────────────────────────────
+  // -- Rodapé totalizador ----------------------------------
   const rodape = `<div style="
     display:grid;
     grid-template-columns:36px 100px 1fr 180px 140px 110px 100px 60px;
@@ -1388,7 +1375,7 @@ function renderTabela(){
   document.getElementById('listaTransacoes').innerHTML = linhas + rodape;
 }
 
-// ── MODAL ────────────────────────────────────────────────
+// -- MODAL ------------------------------------------------
 const TIPO_CONFIG = {
   despesa:      {label:'Nova Despesa',     icon:'↓', cls:'des', cor:'#ef4444', bg:'#ef444415', tipoDB:'despesa'},
   receita:      {label:'Nova Receita',     icon:'↑', cls:'rec', cor:'#22c55e', bg:'#22c55e15', tipoDB:'receita'},
@@ -1445,7 +1432,7 @@ function limparModal(){
   document.querySelectorAll('.dq-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('dqHoje').classList.add('active');
   document.getElementById('fData').style.display='none';
-  var bExcN=document.getElementById('btnExcluirModal'); if(bExcN) bExcN.style.display='none';
+  var bN=document.getElementById('btnExcluirModal'); if(bN) bN.style.display='none';
 }
 
 function setTipo(tipo){
@@ -1454,23 +1441,12 @@ function setTipo(tipo){
 
   // Ícone e cor do header do modal
   const icon = document.getElementById('mIcone');
-  const clsMap = {despesa:'des',receita:'rec',cartao:'cartao',transferencia:'transf'};
-  const cls = clsMap[tipo]||'des';
-  const corMap = {despesa:'#dc2626',receita:'#16a34a',cartao:'#2563eb',transferencia:'#d97706'};
-  const bgMap  = {despesa:'#fee2e2',receita:'#dcfce7',cartao:'#dbeafe',transferencia:'#fef3c7'};
-  const barMap = {despesa:'#ef4444',receita:'#22c55e',cartao:'#3b82f6',transferencia:'#f59e0b'};
-  const subMap = {despesa:'Registre uma saída financeira',receita:'Registre uma entrada financeira',cartao:'Despesa no cartão de crédito',transferencia:'Movimentação entre contas'};
   if(icon){
-    icon.textContent = cfg.icon;
-    icon.style.background = bgMap[tipo]||'#fee2e2';
-    icon.style.color = corMap[tipo]||'#dc2626';
+    icon.textContent      = cfg.icon;
+    icon.style.background = cfg.bg;
+    icon.style.color      = cfg.cor;
+    icon.className        = 'modal-icon';
   }
-  const bar = document.getElementById('mHeaderBar');
-  if(bar) bar.style.background = barMap[tipo]||'#ef4444';
-  const titulo = document.getElementById('mTitulo');
-  if(titulo){ titulo.textContent = cfg.label; titulo.style.color = corMap[tipo]||'#dc2626'; }
-  const sub = document.getElementById('mSubtitulo');
-  if(sub) sub.textContent = subMap[tipo]||'';
 
   // Mostrar info extra para cartão
   const infoCartao = document.getElementById('infoCartao');
@@ -1490,8 +1466,8 @@ function setTipo(tipo){
   document.getElementById('fCat').value = '';
 }
 
-// ── DATA RÁPIDA ──────────────────────────────────────────
-// ── CALENDÁRIO CUSTOMIZADO ───────────────────────────────
+// -- DATA RÁPIDA ------------------------------------------
+// -- CALENDÁRIO CUSTOMIZADO -------------------------------
 let _calData = new Date(); // data temporária selecionada no calendário
 let _calMes  = new Date(); // mês sendo exibido
 
@@ -1611,7 +1587,7 @@ function setDataRapida(qual, el){
   }
 }
 
-// ── PARCELAMENTO ─────────────────────────────────────────
+// -- PARCELAMENTO -----------------------------------------
 function toggleParcela(){
   const on = document.getElementById('togParcela').checked;
   document.getElementById('parcelaBox').classList.toggle('show',on);
@@ -1645,7 +1621,7 @@ function calcParcela(){
 // Recalcular ao mudar valor
 document.getElementById('fValor').addEventListener('input', ()=>{ if(document.getElementById('togParcela').checked) calcParcela(); });
 
-// ── FIXO ─────────────────────────────────────────────────
+// -- FIXO -------------------------------------------------
 function toggleFixo(){
   const on = document.getElementById('togFixo').checked;
   document.getElementById('recorrenteBox').classList.toggle('show',on);
@@ -1661,10 +1637,10 @@ function atualizarFixoResumo(){
   const el = document.getElementById('fixoResumo');
   if(!el) return;
   const n = parseInt(document.getElementById('fRepetir').value)||12;
-  el.textContent = `${n} lançamento${n!==1?'s':''}`;
+  el.textContent = `${n === 0 ? 12 : n} lançamentos`;
 }
 
-// ── SEÇÃO MAIS DETALHES ──────────────────────────────────
+// -- SEÇÃO MAIS DETALHES ----------------------------------
 function toggleSecao(){
   const cols   = document.getElementById('secCols');
   const toggle = document.getElementById('secDetalhes');
@@ -1684,7 +1660,7 @@ function toggleSecao(){
   }
 }
 
-// ── ANEXO ────────────────────────────────────────────────
+// -- ANEXO ------------------------------------------------
 function onAnexoChange(){
   const input = document.getElementById('fAnexo');
   const file  = input.files[0];
@@ -1706,7 +1682,7 @@ function removerAnexo(){
 }
 function verPDF(url){ window.open(url,'_blank'); }
 
-// ── UPLOAD ARQUIVO ────────────────────────────────────────
+// -- UPLOAD ARQUIVO ----------------------------------------
 async function uploadAnexo(file, transId){
   const ext = file.name.split('.').pop();
   const path = `mandala/transacoes/${transId}.${ext}`;
@@ -1720,7 +1696,7 @@ async function uploadAnexo(file, transId){
   return null;
 }
 
-// ── SALVAR ───────────────────────────────────────────────
+// -- SALVAR -----------------------------------------------
 async function salvarLancamento(){
   const btn = document.getElementById('btnSalvar');
   const desc  = document.getElementById('fDesc').value.trim();
@@ -1733,7 +1709,7 @@ async function salvarLancamento(){
   btn.disabled=true; btn.textContent='Salvando...';
   console.log('[DEBUG] _editId ao salvar:', _editId);
 
-  // ── EDIÇÃO: atualiza apenas este lançamento pelo id ──────
+  // -- EDIÇÃO: atualiza apenas este lançamento pelo id ------
   if(_editId){
     const h = hdrs();
     const patchPayload = {
@@ -1907,7 +1883,7 @@ async function salvarLancamento(){
   btn.disabled=false; btn.textContent='Salvar lançamento';
 }
 
-// ── EDITAR ───────────────────────────────────────────────
+// -- EDITAR -----------------------------------------------
 async function editarTransacao(id){
   const t = _transacoes.find(t=>t.id===id);
   if(!t) return;
@@ -1965,13 +1941,11 @@ async function editarTransacao(id){
     const lbl = document.getElementById('secLabel');
     if(lbl) lbl.textContent = 'Menos detalhes';
   }
-  _editId = id; window._editId_atual = id; // setado aqui
-  var bExc = document.getElementById('btnExcluirModal');
-  if(bExc) bExc.style.display = 'block';, após todas as chamadas que possam resetar
+  _editId = id; // setado aqui, após todas as chamadas que possam resetar
   document.getElementById('modalBg').classList.add('open');
 }
 
-// ── BAIXAR MODELO ─────────────────────────────────────────
+// -- BAIXAR MODELO -----------------------------------------
 function baixarModelo(){
   // Gera planilha modelo via SheetJS (XLSX) no browser
   const wb = XLSX.utils.book_new();
@@ -2013,7 +1987,7 @@ function baixarModelo(){
   XLSX.writeFile(wb, `Modelo_Transacoes_${MESES[_mes]}_${_ano}.xlsx`);
 }
 
-// ── EXPORTAR MÊS ─────────────────────────────────────────
+// -- EXPORTAR MÊS -----------------------------------------
 function exportarExcel(){
   if(!_transacoes.length){ showAlert('Nenhuma transação para exportar.','error'); return; }
 
@@ -2061,7 +2035,7 @@ function exportarExcel(){
   showAlert(`✅ Exportado: ${_transacoes.length} lançamentos de ${MESES[_mes]} ${_ano}`);
 }
 
-// ── IMPORTAR ─────────────────────────────────────────────
+// -- IMPORTAR ---------------------------------------------
 let _dadosImport = [];
 
 function abrirImportar(){
@@ -2206,8 +2180,8 @@ async function confirmarImportacao(){
   btn.disabled=false;
 }
 
-// ── DELETAR ───────────────────────────────────────────────
-// ── ESTADO DE EXCLUSÃO ───────────────────────────────────
+// -- DELETAR -----------------------------------------------
+// -- ESTADO DE EXCLUSÃO -----------------------------------
 let _deleteId   = null;
 let _deleteOpt  = 'este'; // 'este' | 'todos'
 
@@ -2237,16 +2211,18 @@ function deletar(id){
     opcoes.style.display = 'flex';
     opcoes.innerHTML = `
       <button class="confirm-opt selected" id="optEste" onclick="selecionarOpt('este')">
-        <div class="confirm-opt-label">Somente este lancamento</div>
-        <div class="confirm-opt-sub">Remove apenas ${mesRef}</div>
-      </button>
-      <button class="confirm-opt" id="optProximos" onclick="selecionarOpt('proximos')">
-        <div class="confirm-opt-label">Este e os proximos</div>
-        <div class="confirm-opt-sub">Remove ${mesRef} em diante</div>
+        <span class="confirm-opt-icon">📄</span>
+        <div>
+          <div class="confirm-opt-label">Somente este mês</div>
+          <div class="confirm-opt-sub">Exclui apenas o lançamento de ${mesRef}</div>
+        </div>
       </button>
       <button class="confirm-opt" id="optTodos" onclick="selecionarOpt('todos')">
-        <div class="confirm-opt-label">Todos da serie</div>
-        <div class="confirm-opt-sub">Remove toda a serie</div>
+        <span class="confirm-opt-icon">🗂</span>
+        <div>
+          <div class="confirm-opt-label">Este e os próximos meses</div>
+          <div class="confirm-opt-sub">Exclui ${mesRef} e todos os lançamentos futuros desta recorrência</div>
+        </div>
       </button>`;
     document.getElementById('confirmDesc').innerHTML += '<br><span style="color:var(--text-mid);font-size:12px">Esta ação não pode ser desfeita.</span>';
   } else {
@@ -2321,7 +2297,7 @@ async function executarDelete(){
   btn.textContent='🗑 Excluir';
 }
 
-// ── FECHAR MODAL FORA ────────────────────────────────────
+// -- FECHAR MODAL FORA ------------------------------------
 // Modal de lançamento só fecha pelo botão Cancelar ou X
 // document.getElementById('modalBg').addEventListener('click',...) removido intencionalmente
 
@@ -2330,7 +2306,7 @@ document.getElementById('confirmBg').addEventListener('click',e=>{
   if(e.target===document.getElementById('confirmBg')) fecharConfirm();
 });
 
-// ── FAB ──────────────────────────────────────────────────
+// -- FAB --------------------------------------------------
 function fabAbre(tipo){
   fecharFab();
   abrirModal(tipo);
@@ -2357,7 +2333,7 @@ document.addEventListener('click', function(e){
   }
 });
 
-// ── INIT ─────────────────────────────────────────────────
+// -- INIT -------------------------------------------------
 window._toggleFab=toggleFab;window._fabAbre=fabAbre;window._mudarMes=mudarMes;
 window._toggleTipoMenu=toggleTipoMenu;window._setTipoFiltro=setTipoFiltro;window._setFiltro=setFiltro;
 window._fecharModal=fecharModal;window._fecharConfirm=fecharConfirm;window._fecharCal=fecharCal;
