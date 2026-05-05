@@ -1009,7 +1009,7 @@ window.trocarCondo = () => {} // síndico tem só 1 condomínio
 
 
 
-const _h = {'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw', 'Content-Type': 'application/json', 'Prefer': 'return=representation'};
+// _h removido — usar hdrs() que pega o token real do usuario logado
 const _BASE = 'https://siczyohqmlrmirqgzlxb.supabase.co/rest/v1';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw';
 
@@ -1078,8 +1078,8 @@ async function loadAll(){
   const h = hdrs();
   // categorias e contas em paralelo
   const [rc,rco] = await Promise.all([
-    fetch(`${_BASE}/condo_categorias?condominio_id=eq.${CONDO_ID}&order=tipo,categoria,nome`,{headers:_h}),
-    fetch(`${_BASE}/condo_contas?condominio_id=eq.${CONDO_ID}&order=nome`,{headers:_h})
+    fetch(`${_BASE}/condo_categorias?condominio_id=eq.${CONDO_ID}&order=tipo,categoria,nome`,{headers:hdrs()}),
+    fetch(`${_BASE}/condo_contas?condominio_id=eq.${CONDO_ID}&order=nome`,{headers:hdrs()})
   ]);
   _categorias = rc.ok ? await rc.json() : [];
   _contas     = rco.ok ? await rco.json() : [];
@@ -1119,8 +1119,8 @@ async function loadTransacoes(){
 
   // Busca mês atual e saldo acumulado dos meses anteriores em paralelo
   const [resMes, resSaldoAnt] = await Promise.all([
-    fetch(`${_BASE}/condo_transacoes?condominio_id=eq.${CONDO_ID}&data=gte.${primDia}&data=lte.${ultDia}&order=data.desc,id.desc`,{headers:_h}),
-    fetch(`${_BASE}/condo_transacoes?condominio_id=eq.${CONDO_ID}&data=lt.${primDia}&select=tipo,valor`,{headers:_h})
+    fetch(`${_BASE}/condo_transacoes?condominio_id=eq.${CONDO_ID}&data=gte.${primDia}&data=lte.${ultDia}&order=data.desc,id.desc`,{headers:hdrs()}),
+    fetch(`${_BASE}/condo_transacoes?condominio_id=eq.${CONDO_ID}&data=lt.${primDia}&select=tipo,valor`,{headers:hdrs()})
   ]);
   _transacoes = resMes.ok ? await resMes.json() : [];
   window._appTransacoes = _transacoes;
@@ -1718,7 +1718,7 @@ async function salvarLancamento(){
     const destino = document.getElementById('fContaDestino').value;
     if(!origem || !destino){ showAlert('Selecione a conta de origem e destino.','error'); btn.disabled=false; btn.textContent='Salvar lançamento'; return; }
     if(origem===destino){ showAlert('Conta de origem e destino não podem ser iguais.','error'); btn.disabled=false; btn.textContent='Salvar lançamento'; return; }
-    const base = {condominio_id:CONDO_ID, descricao:desc, valor, data, situacao:'pago', observacao:document.getElementById('fObs').value.trim()||null};
+    const base = {condominio_id:CONDO_ID, empresa:CONDO_ID, descricao:desc, valor, data, situacao:'pago', observacao:document.getElementById('fObs').value.trim()||null};
     const h = hdrs();
     await Promise.all([
       fetch(`${_BASE}/condo_transacoes`,{method:'POST',headers:{...h,'Prefer':'return=representation'},body:JSON.stringify({...base,tipo:'despesa',conta_id:origem, descricao:`Transf. para ${_contas.find(ct=>ct.id==destino)?.nome||'conta'}: ${desc}`})}),
@@ -1739,6 +1739,7 @@ async function salvarLancamento(){
 
   const basePayload = {
     condominio_id: CONDO_ID,
+    empresa: CONDO_ID,
     tipo:         (TIPO_CONFIG[_tipoAtual]?.tipoDB)||_tipoAtual,
     descricao:    desc,
     valor:        parcelado ? valor/nParcelas : valor,
@@ -1840,7 +1841,7 @@ async function salvarLancamento(){
       const url = await uploadAnexo(_anexoArquivo, idsGerados[0]);
       if(url){
         await fetch(`${_BASE}/condo_transacoes?id=eq.${idsGerados[0]}`,{
-          method:'PATCH', headers:_h, body:JSON.stringify({anexo_url:url})
+          method:'PATCH', headers:{...hdrs(),'Prefer':'return=representation'}, body:JSON.stringify({anexo_url:url})
         });
       }
     }
@@ -2089,7 +2090,7 @@ function processarArquivo(file){
         const catId   = catMap[cat+'|'+sub] || null;
         const contaId = contaMap[conta] || null;
 
-        _dadosImport.push({data:dataISO, tipo, descricao:desc, categoria_id:catId, conta_id:contaId, valor, situacao:sit, observacao:obs||null, condominio_id:CONDO_ID});
+        _dadosImport.push({data:dataISO, tipo, descricao:desc, categoria_id:catId, conta_id:contaId, valor, situacao:sit, observacao:obs||null, condominio_id:CONDO_ID, empresa:CONDO_ID});
       }
 
       // Preview
