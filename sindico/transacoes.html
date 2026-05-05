@@ -999,6 +999,7 @@ function uploadAnexo() { if(window._uploadAnexo) window._uploadAnexo(); }
 <script type="module">
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+(async () => {
 const _sb = createClient('https://siczyohqmlrmirqgzlxb.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw')
 
 // Auth CondoGestor
@@ -1073,11 +1074,16 @@ const fmtDate = d => { if(!d) return '—'; const p=d.split('-'); return `${p[2]
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
 function showAlert(msg,type='success'){
-  const el=document.getElementById('alert');
-  el.textContent=msg; el.className=`alert ${type}`; el.style.display='block';
-  setTimeout(()=>el.style.display='none',4000);
+ const el=document.getElementById('alert');
+ el.className=`alert ${type}`;
+ el.style.display='flex';
+ el.style.opacity='1';
+ el.innerHTML=msg;
+ setTimeout(()=>{
+  el.style.opacity='0';
+  setTimeout(()=>{ el.style.display='none'; el.style.opacity='1'; },250);
+ },3000);
 }
-
 // -- MÊS --------------------------------------------------
 function mudarMes(d){
   _mes+=d;
@@ -2213,38 +2219,40 @@ function deletar(id) {
   const opcoes = document.getElementById('confirmOpcoes');
 
   if (ehFixo) {
-  opcoes.style.display = 'flex';
-  opcoes.innerHTML = `
-   <button class="confirm-opt selected" onclick="selecionarOpt('este', this)">
-    <span class="confirm-opt-icon">📄</span>
-    <div>
-     <div class="confirm-opt-label">Somente este mês</div>
-     <div class="confirm-opt-sub">Remove apenas o lançamento de ${mesRef}</div>
-    </div>
-   </button>
+    opcoes.style.display = 'flex';
+    opcoes.innerHTML = `
+      <button class="confirm-opt selected" onclick="selecionarOpt('este', this)">
+ <span class=\"confirm-opt-icon\">📄</span>
+        <div>
+          <div class="confirm-opt-label">Somente este mês</div>
+          <div class="confirm-opt-sub">Remove apenas o lançamento de ${mesRef}</div>
+        </div>
+      </button>
 
-   <button class="confirm-opt" onclick="selecionarOpt('proximos', this)">
-    <span class="confirm-opt-icon">📆</span>
-    <div>
-     <div class="confirm-opt-label">Este e os próximos</div>
-     <div class="confirm-opt-sub">Remove a partir de ${mesRef}</div>
-    </div>
-   </button>
+      <button class="confirm-opt" onclick="selecionarOpt('proximos', this)">
+ <span class=\"confirm-opt-icon\">📆</span>
+        <div>
+          <div class="confirm-opt-label">Este e os próximos</div>
+          <div class="confirm-opt-sub">Remove a partir de ${mesRef}</div>
+        </div>
+      </button>
 
-   <button class="confirm-opt" onclick="selecionarOpt('todos', this)">
-    <span class="confirm-opt-icon">🗂️</span>
-    <div>
-     <div class="confirm-opt-label">Toda a recorrência</div>
-     <div class="confirm-opt-sub">Remove todos os lançamentos futuros</div>
-    </div>
-   </button>
-  `;
- } else {
-  opcoes.style.display = 'none';
-  opcoes.innerHTML = '';
-  _deleteOpt = 'este';
- }
- document.getElementById('confirmBg').classList.add('open');
+      <button class="confirm-opt" onclick="selecionarOpt('todos', this)">
+ <span class=\"confirm-opt-icon\">🗂️</span>
+        <div>
+          <div class="confirm-opt-label">Toda a recorrência</div>
+          <div class="confirm-opt-sub">Remove todos os lançamentos futuros</div>
+        </div>
+      </button>
+    `;
+  } else {
+    opcoes.style.display = 'none';
+    opcoes.innerHTML = '';
+    _deleteOpt = 'este';
+  }
+
+  document.getElementById('confirmBg').classList.add('open');
+}
 
 
 function selecionarOpt(opt, el){
@@ -2361,7 +2369,7 @@ window._toggleParcela=toggleParcela;window._toggleFixo=toggleFixo;window._verPDF
 window._handleDrop=handleDrop;window._uploadAnexo=uploadAnexo;window._deletar=deletar;
 document.getElementById('mesAtual').textContent = `${MESES[_mes]} ${_ano}`;
 await loadAll();
-</script>
+})().catch(e => { console.error(e); });</script>
 
 </body>
 </html>
