@@ -1025,15 +1025,17 @@ if (!_perfil || _perfil.role !== 'sindico') {
   window.location.href = _d[_perfil?.role] || '/login.html'; throw new Error()
 }
 
-// Variáveis globais compatíveis com o código existente
+// ── Multi-tenant: CONDO_ID vem do perfil do usuário logado ──────────
+// Cada usuário (síndico) está vinculado a 1 condomínio via usuarios.condominio_id
+// No futuro, uma administradora pode gerenciar múltiplos → trocarCondo() habilitado
 const CONDO_ID = _perfil.condominio_id
-let EMPRESA = CONDO_ID  // usado como filtro onde antes era 'mandala'
+let _condoAtivo = CONDO_ID  // condomínio atualmente selecionado (para multi-condo futuro)
 
 // Preenche nome e avatar na sidebar
 document.getElementById('user-name').textContent = _perfil.nome || _sess.user.email
 document.getElementById('avatar-initials').textContent = (_perfil.nome || _sess.user.email).split(' ').slice(0,2).map(p=>p[0].toUpperCase()).join('')
 
-// Busca nome do condomínio
+// Busca nome do condomínio ativo
 const { data: _condo } = await _sb.from('condominios').select('nome').eq('id', CONDO_ID).single()
 if (_condo) {
   const selCondo = document.getElementById('select-condo')
@@ -1041,7 +1043,11 @@ if (_condo) {
 }
 
 window.fazerLogout = async () => { await _sb.auth.signOut(); window.location.href = '/login.html' }
-window.trocarCondo = () => {} // síndico tem só 1 condomínio
+// trocarCondo: preparado para multi-condomínio (administradoras com vários prédios)
+window.trocarCondo = () => {
+  const sel = document.getElementById('select-condo')
+  if(sel){ _condoAtivo = sel.value; loadAll(); }
+}
 
 
 
@@ -1090,7 +1096,9 @@ const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Ag
 function showAlert(msg,type='success'){
   const el=document.getElementById('alert');
   el.textContent=msg; el.className=`alert ${type}`; el.style.display='block';
-  setTimeout(()=>el.style.display='none',4000);
+  // Erros ficam mais tempo na tela
+  const dur = type==='error' ? 8000 : 4000;
+  setTimeout(()=>el.style.display='none',dur);
 }
 
 // ── MÊS ──────────────────────────────────────────────────
@@ -1115,8 +1123,8 @@ async function loadAll(){
   const h = hdrs();
   // categorias e contas em paralelo
   const [rc,rco] = await Promise.all([
-    fetch(`${_BASE}/condo_categorias?condominio_id=eq.${CONDO_ID}&order=tipo,categoria,nome`,{headers:_h}),
-    fetch(`${_BASE}/condo_contas?condominio_id=eq.${CONDO_ID}&order=nome`,{headers:_h})
+    fetch(`${_BASE}/condo_categorias?condominio_id=eq.${_condoAtivo}&order=tipo,categoria,nome`,{headers:_h}),
+    fetch(`${_BASE}/condo_contas?condominio_id=eq.${_condoAtivo}&order=nome`,{headers:_h})
   ]);
   _categorias = rc.ok ? await rc.json() : [];
   _contas     = rco.ok ? await rco.json() : [];
@@ -1156,8 +1164,8 @@ async function loadTransacoes(){
 
   // Busca mês atual e saldo acumulado dos meses anteriores em paralelo
   const [resMes, resSaldoAnt] = await Promise.all([
-    fetch(`${_BASE}/condo_transacoes?condominio_id=eq.${CONDO_ID}&data=gte.${primDia}&data=lte.${ultDia}&order=data.desc,id.desc`,{headers:_h}),
-    fetch(`${_BASE}/condo_transacoes?condominio_id=eq.${CONDO_ID}&data=lt.${primDia}&select=tipo,valor`,{headers:_h})
+    fetch(`${_BASE}/condo_transacoes?condominio_id=eq.${_condoAtivo}&data=gte.${primDia}&data=lte.${ultDia}&order=data.desc,id.desc`,{headers:_h}),
+    fetch(`${_BASE}/condo_transacoes?condominio_id=eq.${_condoAtivo}&data=lt.${primDia}&select=tipo,valor`,{headers:_h})
   ]);
   _transacoes = resMes.ok ? await resMes.json() : [];
 
@@ -1400,6 +1408,12 @@ function abrirModal(tipo){
   badge.innerHTML = `<span style="font-size:18px">${cfg.icon}</span> ${cfg.label}`;
 
   setTipo(_tipoAtual);
+  // Garantir que fData já tem hoje como valor padrão
+  const _hoje = new Date();
+  const _yy = _hoje.getFullYear();
+  const _mm = String(_hoje.getMonth()+1).padStart(2,'0');
+  const _dd = String(_hoje.getDate()).padStart(2,'0');
+  document.getElementById('fData').value = `${_yy}-${_mm}-${_dd}`;
   setDataRapida('hoje', document.getElementById('dqHoje'));
   document.getElementById('modalBg').classList.add('open');
 }
@@ -1781,10 +1795,18 @@ async function salvarLancamento(){
   const btn = document.getElementById('btnSalvar');
   const desc  = document.getElementById('fDesc').value.trim();
   const valor = parseFloat((document.getElementById('fValor').value||'0').replace(/R\$\s*/g,'').replace(/\./g,'').replace(',','.'))||0;
-  const data  = document.getElementById('fData').value;
+  // Se fData ainda vazio (ex: selecionou "Hoje" mas não preencheu), usa hoje
+  let data = document.getElementById('fData').value;
+  if(!data){
+    const ref = new Date();
+    const yy = ref.getFullYear();
+    const mm = String(ref.getMonth()+1).padStart(2,'0');
+    const dd = String(ref.getDate()).padStart(2,'0');
+    data = `${yy}-${mm}-${dd}`;
+    document.getElementById('fData').value = data;
+  }
   if(!desc){ showAlert('Informe a descrição.','error'); return; }
   if(!valor){ showAlert('Informe o valor.','error'); return; }
-  if(!data){ showAlert('Informe a data.','error'); return; }
 
   btn.disabled=true; btn.textContent='Salvando...';
   console.log('[DEBUG] _editId ao salvar:', _editId);
@@ -1796,15 +1818,17 @@ async function salvarLancamento(){
       descricao:    desc,
       valor:        valor,
       data:         data,
-      categoria_id: document.getElementById('fCat').value||null,
-      conta_id:     document.getElementById('fConta').value||null,
+      categoria_id: document.getElementById('fCat').value ? parseInt(document.getElementById('fCat').value) : null,
+      conta_id:     document.getElementById('fConta').value ? parseInt(document.getElementById('fConta').value) : null,
       situacao:     document.getElementById('fSit').value,
       observacao:   document.getElementById('fObs').value.trim()||null,
-      forma:        document.getElementById('fForma')?.value||null,
-      fluxo:        document.getElementById('fFluxo')?.value||null,
     };
+    const _pForma = document.getElementById('fForma')?.value||null;
+    const _pFluxo = document.getElementById('fFluxo')?.value||null;
+    if(_pForma !== null) patchPayload.forma = _pForma;
+    if(_pFluxo !== null) patchPayload.fluxo = _pFluxo;
     try {
-      const res = await fetch(`${_BASE}/condo_transacoes?id=eq.${_editId}&condominio_id=eq.${CONDO_ID}`,{
+      const res = await fetch(`${_BASE}/condo_transacoes?id=eq.${_editId}&condominio_id=eq.${_condoAtivo}`,{
         method:'PATCH',
         headers:{...h,'Prefer':'return=representation'},
         body: JSON.stringify(patchPayload)
@@ -1830,7 +1854,7 @@ async function salvarLancamento(){
     const destino = document.getElementById('fContaDestino').value;
     if(!origem || !destino){ showAlert('Selecione a conta de origem e destino.','error'); btn.disabled=false; btn.textContent='Salvar lançamento'; return; }
     if(origem===destino){ showAlert('Conta de origem e destino não podem ser iguais.','error'); btn.disabled=false; btn.textContent='Salvar lançamento'; return; }
-    const base = {condominio_id:CONDO_ID, descricao:desc, valor, data, situacao:'pago', observacao:document.getElementById('fObs').value.trim()||null};
+    const base = {condominio_id:_condoAtivo, empresa:_condoAtivo, descricao:desc, valor, data, situacao:'pago'};
     const h = hdrs();
     await Promise.all([
       fetch(`${_BASE}/condo_transacoes`,{method:'POST',headers:{...h,'Prefer':'return=representation'},body:JSON.stringify({...base,tipo:'despesa',conta_id:origem, descricao:`Transf. para ${_contas.find(ct=>ct.id==destino)?.nome||'conta'}: ${desc}`})}),
@@ -1849,22 +1873,34 @@ async function salvarLancamento(){
   const repetir    = parseInt(document.getElementById('fRepetir').value)||0;
   const diaVenc    = parseInt(document.getElementById('fDiaVenc').value)||null;
 
+  // ── Payload com apenas colunas garantidamente existentes na tabela ──
+  // Colunas confirmadas: id, empresa/condominio_id, tipo, descricao, valor, data, categoria_id, conta_id, situacao
+  // Colunas opcionais (adicionadas só se existirem): observacao, recorrente, parcela_atual, parcela_total, forma, fluxo
+  // ── Payload multi-tenant: condominio_id isola os dados por condomínio ──
+  // CONDO_ID vem do perfil do usuário logado (usuarios.condominio_id)
+  // Cada registro fica associado ao condomínio correto automaticamente
   const basePayload = {
-    condominio_id: CONDO_ID,
-    tipo:         (TIPO_CONFIG[_tipoAtual]?.tipoDB)||_tipoAtual,
-    descricao:    desc,
-    valor:        parcelado ? valor/nParcelas : valor,
-    categoria_id: document.getElementById('fCat').value||null,
-    conta_id:     document.getElementById('fConta').value||null,
-    situacao:     document.getElementById('fSit').value,
-    observacao:   document.getElementById('fObs').value.trim()||null,
-    forma:        document.getElementById('fForma')?.value||null,
-    fluxo:        document.getElementById('fFluxo')?.value||null,
-    recorrente:   fixo,
-    parcela_atual: null,
-    parcela_total: null,
-    autor_email:  getToken() ? null : null
+    condominio_id: _condoAtivo,  // coluna principal multi-tenant
+    empresa:       _condoAtivo,  // coluna legada — mantida para compatibilidade
+    tipo:          (TIPO_CONFIG[_tipoAtual]?.tipoDB)||_tipoAtual,
+    descricao:     desc,
+    valor:         parcelado ? valor/nParcelas : valor,
+    situacao:      document.getElementById('fSit').value,
+    data:          data,
   };
+  // Opcionais — só adiciona se não forem nulos/vazios
+  const _catId  = document.getElementById('fCat').value ? parseInt(document.getElementById('fCat').value) : null;
+  const _contaId= document.getElementById('fConta').value ? parseInt(document.getElementById('fConta').value) : null;
+  const _obs    = document.getElementById('fObs').value.trim()||null;
+  const _forma  = document.getElementById('fForma')?.value||null;
+  const _fluxo  = document.getElementById('fFluxo')?.value||null;
+  if(_catId)   basePayload.categoria_id  = _catId;
+  if(_contaId) basePayload.conta_id      = _contaId;
+  if(_obs)     basePayload.observacao    = _obs;
+  if(_forma)   basePayload.forma         = _forma;
+  if(_fluxo)   basePayload.fluxo         = _fluxo;
+  if(fixo)     basePayload.recorrente    = true;
+  if(parcelado){ basePayload.parcela_atual = null; basePayload.parcela_total = null; }
 
   const h = hdrs();
   let idsGerados = [];
@@ -1938,15 +1974,27 @@ async function salvarLancamento(){
       showAlert(`✅ ${nMeses} lançamentos fixos criados (${nMeses} meses)!`);
 
     } else {
-      // Lançamento avulso normal
-      const payload = {...basePayload, data};
+      // Lançamento avulso normal — data já está no basePayload
+      const payload = {...basePayload};
       const res = await fetch(`${_BASE}/condo_transacoes`,{
         method:'POST', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)
       });
+      if(!res.ok){
+        const errTxt = await res.text();
+        console.error('[SALVAR] Erro HTTP', res.status, errTxt);
+        let msgErro = errTxt;
+        try {
+          const errJson = JSON.parse(errTxt);
+          msgErro = errJson.message || errJson.hint || errJson.details || errTxt;
+        } catch{}
+        showAlert(`❌ Erro ${res.status}: ${msgErro}`, 'error');
+        btn.disabled=false; btn.textContent='Salvar lançamento';
+        return;
+      }
       const json = await res.json();
       const novo = Array.isArray(json)?json[0]:json;
       if(novo?.id) idsGerados = [novo.id];
-      showAlert('Lançamento salvo!');
+      showAlert('✅ Lançamento salvo com sucesso!');
     }
 
     // upload do anexo na primeira transação criada
@@ -2204,7 +2252,7 @@ function processarArquivo(file){
         const catId   = catMap[cat+'|'+sub] || null;
         const contaId = contaMap[conta] || null;
 
-        _dadosImport.push({data:dataISO, tipo, descricao:desc, categoria_id:catId, conta_id:contaId, valor, situacao:sit, observacao:obs||null, condominio_id:CONDO_ID});
+        _dadosImport.push({data:dataISO, tipo, descricao:desc, categoria_id:catId, conta_id:contaId, valor, situacao:sit, observacao:obs||null, condominio_id:_condoAtivo, empresa:_condoAtivo});
       }
 
       // Preview
@@ -2346,11 +2394,11 @@ async function executarDelete(){
       let url;
       if(t.parcela_total){
         // Parcelado: deleta todos com mesma descrição + parcela_total + tipo
-        url = `${_BASE}/condo_transacoes?condominio_id=eq.${CONDO_ID}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&parcela_total=eq.${t.parcela_total}`;
+        url = `${_BASE}/condo_transacoes?condominio_id=eq.${_condoAtivo}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&parcela_total=eq.${t.parcela_total}`;
       } else {
         // Fixo: deleta este mês e os próximos (data >= data do selecionado)
         const dataEnc = encodeURIComponent(t.data);
-        url = `${_BASE}/condo_transacoes?condominio_id=eq.${CONDO_ID}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&recorrente=eq.true&data=gte.${dataEnc}`;
+        url = `${_BASE}/condo_transacoes?condominio_id=eq.${_condoAtivo}&descricao=eq.${descEnc}&tipo=eq.${t.tipo}&recorrente=eq.true&data=gte.${dataEnc}`;
       }
       const res = await fetch(url, {method:'DELETE', headers:h});
       if(res.ok || res.status===204){
@@ -2362,7 +2410,7 @@ async function executarDelete(){
       }
     } else {
       // Excluir só este lançamento
-      const res = await fetch(`${_BASE}/condo_transacoes?id=eq.${_deleteId}&condominio_id=eq.${CONDO_ID}`,{
+      const res = await fetch(`${_BASE}/condo_transacoes?id=eq.${_deleteId}&condominio_id=eq.${_condoAtivo}`,{
         method:'DELETE', headers:h
       });
       const body = await res.text();
