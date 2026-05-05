@@ -673,10 +673,13 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 <div class="modal">
 
   <!-- HEADER -->
-  <div class="modal-header">
-    <div class="modal-icon rec" id="mIcone">➕</div>
-    <div class="modal-title" id="mTitulo">Novo Lançamento</div>
-    <button class="modal-close" onclick="fecharModal()">✕</button>
+  <div class="modal-header" style="padding:0;display:flex;align-items:stretch">
+    <div id="mHeaderBar" style="width:6px;background:#ef4444;flex-shrink:0"></div>
+    <div style="flex:1;display:flex;align-items:center;gap:12px;padding:16px 20px">
+      <div id="mIcone" style="width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;background:#fee2e2;color:#dc2626">↓</div>
+      <div style="flex:1"><div id="mTitulo" style="font-size:17px;font-weight:800;color:#dc2626">Nova Despesa</div><div id="mSubtitulo" style="font-size:11px;color:#94a3b8;margin-top:2px">Saida financeira</div></div>
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+    </div>
   </div>
 
   <!-- BADGE FIXO (aparece quando vem de um tipo específico do FAB) -->
@@ -927,51 +930,15 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 
   </div><!-- /modal-body -->
 
-  <div class="modal-footer">
-    <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
-    <button class="btn-save" id="btnSalvar" onclick="salvarLancamento()">Salvar lançamento</button>
+  <div class="modal-footer" style="justify-content:space-between">
+    <button id="btnExcluirModal" style="display:none;background:#fef2f2;color:#dc2626;border:2px solid #fecaca;padding:9px 18px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer" onmouseover="this.style.background='#dc2626';this.style.color='#fff'" onmouseout="this.style.background='#fef2f2';this.style.color='#dc2626'" onclick="if(window._editId_atual){var id=window._editId_atual;document.getElementById('modalBg').classList.remove('open');if(window._deletar)window._deletar(id);}">Excluir</button>
+    <div style="display:flex;gap:10px"><button class="btn-cancel" onclick="fecharModal()">Cancelar</button><button class="btn-save" id="btnSalvar" onclick="salvarLancamento()">Salvar lançamento</button></div>
   </div>
 </div>
 </div><!-- /modal-bg -->
   </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script><script>
-
-// -- Expor funções para os stubs globais --
-window._toggleFab = toggleFab;
-window._fabAbre = fabAbre;
-window._mudarMes = mudarMes;
-window._toggleTipoMenu = toggleTipoMenu;
-window._setTipoFiltro = setTipoFiltro;
-window._setFiltro = setFiltro;
-window._fecharModal = fecharModal;
-window._fecharConfirm = fecharConfirm;
-window._fecharCal = fecharCal;
-window._fecharImportar = fecharImportar;
-window._salvarLancamento = salvarLancamento;
-window._editarTransacao = editarTransacao;
-window._executarDelete = executarDelete;
-window._exportarExcel = exportarExcel;
-window._baixarModelo = baixarModelo;
-window._abrirImportar = abrirImportar;
-window._confirmarImportacao = confirmarImportacao;
-window._selecionarOpt = selecionarOpt;
-window._setDataRapida = setDataRapida;
-window._toggleCal = toggleCal;
-window._calNavMes = calNavMes;
-window._calToggleAno = calToggleAno;
-window._calSelecionarDia = calSelecionarDia;
-window._calConfirmar = calConfirmar;
-window._removerAnexo = removerAnexo;
-window._toggleSecao = toggleSecao;
-window._fazerLogout = typeof fazerLogout !== 'undefined' ? fazerLogout : () => {};
-window._toggleParcela = typeof toggleParcela !== 'undefined' ? toggleParcela : () => {};
-window._toggleFixo = typeof toggleFixo !== 'undefined' ? toggleFixo : () => {};
-window._verPDF = typeof verPDF !== 'undefined' ? verPDF : () => {};
-window._handleDrop = typeof handleDrop !== 'undefined' ? handleDrop : () => {};
-window._uploadAnexo = typeof uploadAnexo !== 'undefined' ? uploadAnexo : () => {};
-
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // Stubs globais — chamam as funções reais quando o módulo carregar
 function toggleFab(e) { if(window._toggleFab) window._toggleFab(e); }
@@ -1335,7 +1302,7 @@ function renderTabela(){
       <div class="val-cell ${tp}">${t.tipo==='despesa'?'- ':'+ '}${fmt(t.valor)}</div>
       <div><span class="sit-badge ${sit}">${sitLabel}</span></div>
       <div class="row-actions">
-        <button class="btn-row del" onclick="event.stopPropagation();deletar(${t.id})">🗑</button>
+        <button onclick="event.stopPropagation();window._editarTransacao&&window._editarTransacao(${t.id})" style="background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Editar</button>
       </div>
     </div>`;
   }).join('');
@@ -1432,7 +1399,7 @@ function limparModal(){
   document.querySelectorAll('.dq-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('dqHoje').classList.add('active');
   document.getElementById('fData').style.display='none';
-  var bN=document.getElementById('btnExcluirModal'); if(bN) bN.style.display='none';
+  var bxn=document.getElementById('btnExcluirModal'); if(bxn) bxn.style.display='none';
 }
 
 function setTipo(tipo){
@@ -1441,12 +1408,15 @@ function setTipo(tipo){
 
   // Ícone e cor do header do modal
   const icon = document.getElementById('mIcone');
-  if(icon){
-    icon.textContent      = cfg.icon;
-    icon.style.background = cfg.bg;
-    icon.style.color      = cfg.cor;
-    icon.className        = 'modal-icon';
-  }
+  const corMap={despesa:'#dc2626',receita:'#16a34a',cartao:'#2563eb',transferencia:'#d97706'};
+  const bgMap={despesa:'#fee2e2',receita:'#dcfce7',cartao:'#dbeafe',transferencia:'#fef3c7'};
+  const barMap={despesa:'#ef4444',receita:'#22c55e',cartao:'#3b82f6',transferencia:'#f59e0b'};
+  const subMap={despesa:'Saida financeira',receita:'Entrada financeira',cartao:'Despesa cartao',transferencia:'Transferencia entre contas'};
+  const labelMap={despesa:'Nova Despesa',receita:'Nova Receita',cartao:'Novo Cartao',transferencia:'Transferencia'};
+  if(icon){ icon.textContent=cfg.icon; icon.style.background=bgMap[tipo]||'#fee2e2'; icon.style.color=corMap[tipo]||'#dc2626'; }
+  const bar=document.getElementById('mHeaderBar'); if(bar) bar.style.background=barMap[tipo]||'#ef4444';
+  const tit=document.getElementById('mTitulo'); if(tit){ tit.textContent=labelMap[tipo]||cfg.label; tit.style.color=corMap[tipo]||'#dc2626'; }
+  const sub=document.getElementById('mSubtitulo'); if(sub) sub.textContent=subMap[tipo]||'';
 
   // Mostrar info extra para cartão
   const infoCartao = document.getElementById('infoCartao');
@@ -1941,7 +1911,8 @@ async function editarTransacao(id){
     const lbl = document.getElementById('secLabel');
     if(lbl) lbl.textContent = 'Menos detalhes';
   }
-  _editId = id; // setado aqui, após todas as chamadas que possam resetar
+  _editId = id; window._editId_atual = id;
+  var bx=document.getElementById('btnExcluirModal'); if(bx) bx.style.display='block';
   document.getElementById('modalBg').classList.add('open');
 }
 
@@ -2217,6 +2188,7 @@ function deletar(id){
           <div class="confirm-opt-sub">Exclui apenas o lançamento de ${mesRef}</div>
         </div>
       </button>
+      <button class="confirm-opt" id="optProximos" onclick="selecionarOpt('proximos')"><div class="confirm-opt-label">Este e os proximos</div><div class="confirm-opt-sub">Remove em diante</div></button>
       <button class="confirm-opt" id="optTodos" onclick="selecionarOpt('todos')">
         <span class="confirm-opt-icon">🗂</span>
         <div>
