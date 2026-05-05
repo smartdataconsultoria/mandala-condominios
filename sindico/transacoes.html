@@ -1005,23 +1005,6 @@ if(_condo){ const s=document.getElementById('select-condo'); if(s) s.innerHTML=`
 window.fazerLogout = async()=>{ await _sb.auth.signOut(); window.location.href='/login.html' }
 window.trocarCondo = ()=>{}
 
-// Auth CondoGestor
-const { data: { session: _sess } } = await _sb.auth.getSession()
-if (!_sess) { window.location.href = '/login.html'; throw new Error() }
-const { data: _perfil } = await _sb.from('usuarios').select('nome, role, condominio_id').eq('id', _sess.user.id).single()
-if (!_perfil || _perfil.role !== 'sindico') {
-  const _d = { administradora: '/admin/index.html', morador: '/morador/index.html' }
-  window.location.href = _d[_perfil?.role] || '/login.html'; throw new Error()
-}
-
-// Variáveis globais compatíveis com o código existente
-const CONDO_ID = _perfil.condominio_id
-let EMPRESA = CONDO_ID  // usado como filtro onde antes era 'mandala'
-
-// Preenche nome e avatar na sidebar
-document.getElementById('user-name').textContent = _perfil.nome || _sess.user.email
-document.getElementById('avatar-initials').textContent = (_perfil.nome || _sess.user.email).split(' ').slice(0,2).map(p=>p[0].toUpperCase()).join('')
-
 // Busca nome do condomínio
 const { data: _condo } = await _sb.from('condominios').select('nome').eq('id', CONDO_ID).single()
 if (_condo) {
