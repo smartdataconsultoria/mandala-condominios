@@ -961,6 +961,15 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
+
+// ✅ Função global para normalização da busca (acentos + minúsculas)
+function normalizar(txt){
+  return (txt || '')
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '');
+}
 // Stubs globais — encaminham argumentos para as funções reais no módulo
 function _call(fnName, ...args){
   const fn = window[fnName];
@@ -1270,36 +1279,24 @@ function renderCards(){
 
 // -- TABELA -----------------------------------------------
 function renderTabela(){
-  const busca = normalizar(document.getElementById('busca').value);
-  const catMap = Object.fromEntries(_categorias.map(c=>[c.id,c]));
+  const busca   = document.getElementById('busca').value.toLowerCase();
+  const catMap  = Object.fromEntries(_categorias.map(c=>[c.id,c]));
   const contaMap= Object.fromEntries(_contas.map(c=>[c.id,c]));
-
   let lista = _transacoes.filter(t=>{
-    // Filtro de tipo principal
-    if(_tipoFiltro==='despesa' && t.tipo!=='despesa') return false;
-    if(_tipoFiltro==='receita' && t.tipo!=='receita') return false;
-    if(_tipoFiltro==='transferencia' && t.tipo!=='transferencia') return false;
-
+    // Filtro de tipo principal (dropdown)
+    if(_tipoFiltro==='despesa'      && t.tipo!=='despesa') return false;
+    if(_tipoFiltro==='receita'      && t.tipo!=='receita') return false;
+    if(_tipoFiltro==='transferencia'&& t.tipo!=='transferencia') return false;
     // Filtros secundários
     if(_filtro==='pendente' && t.situacao!=='pendente') return false;
-    if(_filtro==='parcelado' && !t.parcela_total) return false;
-    if(_filtro==='fixo' && !t.recorrente) return false;
-
-    // 🔎 Busca por iniciais (prefixo)
-    if (busca) {
+    if(_filtro==='parcelado'&& !t.parcela_total) return false;
+    if(_filtro==='fixo'     && !t.recorrente) return false;
+    if(busca){
       const cat = catMap[t.categoria_id];
-      const conta = contaMap[t.conta_id];
-      const campos = [
-        t.descricao,
-        cat?.categoria,
-        cat?.nome,
-        conta?.nome,
-        t.observacao
-      ].map(normalizar).join(' ');
-
-      const palavras = campos.split(/\s+/);
-      const encontrou = palavras.some(p => p.startsWith(busca));
-      if (!encontrou) return false;
+      const catNome  = (cat?.categoria||'').toLowerCase();
+      const subNome  = (cat?.nome||'').toLowerCase();
+      const descNome = (t.descricao||'').toLowerCase();
+      if(!descNome.includes(busca) && !catNome.includes(busca) && !subNome.includes(busca)) return false;
     }
     return true;
   });
@@ -1310,8 +1307,79 @@ function renderTabela(){
     return;
   }
 
-  // (restante da função permanece igual)
 
+  // -- Calcular totais da lista filtrada ------------------
+  const totalRec = lista.filter(t=>t.tipo==='receita').reduce((s,t)=>s+parseFloat(t.valor||0),0);
+  const totalDes = lista.filter(t=>t.tipo==='despesa').reduce((s,t)=>s+parseFloat(t.valor||0),0);
+  const totalLiq = totalRec - totalDes;
+  const qtd      = lista.length;
+
+  const linhas = lista.map(t=>{
+    const cat   = catMap[t.categoria_id];
+    const conta = contaMap[t.conta_id];
+    const tp    = t.tipo==='receita' ? 'rec' : 'des';
+    const sit   = t.situacao||'pago';
+    const sitLabel = {pago:'Pago',pendente:'Pendente',agendado:'Agendado'}[sit]||sit;
+    const ehParcelado = t.parcela_total && !t.recorrente;
+    const parTag = ehParcelado ? `<span class="parcela-tag">${t.parcela_atual||1}/${t.parcela_total}</span>` : '';
+    const fixaTag= t.recorrente ? `<span class="fixa-tag">🔄</span>` : '';
+    const pdfTag = t.anexo_url     ? `<span class="pdf-tag" onclick="event.stopPropagation();verPDF('${t.anexo_url}')" title="Ver comprovante">📎</span>` : '';
+    return `<div class="table-row" onclick="editarTransacao(${t.id})">
+      <div><div class="tipo-icon ${tp}">${t.tipo==='receita'?'↑':'↓'}</div></div>
+      <div style="font-size:13px;color:var(--text-light)">${fmtDate(t.data)}</div>
+      <div class="desc-cell">
+        <div class="desc-main">${t.descricao||'—'}${parTag}${fixaTag}${pdfTag}</div>
+        ${t.observacao ? `<div class="desc-sub">${t.observacao.substring(0,50)}</div>` : ''}
+      </div>
+      <div>
+        ${cat ? `
+          <div style="display:flex;flex-direction:column;gap:3px">
+            ${cat.categoria ? `<span style="font-size:10px;color:var(--text-mid);font-weight:600;text-transform:uppercase;letter-spacing:.04em">${cat.categoria}</span>` : ''}
+            <span class="cat-badge">${cat.icone||''} ${cat.nome}</span>
+          </div>` : '<span style="color:#4a5568">—</span>'}
+      </div>
+      <div style="font-size:13px;color:var(--text-light)">${conta ? conta.nome : '—'}</div>
+      <div class="val-cell ${tp}">${t.tipo==='despesa'?'- ':'+ '}${fmt(t.valor)}</div>
+      <div><span class="sit-badge ${sit}">${sitLabel}</span></div>
+      <div class="row-actions">
+        <button onclick="event.stopPropagation();window._editarTransacao&&window._editarTransacao(${t.id})" style="background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Editar</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // -- Rodapé totalizador ----------------------------------
+  const rodape = `<div style="
+    display:grid;
+    grid-template-columns:36px 100px 1fr 180px 140px 110px 100px 60px;
+    gap:8px;padding:14px 20px;
+    background:var(--white);
+    border-top:2px solid var(--border);
+    border-radius:0 0 12px 12px;
+    align-items:center;
+  ">
+    <div></div>
+    <div style="font-size:11px;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:.05em">
+      ${qtd} lançamento${qtd!==1?'s':''}
+    </div>
+    <div style="font-size:12px;color:var(--text-mid)">Total filtrado</div>
+    <div></div>
+    <div></div>
+    <div style="text-align:right">
+      ${totalRec>0 && totalDes>0 ? `
+        <div style="font-size:11px;color:#22c55e;margin-bottom:2px">+ ${fmt(totalRec)}</div>
+        <div style="font-size:11px;color:#ef4444;margin-bottom:2px">- ${fmt(totalDes)}</div>
+        <div style="font-size:13px;font-weight:800;color:${totalLiq>=0?'#22c55e':'#ef4444'};border-top:1px solid var(--border);padding-top:3px">${totalLiq>=0?'+':'-'} ${fmt(Math.abs(totalLiq))}</div>
+      ` : totalDes>0 ? `
+        <div style="font-size:15px;font-weight:800;color:#ef4444">- ${fmt(totalDes)}</div>
+      ` : `
+        <div style="font-size:15px;font-weight:800;color:#22c55e">+ ${fmt(totalRec)}</div>
+      `}
+    </div>
+    <div></div>
+    <div></div>
+  </div>`;
+
+  document.getElementById('listaTransacoes').innerHTML = linhas + rodape;
 }
 
 // -- MODAL ------------------------------------------------
