@@ -2516,6 +2516,9 @@ window._toggleParcela=toggleParcela;window._toggleFixo=toggleFixo;window._verPDF
 window._handleDrop=handleDrop;window._uploadAnexo=uploadAnexo;window._deletar=deletar;
 document.getElementById('mesAtual').textContent = `${MESES[_mes]} ${_ano}`;
 await loadAll();
+ // ✅ Expõe renderTabela para o HTML (oninput)
+window.renderTabela = renderTabela;
+
 })().catch(e => { console.error(e); });</script>
 
 </body>
