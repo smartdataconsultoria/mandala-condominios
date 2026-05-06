@@ -662,16 +662,16 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
   <!-- TABELA -->
   <div class="table-wrap">
     <div class="table-head">
-      <div></div>
-      <div>Data</div>
-      <div>Descrição</div>
-      <div>Categoria</div>
-      <div>Conta</div>
-      <div style="text-align:right">Valor</div>
-      <div>Situação</div>
-      <div></div>
-    </div>
-    <div id="listaTransacoes"><div class="empty-state">⏳ Carregando...</div></div>
+ <div></div>
+ <div onclick="ordenarPor('data')" style="cursor:pointer">Data<span id="sortIcon-data"></span></div>
+ <div onclick="ordenarPor('descricao')" style="cursor:pointer">Descrição<span id="sortIcon-descricao"></span></div>
+ <div onclick="ordenarPor('categoria')" style="cursor:pointer">Categoria<span id="sortIcon-categoria"></span></div>
+ <div onclick="ordenarPor('conta')" style="cursor:pointer">Conta<span id="sortIcon-conta"></span></div>
+ <div onclick="ordenarPor('valor')" style="cursor:pointer;text-align:right">Valor<span id="sortIcon-valor"></span></div>
+ <div onclick="ordenarPor('situacao')" style="cursor:pointer">Situação<span id="sortIcon-situacao"></span></div>
+ <div></div>
+ </div>
+ <div id="listaTransacoes"><div class="empty-state">⏳ Carregando...</div></div>
   </div>
 </main>
 
@@ -961,15 +961,6 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-
-// ✅ Função global para normalização da busca (acentos + minúsculas)
-function normalizar(txt){
-  return (txt || '')
-    .toString()
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '');
-}
 // Stubs globais — encaminham argumentos para as funções reais no módulo
 function _call(fnName, ...args){
   const fn = window[fnName];
@@ -989,6 +980,8 @@ function salvarLancamento(){ return _call('_salvarLancamento'); }
 function editarTransacao(id){ return _call('_editarTransacao', id); }
 function executarDelete(){ return _call('_executarDelete'); }
 function exportarExcel(){ return _call('_exportarExcel'); }
+function renderTabela(){ return _call('_renderTabela'); }
+function ordenarPor(campo){ return _call('_ordenarPor', campo); }
 function abrirImportar(){ return _call('_abrirImportar'); }
 function confirmarImportacao(){ return _call('_confirmarImportacao'); }
 function selecionarOpt(opt, el){ return _call('_selecionarOpt', opt, el); }
@@ -1291,29 +1284,43 @@ function renderTabela(){
     if(_filtro==='pendente' && t.situacao!=='pendente') return false;
     if(_filtro==='parcelado'&& !t.parcela_total) return false;
     if(_filtro==='fixo'     && !t.recorrente) return false;
+    
     if (busca) {
-  const cat = catMap[t.categoria_id];
-  const conta = contaMap[t.conta_id];
-
-  const campos = [
-    t.descricao,
-    cat?.categoria,
-    cat?.nome,
-    conta?.nome,
-    t.observacao
-  ]
-    .map(normalizar)
-    .join(' ');
-
-  const palavras = campos.split(/\s+/);
-
-  const encontrou = palavras.some(p => p.startsWith(busca));
-
-  if (!encontrou) return false;
-}
-``
+      const cat = catMap[t.categoria_id];
+      const conta = contaMap[t.conta_id];
+      const campos = [
+        t.descricao,
+        cat?.categoria,
+        cat?.nome,
+        conta?.nome,
+        t.observacao
+      ].map(normalizar).join(' ');
+      const palavras = campos.split(/\s+/);
+      const encontrou = palavras.some(p => p.startsWith(busca));
+      if (!encontrou) return false;
+    }
     return true;
   });
+
+  // Ordenação clicável
+  atualizarIconesOrdenacao();
+  lista.sort((a,b)=>{
+    let va, vb;
+    switch(_ordemCampo){
+      case 'data': va = a.data || ''; vb = b.data || ''; break;
+      case 'descricao': va = a.descricao || ''; vb = b.descricao || ''; break;
+      case 'categoria': va = (catMap[a.categoria_id]?.nome) || ''; vb = (catMap[b.categoria_id]?.nome) || ''; break;
+      case 'conta': va = (contaMap[a.conta_id]?.nome) || ''; vb = (contaMap[b.conta_id]?.nome) || ''; break;
+      case 'valor': va = parseFloat(a.valor || 0); vb = parseFloat(b.valor || 0); break;
+      case 'situacao': va = a.situacao || ''; vb = b.situacao || ''; break;
+      default: va=''; vb='';
+    }
+    if(typeof va === 'string'){ va = normalizar(va); vb = normalizar(vb); }
+    if(va < vb) return _ordemDir === 'asc' ? -1 : 1;
+    if(va > vb) return _ordemDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
 
   if(lista.length===0){
     document.getElementById('listaTransacoes').innerHTML=
@@ -2513,11 +2520,13 @@ window._setDataRapida=setDataRapida;window._toggleCal=toggleCal;window._calNavMe
 window._calToggleAno=calToggleAno;window._calSelecionarDia=calSelecionarDia;window._calConfirmar=calConfirmar;
 window._removerAnexo=removerAnexo;window._toggleSecao=toggleSecao;window._fazerLogout=fazerLogout;
 window._toggleParcela=toggleParcela;window._toggleFixo=toggleFixo;window._verPDF=verPDF;
-window._handleDrop=handleDrop;window._uploadAnexo=uploadAnexo;window._deletar=deletar;
+window._handleDrop=handleDrop;window._uploadAnexo=uploadAnexo;window._deletar=deletar;window._renderTabela=renderTabela;window._ordenarPor=ordenarPor;
 document.getElementById('mesAtual').textContent = `${MESES[_mes]} ${_ano}`;
 await loadAll();
- // ✅ Expõe renderTabela para o HTML (oninput)
+// ✅ Expõe renderTabela para o HTML (oninput)
 window.renderTabela = renderTabela;
+// ✅ Expõe ordenarPor para o HTML (clique no cabeçalho)
+window.ordenarPor = ordenarPor;
 
 })().catch(e => { console.error(e); });</script>
 
