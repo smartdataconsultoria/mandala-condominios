@@ -602,19 +602,17 @@ function filtrarCatSb(cat, el){
   renderDocs();
 }
 
-// ── RENDER ────────────────────────────────────────────────
+// ── RENDER ────────────────────────────────────────────
 function renderDocs(){
   const busca = document.getElementById('busca').value.toLowerCase();
   const sort  = document.getElementById('sortBy').value;
-  const hoje  = new Date(); hoje.setHours(0,0,0,0);
-  const em30  = new Date(hoje); em30.setDate(em30.getDate()+30);
 
   let lista = _docs.filter(d=>{
     if(!_filtrosit && _filtrocat==='__outros__' && ['Ata','Contrato','Nota Fiscal'].includes(d.categoria)) return false;
     if(!_filtrosit && _filtrocat!=='Todos' && _filtrocat!=='__outros__' && d.categoria!==_filtrocat) return false;
     if(busca && !(
-      d.nome?.toLowerCase().includes(busca) ||
-      d.categoria?.toLowerCase().includes(busca)
+      (d.nome||'').toLowerCase().includes(busca) ||
+      (d.categoria||'').toLowerCase().includes(busca)
     )) return false;
     return true;
   });
@@ -627,39 +625,43 @@ function renderDocs(){
   });
 
   const grid = document.getElementById('docsGrid');
-  if(!lista.length){ grid.innerHTML='<div class="empty-state">📭 Nenhum documento encontrado.</div>'; return; }
+  if(!lista.length){
+    grid.innerHTML='<div class="empty-state">📭 Nenhum documento encontrado.</div>';
+    return;
+  }
 
   grid.innerHTML = lista.map(d=>{
-    const cfg = CAT_CONFIG[d.categoria]||CAT_CONFIG['Outro'];
-    const sv  = statusValidade(d.data_validade);
-    const bg  = CAT_BG[d.categoria]||'#F7F6F2';
-    const aprSt = d.aprovacao_status||'pendente';
-    const acfg  = APR_CONFIG[aprSt]||APR_CONFIG.pendente;
-    return `<div class="doc-card${d.destaque?' destaque':''}" onclick="visualizar(${d.id})">
+    const cfg        = CAT_CONFIG[d.categoria] || CAT_CONFIG['Outro'];
+    const bg         = CAT_BG[d.categoria] || '#F7F6F2';
+    const dataCriado = d.criado_em ? new Date(d.criado_em).toLocaleDateString('pt-BR') : '—';
+    const ext        = d.url ? d.url.split('.').pop().toUpperCase().substring(0,4) : '';
+    const extIcons   = {PDF:'📄',PNG:'🖼',JPG:'🖼',JPEG:'🖼',DOC:'📝',DOCX:'📝',XLS:'📊',XLSX:'📊'};
+    const fileIcon   = extIcons[ext] || '📎';
+    const nomeSeguro = (d.nome||'').replace(/'/g, '&#39;');
+    const urlSegura  = (d.url||'').replace(/'/g, '%27');
+
+    return `<div class="doc-card">
       <div class="doc-type-icon" style="background:${bg}">${cfg.icon}</div>
-      <div class="doc-info">
-        <div class="doc-titulo">${d.nome||'Sem título'}</div>
+      <div class="doc-info" style="cursor:${d.url?'pointer':'default'}" onclick="${d.url ? `verArquivo('${urlSegura}')` : ''}">
+        <div class="doc-titulo">${d.nome || 'Sem título'}</div>
         <div class="doc-meta">
           <span class="doc-cat-badge ${cfg.cls}">${cfg.label}</span>
-          ${d.subcategoria?`<span style="font-size:11px;color:var(--text-light)">${d.subcategoria}</span>`:''}
-          ${d.data_documento?`<span class="doc-date">📅 ${fmtDate(d.data_documento)}</span>`:''}
-          ${sv?`<span class="doc-validade ${sv.cls}">${sv.label}</span>`:''}
-          ${d.valor_contrato?`<span class="doc-valor">${fmt(d.valor_contrato)}</span>`:''}
-          ${d.categoria==='Proposta'?`<span class="apr-badge ${acfg.cls}">${acfg.icon} ${acfg.label}</span>`:''}
+          <span class="doc-date">📅 ${dataCriado}</span>
+          ${d.url
+            ? `<span style="font-size:10px;background:var(--blue-bg);color:var(--blue);padding:2px 7px;border-radius:8px;font-weight:700">${fileIcon} ${ext}</span>`
+            : `<span style="font-size:10px;color:var(--text-light)">Sem arquivo</span>`
+          }
         </div>
-        ${d.prestador_nome?`<div class="doc-prestador">🏢 ${d.prestador_nome}${d.prestador_servico?' — '+d.prestador_servico:''}</div>`:''}
-        ${d.descricao?`<div class="doc-desc">${d.descricao}</div>`:''}
       </div>
       <div class="doc-actions" onclick="event.stopPropagation()">
-        ${d.categoria==='Proposta'?`<button class="btn-action analisar" onclick="abrirModalAprovacao(${d.id})">⚖ Analisar</button>`:''}
-        ${d.arquivo_url?`<button class="btn-action primary" onclick="verArquivo('${d.arquivo_url}')">👁 Ver</button>
-          <a class="btn-action" href="${d.arquivo_url}" download="${d.arquivo_nome||'documento'}" style="text-decoration:none">⬇</a>`:''}
-        <button class="btn-action" onclick="abrirModal(${d.id})">✏</button>
-        <button class="btn-action del" onclick="deletar('${d.id}','${(d.nome||'').replace(/'/g,String.fromCharCode(39))}')">🗑</button>
+        ${d.url ? `<button class="btn-action primary" onclick="verArquivo('${urlSegura}')" title="Visualizar">👁 Ver</button><a class="btn-action" href="${urlSegura}" download target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;gap:4px">⬇ Baixar</a>` : ''}
+        <button class="btn-action" onclick="abrirModal('${d.id}')" title="Editar">✏</button>
+        <button class="btn-action del" onclick="deletar('${d.id}','${nomeSeguro}')" title="Excluir">🗑</button>
       </div>
     </div>`;
   }).join('');
 }
+
 
 // ── MODAL ─────────────────────────────────────────────────
 function abrirModal(id){
