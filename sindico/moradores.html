@@ -470,8 +470,11 @@ input[type=file]#fFoto{display:none}
         <div class="field">
           <label>Tipo de Ocupação</label>
           <select id="fTipoOcup">
+            <option value="morador">Morador</option>
             <option value="proprietario">Proprietário</option>
             <option value="inquilino">Inquilino</option>
+            <option value="sindico">Síndico</option>
+            <option value="funcionario">Funcionário</option>
           </select>
         </div>
       </div>
@@ -582,9 +585,10 @@ input[type=file]#fFoto{display:none}
 
 <script>
 // ── CONFIG ───────────────────────────────────────────────
-const SUPA_URL = 'https://siczyohqmlrmirqgzlxb.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw';
-const EMPRESA  = 'mandala';
+const SUPA_URL      = 'https://siczyohqmlrmirqgzlxb.supabase.co';
+const SUPA_KEY      = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw';
+const CONDO_ID      = 'eefc41c0-519b-419b-847f-eb4724455baa';
+const CONDO_NOME    = 'Edifício Mandala';
 
 let _moradores = [];
 let _filtro    = 'todos';
@@ -636,7 +640,7 @@ function mascaraTel(el){
 // ── LOAD ─────────────────────────────────────────────────
 async function loadMoradores(){
   const res = await fetch(
-    `${SUPA_URL}/rest/v1/condo_moradores?empresa=eq.${EMPRESA}&order=apartamento,nome`,
+    `${SUPA_URL}/rest/v1/usuarios?condominio_id=eq.${CONDO_ID}&order=unidade,nome`,
     {headers:hdrs()}
   );
   _moradores = res.ok ? await res.json() : [];
@@ -647,15 +651,15 @@ async function loadMoradores(){
 
 function renderStats(){
   const ativos = _moradores.filter(m=>m.ativo);
-  const aptos  = [...new Set(_moradores.filter(m=>m.ativo).map(m=>m.apartamento))].length;
+  const aptos  = [...new Set(_moradores.filter(m=>m.ativo).map(m=>m.unidade))].length;
   document.getElementById('statAptos').textContent        = aptos;
   document.getElementById('statAtivos').textContent       = ativos.length;
-  document.getElementById('statProprietarios').textContent= ativos.filter(m=>m.tipo_ocupacao==='proprietario').length;
-  document.getElementById('statInquilinos').textContent   = ativos.filter(m=>m.tipo_ocupacao==='inquilino').length;
+  document.getElementById('statProprietarios').textContent= ativos.filter(m=>m.role==='sindico'||m.role==='proprietario').length;
+  document.getElementById('statInquilinos').textContent   = ativos.filter(m=>m.role==='morador'||m.role==='inquilino').length;
 }
 
 function renderFiltroApto(){
-  const aptos = [...new Set(_moradores.map(m=>m.apartamento))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+  const aptos = [...new Set(_moradores.map(m=>m.unidade).filter(Boolean))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
   const sel = document.getElementById('filtroApto');
   sel.innerHTML = '<option value="">Todos os aptos</option>' +
     aptos.map(a=>`<option value="${a}">Apto ${a}</option>`).join('');
@@ -750,8 +754,7 @@ function abrirModal(id){
     const m = _moradores.find(m=>m.id===id);
     if(m) preencherModal(m);
     document.getElementById('modalTitle').textContent = 'Editar Morador';
-    if(m?.email)  setTimeout(()=>verificarEmailAuth('1'), 200);
-    if(m?.email2) setTimeout(()=>verificarEmailAuth('2'), 300);
+    if(m?.email) setTimeout(()=>verificarEmailAuth('1'), 200);
   } else {
     document.getElementById('modalTitle').textContent = 'Cadastrar Morador';
   }
@@ -769,7 +772,7 @@ function limparModal(){
    'fEmergNome','fEmergTel','fObs','fNasc'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
-  document.getElementById('fTipoOcup').value = 'proprietario';
+  document.getElementById('fTipoOcup').value = 'morador';
   document.getElementById('fEmergPar').value = '';
   document.getElementById('fAtivo').checked  = true;
   ['','2'].forEach(function(sfx){
@@ -791,26 +794,13 @@ function limparModal(){
 
 function preencherModal(m){
   const set = (id,v) => { const el=document.getElementById(id); if(el&&v!=null) el.value=v; };
-  set('fNome',m.nome); set('fCpf',m.cpf); set('fRg',m.rg);
-  set('fEmail',m.email); set('fEmail2',m.email2); set('fTel',m.telefone); set('fTel2',m.telefone2);
-  set('fNasc',m.data_nascimento);
-  set('fApto',m.apartamento); set('fBloco',m.bloco);
-  set('fTipoOcup',m.tipo_ocupacao);
-  set('fEntrada',m.data_entrada); set('fSaida',m.data_saida);
-  set('fPlaca',m.veiculo_placa); set('fModelo',m.veiculo_modelo);
-  set('fCorVei',m.veiculo_cor); set('fVaga',m.vaga_garagem);
-  set('fEmergNome',m.contato_emerg_nome);
-  set('fEmergTel',m.contato_emerg_telefone);
-  set('fEmergPar',m.contato_emerg_parentesco);
-  set('fObs',m.observacao);
+  set('fNome',m.nome);
+  set('fEmail',m.email);
+  set('fTel',m.telefone);
+  set('fApto',m.unidade);
+  set('fBloco',m.bloco);
+  set('fTipoOcup',m.role||'morador');
   if(m.ativo!=null) document.getElementById('fAtivo').checked = m.ativo;
-  if(m.foto_url) document.getElementById('fotoPreview').innerHTML = `<img src="${m.foto_url}" alt="foto"/>`;
-  (m.residentes||[]).forEach(r=>addResidente(r));
-  if(m.tem_pet){
-    document.getElementById('fTemPet').checked = true;
-    document.getElementById('petsArea').style.display = 'block';
-    (m.pets||[]).forEach(p=>addPet(p));
-  }
 }
 
 // ── FOTO ─────────────────────────────────────────────────
@@ -985,100 +975,41 @@ async function salvar(){
   btn.disabled=true; btn.textContent='Salvando...';
 
   const payload = {
-    empresa:              EMPRESA,
+    condominio_id: CONDO_ID,
     nome,
-    cpf:                  document.getElementById('fCpf').value.trim()||null,
-    rg:                   document.getElementById('fRg').value.trim()||null,
-    data_nascimento:      document.getElementById('fNasc').value||null,
-    email:                document.getElementById('fEmail').value.trim()||null,
-    email2:               document.getElementById('fEmail2').value.trim()||null,
-    telefone:             document.getElementById('fTel').value.trim()||null,
-    telefone2:            document.getElementById('fTel2').value.trim()||null,
-    apartamento:          apto,
-    bloco:                document.getElementById('fBloco').value.trim()||null,
-    tipo_ocupacao:        document.getElementById('fTipoOcup').value,
-    data_entrada:         document.getElementById('fEntrada').value||null,
-    data_saida:           document.getElementById('fSaida').value||null,
-    ativo:                document.getElementById('fAtivo').checked,
-    veiculo_placa:        document.getElementById('fPlaca').value.trim().toUpperCase()||null,
-    veiculo_modelo:       document.getElementById('fModelo').value.trim()||null,
-    veiculo_cor:          document.getElementById('fCorVei').value.trim()||null,
-    vaga_garagem:         document.getElementById('fVaga').value.trim()||null,
-    tem_pet:              document.getElementById('fTemPet').checked,
-    pets:                 coletarPets(),
-    residentes:           coletarResidentes(),
-    contato_emerg_nome:   document.getElementById('fEmergNome').value.trim()||null,
-    contato_emerg_telefone: document.getElementById('fEmergTel').value.trim()||null,
-    contato_emerg_parentesco: document.getElementById('fEmergPar').value||null,
-    observacao:           document.getElementById('fObs').value.trim()||null,
+    email:    document.getElementById('fEmail').value.trim()||null,
+    telefone: document.getElementById('fTel').value.trim()||null,
+    unidade:  apto,
+    bloco:    document.getElementById('fBloco').value.trim()||null,
+    role:     document.getElementById('fTipoOcup').value,
+    ativo:    document.getElementById('fAtivo').checked,
   };
 
   const h = hdrs();
-  let savedId = _editId;
   try {
     let res, json;
     if(_editId){
-      res  = await fetch(`${SUPA_URL}/rest/v1/condo_moradores?id=eq.${_editId}`,{
+      res  = await fetch(`${SUPA_URL}/rest/v1/usuarios?id=eq.${_editId}`,{
         method:'PATCH', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)
       });
-      json = await res.json();
     } else {
-      res  = await fetch(`${SUPA_URL}/rest/v1/condo_moradores`,{
+      res  = await fetch(`${SUPA_URL}/rest/v1/usuarios`,{
         method:'POST', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)
       });
-      json = await res.json();
     }
+    json = await res.json();
 
     if(!res.ok){
       const msg = json?.message || json?.hint || JSON.stringify(json);
       let dica = '';
       if(res.status===401) dica = ' — JWT expirado. Faça logout e login novamente.';
-      if(res.status===403) dica = ' — Sem permissão (RLS).';
+      if(res.status===403) dica = ' — Sem permissão (RLS). Desabilite no Supabase.';
       showAlert(`❌ Erro ${res.status}: ${msg}${dica}`, 'error');
       btn.disabled=false; btn.textContent='💾 Salvar Morador';
       return;
     }
 
-    const novo = Array.isArray(json)?json[0]:json;
-    if(!_editId) savedId = novo?.id;
-
-    if(_fotoFile && savedId){
-      const url = await uploadFoto(_fotoFile, savedId);
-      if(url){
-        await fetch(`${SUPA_URL}/rest/v1/condo_moradores?id=eq.${savedId}`,{
-          method:'PATCH', headers:h, body:JSON.stringify({foto_url:url})
-        });
-      }
-    }
-
-    const criarAcesso  = document.getElementById('fCriarAcesso')?.checked;
-    const criarAcesso2 = document.getElementById('fCriarAcesso2')?.checked;
-    const emailVal     = document.getElementById('fEmail').value.trim();
-    const email2Val    = document.getElementById('fEmail2').value.trim();
-    const nomeVal      = document.getElementById('fNome').value.trim();
-    const aptoVal      = document.getElementById('fApto').value.trim();
-    let acessosCriados = [];
-
-    if(criarAcesso && emailVal){
-      btn.textContent='Criando acesso 1...';
-      const ok = await criarAcessoPortal(emailVal, nomeVal, aptoVal, '');
-      if(!ok){ btn.disabled=false; btn.textContent='💾 Salvar Morador'; return; }
-      acessosCriados.push(emailVal);
-    }
-
-    if(criarAcesso2 && email2Val){
-      btn.textContent='Criando acesso 2...';
-      const ok = await criarAcessoPortal(email2Val, nomeVal, aptoVal, '2');
-      if(!ok){ btn.disabled=false; btn.textContent='💾 Salvar Morador'; return; }
-      acessosCriados.push(email2Val);
-    }
-
-    if(acessosCriados.length>0){
-      showAlert('✅ Morador salvo! Acessos criados: '+acessosCriados.join(' e '));
-    } else {
-      showAlert(_editId ? '✅ Morador atualizado!' : '✅ Morador cadastrado com sucesso!');
-    }
-
+    showAlert(_editId ? '✅ Morador atualizado!' : '✅ Morador cadastrado com sucesso!');
     fecharModal();
     await loadMoradores();
   } catch(e){
@@ -1091,7 +1022,7 @@ async function salvar(){
 async function deletar(id, nome){
   if(!confirm(`Excluir o morador "${nome}"?\nEsta ação não pode ser desfeita.`)) return;
   const res = await fetch(
-    `${SUPA_URL}/rest/v1/condo_moradores?id=eq.${id}&empresa=eq.${EMPRESA}`,
+    `${SUPA_URL}/rest/v1/usuarios?id=eq.${id}&condominio_id=eq.${CONDO_ID}`,
     {method:'DELETE', headers:{...hdrs(),'Prefer':'return=representation'}}
   );
   if(res.ok){ showAlert('Morador removido.'); await loadMoradores(); }
@@ -1105,7 +1036,6 @@ document.getElementById('modalBg').addEventListener('click',e=>{
 
 // ── INIT ─────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async ()=>{
-  // Pegar email do usuário logado
   const k = Object.keys(localStorage).find(k=>k.includes('auth-token'));
   if(k){
     try{
@@ -1113,31 +1043,9 @@ window.addEventListener('DOMContentLoaded', async ()=>{
       document.getElementById('navUser').textContent = u?.user?.email || 'Síndico';
     }catch{}
   }
-
-  // Buscar nome do condomínio na tabela condo_config (ou similar)
-  try{
-    const r = await fetch(
-      `${SUPA_URL}/rest/v1/condo_config?empresa=eq.${EMPRESA}&select=nome&limit=1`,
-      {headers:hdrs()}
-    );
-    if(r.ok){
-      const d = await r.json();
-      if(d && d[0]?.nome){
-        document.getElementById('condoNome').childNodes[0].textContent = d[0].nome + ' ';
-        document.title = `Moradores — ${d[0].nome}`;
-      } else {
-        // Fallback: formatar o EMPRESA
-        document.getElementById('condoNome').childNodes[0].textContent =
-          EMPRESA.charAt(0).toUpperCase() + EMPRESA.slice(1) + ' ';
-      }
-    } else {
-      document.getElementById('condoNome').childNodes[0].textContent =
-        EMPRESA.charAt(0).toUpperCase() + EMPRESA.slice(1) + ' ';
-    }
-  } catch {
-    document.getElementById('condoNome').childNodes[0].textContent =
-      EMPRESA.charAt(0).toUpperCase() + EMPRESA.slice(1) + ' ';
-  }
+  // Nome do condomínio
+  document.getElementById('condoNome').innerHTML =
+    CONDO_NOME + ' <svg viewBox="0 0 20 20" style="width:12px;height:12px;fill:#64748b;flex-shrink:0"><path d="M5 8l5 5 5-5"/></svg>';
 
   await loadMoradores();
 });
