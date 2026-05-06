@@ -2091,22 +2091,25 @@ function validarLancamentoBackend(row, categorias, contas){
 
   const tiposValidos = ['despesa','receita','transferencia'];
   if(!tiposValidos.includes(row.tipo)){
-    erros.push(`Tipo inválido: ${row.tipo}`);
+    erros.push(`Tipo inválido: "${row.tipo}" — use: despesa, receita ou transferencia`);
   }
 
   const situacoesValidas = ['pago','pendente','agendado'];
-  if(!situacoesValidas.includes(row.situacao)){
-    erros.push(`Situação inválida: ${row.situacao}`);
+  if(row.situacao && !situacoesValidas.includes(row.situacao)){
+    erros.push(`Situação inválida: "${row.situacao}" — use: pago, pendente ou agendado`);
   }
 
-  const conta = contas.find(c => (c.nome||'').toLowerCase().trim() === (row.conta||'').toLowerCase().trim());
-  if(!conta){ erros.push(`Conta inexistente: ${row.conta}`); }
+  // Conta e categoria são opcionais — apenas faz match se preenchido
+  const conta = row.conta
+    ? contas.find(c => (c.nome||'').toLowerCase().trim() === (row.conta||'').toLowerCase().trim())
+    : null;
 
-  const categoria = categorias.find(c =>
-    (c.categoria||'').toLowerCase().trim() === (row.categoria||'').toLowerCase().trim() &&
-    (c.nome||'').toLowerCase().trim() === (row.subcategoria||'').toLowerCase().trim()
-  );
-  if(!categoria){ erros.push(`Categoria/Subcategoria inválida: ${row.categoria} / ${row.subcategoria}`); }
+  const categoria = (row.categoria || row.subcategoria)
+    ? categorias.find(c =>
+        (c.categoria||'').toLowerCase().trim() === (row.categoria||'').toLowerCase().trim() &&
+        (c.nome||'').toLowerCase().trim() === (row.subcategoria||'').toLowerCase().trim()
+      )
+    : null;
 
   return { ok: erros.length===0, erros, categoria_id: categoria?.id || null, conta_id: conta?.id || null };
 }
@@ -2172,12 +2175,33 @@ function processarArquivo(file){
         const row = data[i];
         if(!row || !row[iData] || !row[iTipo]) continue;
 
-        const dataStr = (row[iData]||'').toString().trim();
         let dataISO = '';
-        if(dataStr.match(/^\d{2}\/\d{2}\/\d{4}$/)){
-          const [d,m,y]=dataStr.split('/'); dataISO=`${y}-${m}-${d}`;
-        } else if(dataStr.match(/^\d{4}-\d{2}-\d{2}$/)){
-          dataISO=dataStr;
+        const dataRaw = row[iData];
+        if(dataRaw){
+          // XLSX às vezes retorna número serial do Excel (data como número)
+          let dataObj = null;
+          if(typeof dataRaw === 'number'){
+            // Serial date do Excel: dias desde 1900-01-01
+            dataObj = new Date(Math.round((dataRaw - 25569) * 86400 * 1000));
+          } else {
+            const dataStr = dataRaw.toString().trim();
+            if(dataStr.match(/^\d{2}\/\d{2}\/\d{4}$/)){
+              const [d,m,y]=dataStr.split('/');
+              dataObj = new Date(`${y}-${m}-${d}`);
+            } else if(dataStr.match(/^\d{4}-\d{2}-\d{2}$/)){
+              dataObj = new Date(dataStr);
+            } else if(dataStr.match(/^\d{2}\/\d{2}\/\d{2}$/)){
+              // DD/MM/YY
+              const [d,m,y]=dataStr.split('/');
+              dataObj = new Date(`20${y}-${m}-${d}`);
+            }
+          }
+          if(dataObj && !isNaN(dataObj)){
+            const yy = dataObj.getFullYear();
+            const mm = String(dataObj.getMonth()+1).padStart(2,'0');
+            const dd = String(dataObj.getDate()).padStart(2,'0');
+            dataISO = `${yy}-${mm}-${dd}`;
+          }
         }
 
         const tipo  = (row[iTipo]||'').toString().toLowerCase().trim();
@@ -2187,10 +2211,10 @@ function processarArquivo(file){
         const conta = (row[iConta]||'').toString().toLowerCase().trim();
         const valorRaw = (row[iValor]||'0').toString().replace(/[R$\s.]/g,'').replace(',','.');
         const valor = parseFloat(valorRaw)||0;
-        const sit   = (row[iSit]||'pago').toString().toLowerCase().trim()||'pago';
+        const sit   = iSit>=0 ? ((row[iSit]||'').toString().toLowerCase().trim()||'pago') : 'pago';
         const obs   = (row[iObs]||'').toString().trim();
 
-        if(!dataISO || !tipo || !desc || !valor) continue;
+        if(!dataISO || !tipo || !desc || valor<=0) continue;
 
         const catId   = catMap[cat+'|'+sub] || null;
         const contaId = contaMap[conta] || null;
