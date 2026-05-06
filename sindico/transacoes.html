@@ -1547,7 +1547,7 @@ function fecharCal(){
 
 function calConfirmar(){
   // Aplica a data selecionada no input hidden
-  const iso = _calData.toISOString().split('T')[0];
+  const iso = [_calData.getFullYear(), String(_calData.getMonth()+1).padStart(2,'0'), String(_calData.getDate()).padStart(2,'0')].join('-');
   document.getElementById('fData').value = iso;
   // Atualiza o display
   const [y,m,d] = iso.split('-');
@@ -1591,7 +1591,7 @@ function setDataRapida(qual, el){
     input.style.display='none';
     const hoje = new Date();
     if(qual==='ontem') hoje.setDate(hoje.getDate()-1);
-    input.value = hoje.toISOString().split('T')[0];
+    input.value = [hoje.getFullYear(), String(hoje.getMonth()+1).padStart(2,'0'), String(hoje.getDate()).padStart(2,'0')].join('-');
   }
 }
 
@@ -1803,7 +1803,7 @@ async function salvarLancamento(){
         else if(intervalo==='quinzenal') d.setDate(d.getDate()+i*15);
         else d.setDate(d.getDate()+i*7);
         const payload = {...basePayload,
-          data: d.toISOString().split('T')[0],
+          data: (()=>{ const _y=d.getFullYear(),_m=String(d.getMonth()+1).padStart(2,'0'),_d=String(d.getDate()).padStart(2,'0'); return `${_y}-${_m}-${_d}`; })(),
           parcela_atual: i+1,
           parcela_total: nParcelas,
           situacao: i===0 ? basePayload.situacao : 'agendado'
@@ -1833,7 +1833,12 @@ async function salvarLancamento(){
         const maxDia = new Date(ano, mes + 1, 0).getDate(); // último dia do mês
         const diaFinal = Math.min(diaVencNum, maxDia);
         const dataLanc = new Date(ano, mes, diaFinal);
-        const dataStr  = dataLanc.toISOString().split('T')[0];
+        // toISOString() pode deslocar 1 dia por causa do fuso (UTC-3)
+        // Usar formatação local para evitar esse bug
+        const yy_ = dataLanc.getFullYear();
+        const mm_ = String(dataLanc.getMonth()+1).padStart(2,'0');
+        const dd_ = String(dataLanc.getDate()).padStart(2,'0');
+        const dataStr  = `${yy_}-${mm_}-${dd_}`;
 
         // Situação: se a data já passou = pago, se ainda não chegou = pendente
         const jaVenceu = dataLanc <= hoje;
@@ -2517,3 +2522,4 @@ await loadAll();
 
 </body>
 </html>
+
