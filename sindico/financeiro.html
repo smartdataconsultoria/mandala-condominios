@@ -436,25 +436,32 @@ async function carregar(){
             <span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#DC2626;border-radius:4px"></span>Despesas</span>
           </div>
         </div>
-        <div style="display:flex;align-items:flex-end;gap:8px;height:200px;padding-top:10px">
+        <div style="display:flex;align-items:flex-end;gap:6px;height:240px;padding-top:32px">
           ${porMes.map((m,i)=>{
-            const rH=Math.max(3,Math.round(m.rec/maxBar*170));
-            const dH=Math.max(3,Math.round(m.des/maxBar*170));
+            const rH=Math.max(4,Math.round(m.rec/maxBar*180));
+            const dH=Math.max(4,Math.round(m.des/maxBar*180));
             const futuro=ano===_anoHoje&&i>_mesHoje&&!m.rec&&!m.des;
             const sel=_mesesSel.includes(i);
             const isAtual = i === (ano===_anoHoje?_mesHoje:ultimoMes);
-            return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;opacity:${futuro?.3:sel||!_mesesSel.length?1:.5};transition:.3s;cursor:pointer;min-width:0" onclick="toggleMes(${i})">
-              <div style="display:flex;align-items:flex-end;gap:3px;height:180px;position:relative">
-                <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
-                  ${m.rec>0&&!futuro?`<div style="font-size:9px;font-weight:700;color:#16A34A;margin-bottom:2px;white-space:nowrap;writing-mode:vertical-lr;transform:rotate(180deg);max-height:60px;overflow:hidden">${brl(m.rec).replace('R$ ','')}</div>`:''}
-                  <div style="width:22px;height:${rH}px;background:${futuro?'#BBF7D0':'#16A34A'};border-radius:4px 4px 0 0;${isAtual?'box-shadow:0 0 0 2px #15803D60':''};transition:height .5s" title="Receita ${MESES_ABREV[i]}: ${brl(m.rec)}"></div>
+            const fmtVal = v => {
+              if(v>=1000000) return (v/1000000).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'M';
+              if(v>=1000) return (v/1000).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'k';
+              return v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
+            };
+            return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0;opacity:${futuro?.25:sel||!_mesesSel.length?1:.45};transition:.3s;cursor:pointer;min-width:0" onclick="toggleMes(${i})">
+              <div style="display:flex;align-items:flex-end;gap:4px;height:210px;width:100%;justify-content:center">
+                <!-- RECEITA -->
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;flex:1;max-width:34px">
+                  ${m.rec>0&&!futuro?`<div style="font-size:10px;font-weight:800;color:#15803D;margin-bottom:4px;white-space:nowrap;text-align:center;line-height:1.2">${fmtVal(m.rec)}</div>`:''}
+                  <div style="width:100%;height:${rH}px;background:${futuro?'#BBF7D0':'#16A34A'};border-radius:5px 5px 0 0;${isAtual?'box-shadow:0 0 0 2px #15803D80':''};transition:height .5s" title="Receita ${MESES_ABREV[i]}: ${brl(m.rec)}"></div>
                 </div>
-                <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
-                  ${m.des>0&&!futuro?`<div style="font-size:9px;font-weight:700;color:#DC2626;margin-bottom:2px;white-space:nowrap;writing-mode:vertical-lr;transform:rotate(180deg);max-height:60px;overflow:hidden">${brl(m.des).replace('R$ ','')}</div>`:''}
-                  <div style="width:22px;height:${dH}px;background:${futuro?'#FECACA':'#DC2626'};border-radius:4px 4px 0 0;${isAtual?'box-shadow:0 0 0 2px #B91C1C60':''};transition:height .5s" title="Despesa ${MESES_ABREV[i]}: ${brl(m.des)}"></div>
+                <!-- DESPESA -->
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;flex:1;max-width:34px">
+                  ${m.des>0&&!futuro?`<div style="font-size:10px;font-weight:800;color:#B91C1C;margin-bottom:4px;white-space:nowrap;text-align:center;line-height:1.2">${fmtVal(m.des)}</div>`:''}
+                  <div style="width:100%;height:${dH}px;background:${futuro?'#FECACA':'#DC2626'};border-radius:5px 5px 0 0;${isAtual?'box-shadow:0 0 0 2px #B91C1C80':''};transition:height .5s" title="Despesa ${MESES_ABREV[i]}: ${brl(m.des)}"></div>
                 </div>
               </div>
-              <div style="font-size:11px;font-weight:${isAtual?800:600};color:${isAtual?'var(--amber)':'var(--text-light)'};text-transform:uppercase;margin-top:4px">${MESES_ABREV[i]}</div>
+              <div style="font-size:11px;font-weight:${isAtual?800:600};color:${isAtual?'var(--amber)':'var(--text-light)'};text-transform:uppercase;margin-top:8px;text-align:center">${MESES_ABREV[i]}</div>
             </div>`;
           }).join('')}
         </div>
