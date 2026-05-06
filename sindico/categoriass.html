@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CondoGestor — Categorias</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #0B1F3A; --navy-light: #142D52; --gold: #E8A320; --gold-light: #F5C35A;
+    --white: #FFFFFF; --off-white: #F7F6F2; --border: #E2E8F0;
+    --text-dark: #0B1F3A; --text-mid: #445571; --text-light: #8899B4;
+    --green: #16A34A; --green-bg: #DCFCE7; --red: #DC2626; --red-bg: #FEF2F2;
+    --amber: #D97706; --amber-bg: #FEF3C7; --blue: #2563EB; --blue-bg: #EFF6FF;
+    --sidebar-w: 240px; --radius: 12px; --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+  }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--off-white); color: var(--text-dark); display: flex; min-height: 100vh; }
+  .sidebar { width: var(--sidebar-w); background: var(--navy); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; overflow-y: auto; }
+  .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 1.5rem 1.25rem 1.25rem; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 0.5rem; }
+  .logo-icon { width: 34px; height: 34px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .logo-icon svg { width: 18px; height: 18px; }
+  .logo-name { font-size: 1.05rem; font-weight: 800; color: var(--white); }
+  .logo-name span { color: var(--gold); }
+  .condo-selector { margin: 0 0.75rem 0.5rem; background: rgba(255,255,255,0.06); border-radius: 8px; padding: 8px 10px; }
+  .condo-selector label { font-size: 0.68rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,0.3); display: block; margin-bottom: 4px; }
+  .condo-selector select { width: 100%; background: transparent; border: none; outline: none; color: var(--white); font-family: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+  .condo-selector select option { background: var(--navy); }
+  .sidebar-section { padding: 0 0.75rem; margin-bottom: 0.25rem; }
+  .sidebar-section-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0.75rem 0.5rem 0.4rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.6); transition: all var(--transition); margin-bottom: 2px; }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: var(--white); }
+  .nav-item.active { background: rgba(232,163,32,0.15); color: #F5C35A; }
+  .nav-item.active svg { opacity: 1; }
+  .sidebar-bottom { margin-top: auto; padding: 1rem 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); }
+  .user-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,0.06); }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--navy); flex-shrink: 0; }
+  .user-name { font-size: 0.82rem; font-weight: 600; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+  .user-role-lbl { font-size: 0.7rem; color: rgba(255,255,255,0.4); }
+  .logout-btn { margin-left: auto; background: none; border: none; cursor: pointer; padding: 4px; color: rgba(255,255,255,0.4); }
+  .logout-btn:hover { color: var(--white); }
+  .logout-btn svg { width: 15px; height: 15px; }
+  .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 40; }
+  .topbar h1 { font-size: 1rem; font-weight: 700; color: var(--navy); }
+  .topbar p { font-size: 0.75rem; color: var(--text-light); }
+  .topbar-right { display: flex; gap: 10px; }
+  .btn-sm { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; font-family: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all var(--transition); text-decoration: none; border: none; }
+  .btn-primary-sm { background: var(--navy); color: var(--white); }
+  .btn-primary-sm:hover { background: var(--navy-light); }
+  .btn-ghost-sm { background: var(--off-white); color: var(--text-mid); border: 1px solid var(--border); }
+  .btn-ghost-sm:hover { background: var(--border); }
+  .content { padding: 1.75rem 2rem; flex: 1; }
+
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  
+
+  /* NAV */
+  
+  .nav-brand{display:flex;align-items:center;gap:10px;margin-right:40px;text-decoration:none}
+  .nav-logo{width:36px;height:36px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+  .nav-brand-text{font-size:13px;font-weight:700;color:var(--text-dark);line-height:1.2}
+  .nav-brand-text span{display:block;font-size:10px;color:var(--text-light);font-weight:400}
+  .nav-links{display:flex;gap:4px}
+  .nav-links a{color:var(--text-light);text-decoration:none;padding:8px 16px;border-radius:6px;font-size:14px;transition:.2s}
+  .nav-links a:hover{background:var(--border);color:var(--text-dark)}
+  .nav-links a.active{background:var(--gold);color:var(--off-white);font-weight:600}
+  .nav-right{margin-left:auto;display:flex;align-items:center;gap:16px}
+  .nav-user{font-size:13px;color:var(--text-mid)}
+
+  /* MAIN */
+  main{max-width:1200px;margin:0 auto;padding:32px 24px}
+
+  /* LAYOUT 2 COLUNAS */
+  .content-layout{display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:start}
+  @media(max-width:700px){.content-layout{grid-template-columns:1fr}}
+
+  /* SIDEBAR FILTRO */
+  .filter-sidebar{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;position:sticky;top:20px}
+  .filter-sidebar h3{font-size:12px;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
+  .filter-tipo{display:flex;flex-direction:column;gap:4px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+  .filter-btn{background:none;border:none;color:var(--text-light);font-size:13px;padding:7px 12px;border-radius:7px;cursor:pointer;text-align:left;transition:.15s;display:flex;align-items:center;gap:8px;width:100%}
+  .filter-btn:hover{background:var(--border);color:var(--text-dark)}
+  .filter-btn.active{background:var(--gold)20;color:var(--gold);font-weight:600}
+  .filter-btn .fbadge{margin-left:auto;background:var(--border);color:var(--text-mid);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
+  .filter-btn.active .fbadge{background:var(--gold)30;color:var(--gold)}
+  .filter-cats-list{display:flex;flex-direction:column;gap:2px;max-height:420px;overflow-y:auto}
+  .filter-cats-list::-webkit-scrollbar{width:4px}
+  .filter-cats-list::-webkit-scrollbar-track{background:transparent}
+  .filter-cats-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+  .filter-cat-item{background:none;border:none;color:var(--text-light);font-size:12px;padding:6px 10px;border-radius:6px;cursor:pointer;text-align:left;transition:.15s;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .filter-cat-item:hover{background:var(--border);color:var(--text-dark)}
+  .filter-cat-item.active{background:var(--gold)15;color:var(--gold);font-weight:600}
+  h1{font-size:28px;font-weight:700;margin-bottom:6px}
+  .subtitle{color:var(--text-mid);font-size:14px;margin-bottom:28px}
+
+  /* TABS */
+  .tabs{display:flex;gap:8px;margin-bottom:28px}
+  .tab{padding:9px 20px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-light);font-size:14px;font-weight:500;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:6px}
+  .tab.active{background:var(--gold);color:var(--off-white);border-color:var(--gold);font-weight:600}
+  .tab:hover:not(.active){background:var(--border);color:var(--text-dark)}
+
+  /* SECTION HEADER */
+  .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+  .section-title{font-size:16px;font-weight:600}
+  .btn-new{background:var(--gold);color:var(--off-white);border:none;padding:9px 18px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:.2s}
+  .btn-new:hover{background:#e09210}
+
+  /* TIPO GROUP */
+  .tipo-group{margin-bottom:32px}
+  .tipo-label{display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  .dot{width:10px;height:10px;border-radius:50%}
+  .dot.receita{background:#22c55e}
+  .dot.despesa{background:#ef4444}
+  .count-badge{background:var(--border);color:var(--text-mid);font-size:11px;padding:2px 8px;border-radius:12px}
+
+  /* CATEGORIA GROUP dentro do tipo */
+  .cat-group{margin-bottom:16px;background:var(--white);border-radius:10px;border:1px solid var(--border);overflow:hidden}
+  .cat-group-header{padding:10px 16px;background:#1e2130;font-size:12px;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)}
+
+  /* CARD */
+  .cat-card{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid #22253300;transition:.15s;cursor:pointer}
+  .cat-card:not(:last-child){border-bottom:1px solid var(--border)30}
+  .cat-card:hover{background:var(--border)30}
+  .cat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .cat-info{flex:1}
+  .cat-name{font-size:14px;font-weight:600;color:var(--text-dark)}
+  .cat-sub{font-size:12px;color:var(--text-mid);margin-top:2px}
+  .cat-actions{display:flex;gap:8px;opacity:0;transition:.15s}
+  .cat-card:hover .cat-actions{opacity:1}
+  .btn-edit,.btn-del{background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;transition:.2s}
+  .btn-edit{color:var(--text-light)}.btn-edit:hover{background:var(--border);color:var(--text-dark)}
+  .btn-del{color:#ef4444}.btn-del:hover{background:#ef444420}
+
+  /* EMPTY */
+  .empty{padding:24px 16px;color:#4a5568;font-size:14px;text-align:center}
+
+  /* LOADING / MSG */
+  .loading{text-align:center;padding:48px;color:var(--text-mid);font-size:14px}
+  .alert{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:20px;display:none}
+  .alert.success{background:#052e1660;border:1px solid #22c55e40;color:#22c55e}
+  .alert.error{background:#2d0a0a60;border:1px solid #ef444440;color:#ef4444}
+
+  /* MODAL */
+  .modal-bg{position:fixed;inset:0;background:#00000080;display:none;align-items:center;justify-content:center;z-index:999}
+  .modal-bg.open{display:flex}
+  .modal{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:28px;width:100%;max-width:460px}
+  .modal h2{font-size:18px;font-weight:700;margin-bottom:20px}
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:12px;color:var(--text-light);margin-bottom:6px;font-weight:500}
+  .field input,.field select{width:100%;background:var(--off-white);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text-dark);font-size:14px;outline:none;transition:.2s}
+  .field input:focus,.field select:focus{border-color:var(--gold)}
+  .field select option{background:var(--white)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .icon-preview{font-size:28px;text-align:center;padding:10px;background:var(--off-white);border-radius:8px;border:1px solid var(--border);margin-top:4px}
+  .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+  .btn-cancel{background:none;border:1px solid var(--border);color:var(--text-light);padding:9px 18px;border-radius:8px;font-size:14px;cursor:pointer;transition:.2s}
+  .btn-cancel:hover{background:var(--border)}
+  .btn-save{background:var(--gold);color:var(--off-white);border:none;padding:9px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:.2s}
+  .btn-save:hover{background:#e09210}
+  .btn-save:disabled{opacity:.5;cursor:not-allowed}
+
+  /* CONTAS */
+  .conta-card{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--white);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;transition:.15s}
+  .conta-card:hover{border-color:var(--gold)60;background:#1e2130}
+  .conta-actions{display:flex;gap:8px;margin-left:16px;opacity:0;transition:.15s}
+  .conta-card:hover .conta-actions{opacity:1}
+  .conta-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px}
+  .conta-name{font-size:14px;font-weight:600}
+  .conta-banco{font-size:12px;color:var(--text-mid);margin-top:2px}
+  .conta-saldo{margin-left:auto;text-align:right}
+  .conta-saldo-val{font-size:16px;font-weight:700;color:#22c55e}
+  .conta-tipo-badge{font-size:11px;color:var(--text-mid);margin-top:2px;background:var(--border);padding:2px 8px;border-radius:10px}
+
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <a href="/sindico/dashboard.html" class="sidebar-logo">
+    <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="#0B1F3A" stroke-width="2.5" stroke-linejoin="round"/><path d="M9 22V12h6v10" stroke="#0B1F3A" stroke-width="2.5"/></svg></div>
+    <span class="logo-name">Condo<span>Gestor</span></span>
+  </a>
+  <div class="condo-selector">
+    <label>Condomínio</label>
+    <select id="select-condo" onchange="trocarCondo()"><option>Carregando...</option></select>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Principal</div>
+    <a href="/sindico/dashboard.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
+    <a href="/sindico/moradores.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Moradores</a>
+    <a href="/sindico/chamados.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Chamados</a>
+    <a href="/sindico/documentos.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documentos</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Financeiro</div>
+    <a href="/sindico/financeiro.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Financeiro</a>
+    <a href="/sindico/transacoes.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Transações</a>
+    <a href="/sindico/categorias.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Categorias</a>
+    <a href="/sindico/metas.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Metas & Projetos</a>
+    <a href="/sindico/orcamento.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Orçamento</a>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-avatar" id="avatar-initials">--</div>
+      <div><div class="user-name" id="user-name">Carregando...</div><div class="user-role-lbl">Síndico</div></div>
+      <button class="logout-btn" onclick="fazerLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+    </div>
+  </div>
+</aside>
+<div class="main">
+  <header class="topbar">
+    <div><h1>Categorias</h1><p>Organização financeira</p></div>
+    <div class="topbar-right" id="topbar-right"></div>
+  </header>
+  <div class="content">
+<!-- NAV -->
+
+
+<!-- MAIN -->
+<main>
+  <h1>Categorias & Contas</h1>
+  <p class="subtitle">Organize as categorias de receitas, despesas e contas bancárias</p>
+
+  <div class="alert" id="alert"></div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('categorias')">🏷 Categorias</button>
+    <button class="tab" onclick="showTab('contas')">🏦 Contas</button>
+  </div>
+
+  <!-- TAB CATEGORIAS -->
+  <div id="tabCategorias">
+    <div class="section-header">
+      <span class="section-title">Categorias cadastradas</span>
+      <button class="btn-new" onclick="openModal()">+ Nova Categoria</button>
+    </div>
+    <div class="content-layout">
+      <!-- SIDEBAR -->
+      <div class="filter-sidebar">
+        <h3>Filtrar por tipo</h3>
+        <div class="filter-tipo">
+          <button class="filter-btn active" onclick="filtrar('todos')" id="fbTodos">
+            📋 Todos <span class="fbadge" id="fbTodosBadge">0</span>
+          </button>
+          <button class="filter-btn" onclick="filtrar('receita')" id="fbReceita">
+            <span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block"></span>
+            Receitas <span class="fbadge" id="fbReceitaBadge">0</span>
+          </button>
+          <button class="filter-btn" onclick="filtrar('despesa')" id="fbDespesa">
+            <span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block"></span>
+            Despesas <span class="fbadge" id="fbDespesaBadge">0</span>
+          </button>
+        </div>
+        <h3>Filtrar por categoria</h3>
+        <div class="filter-cats-list" id="filterCatsList"></div>
+      </div>
+      <!-- LISTA -->
+      <div id="listaCategorias"><div class="loading">⏳ Carregando categorias...</div></div>
+    </div>
+  </div>
+
+  <!-- TAB CONTAS -->
+  <div id="tabContas" style="display:none">
+    <div class="section-header">
+      <span class="section-title">Contas bancárias & fundos</span>
+      <button class="btn-new" onclick="openContaModal()">+ Nova Conta</button>
+    </div>
+    <div id="listaContas"><div class="loading">⏳ Carregando contas...</div></div>
+  </div>
+</main>
+
+<!-- MODAL CATEGORIA -->
+<div class="modal-bg" id="modalCat">
+  <div class="modal">
+    <h2 id="modalTitle">Nova Categoria</h2>
+    <div class="field">
+      <label>Tipo *</label>
+      <select id="fTipo">
+        <option value="receita">Receita</option>
+        <option value="despesa">Despesa</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Categoria (agrupamento) *</label>
+      <input id="fCategoria" type="text" placeholder="Ex: Pessoal, Taxa, Manutenção..."/>
+    </div>
+    <div class="field">
+      <label>Subcategoria *</label>
+      <input id="fNome" type="text" placeholder="Ex: Salário, INSS..."/>
+    </div>
+    <div class="field">
+      <label>Forma *</label>
+      <input id="fNome" type="text" placeholder="Ex: Contrato, Avulso..."/>
+    </div>
+    <div class="field">
+      <label>Fluxo *</label>
+      <input id="fNome" type="text" placeholder="Ex: Fixo, Váriavel..."/>
+    </div>
+ <div class="row2">
+      <div class="field">
+        <label>Ícone (emoji)</label>
+        <input id="fIcone" type="text" placeholder="🏷" maxlength="4" oninput="document.getElementById('iconePrev').textContent=this.value||'🏷'"/>
+        <div class="icon-preview" id="iconePrev">🏷</div>
+      </div>
+      <div class="field">
+        <label>Cor</label>
+        <input id="fCor" type="color" value="#f5a623" style="height:42px;padding:4px 6px;cursor:pointer"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-save" id="btnSalvar" onclick="salvarCategoria()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONTA -->
+<div class="modal-bg" id="modalConta">
+  <div class="modal">
+    <h2 id="modalContaTitle">Nova Conta</h2>
+    <div class="field">
+      <label>Nome da conta *</label>
+      <input id="cNome" type="text" placeholder="Ex: Conta Corrente Principal"/>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Tipo</label>
+        <select id="cTipo">
+          <option value="corrente">Conta Corrente</option>
+          <option value="poupanca">Poupança</option>
+          <option value="caixa">Caixa Físico</option>
+          <option value="fundo_reserva">Fundo de Reserva</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Banco</label>
+        <input id="cBanco" type="text" placeholder="Ex: Banco do Brasil"/>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Saldo inicial (R$)</label>
+        <input id="cSaldo" type="number" step="0.01" placeholder="0,00"/>
+      </div>
+      <div class="field">
+        <label>Ícone</label>
+        <input id="cIcone" type="text" placeholder="🏦" maxlength="4"/>
+      </div>
+    </div>
+    <div class="field">
+      <label>Cor</label>
+      <input id="cCor" type="color" value="#f5a623" style="height:42px;padding:4px 6px;cursor:pointer"/>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeContaModal()">Cancelar</button>
+      <button class="btn-save" onclick="salvarConta()">Salvar</button>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+<script>
+// ── CONFIGURAÇÃO ─────────────────────────────────────────
+const SUPA_URL = 'https://siczyohqmlrmirqgzlxb.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw'; // substitua pela sua anon key do Supabase
+const EMPRESA  = 'mandala';
+
+let editingId = null;
+let editingContaId = null;
+
+// ── AUTH ─────────────────────────────────────────────────
+function getToken(){
+  // Busca o token de sessão e verifica se ainda é válido
+  const stored = Object.keys(localStorage).find(k=>k.includes('auth-token'));
+  if(!stored) return null;
+  try{
+    const sess = JSON.parse(localStorage.getItem(stored));
+    const token = sess?.access_token;
+    const exp   = sess?.expires_at; // timestamp em segundos
+    if(!token) return null;
+    // Se expirou, usa anon key (não propaga JWT expirado)
+    if(exp && Date.now()/1000 > exp) return null;
+    return token;
+  } catch{ return null; }
+}
+
+async function headers(){
+  const tk = await getToken();
+  return {
+    'Content-Type':'application/json',
+    'apikey': SUPA_KEY,
+    'Authorization': tk ? `Bearer ${tk}` : `Bearer ${SUPA_KEY}`
+  };
+}
+
+// ── TABS ─────────────────────────────────────────────────
+function showTab(tab){
+  document.getElementById('tabCategorias').style.display = tab==='categorias'?'block':'none';
+  document.getElementById('tabContas').style.display     = tab==='contas'?'block':'none';
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active', (i===0&&tab==='categorias')||(i===1&&tab==='contas'));
+  });
+  if(tab==='contas') loadContas();
+}
+
+// ── ALERT ────────────────────────────────────────────────
+function showAlert(msg, type='success'){
+  const el = document.getElementById('alert');
+  el.textContent = msg;
+  el.className = `alert ${type}`;
+  el.style.display = 'block';
+  setTimeout(()=>el.style.display='none', 3500);
+}
+
+// ── ESTADO DE FILTRO ─────────────────────────────────────
+let _todosData = [];
+let _filtroTipo = 'todos';
+let _filtroCat  = null;
+
+
+let CONDO_ID = null;
+
+async function loadCondoId(){
+  const tk = await getToken();
+  if(!tk){
+    window.location.href = '/login.html';
+    return;
+  }
+  const stored = Object.keys(localStorage).find(k => k.includes('auth-token'));
+  const sess = stored ? JSON.parse(localStorage.getItem(stored)) : null;
+  const userId = sess?.user?.id;
+  if(!userId) return;
+
+  const res = await fetch(
+    `${SUPA_URL}/rest/v1/usuarios?select=condominio_id&id=eq.${userId}`,
+    { headers: await headers() }
+  );
+  const data = await res.json();
+  CONDO_ID = data?.[0]?.condominio_id || null;
+}
+
+// ── LOAD CATEGORIAS ──────────────────────────────────────
+async function loadCategorias(){
+  const h = await headers();
+  let res, data;
+  try {
+    res = await fetch(
+      `${SUPA_URL}/rest/v1/condo_categorias?condominio_id=eq.${CONDO_ID}&order=tipo,categoria,nome`,
+      {headers:h}
+    );
+    data = await res.json();
+  } catch(e) {
+    document.getElementById('listaCategorias').innerHTML =
+      `<div style="background:#2d0a0a;border:1px solid #ef444440;border-radius:8px;padding:16px;color:#ef4444;font-size:13px">
+        ❌ Erro de conexão: ${e.message}
+      </div>`;
+    return;
+  }
+  if(!Array.isArray(data)){
+    const msg = (data && (data.message||data.hint)) || JSON.stringify(data);
+    document.getElementById('listaCategorias').innerHTML =
+      `<div style="background:#2d0a0a;border:1px solid #ef444440;border-radius:8px;padding:16px;color:#ef4444;font-size:13px;line-height:1.8">
+        <strong>❌ Erro HTTP ${res.status}</strong><br><span style="opacity:.75">${msg}</span>
+      </div>`;
+    return;
+  }
+  _todosData  = data;
+  _filtroTipo = 'todos';
+  _filtroCat  = null;
+  buildSidebar(data);
+  renderLista(data);
+}
+
+// ── SIDEBAR ───────────────────────────────────────────────
+function buildSidebar(data){
+  const nRec = data.filter(d=>d.tipo==='receita').length;
+  const nDes = data.filter(d=>d.tipo==='despesa').length;
+  document.getElementById('fbTodosBadge').textContent   = _todosData.length;
+  document.getElementById('fbReceitaBadge').textContent = _todosData.filter(d=>d.tipo==='receita').length;
+  document.getElementById('fbDespesaBadge').textContent = _todosData.filter(d=>d.tipo==='despesa').length;
+
+  const fonte = _filtroTipo==='todos' ? _todosData : _todosData.filter(d=>d.tipo===_filtroTipo);
+  const cats  = [...new Set(fonte.map(d=>d.categoria||'Geral'))].sort();
+  document.getElementById('filterCatsList').innerHTML = cats.map(cat=>{
+    const qtd   = fonte.filter(d=>(d.categoria||'Geral')===cat).length;
+    const ativo = _filtroCat===cat ? 'active' : '';
+    return `<button class="filter-cat-item ${ativo}" onclick="filtrarCat(this,'${cat.replace(/'/g,"\\'")}')">
+      📂 ${cat} <span style="float:right;opacity:.5">${qtd}</span>
+    </button>`;
+  }).join('');
+}
+
+function filtrar(tipo){
+  _filtroTipo = tipo;
+  _filtroCat  = null;
+  ['fbTodos','fbReceita','fbDespesa'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  ({todos:'fbTodos',receita:'fbReceita',despesa:'fbDespesa'})[tipo] &&
+    document.getElementById(({todos:'fbTodos',receita:'fbReceita',despesa:'fbDespesa'})[tipo]).classList.add('active');
+  buildSidebar(_todosData);
+  const fonte = tipo==='todos' ? _todosData : _todosData.filter(d=>d.tipo===tipo);
+  renderLista(fonte);
+}
+
+function filtrarCat(el, cat){
+  _filtroCat = (_filtroCat===cat) ? null : cat;
+  document.querySelectorAll('.filter-cat-item').forEach(b=>b.classList.remove('active'));
+  if(_filtroCat) el.classList.add('active');
+  let fonte = _filtroTipo==='todos' ? _todosData : _todosData.filter(d=>d.tipo===_filtroTipo);
+  if(_filtroCat) fonte = fonte.filter(d=>(d.categoria||'Geral')===_filtroCat);
+  renderLista(fonte);
+}
+
+function renderLista(data){
+  if(!data||data.length===0){
+    document.getElementById('listaCategorias').innerHTML =
+      `<div style="color:#4a5568;font-size:14px;text-align:center;padding:48px 24px">Nenhuma categoria para esse filtro.</div>`;
+    return;
+  }
+  const grupos = {};
+  data.forEach(d=>{
+    const t   = d.tipo;
+    const cat = d.categoria||'Geral';
+    if(!grupos[t]) grupos[t]={};
+    if(!grupos[t][cat]) grupos[t][cat]=[];
+    grupos[t][cat].push(d);
+  });
+  let html = '';
+  ['receita','despesa'].forEach(tipo=>{
+    if(!grupos[tipo]) return;
+    const cats       = grupos[tipo];
+    const totalItems = Object.values(cats).flat().length;
+    html += `<div class="tipo-group">
+      <div class="tipo-label">
+        <div class="dot ${tipo}"></div>${tipo.toUpperCase()}S
+        <span class="count-badge">${totalItems}</span>
+      </div>`;
+    Object.entries(cats).forEach(([catNome,items])=>{
+      html += `<div class="cat-group">
+        <div class="cat-group-header">📂 ${catNome} (${items.length})</div>`;
+      items.forEach(d=>{
+        const bg = d.cor ? d.cor+'22' : 'var(--gold)22';
+        html += `<div class="cat-card">
+          <div class="cat-icon" style="background:${bg}">${d.icone||'🏷'}</div>
+          <div class="cat-info">
+            <div class="cat-name">${d.nome}</div>
+            <div class="cat-sub">${catNome} · ${tipo}</div>
+          </div>
+          <div class="cat-actions">
+            <button class="btn-edit" onclick="editarCategoria(${d.id})">✏ Editar</button>
+            <button class="btn-del"  onclick="deletarCategoria(${d.id},'${d.nome.replace(/'/g,"\\'")}')">🗑</button>
+          </div>
+        </div>`;
+      });
+      html += `</div>`;
+    });
+    html += `</div>`;
+  });
+  document.getElementById('listaCategorias').innerHTML = html;
+}
+
+function renderEmpty(){
+  return `<div style="color:#4a5568;font-size:14px;text-align:center;padding:48px">Nenhuma categoria cadastrada.</div>`;
+}
+
+
+// ── MODAL CATEGORIA ──────────────────────────────────────
+function openModal(id){
+  editingId = id||null;
+  document.getElementById('modalTitle').textContent = id ? 'Editar Categoria' : 'Nova Categoria';
+  if(!id){
+    document.getElementById('fTipo').value = 'despesa';
+    document.getElementById('fCategoria').value = '';
+    document.getElementById('fNome').value = '';
+    document.getElementById('fIcone').value = '';
+    document.getElementById('iconePrev').textContent = '🏷';
+    document.getElementById('fCor').value = 'var(--gold)';
+  }
+  document.getElementById('modalCat').classList.add('open');
+}
+function closeModal(){ document.getElementById('modalCat').classList.remove('open'); }
+
+async function editarCategoria(id){
+  const h = await headers();
+  const res = await fetch(`${SUPA_URL}/rest/v1/condo_categorias?id=eq.${id}`,{headers:h});
+  const [c] = await res.json();
+  if(!c) return;
+  document.getElementById('fTipo').value = c.tipo;
+  document.getElementById('fCategoria').value = c.categoria||'';
+  document.getElementById('fNome').value = c.nome;
+  document.getElementById('fIcone').value = c.icone||'';
+  document.getElementById('iconePrev').textContent = c.icone||'🏷';
+  document.getElementById('fCor').value = c.cor||'var(--gold)';
+  openModal(id);
+}
+
+async function salvarCategoria(){
+  const btn = document.getElementById('btnSalvar');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  const payload = {
+  condominio_id: CONDO_ID,
+  tipo: document.getElementById('fTipo').value,
+  categoria: document.getElementById('fCategoria').value.trim(),
+  nome: document.getElementById('fNome').value.trim(),
+  icone: document.getElementById('fIcone').value.trim() || '🏷',
+  cor: document.getElementById('fCor').value
+};
+  if(!payload.nome||!payload.categoria){
+    showAlert('Preencha Categoria e Nome.','error');
+    btn.disabled=false; btn.textContent='Salvar'; return;
+  }
+  const h = await headers();
+  let res;
+  if(editingId){
+    res = await fetch(`${SUPA_URL}/rest/v1/condo_categorias?id=eq.${editingId}`,{
+      method:'PATCH', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)
+    });
+  } else {
+    res = await fetch(`${SUPA_URL}/rest/v1/condo_categorias`,{
+      method:'POST', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)
+    });
+  }
+  btn.disabled=false; btn.textContent='Salvar';
+  if(res.ok){
+    closeModal();
+    showAlert(editingId ? 'Categoria atualizada!' : 'Categoria criada!');
+    loadCategorias();
+  } else {
+    const err = await res.json();
+    showAlert('Erro: '+(err.message||res.status),'error');
+  }
+}
+
+async function deletarCategoria(id, nome){
+  if(!confirm(`Excluir categoria "${nome}"?`)) return;
+  const h = await headers();
+  const res = await fetch(`${SUPA_URL}/rest/v1/condo_categorias?id=eq.${id}`,{method:'DELETE',headers:h});
+  if(res.ok){ showAlert('Categoria removida.'); loadCategorias(); }
+  else showAlert('Erro ao remover.','error');
+}
+
+// ── CONTAS ───────────────────────────────────────────────
+async function loadContas(){
+  const h = await headers();
+  const res = await fetch(`${SUPA_URL}/rest/v1/condo_contas?empresa=eq.${EMPRESA}&order=nome`,{headers:h});
+  const data = await res.json();
+  const el = document.getElementById('listaContas');
+  if(!Array.isArray(data)||data.length===0){
+    el.innerHTML='<div class="empty">Nenhuma conta cadastrada.</div>'; return;
+  }
+  el.innerHTML = data.map(c=>{
+    const bg = (c.cor||'var(--gold)')+'22';
+    const tipos = {corrente:'Conta Corrente',poupanca:'Poupança',caixa:'Caixa',fundo_reserva:'Fundo de Reserva'};
+    const saldo = (c.saldo_inicial||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    return `<div class="conta-card">
+      <div class="conta-icon" style="background:${bg}">${c.icone||'🏦'}</div>
+      <div style="flex:1">
+        <div class="conta-name">${c.nome}</div>
+        <div class="conta-banco">${c.banco||'—'}</div>
+      </div>
+      <div class="conta-saldo">
+        <div class="conta-saldo-val">${saldo}</div>
+        <div class="conta-tipo-badge">${tipos[c.tipo]||c.tipo}</div>
+      </div>
+      <div class="conta-actions">
+        <button class="btn-edit" onclick="editarConta(${c.id})">✏ Editar</button>
+        <button class="btn-del"  onclick="deletarConta(${c.id},'${c.nome.replace(/'/g,"\\'")}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openContaModal(){ editingContaId=null; document.getElementById('modalContaTitle').textContent='Nova Conta'; document.getElementById('modalConta').classList.add('open'); }
+function closeContaModal(){ document.getElementById('modalConta').classList.remove('open'); }
+
+async function editarConta(id){
+  const h = await headers();
+  const res = await fetch(`${SUPA_URL}/rest/v1/condo_contas?id=eq.${id}`,{headers:h});
+  const [c] = await res.json();
+  if(!c) return;
+  editingContaId = id;
+  document.getElementById('modalContaTitle').textContent = 'Editar Conta';
+  document.getElementById('cNome').value  = c.nome;
+  document.getElementById('cTipo').value  = c.tipo;
+  document.getElementById('cBanco').value = c.banco||'';
+  document.getElementById('cSaldo').value = c.saldo_inicial||0;
+  document.getElementById('cIcone').value = c.icone||'';
+  document.getElementById('cCor').value   = c.cor||'var(--gold)';
+  document.getElementById('modalConta').classList.add('open');
+}
+
+async function deletarConta(id, nome){
+  if(!confirm(`Excluir a conta "${nome}"?
+Atenção: esta ação não pode ser desfeita.`)) return;
+  const h = await headers();
+  const res = await fetch(`${SUPA_URL}/rest/v1/condo_contas?id=eq.${id}`,{
+    method:'DELETE', headers:{...h,'Prefer':'return=representation'}
+  });
+  if(res.ok){ showAlert('Conta removida.'); loadContas(); }
+  else showAlert('Erro ao remover conta.','error');
+}
+
+async function salvarConta(){
+  const payload = {
+    empresa:       EMPRESA,
+    nome:          document.getElementById('cNome').value.trim(),
+    tipo:          document.getElementById('cTipo').value,
+    banco:         document.getElementById('cBanco').value.trim()||null,
+    saldo_inicial: parseFloat(document.getElementById('cSaldo').value)||0,
+    icone:         document.getElementById('cIcone').value.trim()||'🏦',
+    cor:           document.getElementById('cCor').value
+  };
+  if(!payload.nome){ showAlert('Informe o nome da conta.','error'); return; }
+  const h = await headers();
+  let res;
+  if(editingContaId){
+    res = await fetch(`${SUPA_URL}/rest/v1/condo_contas?id=eq.${editingContaId}`,{
+      method:'PATCH', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)
+    });
+  } else {
+    res = await fetch(`${SUPA_URL}/rest/v1/condo_contas`,{
+      method:'POST', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)
+    });
+  }
+  if(res.ok){ closeContaModal(); showAlert(editingContaId?'Conta atualizada!':'Conta criada!'); loadContas(); }
+  else showAlert('Erro ao salvar conta.','error');
+}
+
+// ── INIT ─────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async ()=>{
+  const stored = Object.keys(localStorage).find(k=>k.includes('auth-token'));
+  if(stored){
+    try{
+      const sess = JSON.parse(localStorage.getItem(stored));
+      document.getElementById('navUser').textContent = sess?.user?.email||'';
+    } catch{}
+  }
+  await loadCondoId();
+  await loadCategorias();
+});
+
+// Fechar modal clicando fora
+document.getElementById('modalCat').addEventListener('click',e=>{ if(e.target===document.getElementById('modalCat')) closeModal(); });
+document.getElementById('modalConta').addEventListener('click',e=>{ if(e.target===document.getElementById('modalConta')) closeContaModal(); });
+</script>
+
+</body>
+</html>
