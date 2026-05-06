@@ -1270,6 +1270,29 @@ function renderCards(){
   }
 }
 
+
+// --- UTILIDADES DE ORDENAÇÃO E BUSCA ---------------------
+function normalizar(txt){
+  return (txt || '')
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '');
+}
+
+let _ordemCampo = 'data';
+let _ordemDir = 'desc';
+
+function atualizarIconesOrdenacao(){
+  const campos = ['data','descricao','categoria','conta','valor','situacao'];
+  campos.forEach(c => {
+    const el = document.getElementById('sortIcon-' + c);
+    if(!el) return;
+    if(_ordemCampo !== c){ el.textContent=''; return; }
+    el.textContent = _ordemDir === 'asc' ? ' ▲' : ' ▼';
+  });
+}
+
 // -- TABELA -----------------------------------------------
 function renderTabela(){
   const busca   = document.getElementById('busca').value.toLowerCase();
