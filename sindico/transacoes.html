@@ -520,7 +520,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
   </a>
   <div class="condo-selector">
     <label>Condomínio</label>
-    <div id="select-condo" style="color:white;font-size:0.82rem;font-weight:700">Edifício Mandala</div>
+    <select id="select-condo" onchange="trocarCondo()"><option>Carregando...</option></select>
   </div>
   <div class="sidebar-section">
     <div class="sidebar-section-label">Principal</div>
@@ -980,8 +980,6 @@ function salvarLancamento(){ return _call('_salvarLancamento'); }
 function editarTransacao(id){ return _call('_editarTransacao', id); }
 function executarDelete(){ return _call('_executarDelete'); }
 function exportarExcel(){ return _call('_exportarExcel'); }
-function baixarModelo(){ return _call('_baixarModelo'); }
-function processarArquivo(file){ return _call('_processarArquivo', file); }
 function abrirImportar(){ return _call('_abrirImportar'); }
 function confirmarImportacao(){ return _call('_confirmarImportacao'); }
 function selecionarOpt(opt, el){ return _call('_selecionarOpt', opt, el); }
@@ -1547,7 +1545,7 @@ function fecharCal(){
 
 function calConfirmar(){
   // Aplica a data selecionada no input hidden
-  const iso = [_calData.getFullYear(), String(_calData.getMonth()+1).padStart(2,'0'), String(_calData.getDate()).padStart(2,'0')].join('-');
+  const iso = _calData.toISOString().split('T')[0];
   document.getElementById('fData').value = iso;
   // Atualiza o display
   const [y,m,d] = iso.split('-');
@@ -1591,7 +1589,7 @@ function setDataRapida(qual, el){
     input.style.display='none';
     const hoje = new Date();
     if(qual==='ontem') hoje.setDate(hoje.getDate()-1);
-    input.value = [hoje.getFullYear(), String(hoje.getMonth()+1).padStart(2,'0'), String(hoje.getDate()).padStart(2,'0')].join('-');
+    input.value = hoje.toISOString().split('T')[0];
   }
 }
 
@@ -1717,37 +1715,115 @@ async function salvarLancamento(){
   btn.disabled=true; btn.textContent='Salvando...';
   console.log('[DEBUG] _editId ao salvar:', _editId);
 
-  // -- EDIÇÃO: atualiza apenas este lançamento pelo id ------
+  // -- EDIÇÃO: atualiza este lançamento e, se virar FIXO, programa próximos meses ------
   if(_editId){
     const h = hdrs();
+
+    // Detecta se o lançamento era fixo antes
+    const atual = _transacoes.find(x => x.id === _editId) || {};
+    const eraFixoAntes = atual.recorrente === true;
+
+    const marcouFixo = document.getElementById('togFixo').checked;
+    const repetirSel = parseInt(document.getElementById('fRepetir').value) || 12;
+    const nMeses = repetirSel > 0 ? repetirSel : 12;
+    const diaVencNum = parseInt(document.getElementById('fDiaVenc').value) || (new Date(data+'T12:00:00')).getDate();
+
     const patchPayload = {
-      descricao:    desc,
-      valor:        valor,
-      data:         data,
+      descricao: desc,
+      valor: valor,
+      data: data,
       categoria_id: document.getElementById('fCat').value ? parseInt(document.getElementById('fCat').value) : null,
       conta_id: document.getElementById('fConta').value ? parseInt(document.getElementById('fConta').value) : null,
-      situacao:     document.getElementById('fSit').value,
-      observacao:   document.getElementById('fObs').value.trim()||null,
+      situacao: document.getElementById('fSit').value,
+      observacao: document.getElementById('fObs').value.trim() || null,
+      recorrente: marcouFixo,
+      parcela_atual: null,
+      parcela_total: null
     };
+
     try {
+      // 1) Atualiza o mês atual
       const res = await fetch(`${_BASE}/condo_transacoes?id=eq.${_editId}&condominio_id=eq.${CONDO_ID}`,{
         method:'PATCH',
         headers:{...h,'Prefer':'return=representation'},
         body: JSON.stringify(patchPayload)
       });
-      if(res.ok || res.status===204){
-        showAlert('✅ Lançamento atualizado com sucesso!');
-        fecharModal();
-        await loadTransacoes();
-      } else {
+
+      if(!(res.ok || res.status===204)){
         const err = await res.text();
         showAlert('Erro ao atualizar: ' + err, 'error');
+        btn.disabled=false; btn.textContent='Salvar lançamento';
+        return;
       }
+
+      // 2) Se virou FIXO agora (antes não era), criar os meses seguintes
+      if(marcouFixo && !eraFixoAntes){
+        // Evitar duplicação: se já existir série futura fixo com mesma descrição+tipo, não cria novamente
+        const tipoSerie = (TIPO_CONFIG[_tipoAtual]?.tipoDB) || (atual.tipo || _tipoAtual);
+
+        // Calcula data inicial do próximo mês
+        const base = new Date(data + 'T12:00:00');
+        const nextBase = new Date(base.getFullYear(), base.getMonth()+1, 1);
+        const y0 = nextBase.getFullYear();
+        const m0 = String(nextBase.getMonth()+1).padStart(2,'0');
+        const d0 = String(Math.min(diaVencNum, new Date(y0, nextBase.getMonth()+1, 0).getDate())).padStart(2,'0');
+        const nextStr = `${y0}-${m0}-${d0}`;
+
+        // Checa se já existem recorrentes futuros
+        const chk = await fetch(`${_BASE}/condo_transacoes?condominio_id=eq.${CONDO_ID}&descricao=eq.${encodeURIComponent(desc)}&tipo=eq.${tipoSerie}&recorrente=eq.true&data=gte.${nextStr}&select=id`,{headers:h});
+        const chkData = chk.ok ? await chk.json() : [];
+        if(Array.isArray(chkData) && chkData.length){
+          showAlert('⚠️ Este lançamento já possui recorrência futura. Nenhum novo mês foi criado para evitar duplicação.', 'error');
+        } else {
+          const hoje = new Date(); hoje.setHours(0,0,0,0);
+          const posts = [];
+
+          for(let i=1; i<nMeses; i++){
+            const d = new Date(base.getFullYear(), base.getMonth()+i, 1);
+            const maxDia = new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
+            const diaFinal = Math.min(diaVencNum, maxDia);
+            const dataLanc = new Date(d.getFullYear(), d.getMonth(), diaFinal);
+            const dataStr = `${dataLanc.getFullYear()}-${String(dataLanc.getMonth()+1).padStart(2,'0')}-${String(dataLanc.getDate()).padStart(2,'0')}`;
+            const jaVenceu = dataLanc <= hoje;
+
+            posts.push(fetch(`${_BASE}/condo_transacoes`,{
+              method:'POST',
+              headers:{...h,'Prefer':'return=minimal'},
+              body: JSON.stringify({
+                condominio_id: CONDO_ID,
+                empresa: CONDO_ID,
+                tipo: tipoSerie,
+                descricao: desc,
+                valor: valor,
+                data: dataStr,
+                situacao: jaVenceu ? 'pago' : 'pendente',
+                categoria_id: patchPayload.categoria_id,
+                conta_id: patchPayload.conta_id,
+                observacao: patchPayload.observacao,
+                recorrente: true,
+                parcela_atual: null,
+                parcela_total: null
+              })
+            }));
+          }
+
+          await Promise.all(posts);
+          showAlert(`✅ Lançamento convertido em fixo — ${nMeses} meses programados (inclui o mês atual).`);
+        }
+      } else {
+        showAlert('✅ Lançamento atualizado com sucesso!');
+      }
+
+      fecharModal();
+      await loadTransacoes();
+
     } catch(e){
       showAlert('Erro: ' + e.message, 'error');
     }
+
     btn.disabled=false; btn.textContent='Salvar lançamento';
     return;
+  }
   }
 
   // Transferência: cria 2 lançamentos (saída + entrada)
@@ -1756,7 +1832,7 @@ async function salvarLancamento(){
     const destino = document.getElementById('fContaDestino').value;
     if(!origem || !destino){ showAlert('Selecione a conta de origem e destino.','error'); btn.disabled=false; btn.textContent='Salvar lançamento'; return; }
     if(origem===destino){ showAlert('Conta de origem e destino não podem ser iguais.','error'); btn.disabled=false; btn.textContent='Salvar lançamento'; return; }
-    const base = {condominio_id:CONDO_ID, descricao:desc, valor, data, situacao:'pago', observacao:document.getElementById('fObs').value.trim()||null};
+    const base = {condominio_id:CONDO_ID, empresa:CONDO_ID, descricao:desc, valor, data, situacao:'pago', observacao:document.getElementById('fObs').value.trim()||null};
     const h = hdrs();
     await Promise.all([
       fetch(`${_BASE}/condo_transacoes`,{method:'POST',headers:{...h,'Prefer':'return=representation'},body:JSON.stringify({...base,tipo:'despesa',conta_id:origem, descricao:`Transf. para ${_contas.find(ct=>ct.id==destino)?.nome||'conta'}: ${desc}`})}),
@@ -1777,7 +1853,8 @@ async function salvarLancamento(){
 
   const basePayload = {
     condominio_id: CONDO_ID,
-        tipo:         (TIPO_CONFIG[_tipoAtual]?.tipoDB)||_tipoAtual,
+    empresa: CONDO_ID,
+    tipo:         (TIPO_CONFIG[_tipoAtual]?.tipoDB)||_tipoAtual,
     descricao:    desc,
     valor:        parcelado ? valor/nParcelas : valor,
     categoria_id: document.getElementById('fCat').value ? parseInt(document.getElementById('fCat').value) : null,
@@ -1803,7 +1880,7 @@ async function salvarLancamento(){
         else if(intervalo==='quinzenal') d.setDate(d.getDate()+i*15);
         else d.setDate(d.getDate()+i*7);
         const payload = {...basePayload,
-          data: (()=>{ const _y=d.getFullYear(),_m=String(d.getMonth()+1).padStart(2,'0'),_d=String(d.getDate()).padStart(2,'0'); return `${_y}-${_m}-${_d}`; })(),
+          data: d.toISOString().split('T')[0],
           parcela_atual: i+1,
           parcela_total: nParcelas,
           situacao: i===0 ? basePayload.situacao : 'agendado'
@@ -1833,12 +1910,7 @@ async function salvarLancamento(){
         const maxDia = new Date(ano, mes + 1, 0).getDate(); // último dia do mês
         const diaFinal = Math.min(diaVencNum, maxDia);
         const dataLanc = new Date(ano, mes, diaFinal);
-        // toISOString() pode deslocar 1 dia por causa do fuso (UTC-3)
-        // Usar formatação local para evitar esse bug
-        const yy_ = dataLanc.getFullYear();
-        const mm_ = String(dataLanc.getMonth()+1).padStart(2,'0');
-        const dd_ = String(dataLanc.getDate()).padStart(2,'0');
-        const dataStr  = `${yy_}-${mm_}-${dd_}`;
+        const dataStr  = dataLanc.toISOString().split('T')[0];
 
         // Situação: se a data já passou = pago, se ainda não chegou = pendente
         const jaVenceu = dataLanc <= hoje;
@@ -2089,37 +2161,6 @@ function exportarExcel(){
   showAlert(`✅ Exportado: ${_transacoes.length} lançamentos de ${MESES[_mes]} ${_ano}`);
 }
 
-
-// ===== VALIDAÇÃO BACKEND (IMPORTAÇÃO) ====================
-function validarLancamentoBackend(row, categorias, contas){
-  const erros = [];
-
-  const tiposValidos = ['despesa','receita','transferencia'];
-  if(!tiposValidos.includes(row.tipo)){
-    erros.push(`Tipo inválido: "${row.tipo}" — use: despesa, receita ou transferencia`);
-  }
-
-  const situacoesValidas = ['pago','pendente','agendado'];
-  if(row.situacao && !situacoesValidas.includes(row.situacao)){
-    erros.push(`Situação inválida: "${row.situacao}" — use: pago, pendente ou agendado`);
-  }
-
-  // Conta e categoria são opcionais — apenas faz match se preenchido
-  const conta = row.conta
-    ? contas.find(c => (c.nome||'').toLowerCase().trim() === (row.conta||'').toLowerCase().trim())
-    : null;
-
-  const categoria = (row.categoria || row.subcategoria)
-    ? categorias.find(c =>
-        (c.categoria||'').toLowerCase().trim() === (row.categoria||'').toLowerCase().trim() &&
-        (c.nome||'').toLowerCase().trim() === (row.subcategoria||'').toLowerCase().trim()
-      )
-    : null;
-
-  return { ok: erros.length===0, erros, categoria_id: categoria?.id || null, conta_id: conta?.id || null };
-}
-// =========================================================
-
 // -- IMPORTAR ---------------------------------------------
 let _dadosImport = [];
 
@@ -2149,7 +2190,7 @@ function processarArquivo(file){
     try{
       const wb   = XLSX.read(e.target.result, {type:'array'});
       const ws   = wb.Sheets[wb.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json(ws, {header:1, raw:true, defval:''});
+      const data = XLSX.utils.sheet_to_json(ws, {header:1, raw:false});
 
       // Encontrar linha de cabeçalho (contém DATA e TIPO)
       let headerRow = -1;
@@ -2180,41 +2221,12 @@ function processarArquivo(file){
         const row = data[i];
         if(!row || !row[iData] || !row[iTipo]) continue;
 
+        const dataStr = (row[iData]||'').toString().trim();
         let dataISO = '';
-        const dataRaw = row[iData];
-        if(dataRaw !== '' && dataRaw !== null && dataRaw !== undefined){
-          let dataObj = null;
-          if(typeof dataRaw === 'number' && dataRaw > 1000){
-            // Serial do Excel: dias desde 01/01/1900 (com bug do Lotus 1-2-3)
-            dataObj = new Date(Date.UTC(1899,11,30) + dataRaw * 86400000);
-          } else {
-            const dataStr = dataRaw.toString().trim();
-            // Tenta vários formatos
-            const m1 = dataStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/); // D/M/YY ou DD/MM/YYYY
-            const m2 = dataStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);           // YYYY-MM-DD
-            const m3 = dataStr.match(/^(\d{1,2})-(\d{1,2})-(\d{2,4})$/);     // D-M-YY
-            if(m2){
-              dataObj = new Date(Date.UTC(+m2[1],+m2[2]-1,+m2[3]));
-            } else if(m1){
-              // Detectar se é MM/DD/YYYY (americano) ou DD/MM/YYYY (brasileiro)
-              // Se parte[0] > 12, é dia; se parte[1] > 12, é dia
-              let dd2,mm2,yy2;
-              if(+m1[1] > 12){ dd2=+m1[1]; mm2=+m1[2]; } // definitivamente DD/MM
-              else if(+m1[2] > 12){ dd2=+m1[2]; mm2=+m1[1]; } // definitivamente MM/DD (americano)
-              else { mm2=+m1[1]; dd2=+m1[2]; } // ambíguo: assume MM/DD (padrão XLSX.js)
-              yy2 = +m1[3] < 100 ? 2000 + +m1[3] : +m1[3];
-              dataObj = new Date(Date.UTC(yy2, mm2-1, dd2));
-            } else if(m3){
-              const yy3 = +m3[3] < 100 ? 2000 + +m3[3] : +m3[3];
-              dataObj = new Date(Date.UTC(yy3, +m3[2]-1, +m3[1]));
-            }
-          }
-          if(dataObj && !isNaN(dataObj.getTime())){
-            const yy = dataObj.getUTCFullYear();
-            const mm = String(dataObj.getUTCMonth()+1).padStart(2,'0');
-            const dd = String(dataObj.getUTCDate()).padStart(2,'0');
-            dataISO = `${yy}-${mm}-${dd}`;
-          }
+        if(dataStr.match(/^\d{2}\/\d{2}\/\d{4}$/)){
+          const [d,m,y]=dataStr.split('/'); dataISO=`${y}-${m}-${d}`;
+        } else if(dataStr.match(/^\d{4}-\d{2}-\d{2}$/)){
+          dataISO=dataStr;
         }
 
         const tipo  = (row[iTipo]||'').toString().toLowerCase().trim();
@@ -2222,21 +2234,17 @@ function processarArquivo(file){
         const cat   = (row[iCat]||'').toString().toLowerCase().trim();
         const sub   = (row[iSub]||'').toString().toLowerCase().trim();
         const conta = (row[iConta]||'').toString().toLowerCase().trim();
-        // Com raw:true, valor pode ser número direto ou string formatada
-        let valorRaw2 = row[iValor];
-        let valor;
-        if(typeof valorRaw2 === 'number'){ valor = valorRaw2; }
-        else { valor = parseFloat((valorRaw2||'0').toString().replace(/[R$\s]/g,'').replace(/\.(\d{3})/g,'$1').replace(',','.')) || 0; }
-
-        const sit   = iSit>=0 ? ((row[iSit]||'').toString().toLowerCase().trim()||'pago') : 'pago';
+        const valorRaw = (row[iValor]||'0').toString().replace(/[R$\s.]/g,'').replace(',','.');
+        const valor = parseFloat(valorRaw)||0;
+        const sit   = (row[iSit]||'pago').toString().toLowerCase().trim()||'pago';
         const obs   = (row[iObs]||'').toString().trim();
 
-        if(!dataISO || !tipo || !desc || valor<=0) continue;
+        if(!dataISO || !tipo || !desc || !valor) continue;
 
         const catId   = catMap[cat+'|'+sub] || null;
         const contaId = contaMap[conta] || null;
 
-        _dadosImport.push({data:dataISO, tipo, descricao:desc, categoria_id:catId, conta_id:contaId, valor, situacao:sit, observacao:obs||null, condominio_id:CONDO_ID});
+        _dadosImport.push({data:dataISO, tipo, descricao:desc, categoria_id:catId, conta_id:contaId, valor, situacao:sit, observacao:obs||null, condominio_id:CONDO_ID, empresa:CONDO_ID});
       }
 
       // Preview
@@ -2280,54 +2288,23 @@ function processarArquivo(file){
 
 async function confirmarImportacao(){
   if(!_dadosImport.length) return;
-
-  const erros = [];
-  const validos = [];
-
-  _dadosImport.forEach((r,i)=>{
-    const v = validarLancamentoBackend(r,_categorias,_contas);
-    if(!v.ok){
-      erros.push(`Linha ${i+4}: ${v.erros.join('; ')}`);
-    } else {
-      validos.push({...r, categoria_id:v.categoria_id, conta_id:v.conta_id});
-    }
-  });
-
-  if(erros.length){
-    showAlert('❌ Importação bloqueada:\n'+erros.join('\n'),'error');
-    return;
-  }
-
   const btn = document.getElementById('btnConfirmarImport');
   btn.disabled=true; btn.textContent='Importando...';
-
   const h = hdrs();
-  let ok = 0;
-
-  for(const r of validos){
-    const res = await fetch(`${_BASE}/condo_transacoes`,{
-      method:'POST', headers:{...h,'Prefer':'return=minimal'},
-      body: JSON.stringify({
-        condominio_id:CONDO_ID,
-                tipo:r.tipo,
-        descricao:r.descricao,
-        data:r.data,
-        valor:r.valor,
-        situacao:r.situacao,
-        categoria_id:r.categoria_id,
-        conta_id:r.conta_id,
-        observacao:r.observacao||null
-      })
+  let ok=0, erros=0;
+  for(const row of _dadosImport){
+    const r = await fetch(`${_BASE}/condo_transacoes`,{
+      method:'POST',
+      headers:{...h,'Prefer':'return=minimal'},
+      body: JSON.stringify(row)
     });
-    if(res.ok) ok++;
+    if(r.ok||r.status===201||r.status===204) ok++; else erros++;
   }
-
   fecharImportar();
   await loadTransacoes();
-  showAlert(`✅ Importação concluída: ${ok} lançamentos inseridos`);
+  showAlert(`✅ Importação concluída: ${ok} lançamento(s) inserido(s)${erros>0?' | ⚠ '+erros+' erro(s)':''}`);
   btn.disabled=false;
 }
-
 
 // -- DELETAR -----------------------------------------------
 // -- ESTADO DE EXCLUSÃO -----------------------------------
@@ -2510,7 +2487,7 @@ window._fecharModal=fecharModal;window._fecharConfirm=fecharConfirm;window._fech
 window._fecharImportar=fecharImportar;window._salvarLancamento=salvarLancamento;
 window._editarTransacao=editarTransacao;window._executarDelete=executarDelete;
 window._exportarExcel=exportarExcel;window._baixarModelo=baixarModelo;window._abrirImportar=abrirImportar;
-window._confirmarImportacao=confirmarImportacao;window._processarArquivo=processarArquivo;window._selecionarOpt=selecionarOpt;
+window._confirmarImportacao=confirmarImportacao;window._selecionarOpt=selecionarOpt;
 window._setDataRapida=setDataRapida;window._toggleCal=toggleCal;window._calNavMes=calNavMes;
 window._calToggleAno=calToggleAno;window._calSelecionarDia=calSelecionarDia;window._calConfirmar=calConfirmar;
 window._removerAnexo=removerAnexo;window._toggleSecao=toggleSecao;window._fazerLogout=fazerLogout;
@@ -2522,4 +2499,3 @@ await loadAll();
 
 </body>
 </html>
-
