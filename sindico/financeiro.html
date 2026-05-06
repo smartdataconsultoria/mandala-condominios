@@ -362,6 +362,11 @@ async function carregar(){
     });
     const catsAno=Object.entries(catAnoMap).sort((a,b)=>b[1]-a[1]);
 
+    // Guardar dados globais para o gráfico interativo de categorias
+    window._catDados = { trans, catMap, cats, porMes, ano };
+    // Popular subcategorias no select e renderizar gráfico após o HTML ser inserido
+    setTimeout(()=>{ popularSubcats(); atualizarGrafoCat(); }, 0);
+
     // Comparativo meses
     const compMeses = mesesFiltro && mesesFiltro.length>1
       ? mesesFiltro
@@ -440,73 +445,67 @@ async function carregar(){
         </div>
       </div>
 
-      <!-- GRÁFICO ANUAL + CATEGORIAS -->
-      <div class="g2">
-        <div class="card">
-          <div class="ct">Receitas × Despesas — ${ano}</div>
-          <div style="display:flex;align-items:flex-end;gap:5px;height:120px;padding-top:10px">
-            ${porMes.map((m,i)=>{
-              const rH=Math.max(2,Math.round(m.rec/maxBar*100));
-              const dH=Math.max(2,Math.round(m.des/maxBar*100));
-              const futuro=ano===_anoHoje&&i>_mesHoje&&!m.rec&&!m.des;
-              const sel=_mesesSel.includes(i);
-              const isAtual = i === (ano===_anoHoje?_mesHoje:ultimoMes);
-              return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;opacity:${futuro?.3:sel||!_mesesSel.length?1:.45};transition:.3s;cursor:pointer" onclick="toggleMes(${i})">
-                <div style="display:flex;align-items:flex-end;gap:2px;height:100px">
-                  <div style="width:9px;height:${rH}px;background:${futuro?'#BBF7D0':'#16A34A'};border-radius:3px 3px 0 0;${isAtual?'box-shadow:0 0 0 2px #15803D40':''}" title="Receita ${MESES_ABREV[i]}: ${brl(m.rec)}"></div>
-                  <div style="width:9px;height:${dH}px;background:${futuro?'#FECACA':'#DC2626'};border-radius:3px 3px 0 0;${isAtual?'box-shadow:0 0 0 2px #B91C1C40':''}" title="Despesa ${MESES_ABREV[i]}: ${brl(m.des)}"></div>
-                </div>
-                <div style="font-size:9px;font-weight:${isAtual?700:600};color:${isAtual?'var(--amber)':'var(--text-light)'};text-transform:uppercase">${MESES_ABREV[i]}</div>
-              </div>`;
-            }).join('')}
+      <!-- GRÁFICO RECEITAS × DESPESAS — LARGURA TOTAL -->
+      <div class="card" style="margin-bottom:18px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+          <div class="ct" style="margin-bottom:0">Receitas × Despesas — ${ano}</div>
+          <div style="display:flex;gap:20px;font-size:13px;color:var(--text-mid)">
+            <span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#16A34A;border-radius:4px"></span>Receitas</span>
+            <span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#DC2626;border-radius:4px"></span>Despesas</span>
           </div>
-          <div style="display:flex;gap:20px;margin-top:12px;font-size:11px;color:var(--text-mid);justify-content:center;padding-top:10px;border-top:1px solid var(--border-light)">
-            <span style="display:flex;align-items:center;gap:5px;font-weight:600"><span style="display:inline-block;width:10px;height:10px;background:#16A34A;border-radius:3px"></span>Receitas</span>
-            <span style="display:flex;align-items:center;gap:5px;font-weight:600"><span style="display:inline-block;width:10px;height:10px;background:#DC2626;border-radius:3px"></span>Despesas</span>
-          </div>
-          ${ultimoMes<11&&!mesFiltrado?`<div style="margin-top:12px;padding:11px 14px;background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:10px;font-size:12px;display:flex;justify-content:space-between;align-items:center">
-            <span style="color:var(--amber);font-weight:700">📈 Projeção ${MESES_FULL[ultimoMes+1]} – Dez</span>
-            <span style="color:var(--amber);font-weight:800">~ ${brl(mediaDes)}/mês</span>
-          </div>`:''}
         </div>
-
-        <div class="card">
-          <div class="ct">Despesas por Categoria — ${mesFiltrado?labelPeriodo:MESES_FULL[mesRef]}</div>
-          ${catsMes.length ? catsMes.map(([nome,data],ci)=>{
-            const pct=Math.round(data.val/Math.max(totalDes,1)*100);
-            const pctBar=Math.round(data.val/maxCat*100);
-            let varPct=null;
-            const mAnt=mesesFiltro?null:mesRef>0?mesRef-1:null;
-            if(mAnt!==null){
-              let vAnt=0;
-              porMes[mAnt].trans.filter(t=>t.tipo==='despesa').forEach(t=>{
-                if((catMap[t.categoria_id]?.categoria||'Outros')===nome) vAnt+=parseFloat(t.valor||0);
-              });
-              if(vAnt>0) varPct=((data.val-vAnt)/vAnt*100);
-            }
-            return `<div style="margin-bottom:16px">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-                <div style="display:flex;align-items:center;gap:8px">
-                  <span style="width:10px;height:10px;border-radius:3px;background:${CORES_CAT[ci%CORES_CAT.length]};display:inline-block;flex-shrink:0"></span>
-                  <span style="font-size:13px;color:var(--text-dark);font-weight:700">${esc(nome)}</span>
-                  <span style="font-size:10px;font-weight:700;color:var(--text-light);background:var(--off-white);border:1px solid var(--border);border-radius:20px;padding:1px 7px">${pct}%</span>
+        <div style="display:flex;align-items:flex-end;gap:8px;height:200px;padding-top:10px">
+          ${porMes.map((m,i)=>{
+            const rH=Math.max(3,Math.round(m.rec/maxBar*170));
+            const dH=Math.max(3,Math.round(m.des/maxBar*170));
+            const futuro=ano===_anoHoje&&i>_mesHoje&&!m.rec&&!m.des;
+            const sel=_mesesSel.includes(i);
+            const isAtual = i === (ano===_anoHoje?_mesHoje:ultimoMes);
+            return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;opacity:${futuro?.3:sel||!_mesesSel.length?1:.5};transition:.3s;cursor:pointer;min-width:0" onclick="toggleMes(${i})">
+              <div style="display:flex;align-items:flex-end;gap:3px;height:180px;position:relative">
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+                  ${m.rec>0&&!futuro?`<div style="font-size:9px;font-weight:700;color:#16A34A;margin-bottom:2px;white-space:nowrap;writing-mode:vertical-lr;transform:rotate(180deg);max-height:60px;overflow:hidden">${brl(m.rec).replace('R$ ','')}</div>`:''}
+                  <div style="width:22px;height:${rH}px;background:${futuro?'#BBF7D0':'#16A34A'};border-radius:4px 4px 0 0;${isAtual?'box-shadow:0 0 0 2px #15803D60':''};transition:height .5s" title="Receita ${MESES_ABREV[i]}: ${brl(m.rec)}"></div>
                 </div>
-                <div style="display:flex;align-items:center;gap:8px">
-                  ${varPct!==null?`<span style="font-size:10px;font-weight:800;padding:2px 6px;border-radius:20px;background:${varPct>0?'var(--red-bg)':'var(--green-bg)'};color:${varPct>0?'var(--red)':'var(--green)'}">${varPct>0?'▲':'▼'}${Math.abs(Math.round(varPct))}%</span>`:''}
-                  <span style="font-size:14px;font-weight:800;color:var(--text-dark)">${brl(data.val)}</span>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+                  ${m.des>0&&!futuro?`<div style="font-size:9px;font-weight:700;color:#DC2626;margin-bottom:2px;white-space:nowrap;writing-mode:vertical-lr;transform:rotate(180deg);max-height:60px;overflow:hidden">${brl(m.des).replace('R$ ','')}</div>`:''}
+                  <div style="width:22px;height:${dH}px;background:${futuro?'#FECACA':'#DC2626'};border-radius:4px 4px 0 0;${isAtual?'box-shadow:0 0 0 2px #B91C1C60':''};transition:height .5s" title="Despesa ${MESES_ABREV[i]}: ${brl(m.des)}"></div>
                 </div>
               </div>
-              <div class="prog"><div style="height:100%;width:${pctBar}%;background:${CORES_CAT[ci%CORES_CAT.length]};border-radius:99px"></div></div>
-              <div style="margin-top:5px;padding-left:18px">
-                ${Object.entries(data.sub).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([s,v])=>`
-                  <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-light);margin-top:3px;padding:2px 0;border-bottom:1px dashed var(--border-light)">
-                    <span style="display:flex;align-items:center;gap:4px"><span style="color:var(--border)">└</span> ${esc(s)}</span>
-                    <span style="font-weight:700;color:var(--text-mid)">${brl(v)} <span style="color:var(--text-light);font-weight:500">(${Math.round(v/data.val*100)}%)</span></span>
-                  </div>`).join('')}
-              </div>
+              <div style="font-size:11px;font-weight:${isAtual?800:600};color:${isAtual?'var(--amber)':'var(--text-light)'};text-transform:uppercase;margin-top:4px">${MESES_ABREV[i]}</div>
             </div>`;
-          }).join('') : '<div style="color:var(--text-light);font-size:13px;text-align:center;padding:30px">Sem despesas no período</div>'}
+          }).join('')}
         </div>
+        ${ultimoMes<11&&!mesFiltrado?`<div style="margin-top:16px;padding:12px 16px;background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:10px;font-size:13px;display:flex;justify-content:space-between;align-items:center">
+          <span style="color:var(--amber);font-weight:700">📈 Projeção ${MESES_FULL[ultimoMes+1]} – Dez</span>
+          <span style="color:var(--amber);font-weight:800">~ ${brl(mediaDes)}/mês</span>
+        </div>`:''}
+      </div>
+
+      <!-- GRÁFICO DESPESAS POR CATEGORIA/SUBCATEGORIA MENSAL -->
+      <div class="card" style="margin-bottom:18px" id="card-cat-mensal">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+          <div>
+            <div class="ct" style="margin-bottom:4px">Despesas por Categoria — Evolução Mensal ${ano}</div>
+            <div style="font-size:12px;color:var(--text-light)">Valor mensal + acumulado anual por categoria e subcategoria</div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-light)">Categoria</label>
+              <select id="filtCat" onchange="atualizarGrafoCat()" style="background:var(--white);border:1px solid var(--border);color:var(--text-dark);border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:600;min-width:140px">
+                <option value="">Todas</option>
+                ${[...new Set(cats.map(c=>c.categoria).filter(Boolean))].sort().map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')}
+              </select>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-light)">Subcategoria</label>
+              <select id="filtSub" onchange="atualizarGrafoCat()" style="background:var(--white);border:1px solid var(--border);color:var(--text-dark);border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:600;min-width:160px">
+                <option value="">Todas</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div id="grafico-cat-mensal"></div>
       </div>
 
       <!-- COMPARATIVO MENSAL -->
@@ -614,6 +613,146 @@ async function carregar(){
   }catch(e){
     document.getElementById('conteudo').innerHTML=`<div style="color:#ef4444;padding:20px">Erro ao carregar: ${e.message}</div>`;
   }
+}
+
+// ── GRÁFICO CATEGORIAS — FILTROS ──────────────────────────
+function popularSubcats(){
+  const d = window._catDados; if(!d) return;
+  const filtCat = document.getElementById('filtCat');
+  const filtSub = document.getElementById('filtSub');
+  if(!filtCat||!filtSub) return;
+  const catSel = filtCat.value;
+  const subs = [...new Set(d.cats
+    .filter(c=>!catSel||c.categoria===catSel)
+    .map(c=>c.nome).filter(Boolean))].sort();
+  filtSub.innerHTML = '<option value="">Todas</option>' +
+    subs.map(s=>`<option value="${s.replace(/"/g,'&quot;')}">${s}</option>`).join('');
+}
+
+function atualizarGrafoCat(){
+  popularSubcats();
+  const d = window._catDados;
+  const el = document.getElementById('grafico-cat-mensal');
+  if(!d||!el) return;
+  const { trans, catMap, porMes, ano } = d;
+  const filtCat = document.getElementById('filtCat')?.value||'';
+  const filtSub = document.getElementById('filtSub')?.value||'';
+
+  // Montar mapa: categoria → mes → { valor, subs: {sub: valor} }
+  const catMesData = {}; // { catNome: { [mes]: { val, subs:{} } } }
+  trans.filter(t=>t.tipo==='despesa').forEach(t=>{
+    const cat = catMap[t.categoria_id];
+    const catNome = cat?.categoria||'Outros';
+    const subNome = cat?.nome||'Sem subcategoria';
+    if(filtCat && catNome!==filtCat) return;
+    if(filtSub && subNome!==filtSub) return;
+    const mes = parseInt((t.data||'').split('-')[1])-1;
+    if(mes<0||mes>11) return;
+    const v = parseFloat(t.valor||0);
+    if(!catMesData[catNome]) catMesData[catNome]={};
+    if(!catMesData[catNome][mes]) catMesData[catNome][mes]={val:0,subs:{}};
+    catMesData[catNome][mes].val+=v;
+    catMesData[catNome][mes].subs[subNome]=(catMesData[catNome][mes].subs[subNome]||0)+v;
+  });
+
+  const categorias = Object.keys(catMesData).sort((a,b)=>{
+    const ta=Object.values(catMesData[a]).reduce((s,x)=>s+x.val,0);
+    const tb=Object.values(catMesData[b]).reduce((s,x)=>s+x.val,0);
+    return tb-ta;
+  });
+
+  if(!categorias.length){
+    el.innerHTML='<div style="color:var(--text-light);font-size:14px;text-align:center;padding:40px">Sem dados para o filtro selecionado</div>';
+    return;
+  }
+
+  // Acumulado anual por categoria
+  const acumulado = {};
+  categorias.forEach(c=>{ acumulado[c]=Object.values(catMesData[c]).reduce((s,x)=>s+x.val,0); });
+  const maxAcum = Math.max(...Object.values(acumulado), 1);
+
+  // Máx valor mensal para escala das barras mensais
+  let maxMensal = 1;
+  categorias.forEach(c=>{
+    Object.values(catMesData[c]).forEach(x=>{ if(x.val>maxMensal) maxMensal=x.val; });
+  });
+
+  const MESES_ABR = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+  let html = '';
+  categorias.forEach((catNome, ci)=>{
+    const cor = CORES_CAT[ci % CORES_CAT.length];
+    const totalCat = acumulado[catNome];
+    const pctAcum = Math.round(totalCat/maxAcum*100);
+    const mesData = catMesData[catNome];
+
+    // Top subcategorias acumuladas
+    const subAcum={};
+    Object.values(mesData).forEach(md=>{ Object.entries(md.subs).forEach(([s,v])=>{ subAcum[s]=(subAcum[s]||0)+v; }); });
+    const topSubs = Object.entries(subAcum).sort((a,b)=>b[1]-a[1]);
+
+    html += `<div style="margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--border-light)">
+      <!-- Cabeçalho categoria -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="width:14px;height:14px;border-radius:4px;background:${cor};display:inline-block;flex-shrink:0"></span>
+          <span style="font-size:16px;font-weight:800;color:var(--text-dark)">${catNome}</span>
+          ${topSubs.map(([s])=>`<span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:var(--off-white);border:1px solid var(--border);color:var(--text-mid)">${s}</span>`).slice(0,3).join('')}
+        </div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <span style="font-size:13px;color:var(--text-light);font-weight:600">Acumulado anual:</span>
+          <span style="font-size:20px;font-weight:800;color:${cor}">${brl(totalCat)}</span>
+        </div>
+      </div>
+      <!-- Barra acumulado -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <div style="font-size:10px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;min-width:60px">Total ${ano}</div>
+        <div style="flex:1;height:12px;background:var(--border-light);border-radius:99px;overflow:hidden">
+          <div style="height:100%;width:${pctAcum}%;background:${cor};border-radius:99px;transition:width .7s"></div>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:var(--text-mid);min-width:36px;text-align:right">${pctAcum}%</div>
+      </div>
+      <!-- Gráfico barras mensais -->
+      <div style="display:flex;align-items:flex-end;gap:6px;height:130px;padding-top:8px">
+        ${MESES_ABR.map((mes,mi)=>{
+          const md = mesData[mi];
+          const v = md?md.val:0;
+          const bH = Math.max(2, Math.round(v/maxMensal*110));
+          const topSub = md?Object.entries(md.subs).sort((a,b)=>b[1]-a[1])[0]:null;
+          return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:115px;width:100%">
+              ${v>0?`<div style="font-size:9px;font-weight:700;color:${cor};margin-bottom:3px;white-space:nowrap">${brl(v).replace('R$ ','')}</div>`:''}
+              <div style="width:100%;max-width:36px;height:${bH}px;background:${cor};border-radius:4px 4px 0 0;opacity:${v>0?1:.15};transition:height .5s;position:relative" title="${v>0?catNome+' '+mes+': '+brl(v):'Sem dados'}">
+                ${topSub&&v>0?`<div style="position:absolute;bottom:100%;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:8px;color:var(--text-light);margin-bottom:1px;max-width:60px;overflow:hidden;text-overflow:ellipsis">${topSub[0]}</div>`:''}
+              </div>
+            </div>
+            <div style="font-size:10px;font-weight:${v>0?700:500};color:${v>0?'var(--text-mid)':'var(--text-light)'};text-transform:uppercase">${mes}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <!-- Subcategorias acumuladas -->
+      ${topSubs.length>0?`<div style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--border-light)">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-light);margin-bottom:8px">Subcategorias — acumulado ${ano}</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px">
+          ${topSubs.map(([sub,val])=>{
+            const pct=Math.round(val/totalCat*100);
+            return `<div style="padding:10px 12px;background:var(--off-white);border:1px solid var(--border-light);border-radius:10px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <span style="font-size:12px;font-weight:700;color:var(--text-dark)">${esc(sub)}</span>
+                <span style="font-size:13px;font-weight:800;color:${cor}">${brl(val)}</span>
+              </div>
+              <div style="height:5px;background:var(--border-light);border-radius:99px;overflow:hidden">
+                <div style="height:100%;width:${pct}%;background:${cor};border-radius:99px"></div>
+              </div>
+              <div style="font-size:10px;color:var(--text-light);margin-top:4px;font-weight:600">${pct}% do total da categoria</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`:'' }
+    </div>`;
+  });
+
+  el.innerHTML = html;
 }
 </script>
 
