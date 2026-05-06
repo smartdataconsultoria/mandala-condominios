@@ -1,349 +1,354 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Documentos — Edifício Mandala</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CondoGestor — Documentos</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',sans-serif;background:#0f1117;color:#f1f5f9;min-height:100vh}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #0B1F3A; --navy-light: #142D52; --gold: #E8A320; --gold-light: #F5C35A;
+    --white: #FFFFFF; --off-white: #F7F6F2; --border: #E2E8F0; --border-light: #EAE7E0;
+    --text-dark: #0B1F3A; --text-mid: #445571; --text-light: #8899B4;
+    --green: #16A34A; --green-bg: #DCFCE7; --green-border: #86EFAC;
+    --red: #DC2626; --red-bg: #FEE2E2; --red-border: #FCA5A5;
+    --amber: #D97706; --amber-bg: #FEF3C7; --amber-border: #FCD34D;
+    --blue: #2563EB; --blue-bg: #EFF6FF;
+    --purple: #7C3AED; --purple-bg: #F5F3FF;
+    --sidebar-w: 240px; --radius: 12px; --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+  }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--off-white); color: var(--text-dark); display: flex; min-height: 100vh; }
 
-/* NAV */
-nav{background:#1a1d27;border-bottom:1px solid #2a2d3e;padding:0 24px;display:flex;align-items:center;height:60px}
-.nav-brand{display:flex;align-items:center;gap:10px;margin-right:40px;text-decoration:none}
-.nav-logo{width:36px;height:36px;background:#f5a623;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
-.nav-brand-text{font-size:13px;font-weight:700;color:#f1f5f9;line-height:1.2}
-.nav-brand-text span{display:block;font-size:10px;color:#94a3b8;font-weight:400}
-.nav-links{display:flex;gap:4px}
-.nav-links a{color:#94a3b8;text-decoration:none;padding:8px 16px;border-radius:6px;font-size:14px;transition:.2s}
-.nav-links a:hover{background:#2a2d3e;color:#f1f5f9}
-.nav-links a.active{background:#f5a623;color:#0f1117;font-weight:600}
-.nav-right{margin-left:auto;display:flex;align-items:center;gap:16px}
-.nav-user{font-size:13px;color:#64748b}
+  /* ── SIDEBAR ── */
+  .sidebar { width: var(--sidebar-w); background: var(--navy); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; overflow-y: auto; }
+  .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 1.5rem 1.25rem 1.25rem; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 0.5rem; }
+  .logo-icon { width: 34px; height: 34px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .logo-icon svg { width: 18px; height: 18px; }
+  .logo-name { font-size: 1.05rem; font-weight: 800; color: var(--white); }
+  .logo-name span { color: var(--gold); }
+  .condo-selector { margin: 0 0.75rem 0.5rem; background: rgba(255,255,255,0.07); border-radius: 8px; padding: 9px 12px; border: 1px solid rgba(255,255,255,0.07); }
+  .condo-selector label { font-size: 0.65rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: rgba(255,255,255,0.35); display: block; margin-bottom: 4px; }
+  .condo-selector div { color: var(--white); font-size: 0.84rem; font-weight: 700; }
+  .sidebar-section { padding: 0 0.75rem; margin-bottom: 0.2rem; }
+  .sidebar-section-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0.75rem 0.5rem 0.4rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.6); transition: all var(--transition); margin-bottom: 2px; }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: var(--white); }
+  .nav-item.active { background: rgba(232,163,32,0.15); color: #F5C35A; }
+  .nav-item.active svg { opacity: 1; }
+  .sidebar-bottom { margin-top: auto; padding: 1rem 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); }
+  .user-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,0.06); }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--navy); flex-shrink: 0; }
+  .user-name { font-size: 0.82rem; font-weight: 600; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+  .user-role-lbl { font-size: 0.7rem; color: rgba(255,255,255,0.4); }
+  .logout-btn { margin-left: auto; background: none; border: none; cursor: pointer; padding: 4px; color: rgba(255,255,255,0.4); transition: color .2s; }
+  .logout-btn:hover { color: #FCA5A5; }
+  .logout-btn svg { width: 15px; height: 15px; }
 
-/* MAIN */
-main{max-width:1200px;margin:0 auto;padding:28px 24px}
+  /* ── MAIN ── */
+  .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 40; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+  .topbar h1 { font-size: 1rem; font-weight: 700; color: var(--navy); }
+  .topbar p { font-size: 0.75rem; color: var(--text-light); }
+  .content { padding: 1.75rem 2rem; flex: 1; }
 
-/* ALERT */
-.alert{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:20px;display:none}
-.alert.success{background:#052e1660;border:1px solid #22c55e40;color:#22c55e}
-.alert.error{background:#2d0a0a60;border:1px solid #ef444440;color:#ef4444}
+  /* ── PAGE HEADER ── */
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 22px; gap: 16px; flex-wrap: wrap; }
+  .page-title { font-size: 22px; font-weight: 800; color: var(--text-dark); }
+  .page-sub { font-size: 13px; color: var(--text-light); margin-top: 4px; }
+  .btn-new { background: var(--navy); color: var(--white); border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: .2s; font-family: inherit; }
+  .btn-new:hover { background: var(--navy-light); transform: translateY(-1px); }
 
-/* HEADER */
-.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:12px;flex-wrap:wrap}
-.page-title{font-size:24px;font-weight:700}
-.page-subtitle{font-size:13px;color:#64748b;margin-top:3px}
-.header-actions{display:flex;gap:10px}
-.btn-new{background:#f5a623;color:#0f1117;border:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.2s}
-.btn-new:hover{background:#e09210;transform:translateY(-1px)}
+  /* ── ALERT ── */
+  .alert { padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; display: none; border: 1px solid; }
+  .alert.success { background: #f0fdf4; border-color: var(--green-border); color: var(--green); }
+  .alert.error   { background: #fff1f2; border-color: var(--red-border); color: var(--red); }
 
-/* STATS */
-.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
-.stat{background:#1a1d27;border:1px solid #2a2d3e;border-radius:12px;padding:14px 16px;cursor:pointer;transition:.2s}
-.stat:hover{border-color:#f5a62340}
-.stat.active{border-color:#f5a623;background:#f5a62308}
-.stat-icon{font-size:22px;margin-bottom:6px}
-.stat-label{font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
-.stat-val{font-size:20px;font-weight:700}
+  /* ── STATS ── */
+  .stats { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; margin-bottom: 22px; }
+  .stat { background: var(--white); border: 2px solid var(--border); border-radius: var(--radius); padding: 14px 16px; cursor: pointer; transition: .2s; }
+  .stat:hover { border-color: rgba(232,163,32,.5); box-shadow: 0 4px 14px rgba(0,0,0,.06); }
+  .stat.active { border-color: var(--gold); background: var(--amber-bg); }
+  .stat-icon { font-size: 20px; margin-bottom: 6px; }
+  .stat-label { font-size: 10px; color: var(--text-light); font-weight: 700; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 4px; }
+  .stat-val { font-size: 22px; font-weight: 800; color: var(--text-dark); }
+  .stat.active .stat-val { color: var(--amber); }
 
-/* LAYOUT */
-.layout{display:grid;grid-template-columns:240px 1fr;gap:20px;align-items:start}
+  /* ── LAYOUT 2 COLUNAS ── */
+  .content-layout { display: grid; grid-template-columns: 220px 1fr; gap: 20px; align-items: start; }
+  @media(max-width:700px){ .content-layout { grid-template-columns: 1fr; } }
 
-/* SIDEBAR FILTROS */
-.sidebar{background:#1a1d27;border:1px solid #2a2d3e;border-radius:12px;padding:16px;position:sticky;top:20px}
-.sb-title{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
-.sb-sep{height:1px;background:#2a2d3e;margin:14px 0}
-.cat-btn{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;background:none;border:none;border-radius:8px;color:#94a3b8;font-size:13px;cursor:pointer;text-align:left;transition:.15s;margin-bottom:2px}
-.cat-btn:hover{background:#2a2d3e;color:#f1f5f9}
-.cat-btn.active{background:#f5a62315;color:#f5a623;font-weight:600}
-.cat-btn .cat-icon{font-size:16px;width:22px;text-align:center}
-.cat-btn .cat-count{margin-left:auto;background:#2a2d3e;color:#64748b;font-size:10px;padding:2px 6px;border-radius:8px;font-weight:600}
-.cat-btn.active .cat-count{background:#f5a62325;color:#f5a623}
+  /* ── FILTER SIDEBAR ── */
+  .filter-sidebar { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; position: sticky; top: 80px; }
+  .filter-sidebar h3 { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: var(--text-light); margin-bottom: 10px; margin-top: 14px; }
+  .filter-sidebar h3:first-child { margin-top: 0; }
+  .filter-sep { height: 1px; background: var(--border-light); margin: 12px 0; }
+  .cat-btn { display: flex; align-items: center; gap: 9px; width: 100%; padding: 8px 10px; background: none; border: none; border-radius: 8px; color: var(--text-mid); font-size: 13px; cursor: pointer; text-align: left; transition: .15s; margin-bottom: 2px; font-family: inherit; }
+  .cat-btn:hover { background: var(--off-white); color: var(--text-dark); }
+  .cat-btn.active { background: var(--amber-bg); color: var(--amber); font-weight: 700; border: 1px solid var(--amber-border); }
+  .cat-icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+  .cat-count { margin-left: auto; background: var(--off-white); color: var(--text-light); font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 700; flex-shrink: 0; }
+  .cat-btn.active .cat-count { background: rgba(217,119,6,.15); color: var(--amber); }
 
-/* BUSCA */
-.search-bar{display:flex;gap:10px;margin-bottom:16px}
-.search-box{flex:1;position:relative}
-.search-box input{width:100%;background:#1a1d27;border:1px solid #2a2d3e;border-radius:8px;padding:9px 14px 9px 38px;color:#f1f5f9;font-size:14px;outline:none;transition:.2s}
-.search-box input:focus{border-color:#f5a623}
-.search-box::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px}
-.sort-select{background:#1a1d27;border:1px solid #2a2d3e;border-radius:8px;padding:9px 14px;color:#94a3b8;font-size:13px;outline:none;cursor:pointer}
+  /* ── BUSCA ── */
+  .search-bar { display: flex; gap: 10px; margin-bottom: 16px; }
+  .search-box { flex: 1; position: relative; }
+  .search-box input { width: 100%; background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 9px 14px 9px 38px; color: var(--text-dark); font-size: 13px; outline: none; transition: .2s; font-family: inherit; }
+  .search-box input:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(11,31,58,.08); }
+  .search-box input::placeholder { color: var(--text-light); }
+  .search-box::before { content: '🔍'; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; }
+  .sort-select { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 9px 14px; color: var(--text-mid); font-size: 13px; outline: none; cursor: pointer; font-family: inherit; }
 
-/* DOCS GRID */
-.docs-grid{display:flex;flex-direction:column;gap:10px}
+  /* ── DOC CARDS ── */
+  .docs-list { display: flex; flex-direction: column; gap: 10px; }
+  .doc-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; display: flex; align-items: center; gap: 16px; transition: .2s; cursor: pointer; }
+  .doc-card:hover { border-color: rgba(232,163,32,.5); box-shadow: 0 4px 16px rgba(0,0,0,.06); transform: translateY(-1px); }
+  .doc-card.destaque { border-color: var(--amber-border); background: var(--amber-bg); }
+  .doc-type-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .doc-info { flex: 1; min-width: 0; }
+  .doc-titulo { font-size: 14px; font-weight: 700; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .doc-meta { display: flex; align-items: center; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
+  .doc-cat-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+  .doc-date { font-size: 11px; color: var(--text-light); }
+  .doc-desc { font-size: 12px; color: var(--text-light); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .doc-prestador { font-size: 12px; color: var(--text-mid); margin-top: 3px; font-weight: 500; }
+  .doc-valor { font-size: 13px; font-weight: 800; color: var(--green); white-space: nowrap; }
+  .doc-validade { font-size: 11px; padding: 2px 8px; border-radius: 8px; font-weight: 600; white-space: nowrap; }
+  .doc-validade.ok   { background: var(--green-bg); color: var(--green); }
+  .doc-validade.warn { background: var(--amber-bg); color: var(--amber); }
+  .doc-validade.exp  { background: var(--red-bg); color: var(--red); }
+  .doc-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .btn-action { background: var(--off-white); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: .2s; color: var(--text-mid); white-space: nowrap; font-family: inherit; }
+  .btn-action:hover { background: var(--border); color: var(--text-dark); }
+  .btn-action.primary { background: var(--amber-bg); border-color: var(--amber-border); color: var(--amber); }
+  .btn-action.primary:hover { background: #FDE68A; }
+  .btn-action.analisar { background: var(--blue-bg); border-color: #93C5FD; color: var(--blue); }
+  .btn-action.analisar:hover { background: #DBEAFE; }
+  .btn-action.del:hover { background: var(--red-bg); color: var(--red); border-color: var(--red-border); }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-light); font-size: 14px; }
+  .loading-state { text-align: center; padding: 60px 20px; color: var(--text-light); font-size: 14px; }
 
-/* DOC CARD */
-.doc-card{background:#1a1d27;border:1px solid #2a2d3e;border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:16px;transition:.2s;cursor:pointer}
-.doc-card:hover{border-color:#f5a62340;background:#1e2130}
-.doc-card.destaque{border-color:#f5a62340;background:#f5a62306}
-.doc-type-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-.doc-info{flex:1;min-width:0}
-.doc-titulo{font-size:14px;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.doc-meta{display:flex;align-items:center;gap:10px;margin-top:4px;flex-wrap:wrap}
-.doc-cat-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:600}
-.doc-date{font-size:12px;color:#64748b}
-.doc-desc{font-size:12px;color:#64748b;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:500px}
-.doc-prestador{font-size:12px;color:#94a3b8;margin-top:2px}
-.doc-valor{font-size:13px;font-weight:700;color:#22c55e;white-space:nowrap}
-.doc-validade{font-size:11px;padding:2px 8px;border-radius:6px;white-space:nowrap}
-.doc-validade.ok{background:#22c55e15;color:#22c55e}
-.doc-validade.warn{background:#f5a62315;color:#f5a623}
-.doc-validade.exp{background:#ef444415;color:#ef4444}
-.doc-actions{display:flex;gap:6px;flex-shrink:0}
-.btn-action{background:none;border:1px solid #2a2d3e;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:.2s;color:#94a3b8;white-space:nowrap}
-.btn-action:hover{background:#2a2d3e;color:#f1f5f9}
-.btn-action.primary{background:#f5a62315;border-color:#f5a62340;color:#f5a623}
-.btn-action.primary:hover{background:#f5a62325}
-.btn-action.del:hover{background:#ef444420;color:#ef4444;border-color:#ef4444}
-.empty-state{text-align:center;padding:60px 20px;color:#4a5568}
+  /* ── BADGES APROVAÇÃO ── */
+  .apr-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+  .apr-pendente  { background: var(--amber-bg); color: var(--amber); }
+  .apr-aprovado  { background: var(--green-bg); color: var(--green); }
+  .apr-rejeitado { background: var(--red-bg); color: var(--red); }
 
-/* MODAL */
-.modal-bg{position:fixed;inset:0;background:#00000090;display:none;align-items:flex-start;justify-content:center;z-index:999;overflow-y:auto;padding:20px 16px}
-.modal-bg.open{display:flex}
-.modal{background:#13161f;border:1px solid #2a2d3e;border-radius:16px;width:100%;max-width:700px;margin:auto}
-.modal-header{padding:22px 24px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #2a2d3e}
-.modal-title{font-size:18px;font-weight:700;flex:1}
-.modal-close{background:none;border:none;color:#64748b;font-size:22px;cursor:pointer;padding:2px 6px;border-radius:6px;transition:.2s}
-.modal-close:hover{background:#2a2d3e;color:#f1f5f9}
-.modal-body{padding:20px 24px}
-.modal-footer{display:flex;gap:10px;justify-content:flex-end;padding:18px 24px;border-top:1px solid #2a2d3e}
+  /* ── BADGES CATEGORIA ── */
+  .cat-ata       { background: #EFF6FF; color: #1D4ED8; }
+  .cat-contrato  { background: var(--amber-bg); color: var(--amber); }
+  .cat-nf        { background: var(--green-bg); color: var(--green); }
+  .cat-comunicado{ background: #F5F3FF; color: #7C3AED; }
+  .cat-convencao { background: #ECFEFF; color: #0E7490; }
+  .cat-regimento { background: #F1F5F9; color: #475569; }
+  .cat-financeiro{ background: var(--green-bg); color: var(--green); }
+  .cat-proposta  { background: #FFF1F2; color: #BE123C; }
+  .cat-outro     { background: var(--off-white); color: var(--text-mid); }
 
-/* FORM */
-.sec-title{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin:18px 0 12px;display:flex;align-items:center;gap:8px}
-.sec-title::after{content:'';flex:1;height:1px;background:#2a2d3e}
-.sec-title:first-child{margin-top:0}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
-.field{margin-bottom:14px}
-.field label{display:block;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
-.field input,.field select,.field textarea{width:100%;background:#0f1117;border:1px solid #2a2d3e;border-radius:8px;padding:10px 13px;color:#f1f5f9;font-size:14px;outline:none;transition:.2s;font-family:inherit}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:#f5a623}
-.field select option{background:#1a1d27}
-.field textarea{resize:vertical;min-height:80px}
-.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #2a2d3e20;margin-bottom:6px}
-.toggle-label{font-size:14px;color:#94a3b8;display:flex;align-items:center;gap:8px}
-.switch{position:relative;width:44px;height:24px;flex-shrink:0}
-.switch input{opacity:0;width:0;height:0}
-.switch .slider{position:absolute;inset:0;background:#2a2d3e;border-radius:24px;cursor:pointer;transition:.3s}
-.switch .slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:#64748b;border-radius:50%;transition:.3s}
-.switch input:checked+.slider{background:#f5a623}
-.switch input:checked+.slider::before{transform:translateX(20px);background:#fff}
+  /* ── MODAL ── */
+  .modal-bg { position: fixed; inset: 0; background: rgba(11,31,58,.5); display: none; align-items: flex-start; justify-content: center; z-index: 999; overflow-y: auto; padding: 20px 16px; backdrop-filter: blur(2px); }
+  .modal-bg.open { display: flex; }
+  .modal { background: var(--white); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 680px; margin: auto; box-shadow: 0 20px 60px rgba(11,31,58,.12); }
+  .modal-header { padding: 20px 24px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border-light); }
+  .modal-title { font-size: 17px; font-weight: 800; flex: 1; color: var(--text-dark); }
+  .modal-close { background: none; border: 1px solid var(--border); color: var(--text-light); font-size: 16px; cursor: pointer; line-height: 1; padding: 4px 9px; border-radius: 8px; transition: .2s; }
+  .modal-close:hover { background: var(--off-white); color: var(--text-dark); }
+  .modal-body { padding: 20px 24px; }
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; padding: 16px 24px; border-top: 1px solid var(--border-light); background: var(--off-white); border-radius: 0 0 16px 16px; }
+  .btn-cancel { background: none; border: 1px solid var(--border); color: var(--text-light); padding: 9px 18px; border-radius: 8px; font-size: 13px; cursor: pointer; transition: .2s; font-family: inherit; }
+  .btn-cancel:hover { background: var(--border); color: var(--text-dark); }
+  .btn-save { background: var(--navy); color: var(--white); border: none; padding: 9px 22px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: .2s; font-family: inherit; }
+  .btn-save:hover { background: var(--navy-light); }
+  .btn-save:disabled { opacity: .5; cursor: not-allowed; }
 
-/* UPLOAD */
-.upload-area{border:2px dashed #2a2d3e;border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:.25s;position:relative;background:#0f1117}
-.upload-area:hover,.upload-area.drag{border-color:#f5a623;background:#f5a62306}
-.upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
-.upload-icon{font-size:36px;margin-bottom:10px}
-.upload-text{font-size:14px;color:#94a3b8}
-.upload-text strong{color:#f5a623}
-.upload-hint{font-size:11px;color:#4a5568;margin-top:4px}
-.file-preview{display:none;background:#0f1117;border:1px solid #2a2d3e;border-radius:10px;padding:14px 16px;align-items:center;gap:12px;margin-top:10px}
-.file-preview.show{display:flex}
-.file-type-icon{font-size:28px;flex-shrink:0}
-.file-info{flex:1;min-width:0}
-.file-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.file-size{font-size:11px;color:#64748b;margin-top:2px}
-.file-remove{background:none;border:none;color:#ef4444;font-size:18px;cursor:pointer;padding:2px 6px;border-radius:4px;transition:.2s;flex-shrink:0}
-.file-remove:hover{background:#ef444420}
+  /* ── FORM ── */
+  .sec-title { font-size: 10px; font-weight: 800; color: var(--text-light); text-transform: uppercase; letter-spacing: .1em; margin: 18px 0 12px; display: flex; align-items: center; gap: 8px; }
+  .sec-title:first-child { margin-top: 0; }
+  .sec-title::after { content: ''; flex: 1; height: 1px; background: var(--border-light); }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 10px; font-weight: 700; color: var(--text-mid); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 6px; }
+  .field input, .field select, .field textarea { width: 100%; background: var(--off-white); border: 1px solid var(--border); border-radius: 8px; padding: 10px 13px; color: var(--text-dark); font-size: 13px; outline: none; transition: .2s; font-family: inherit; }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--navy); background: var(--white); box-shadow: 0 0 0 3px rgba(11,31,58,.06); }
+  .field textarea { resize: vertical; min-height: 80px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .box-extra { background: var(--off-white); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 14px; display: none; }
+  .box-extra.show { display: block; }
+  .sec-box-title { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 12px; }
+  .sec-box-title.amber { color: var(--amber); }
+  .sec-box-title.blue  { color: var(--blue); }
 
-/* CAMPOS CONDICIONAIS */
-.cond-box{background:#0f1117;border:1px solid #2a2d3e;border-radius:10px;padding:16px;margin-top:12px;display:none}
-.cond-box.show{display:block}
+  /* ── UPLOAD ── */
+  .upload-area { border: 2px dashed var(--border); border-radius: 10px; padding: 24px; text-align: center; cursor: pointer; transition: .2s; background: var(--off-white); }
+  .upload-area:hover, .upload-area.drag { border-color: var(--gold); background: var(--amber-bg); }
+  .upload-area p { font-size: 13px; color: var(--text-light); margin-top: 8px; }
+  .upload-link { color: var(--blue); font-weight: 600; cursor: pointer; font-size: 13px; }
+  .file-preview { display: none; align-items: center; gap: 12px; padding: 12px 14px; background: var(--green-bg); border: 1px solid var(--green-border); border-radius: 10px; }
+  .file-preview.show { display: flex; }
+  .file-icon { font-size: 24px; flex-shrink: 0; }
+  .file-name { font-size: 13px; font-weight: 600; color: var(--green); }
+  .file-size { font-size: 11px; color: var(--text-light); }
+  .file-rm { background: none; border: none; color: var(--text-light); cursor: pointer; font-size: 16px; margin-left: auto; padding: 2px 6px; border-radius: 6px; transition: .2s; }
+  .file-rm:hover { color: var(--red); background: var(--red-bg); }
 
-.btn-cancel{background:none;border:1px solid #2a2d3e;color:#94a3b8;padding:10px 20px;border-radius:8px;font-size:14px;cursor:pointer;transition:.2s}
-.btn-cancel:hover{background:#2a2d3e}
-.btn-save{background:#f5a623;color:#0f1117;border:none;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:.2s}
-.btn-save:hover{background:#e09210}
-.btn-save:disabled{opacity:.5;cursor:not-allowed}
+  /* ── TOGGLE ── */
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-light); }
+  .toggle-label { font-size: 13px; color: var(--text-mid); }
+  .switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch .slider { position: absolute; inset: 0; background: var(--border); border-radius: 24px; cursor: pointer; transition: .3s; }
+  .switch .slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px; background: var(--text-light); border-radius: 50%; transition: .3s; }
+  .switch input:checked + .slider { background: var(--navy); }
+  .switch input:checked + .slider::before { transform: translateX(20px); background: var(--gold); }
 
-/* CORES POR CATEGORIA */
-.cat-ata{background:#3b82f615;color:#3b82f6}
-.cat-contrato{background:#f5a62315;color:#f5a623}
-.cat-nf{background:#22c55e15;color:#22c55e}
-.cat-comunicado{background:#a855f715;color:#a855f7}
-.cat-convencao{background:#06b6d415;color:#06b6d4}
-.cat-regimento{background:#64748b15;color:#64748b}
-.cat-financeiro{background:#22c55e15;color:#22c55e}
-.cat-outro{background:#2a2d3e;color:#94a3b8}
-.cat-proposta{background:#f59e0b15;color:#f59e0b}
-
-/* APROVAÇÃO BADGES */
-.apr-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.03em}
-.apr-pendente{background:#f59e0b20;color:#f59e0b;border:1px solid #f59e0b30}
-.apr-aprovado{background:#22c55e20;color:#22c55e;border:1px solid #22c55e30}
-.apr-rejeitado{background:#ef444420;color:#ef4444;border:1px solid #ef444430}
-
-/* MODAL DE APROVAÇÃO */
-.apr-modal{background:#13161f;border:1px solid #2a2d3e;border-radius:16px;width:100%;max-width:520px;margin:auto}
-.apr-section{background:#0f1117;border:1px solid #2a2d3e;border-radius:10px;padding:16px;margin-bottom:14px}
-.apr-titulo{font-size:15px;font-weight:700;margin-bottom:4px}
-.apr-meta{font-size:12px;color:#64748b}
-.btn-aprovar{background:#22c55e;color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:.2s}
-.btn-aprovar:hover{background:#16a34a}
-.btn-rejeitar{background:#ef444415;color:#ef4444;border:1px solid #ef444430;padding:10px 22px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:.2s}
-.btn-rejeitar:hover{background:#ef444425}
-.apr-hist-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #2a2d3e20}
-.apr-hist-item:last-child{border-bottom:none}
+  /* ── MODAL APROVAÇÃO ── */
+  .apr-modal { background: var(--white); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 540px; margin: auto; box-shadow: 0 20px 60px rgba(11,31,58,.12); }
+  .apr-section { background: var(--off-white); border-radius: 10px; padding: 14px; margin-bottom: 16px; }
+  .apr-titulo { font-size: 15px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px; }
+  .apr-meta { font-size: 12px; color: var(--text-light); }
+  .apr-hist-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border-light); }
+  .btn-aprovar  { background: var(--green); color: var(--white); border: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; transition: .2s; }
+  .btn-aprovar:hover  { background: var(--green); opacity: .85; }
+  .btn-rejeitar { background: var(--red); color: var(--white); border: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; transition: .2s; }
+  .btn-rejeitar:hover { background: var(--red); opacity: .85; }
 </style>
 </head>
 <body>
 
-<nav>
-  <a class="nav-brand" href="dashboard.html">
-    <div class="nav-logo">🏠</div>
-    <div class="nav-brand-text">EDIFÍCIO<br><span>Mandala</span></div>
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <a href="/sindico/dashboard.html" class="sidebar-logo">
+    <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="#0B1F3A" stroke-width="2.5" stroke-linejoin="round"/><path d="M9 22V12h6v10" stroke="#0B1F3A" stroke-width="2.5"/></svg></div>
+    <span class="logo-name">Condo<span>Gestor</span></span>
   </a>
-  <div class="nav-links">
-    <a href="dashboard.html">Dashboard</a>
-    <a href="transacoes.html">Transações</a>
-    <a href="moradores.html">Moradores</a>
-    <a href="documentos.html" class="active">Documentos</a>
-    <a href="categorias.html">Categorias</a>
+  <div class="condo-selector">
+    <label>Condomínio</label>
+    <div id="condoNome">Edifício Mandala</div>
   </div>
-  <div class="nav-right">
-    <span class="nav-user" id="navUser"></span>
-    <a href="login.html" style="color:#64748b;font-size:13px;text-decoration:none">⇤ Sair</a>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Principal</div>
+    <a href="/sindico/dashboard.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
+    <a href="/sindico/moradores.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Moradores</a>
+    <a href="/sindico/chamados.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Chamados</a>
+    <a href="/sindico/documentos.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documentos</a>
   </div>
-</nav>
-
-<main>
-  <div class="alert" id="alert"></div>
-
-  <div class="page-header">
-    <div>
-      <div class="page-title">📁 Documentos</div>
-      <div class="page-subtitle">Gestão de documentos, contratos e notas fiscais do condomínio</div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Financeiro</div>
+    <a href="/sindico/financeiro.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Financeiro</a>
+    <a href="/sindico/transacoes.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Transações</a>
+    <a href="/sindico/categorias.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Categorias</a>
+    <a href="/sindico/metas.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Metas & Projetos</a>
+    <a href="/sindico/orcamento.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Orçamento</a>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-avatar" id="avatar-initials">--</div>
+      <div><div class="user-name" id="user-name">Carregando...</div><div class="user-role-lbl">Síndico</div></div>
+      <button class="logout-btn" onclick="fazerLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
     </div>
-    <div class="header-actions">
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<div class="main">
+  <header class="topbar">
+    <div><h1>Documentos</h1><p>Gestão de documentos, contratos e notas fiscais</p></div>
+  </header>
+  <div class="content">
+
+    <div class="alert" id="alert"></div>
+
+    <div class="page-header">
+      <div>
+        <div class="page-title">📁 Documentos</div>
+        <div class="page-sub">Gestão de documentos, contratos e notas fiscais do condomínio</div>
+      </div>
       <button class="btn-new" onclick="abrirModal()">+ Novo Documento</button>
     </div>
-  </div>
 
-  <!-- STATS CLICÁVEIS -->
-  <div class="stats" id="statsBar">
-    <div class="stat active" onclick="filtrarCat('Todos',this)">
-      <div class="stat-icon">📂</div>
-      <div class="stat-label">Todos</div>
-      <div class="stat-val" id="stTodos">0</div>
-    </div>
-    <div class="stat" onclick="filtrarCat('Ata',this)">
-      <div class="stat-icon">📋</div>
-      <div class="stat-label">Atas</div>
-      <div class="stat-val" id="stAta">0</div>
-    </div>
-    <div class="stat" onclick="filtrarCat('Contrato',this)">
-      <div class="stat-icon">📝</div>
-      <div class="stat-label">Contratos</div>
-      <div class="stat-val" id="stContrato">0</div>
-    </div>
-    <div class="stat" onclick="filtrarCat('Nota Fiscal',this)">
-      <div class="stat-icon">🧾</div>
-      <div class="stat-label">Notas Fiscais</div>
-      <div class="stat-val" id="stNF">0</div>
-    </div>
-    <div class="stat" onclick="filtrarCat('Outros',this)">
-      <div class="stat-icon">📌</div>
-      <div class="stat-label">Outros</div>
-      <div class="stat-val" id="stOutros">0</div>
-    </div>
-  </div>
-
-  <div class="layout">
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-      <div class="sb-title">Categoria</div>
-      <button class="cat-btn active" id="sbTodos" onclick="filtrarCat('Todos',null,this)">
-        <span class="cat-icon">📂</span> Todos
-        <span class="cat-count" id="sbCTodos">0</span>
-      </button>
-      <button class="cat-btn" onclick="filtrarCat('Ata',null,this)">
-        <span class="cat-icon">📋</span> Atas
-        <span class="cat-count" id="sbCAta">0</span>
-      </button>
-      <button class="cat-btn" onclick="filtrarCat('Contrato',null,this)">
-        <span class="cat-icon">📝</span> Contratos
-        <span class="cat-count" id="sbCContrato">0</span>
-      </button>
-      <button class="cat-btn" onclick="filtrarCat('Nota Fiscal',null,this)">
-        <span class="cat-icon">🧾</span> Notas Fiscais
-        <span class="cat-count" id="sbCNF">0</span>
-      </button>
-      <button class="cat-btn" onclick="filtrarCat('Comunicado',null,this)">
-        <span class="cat-icon">📣</span> Comunicados
-        <span class="cat-count" id="sbCCom">0</span>
-      </button>
-      <button class="cat-btn" onclick="filtrarCat('Convenção',null,this)">
-        <span class="cat-icon">📖</span> Convenção
-        <span class="cat-count" id="sbCConv">0</span>
-      </button>
-      <button class="cat-btn" onclick="filtrarCat('Regimento',null,this)">
-        <span class="cat-icon">📜</span> Regimento
-        <span class="cat-count" id="sbCReg">0</span>
-      </button>
-      <button class="cat-btn" onclick="filtrarCat('Financeiro',null,this)">
-        <span class="cat-icon">💰</span> Financeiro
-        <span class="cat-count" id="sbCFin">0</span>
-      </button>
-      <button class="cat-btn" onclick="filtrarCat('Outro',null,this)">
-        <span class="cat-icon">📌</span> Outros
-        <span class="cat-count" id="sbCOut">0</span>
-      </button>
-      <button class="cat-btn" onclick="filtrarCat('Proposta',null,this)">
-        <span class="cat-icon">💡</span> Propostas
-        <span class="cat-count" id="sbCProp">0</span>
-      </button>
-
-      <div class="sb-sep"></div>
-      <div class="sb-title">Situação</div>
-      <button class="cat-btn" onclick="filtrarSit('publicado',this)">
-        <span class="cat-icon">✅</span> Publicados
-      </button>
-      <button class="cat-btn" onclick="filtrarSit('destaque',this)">
-        <span class="cat-icon">⭐</span> Destaques
-      </button>
-      <button class="cat-btn" onclick="filtrarSit('vencendo',this)">
-        <span class="cat-icon">⚠️</span> Vencendo (30d)
-      </button>
-      <button class="cat-btn" onclick="filtrarSit('vencido',this)">
-        <span class="cat-icon">🔴</span> Vencidos
-      </button>
-
-      <div class="sb-sep"></div>
-      <div class="sb-title">Propostas</div>
-      <button class="cat-btn" onclick="filtrarSit('pendente',this)">
-        <span class="cat-icon">⏳</span> Aguardando
-        <span class="cat-count" id="sbAPend">0</span>
-      </button>
-      <button class="cat-btn" onclick="filtrarSit('aprovado',this)">
-        <span class="cat-icon">✅</span> Aprovadas
-        <span class="cat-count" id="sbAAprov">0</span>
-      </button>
-      <button class="cat-btn" onclick="filtrarSit('rejeitado',this)">
-        <span class="cat-icon">❌</span> Rejeitadas
-        <span class="cat-count" id="sbARej">0</span>
-      </button>
+    <!-- STATS -->
+    <div class="stats">
+      <div class="stat active" onclick="filtrarCat('Todos',this,document.getElementById('sbTodos'))">
+        <div class="stat-icon">📁</div>
+        <div class="stat-label">Todos</div>
+        <div class="stat-val" id="stTodos">0</div>
+      </div>
+      <div class="stat" onclick="filtrarCat('Ata',this,document.getElementById('sbAta'))">
+        <div class="stat-icon">📋</div>
+        <div class="stat-label">Atas</div>
+        <div class="stat-val" id="stAta">0</div>
+      </div>
+      <div class="stat" onclick="filtrarCat('Contrato',this,document.getElementById('sbContrato'))">
+        <div class="stat-icon">📝</div>
+        <div class="stat-label">Contratos</div>
+        <div class="stat-val" id="stContrato">0</div>
+      </div>
+      <div class="stat" onclick="filtrarCat('Nota Fiscal',this,document.getElementById('sbNF'))">
+        <div class="stat-icon">🧾</div>
+        <div class="stat-label">Notas Fiscais</div>
+        <div class="stat-val" id="stNF">0</div>
+      </div>
+      <div class="stat" onclick="filtrarCat('__outros__',this,null)">
+        <div class="stat-icon">📌</div>
+        <div class="stat-label">Outros</div>
+        <div class="stat-val" id="stOutros">0</div>
+      </div>
     </div>
 
-    <!-- CONTEÚDO -->
-    <div>
-      <div class="search-bar">
-        <div class="search-box">
-          <input type="text" id="busca" placeholder="Buscar por título, prestador, descrição..." oninput="renderDocs()"/>
+    <!-- LAYOUT 2 COLUNAS -->
+    <div class="content-layout">
+
+      <!-- SIDEBAR FILTROS -->
+      <div class="filter-sidebar">
+        <h3>Categoria</h3>
+        <button class="cat-btn active" id="sbTodos"    onclick="filtrarCatSb('Todos',this)"><span class="cat-icon">📁</span>Todos<span class="cat-count" id="sbCTodos">0</span></button>
+        <button class="cat-btn"        id="sbAta"       onclick="filtrarCatSb('Ata',this)"><span class="cat-icon">📋</span>Atas<span class="cat-count" id="sbCAta">0</span></button>
+        <button class="cat-btn"        id="sbContrato"  onclick="filtrarCatSb('Contrato',this)"><span class="cat-icon">📝</span>Contratos<span class="cat-count" id="sbCContrato">0</span></button>
+        <button class="cat-btn"        id="sbNF"        onclick="filtrarCatSb('Nota Fiscal',this)"><span class="cat-icon">🧾</span>Notas Fiscais<span class="cat-count" id="sbCNF">0</span></button>
+        <button class="cat-btn"        id="sbCom"       onclick="filtrarCatSb('Comunicado',this)"><span class="cat-icon">📣</span>Comunicados<span class="cat-count" id="sbCCom">0</span></button>
+        <button class="cat-btn"        id="sbConv"      onclick="filtrarCatSb('Convenção',this)"><span class="cat-icon">📖</span>Convenção<span class="cat-count" id="sbCConv">0</span></button>
+        <button class="cat-btn"        id="sbReg"       onclick="filtrarCatSb('Regimento',this)"><span class="cat-icon">📜</span>Regimento<span class="cat-count" id="sbCReg">0</span></button>
+        <button class="cat-btn"        id="sbFin"       onclick="filtrarCatSb('Financeiro',this)"><span class="cat-icon">💰</span>Financeiro<span class="cat-count" id="sbCFin">0</span></button>
+        <button class="cat-btn"        id="sbProp"      onclick="filtrarCatSb('Proposta',this)"><span class="cat-icon">💡</span>Propostas<span class="cat-count" id="sbCProp">0</span></button>
+        <button class="cat-btn"        id="sbOut"       onclick="filtrarCatSb('Outro',this)"><span class="cat-icon">📌</span>Outros<span class="cat-count" id="sbCOut">0</span></button>
+
+        <div class="filter-sep"></div>
+        <h3>Situação</h3>
+        <button class="cat-btn" onclick="filtrarSit('publicado',this)"><span class="cat-icon">✅</span>Publicados<span class="cat-count" id="sbAPub">0</span></button>
+        <button class="cat-btn" onclick="filtrarSit('destaque',this)"><span class="cat-icon">⭐</span>Destaques<span class="cat-count" id="sbADest">0</span></button>
+        <button class="cat-btn" onclick="filtrarSit('vencendo',this)"><span class="cat-icon">⚠️</span>Vencendo (30d)<span class="cat-count" id="sbAVenc">0</span></button>
+        <button class="cat-btn" onclick="filtrarSit('vencido',this)"><span class="cat-icon">🔴</span>Vencidos<span class="cat-count" id="sbAExp">0</span></button>
+
+        <div class="filter-sep"></div>
+        <h3>Propostas</h3>
+        <button class="cat-btn" onclick="filtrarSit('pendente',this)"><span class="cat-icon">⏳</span>Aguardando<span class="cat-count" id="sbAPend">0</span></button>
+        <button class="cat-btn" onclick="filtrarSit('aprovado',this)"><span class="cat-icon">✅</span>Aprovadas<span class="cat-count" id="sbAAprov">0</span></button>
+        <button class="cat-btn" onclick="filtrarSit('rejeitado',this)"><span class="cat-icon">❌</span>Rejeitadas<span class="cat-count" id="sbARej">0</span></button>
+      </div>
+
+      <!-- LISTA DOCUMENTOS -->
+      <div>
+        <div class="search-bar">
+          <div class="search-box">
+            <input type="text" id="busca" placeholder="Buscar por título, prestador, descrição..." oninput="renderDocs()"/>
+          </div>
+          <select class="sort-select" id="sortBy" onchange="renderDocs()">
+            <option value="data_desc">Mais recentes</option>
+            <option value="data_asc">Mais antigos</option>
+            <option value="titulo">Título A-Z</option>
+            <option value="categoria">Categoria</option>
+          </select>
         </div>
-        <select class="sort-select" id="sortBy" onchange="renderDocs()">
-          <option value="data_desc">Mais recentes</option>
-          <option value="data_asc">Mais antigos</option>
-          <option value="titulo">Título A→Z</option>
-          <option value="categoria">Categoria</option>
-        </select>
-      </div>
-      <div class="docs-grid" id="docsGrid">
-        <div class="empty-state">⏳ Carregando documentos...</div>
+        <div class="docs-list" id="docsGrid">
+          <div class="loading-state">⏳ Carregando documentos...</div>
+        </div>
       </div>
     </div>
-  </div>
-</main>
 
-<!-- ══════ MODAL ══════ -->
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ══════ MODAL DOCUMENTO ══════ -->
 <div class="modal-bg" id="modalBg">
 <div class="modal">
   <div class="modal-header">
@@ -353,51 +358,30 @@ main{max-width:1200px;margin:0 auto;padding:28px 24px}
   </div>
   <div class="modal-body">
 
-    <!-- UPLOAD -->
-    <div class="sec-title">Arquivo</div>
-    <div class="upload-area" id="uploadArea"
-         ondragover="event.preventDefault();this.classList.add('drag')"
-         ondragleave="this.classList.remove('drag')"
-         ondrop="onDrop(event)">
-      <input type="file" id="fArquivo" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" onchange="onArquivoChange()"/>
-      <div class="upload-icon">📄</div>
-      <div class="upload-text">Arraste o arquivo ou <strong>clique para selecionar</strong></div>
-      <div class="upload-hint">PDF, Word, Excel, Imagem • máx. 20MB</div>
-    </div>
-    <div class="file-preview" id="filePreview">
-      <span class="file-type-icon" id="fileIcon">📄</span>
-      <div class="file-info">
-        <div class="file-name" id="fileName">arquivo.pdf</div>
-        <div class="file-size" id="fileSize">0 KB</div>
-      </div>
-      <button class="file-remove" onclick="removerArquivo()">✕</button>
-    </div>
-
-    <!-- IDENTIFICAÇÃO -->
     <div class="sec-title">Identificação</div>
     <div class="field">
       <label>Título *</label>
-      <input id="fTitulo" type="text" placeholder="Ex: Ata da Assembleia Geral — Jun/2025"/>
+      <input id="fTitulo" type="text" placeholder="Ex: Contrato de Limpeza 2026"/>
     </div>
     <div class="grid2">
       <div class="field">
         <label>Categoria *</label>
         <select id="fCategoria" onchange="onCatChange()">
           <option value="">Selecionar...</option>
-          <option value="Ata">📋 Ata de Assembleia</option>
-          <option value="Contrato">📝 Contrato de Serviço</option>
-          <option value="Nota Fiscal">🧾 Nota Fiscal</option>
-          <option value="Comunicado">📣 Comunicado</option>
-          <option value="Convenção">📖 Convenção do Condomínio</option>
-          <option value="Regimento">📜 Regimento Interno</option>
-          <option value="Financeiro">💰 Documento Financeiro</option>
-          <option value="Proposta">💡 Proposta (requer aprovação)</option>
-          <option value="Outro">📌 Outro</option>
+          <option>Ata</option>
+          <option>Contrato</option>
+          <option>Nota Fiscal</option>
+          <option>Comunicado</option>
+          <option>Convenção</option>
+          <option>Regimento</option>
+          <option>Financeiro</option>
+          <option>Proposta</option>
+          <option>Outro</option>
         </select>
       </div>
       <div class="field">
-        <label>Subcategoria / Tipo</label>
-        <input id="fSub" type="text" placeholder="Ex: AGO, AGE, Manutenção..."/>
+        <label>Subcategoria</label>
+        <input id="fSub" type="text" placeholder="Ex: Assembleia Ordinária"/>
       </div>
     </div>
     <div class="grid2">
@@ -406,59 +390,76 @@ main{max-width:1200px;margin:0 auto;padding:28px 24px}
         <input id="fData" type="date"/>
       </div>
       <div class="field">
-        <label>Data de Validade</label>
+        <label>Validade</label>
         <input id="fValidade" type="date"/>
-        <div style="font-size:11px;color:#4a5568;margin-top:3px">Para contratos com vencimento</div>
       </div>
     </div>
 
-    <!-- CAMPOS CONDICIONAIS: CONTRATO / NF -->
-    <div class="cond-box" id="boxPrestador">
-      <div class="sec-title" style="margin-top:0">Prestador de Serviço</div>
-      <div class="grid3">
-        <div class="field" style="margin:0">
-          <label>Nome / Empresa</label>
-          <input id="fPrestNome" type="text" placeholder="Ex: Elevadores Silva Ltda"/>
+    <!-- BOX PRESTADOR -->
+    <div class="box-extra" id="boxPrestador">
+      <div class="sec-box-title amber">🏢 Dados do Prestador / Fornecedor</div>
+      <div class="grid2">
+        <div class="field" style="margin:0 0 12px">
+          <label>Nome / Razão Social</label>
+          <input id="fPrestNome" type="text" placeholder="Ex: Empresa XYZ Ltda"/>
         </div>
-        <div class="field" style="margin:0">
-          <label>CNPJ / CPF</label>
-          <input id="fPrestCnpj" type="text" placeholder="00.000.000/0001-00"/>
-        </div>
-        <div class="field" style="margin:0">
-          <label>Serviço prestado</label>
-          <input id="fPrestServ" type="text" placeholder="Ex: Manutenção elevador"/>
+        <div class="field" style="margin:0 0 12px">
+          <label>CNPJ</label>
+          <input id="fPrestCnpj" type="text" placeholder="00.000.000/0000-00"/>
         </div>
       </div>
-      <div class="field" style="margin-top:12px;margin-bottom:0">
-        <label>Valor (R$)</label>
-        <input id="fValor" type="text" placeholder="Ex: 1.500,00" oninput="mascaraValor(this)" style="max-width:200px"/>
-      </div>
-    </div>
-
-    <!-- CAMPOS DE PROPOSTA -->
-    <div class="cond-box" id="boxProposta">
-      <div class="sec-title" style="margin-top:0">📋 Dados da Proposta</div>
       <div class="grid2">
         <div class="field" style="margin:0">
+          <label>Serviço prestado</label>
+          <input id="fPrestServ" type="text" placeholder="Ex: Limpeza das áreas comuns"/>
+        </div>
+        <div class="field" style="margin:0">
+          <label>Valor (R$)</label>
+          <input id="fValor" type="text" placeholder="Ex: 21.858,40" oninput="mascaraValor(this)"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOX PROPOSTA -->
+    <div class="box-extra" id="boxProposta">
+      <div class="sec-box-title blue">💡 Dados da Proposta</div>
+      <div class="grid2">
+        <div class="field" style="margin:0 0 12px">
           <label>Valor estimado (R$)</label>
           <input id="fPropValor" type="text" placeholder="Ex: 21.858,40" oninput="mascaraValor(this)"/>
         </div>
-        <div class="field" style="margin:0">
+        <div class="field" style="margin:0 0 12px">
           <label>Prazo para decisão</label>
           <input id="fPropPrazo" type="date"/>
         </div>
       </div>
-      <div class="field" style="margin-top:12px;margin-bottom:0">
+      <div class="field" style="margin:0">
         <label>Justificativa / Motivação</label>
         <textarea id="fPropJustif" placeholder="Descreva o motivo e a necessidade desta proposta..." style="min-height:80px"></textarea>
       </div>
-      <div style="margin-top:12px;padding:10px 12px;background:#f59e0b08;border:1px solid #f59e0b20;border-radius:8px;font-size:12px;color:#f59e0b;display:flex;align-items:center;gap:8px">
+      <div style="margin-top:12px;padding:10px 12px;background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:8px;font-size:12px;color:var(--amber);display:flex;align-items:center;gap:8px">
         ⚠️ Esta proposta será enviada para aprovação do <strong>Conselho Fiscal</strong> antes de ser publicada.
       </div>
     </div>
 
-    <!-- DESCRIÇÃO E OBS -->
-    <div class="sec-title">Descrição</div>
+    <div class="sec-title">Arquivo</div>
+    <div class="upload-area" id="uploadArea"
+         ondragover="event.preventDefault();this.classList.add('drag')"
+         ondragleave="this.classList.remove('drag')"
+         ondrop="onDrop(event)"
+         onclick="document.getElementById('fArquivo').click()">
+      <div style="font-size:32px">📎</div>
+      <p>Arraste o arquivo aqui ou <span class="upload-link">selecione</span></p>
+      <p style="font-size:11px;color:var(--text-light);margin-top:4px">PDF, Word, Excel, Imagens — máx. 20MB</p>
+    </div>
+    <input type="file" id="fArquivo" style="display:none" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" onchange="onArquivoChange()"/>
+    <div class="file-preview" id="filePreview">
+      <span class="file-icon" id="fileIcon">📄</span>
+      <div><div class="file-name" id="fileName">—</div><div class="file-size" id="fileSize">—</div></div>
+      <button class="file-rm" onclick="removerArquivo()">✕</button>
+    </div>
+
+    <div class="sec-title" style="margin-top:18px">Descrição</div>
     <div class="field">
       <label>Descrição / Resumo</label>
       <textarea id="fDesc" placeholder="Descreva brevemente o conteúdo do documento..."></textarea>
@@ -468,7 +469,6 @@ main{max-width:1200px;margin:0 auto;padding:28px 24px}
       <textarea id="fObs" placeholder="Notas internas (não visíveis para condôminos)..." style="min-height:60px"></textarea>
     </div>
 
-    <!-- OPÇÕES -->
     <div class="sec-title">Configurações</div>
     <div class="toggle-row">
       <span class="toggle-label">✅ Publicar (visível para condôminos)</span>
@@ -496,25 +496,17 @@ main{max-width:1200px;margin:0 auto;padding:28px 24px}
     <button class="modal-close" onclick="fecharModalAprovacao()">✕</button>
   </div>
   <div class="modal-body">
-
-    <!-- Resumo da proposta -->
     <div class="apr-section">
       <div class="apr-titulo" id="aprTitulo">—</div>
       <div class="apr-meta" id="aprMeta">—</div>
-      <div style="margin-top:10px;font-size:13px;color:#94a3b8" id="aprDesc">—</div>
+      <div style="margin-top:8px;font-size:13px;color:var(--text-light)" id="aprDesc">—</div>
       <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap" id="aprInfos"></div>
     </div>
-
-    <!-- Histórico de decisões -->
     <div id="aprHistArea" style="display:none;margin-bottom:14px">
-      <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Histórico</div>
+      <div style="font-size:10px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Histórico</div>
       <div id="aprHistLista"></div>
     </div>
-
-    <!-- Status atual -->
     <div id="aprStatusAtual" style="margin-bottom:16px"></div>
-
-    <!-- Formulário de decisão -->
     <div id="aprFormDecisao">
       <div class="field">
         <label>Parecer do Conselho Fiscal *</label>
@@ -525,8 +517,8 @@ main{max-width:1200px;margin:0 auto;padding:28px 24px}
         <input id="aprMembro" type="text" placeholder="Nome do conselheiro responsável"/>
       </div>
       <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
-        <button class="btn-rejeitar" onclick="registrarDecisao('rejeitado')">❌ Rejeitar Proposta</button>
-        <button class="btn-aprovar" onclick="registrarDecisao('aprovado')">✅ Aprovar Proposta</button>
+        <button class="btn-rejeitar" onclick="registrarDecisao('rejeitado')">❌ Rejeitar</button>
+        <button class="btn-aprovar"  onclick="registrarDecisao('aprovado')">✅ Aprovar</button>
       </div>
     </div>
   </div>
@@ -534,55 +526,49 @@ main{max-width:1200px;margin:0 auto;padding:28px 24px}
 </div>
 
 <script>
-// ── CONFIG ───────────────────────────────────────────────
-// Formatar valor em pt-BR enquanto digita
+// ── UTILS ─────────────────────────────────────────────────
 function mascaraValor(el){
-  // Remove tudo exceto dígitos e vírgula
   let v = el.value.replace(/[^\d,]/g,'');
-  // Garante no máximo 1 vírgula
   const parts = v.split(',');
   if(parts.length > 2) v = parts[0]+','+parts.slice(1).join('');
-  // Limita casas decimais a 2
   if(parts[1]?.length > 2) v = parts[0]+','+parts[1].substring(0,2);
-  // Adiciona pontos de milhar na parte inteira
   const intPart = (parts[0]||'').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
-  el.value = parts.length === 2 ? intPart+','+( parts[1]?.substring(0,2)||'' ) : intPart;
+  el.value = parts.length === 2 ? intPart+','+(parts[1]?.substring(0,2)||'') : intPart;
 }
-
-// Converter "21.858,40" → 21858.40 para salvar no banco
 function parseBR(v){
   if(!v) return null;
   const n = parseFloat(v.replace(/\./g,'').replace(',','.'));
   return isNaN(n) ? null : n;
 }
 
+// ── CONFIG ────────────────────────────────────────────────
 const SUPA_URL = 'https://siczyohqmlrmirqgzlxb.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw';
+const CONDO_ID = 'eefc41c0-519b-419b-847f-eb4724455baa';
 const EMPRESA  = 'mandala';
 const BUCKET   = 'documentos-mandala';
 
-let _docs       = [];
-let _filtrocat  = 'Todos';
-let _filtrosit  = null;
-let _editId     = null;
-let _arquivo    = null;
+let _docs      = [];
+let _filtrocat = 'Todos';
+let _filtrosit = null;
+let _editId    = null;
+let _arquivo   = null;
 
-// ── AUTH ─────────────────────────────────────────────────
+function fazerLogout(){
+  localStorage.removeItem('mandala_session');
+  const k = Object.keys(localStorage).find(k=>k.includes('auth-token'));
+  if(k) localStorage.removeItem(k);
+  window.location.href = '/login.html';
+}
 function getToken(){
   const k = Object.keys(localStorage).find(k=>k.includes('auth-token'));
   if(!k) return null;
-  try{
-    const s = JSON.parse(localStorage.getItem(k));
-    if(s?.expires_at && Date.now()/1000 > s.expires_at) return null;
-    return s?.access_token||null;
-  }catch{ return null; }
+  try{ const s=JSON.parse(localStorage.getItem(k)); if(s?.expires_at && Date.now()/1000 > s.expires_at) return null; return s?.access_token||null; }catch{ return null; }
 }
 function hdrs(extra={}){
   const tk = getToken();
   return {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${tk||SUPA_KEY}`,...extra};
 }
-
-// ── UTILS ────────────────────────────────────────────────
 function showAlert(msg,type='success'){
   const el=document.getElementById('alert');
   el.textContent=msg; el.className=`alert ${type}`; el.style.display='block';
@@ -593,19 +579,18 @@ const fmtDate = d => { if(!d) return null; const p=d.split('-'); return `${p[2]}
 const fmtSize = b => b > 1048576 ? (b/1048576).toFixed(1)+' MB' : (b/1024).toFixed(0)+' KB';
 
 const CAT_CONFIG = {
-  'Ata':         {icon:'📋', cls:'cat-ata',       label:'Ata'},
-  'Contrato':    {icon:'📝', cls:'cat-contrato',   label:'Contrato'},
-  'Nota Fiscal': {icon:'🧾', cls:'cat-nf',         label:'Nota Fiscal'},
-  'Comunicado':  {icon:'📣', cls:'cat-comunicado', label:'Comunicado'},
-  'Convenção':   {icon:'📖', cls:'cat-convencao',  label:'Convenção'},
-  'Regimento':   {icon:'📜', cls:'cat-regimento',  label:'Regimento'},
-  'Financeiro':  {icon:'💰', cls:'cat-financeiro', label:'Financeiro'},
-  'Proposta':    {icon:'💡', cls:'cat-proposta',   label:'Proposta'},
-  'Outro':       {icon:'📌', cls:'cat-outro',      label:'Outro'},
+  'Ata':         {icon:'📋', cls:'cat-ata',        label:'Ata'},
+  'Contrato':    {icon:'📝', cls:'cat-contrato',    label:'Contrato'},
+  'Nota Fiscal': {icon:'🧾', cls:'cat-nf',          label:'Nota Fiscal'},
+  'Comunicado':  {icon:'📣', cls:'cat-comunicado',  label:'Comunicado'},
+  'Convenção':   {icon:'📖', cls:'cat-convencao',   label:'Convenção'},
+  'Regimento':   {icon:'📜', cls:'cat-regimento',   label:'Regimento'},
+  'Financeiro':  {icon:'💰', cls:'cat-financeiro',  label:'Financeiro'},
+  'Proposta':    {icon:'💡', cls:'cat-proposta',    label:'Proposta'},
+  'Outro':       {icon:'📌', cls:'cat-outro',       label:'Outro'},
 };
-
 const APR_CONFIG = {
-  pendente:  {cls:'apr-pendente',  icon:'⏳', label:'Aguardando Aprovação'},
+  pendente:  {cls:'apr-pendente',  icon:'⏳', label:'Aguardando'},
   aprovado:  {cls:'apr-aprovado',  icon:'✅', label:'Aprovado'},
   rejeitado: {cls:'apr-rejeitado', icon:'❌', label:'Rejeitado'},
 };
@@ -616,15 +601,20 @@ const FILE_ICONS = {
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':'📊',
   'image/jpeg':'🖼','image/png':'🖼'
 };
+const CAT_BG = {
+  'Ata':'#EFF6FF','Contrato':'#FEF3C7','Nota Fiscal':'#DCFCE7',
+  'Comunicado':'#F5F3FF','Convenção':'#ECFEFF','Regimento':'#F1F5F9',
+  'Financeiro':'#DCFCE7','Proposta':'#FFF1F2','Outro':'#F7F6F2'
+};
 
 // ── VALIDADE ─────────────────────────────────────────────
 function statusValidade(dataStr){
   if(!dataStr) return null;
-  const hoje  = new Date(); hoje.setHours(0,0,0,0);
-  const val   = new Date(dataStr);
-  const diff  = Math.ceil((val - hoje)/(1000*60*60*24));
-  if(diff < 0)  return {cls:'exp',  label:`Vencido há ${Math.abs(diff)}d`};
-  if(diff <= 30) return {cls:'warn', label:`Vence em ${diff}d`};
+  const hoje=new Date(); hoje.setHours(0,0,0,0);
+  const val=new Date(dataStr);
+  const diff=Math.ceil((val-hoje)/(1000*60*60*24));
+  if(diff<0)   return {cls:'exp',  label:`Vencido há ${Math.abs(diff)}d`};
+  if(diff<=30)  return {cls:'warn', label:`Vence em ${diff}d`};
   return {cls:'ok', label:`Válido até ${fmtDate(dataStr)}`};
 }
 
@@ -641,8 +631,10 @@ async function loadDocs(){
   renderDocs();
 }
 
-// ── STATS ────────────────────────────────────────────────
+// ── STATS ─────────────────────────────────────────────────
 function renderStats(){
+  const hoje=new Date(); hoje.setHours(0,0,0,0);
+  const em30=new Date(hoje); em30.setDate(em30.getDate()+30);
   document.getElementById('stTodos').textContent    = _docs.length;
   document.getElementById('stAta').textContent      = _docs.filter(d=>d.categoria==='Ata').length;
   document.getElementById('stContrato').textContent = _docs.filter(d=>d.categoria==='Contrato').length;
@@ -652,6 +644,8 @@ function renderStats(){
 
 function renderSidebar(){
   const cnt = cat => _docs.filter(d=>d.categoria===cat).length;
+  const hoje=new Date(); hoje.setHours(0,0,0,0);
+  const em30=new Date(hoje); em30.setDate(em30.getDate()+30);
   const props = _docs.filter(d=>d.categoria==='Proposta');
   document.getElementById('sbCTodos').textContent    = _docs.length;
   document.getElementById('sbCAta').textContent      = cnt('Ata');
@@ -663,115 +657,95 @@ function renderSidebar(){
   document.getElementById('sbCFin').textContent      = cnt('Financeiro');
   document.getElementById('sbCOut').textContent      = cnt('Outro');
   document.getElementById('sbCProp').textContent     = props.length;
-  document.getElementById('sbAPend').textContent     = props.filter(d=>d.aprovacao_status==='pendente'||!d.aprovacao_status).length;
+  document.getElementById('sbAPub').textContent      = _docs.filter(d=>d.publicado).length;
+  document.getElementById('sbADest').textContent     = _docs.filter(d=>d.destaque).length;
+  document.getElementById('sbAVenc').textContent     = _docs.filter(d=>{ if(!d.data_validade) return false; const v=new Date(d.data_validade); return v>=hoje&&v<=em30; }).length;
+  document.getElementById('sbAExp').textContent      = _docs.filter(d=>d.data_validade&&new Date(d.data_validade)<hoje).length;
+  document.getElementById('sbAPend').textContent     = props.filter(d=>!d.aprovacao_status||d.aprovacao_status==='pendente').length;
   document.getElementById('sbAAprov').textContent    = props.filter(d=>d.aprovacao_status==='aprovado').length;
   document.getElementById('sbARej').textContent      = props.filter(d=>d.aprovacao_status==='rejeitado').length;
 }
 
 // ── FILTROS ───────────────────────────────────────────────
 function filtrarCat(cat, statEl, sbEl){
-  _filtrocat = cat; _filtrosit = null;
-  // highlight stats
-  if(statEl){ document.querySelectorAll('.stat').forEach(s=>s.classList.remove('active')); statEl.classList.add('active'); }
-  // highlight sidebar
-  if(sbEl){ document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active')); sbEl.classList.add('active'); }
+  _filtrocat=cat; _filtrosit=null;
+  document.querySelectorAll('.stat').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  if(statEl) statEl.classList.add('active');
+  if(sbEl)   sbEl.classList.add('active');
+  else document.getElementById('sbTodos').classList.add('active');
   renderDocs();
 }
 function filtrarSit(sit, el){
-  _filtrosit = sit; _filtrocat = 'Todos';
+  _filtrosit=sit; _filtrocat='Todos';
   document.querySelectorAll('.stat,.cat-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
   renderDocs();
 }
 function filtrarCatSb(cat, el){
-  filtrarCat(cat, null, el);
+  _filtrocat=cat; _filtrosit=null;
+  document.querySelectorAll('.stat,.cat-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderDocs();
 }
 
-// ── RENDER DOCS ───────────────────────────────────────────
+// ── RENDER ────────────────────────────────────────────────
 function renderDocs(){
-  const busca  = document.getElementById('busca').value.toLowerCase();
-  const sort   = document.getElementById('sortBy').value;
-  const hoje   = new Date(); hoje.setHours(0,0,0,0);
-  const em30   = new Date(hoje); em30.setDate(em30.getDate()+30);
+  const busca = document.getElementById('busca').value.toLowerCase();
+  const sort  = document.getElementById('sortBy').value;
+  const hoje  = new Date(); hoje.setHours(0,0,0,0);
+  const em30  = new Date(hoje); em30.setDate(em30.getDate()+30);
 
   let lista = _docs.filter(d=>{
-    if(_filtrosit==='publicado'  && !d.publicado) return false;
-    if(_filtrosit==='destaque'   && !d.destaque)  return false;
-    if(_filtrosit==='vencendo'){
-      if(!d.data_validade) return false;
-      const v = new Date(d.data_validade);
-      if(v < hoje || v > em30) return false;
-    }
-    if(_filtrosit==='vencido'){
-      if(!d.data_validade) return false;
-      if(new Date(d.data_validade) >= hoje) return false;
-    }
-    // Filtros de proposta por status de aprovação
-    if(_filtrosit==='pendente'){
-      if(d.categoria!=='Proposta') return false;
-      if(d.aprovacao_status && d.aprovacao_status!=='pendente') return false;
-    }
-    if(_filtrosit==='aprovado'){
-      if(d.categoria!=='Proposta' || d.aprovacao_status!=='aprovado') return false;
-    }
-    if(_filtrosit==='rejeitado'){
-      if(d.categoria!=='Proposta' || d.aprovacao_status!=='rejeitado') return false;
-    }
-    if(!_filtrosit && _filtrocat!=='Todos' && d.categoria!==_filtrocat) return false;
-    if(busca && !(
-      d.titulo?.toLowerCase().includes(busca) ||
-      d.descricao?.toLowerCase().includes(busca) ||
-      d.prestador_nome?.toLowerCase().includes(busca) ||
-      d.categoria?.toLowerCase().includes(busca)
-    )) return false;
+    if(_filtrosit==='publicado' && !d.publicado) return false;
+    if(_filtrosit==='destaque'  && !d.destaque)  return false;
+    if(_filtrosit==='vencendo'){ if(!d.data_validade) return false; const v=new Date(d.data_validade); if(v<hoje||v>em30) return false; }
+    if(_filtrosit==='vencido'){  if(!d.data_validade) return false; if(new Date(d.data_validade)>=hoje) return false; }
+    if(_filtrosit==='pendente'){  if(d.categoria!=='Proposta') return false; if(d.aprovacao_status&&d.aprovacao_status!=='pendente') return false; }
+    if(_filtrosit==='aprovado'){  if(d.categoria!=='Proposta'||d.aprovacao_status!=='aprovado') return false; }
+    if(_filtrosit==='rejeitado'){ if(d.categoria!=='Proposta'||d.aprovacao_status!=='rejeitado') return false; }
+    if(!_filtrosit && _filtrocat==='__outros__' && ['Ata','Contrato','Nota Fiscal'].includes(d.categoria)) return false;
+    if(!_filtrosit && _filtrocat!=='Todos' && _filtrocat!=='__outros__' && d.categoria!==_filtrocat) return false;
+    if(busca && !(d.titulo?.toLowerCase().includes(busca)||d.descricao?.toLowerCase().includes(busca)||d.prestador_nome?.toLowerCase().includes(busca)||d.categoria?.toLowerCase().includes(busca))) return false;
     return true;
   });
 
-  // Ordenar
   lista.sort((a,b)=>{
-    if(sort==='data_asc')  return (a.data_documento||a.created_at) > (b.data_documento||b.created_at) ? 1 : -1;
+    if(sort==='data_asc')  return (a.data_documento||a.created_at)>(b.data_documento||b.created_at)?1:-1;
     if(sort==='titulo')    return a.titulo.localeCompare(b.titulo);
     if(sort==='categoria') return a.categoria.localeCompare(b.categoria);
-    return (b.data_documento||b.created_at) > (a.data_documento||a.created_at) ? 1 : -1;
+    return (b.data_documento||b.created_at)>(a.data_documento||a.created_at)?1:-1;
   });
-
-  // Destaques primeiro
-  lista.sort((a,b)=>(!b.destaque - !a.destaque));
+  lista.sort((a,b)=>(!b.destaque-!a.destaque));
 
   const grid = document.getElementById('docsGrid');
-  if(!lista.length){
-    grid.innerHTML='<div class="empty-state">📭 Nenhum documento encontrado.</div>';
-    return;
-  }
+  if(!lista.length){ grid.innerHTML='<div class="empty-state">📭 Nenhum documento encontrado.</div>'; return; }
 
   grid.innerHTML = lista.map(d=>{
-    const cfg  = CAT_CONFIG[d.categoria] || CAT_CONFIG['Outro'];
-    const sv   = statusValidade(d.data_validade);
-    const bg   = {
-      'Ata':'#3b82f615','Contrato':'#f5a62315','Nota Fiscal':'#22c55e15',
-      'Comunicado':'#a855f715','Convenção':'#06b6d415','Regimento':'#64748b15',
-      'Financeiro':'#22c55e15','Outro':'#2a2d3e'
-    }[d.categoria]||'#2a2d3e';
+    const cfg = CAT_CONFIG[d.categoria]||CAT_CONFIG['Outro'];
+    const sv  = statusValidade(d.data_validade);
+    const bg  = CAT_BG[d.categoria]||'#F7F6F2';
+    const aprSt = d.aprovacao_status||'pendente';
+    const acfg  = APR_CONFIG[aprSt]||APR_CONFIG.pendente;
     return `<div class="doc-card${d.destaque?' destaque':''}" onclick="visualizar(${d.id})">
       <div class="doc-type-icon" style="background:${bg}">${cfg.icon}</div>
       <div class="doc-info">
         <div class="doc-titulo">${d.titulo}${d.destaque?' ⭐':''}</div>
         <div class="doc-meta">
           <span class="doc-cat-badge ${cfg.cls}">${cfg.label}</span>
-          ${d.subcategoria?`<span style="font-size:11px;color:#64748b">${d.subcategoria}</span>`:''}
+          ${d.subcategoria?`<span style="font-size:11px;color:var(--text-light)">${d.subcategoria}</span>`:''}
           ${d.data_documento?`<span class="doc-date">📅 ${fmtDate(d.data_documento)}</span>`:''}
           ${sv?`<span class="doc-validade ${sv.cls}">${sv.label}</span>`:''}
           ${d.valor_contrato?`<span class="doc-valor">${fmt(d.valor_contrato)}</span>`:''}
-          ${d.categoria==='Proposta'?(()=>{const st=d.aprovacao_status||'pendente';const a=APR_CONFIG[st]||APR_CONFIG.pendente;return `<span class="apr-badge ${a.cls}">${a.icon} ${a.label}</span>`;})():''}
-          ${d.categoria==='Proposta'&&d.aprovacao_status!=='rejeitado'&&d.prop_prazo_decisao?`<span class="doc-date">⏱ Prazo: ${fmtDate(d.prop_prazo_decisao)}</span>`:''}
+          ${d.categoria==='Proposta'?`<span class="apr-badge ${acfg.cls}">${acfg.icon} ${acfg.label}</span>`:''}
         </div>
         ${d.prestador_nome?`<div class="doc-prestador">🏢 ${d.prestador_nome}${d.prestador_servico?' — '+d.prestador_servico:''}</div>`:''}
         ${d.descricao?`<div class="doc-desc">${d.descricao}</div>`:''}
       </div>
       <div class="doc-actions" onclick="event.stopPropagation()">
-        ${d.categoria==='Proposta'?`<button class="btn-action" style="background:#f59e0b15;border-color:#f59e0b30;color:#f59e0b" onclick="abrirModalAprovacao(${d.id})">⚖ Analisar</button>`:''}
+        ${d.categoria==='Proposta'?`<button class="btn-action analisar" onclick="abrirModalAprovacao(${d.id})">⚖ Analisar</button>`:''}
         ${d.arquivo_url?`<button class="btn-action primary" onclick="verArquivo('${d.arquivo_url}')">👁 Ver</button>
-          <a class="btn-action" href="${d.arquivo_url}" download="${d.arquivo_nome||'documento'}" style="text-decoration:none">⬇ Baixar</a>`:''}
+          <a class="btn-action" href="${d.arquivo_url}" download="${d.arquivo_nome||'documento'}" style="text-decoration:none">⬇</a>`:''}
         <button class="btn-action" onclick="abrirModal(${d.id})">✏</button>
         <button class="btn-action del" onclick="deletar(${d.id},'${(d.titulo||'').replace(/'/g,"\\'")}')">🗑</button>
       </div>
@@ -779,36 +753,33 @@ function renderDocs(){
   }).join('');
 }
 
-// ── MODAL ────────────────────────────────────────────────
+// ── MODAL ─────────────────────────────────────────────────
 function abrirModal(id){
-  _editId = id||null; _arquivo = null;
+  _editId=id||null; _arquivo=null;
   limparModal();
   if(id){
-    const d = _docs.find(d=>d.id===id);
+    const d=_docs.find(d=>d.id===id);
     if(d) preencherModal(d);
     document.getElementById('modalTitle').textContent='Editar Documento';
   } else {
     document.getElementById('modalTitle').textContent='Novo Documento';
-    // data padrão = hoje
-    document.getElementById('fData').value = new Date().toISOString().split('T')[0];
+    const yy=new Date().getFullYear(), mm=String(new Date().getMonth()+1).padStart(2,'0'), dd=String(new Date().getDate()).padStart(2,'0');
+    document.getElementById('fData').value=`${yy}-${mm}-${dd}`;
   }
   document.getElementById('modalBg').classList.add('open');
 }
 function fecharModal(){ document.getElementById('modalBg').classList.remove('open'); _editId=null; _arquivo=null; }
-
 function limparModal(){
-  ['fTitulo','fSub','fData','fValidade','fPrestNome','fPrestCnpj','fPrestServ','fValor','fDesc','fObs'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.value='';
-  });
+  ['fTitulo','fSub','fData','fValidade','fPrestNome','fPrestCnpj','fPrestServ','fValor','fDesc','fObs','fPropValor','fPropPrazo','fPropJustif'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('fCategoria').value='';
   document.getElementById('fPublicado').checked=true;
   document.getElementById('fDestaque').checked=false;
   document.getElementById('boxPrestador').classList.remove('show');
+  document.getElementById('boxProposta').classList.remove('show');
   removerArquivo();
 }
-
 function preencherModal(d){
-  const set=(id,v)=>{const el=document.getElementById(id);if(el&&v!=null)el.value=v;};
+  const set=(id,v)=>{ const el=document.getElementById(id); if(el&&v!=null) el.value=v; };
   set('fTitulo',d.titulo); set('fSub',d.subcategoria);
   set('fCategoria',d.categoria); set('fData',d.data_documento);
   set('fValidade',d.data_validade);
@@ -826,38 +797,25 @@ function preencherModal(d){
     document.getElementById('filePreview').classList.add('show');
   }
 }
-
 function onCatChange(){
-  const cat = document.getElementById('fCategoria').value;
-  const showPrest   = ['Contrato','Nota Fiscal'].includes(cat);
-  const showProposta= cat === 'Proposta';
-  document.getElementById('boxPrestador').classList.toggle('show', showPrest);
-  document.getElementById('boxProposta').classList.toggle('show', showProposta);
+  const cat=document.getElementById('fCategoria').value;
+  document.getElementById('boxPrestador').classList.toggle('show', ['Contrato','Nota Fiscal'].includes(cat));
+  document.getElementById('boxProposta').classList.toggle('show', cat==='Proposta');
 }
 
-// ── UPLOAD ───────────────────────────────────────────────
-function onDrop(e){
-  e.preventDefault();
-  document.getElementById('uploadArea').classList.remove('drag');
-  const file = e.dataTransfer.files[0];
-  if(file) processarArquivo(file);
-}
-function onArquivoChange(){
-  const file = document.getElementById('fArquivo').files[0];
-  if(file) processarArquivo(file);
-}
+// ── UPLOAD ────────────────────────────────────────────────
+function onDrop(e){ e.preventDefault(); document.getElementById('uploadArea').classList.remove('drag'); const f=e.dataTransfer.files[0]; if(f) processarArquivo(f); }
+function onArquivoChange(){ const f=document.getElementById('fArquivo').files[0]; if(f) processarArquivo(f); }
 function processarArquivo(file){
-  if(file.size > 20*1024*1024){ showAlert('Arquivo muito grande. Máximo 20MB.','error'); return; }
-  _arquivo = file;
+  if(file.size>20*1024*1024){ showAlert('Arquivo muito grande. Máximo 20MB.','error'); return; }
+  _arquivo=file;
   document.getElementById('uploadArea').style.display='none';
   document.getElementById('fileIcon').textContent = FILE_ICONS[file.type]||'📎';
   document.getElementById('fileName').textContent = file.name;
   document.getElementById('fileSize').textContent = fmtSize(file.size);
   document.getElementById('filePreview').classList.add('show');
-  // auto-preencher titulo se vazio
-  if(!document.getElementById('fTitulo').value){
+  if(!document.getElementById('fTitulo').value)
     document.getElementById('fTitulo').value = file.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' ');
-  }
 }
 function removerArquivo(){
   _arquivo=null;
@@ -865,34 +823,27 @@ function removerArquivo(){
   document.getElementById('uploadArea').style.display='block';
   document.getElementById('filePreview').classList.remove('show');
 }
-
 async function uploadArquivo(file, docId){
-  const ext  = file.name.split('.').pop();
-  const path = `mandala/${docId}_${Date.now()}.${ext}`;
-  const res  = await fetch(`${SUPA_URL}/storage/v1/object/${BUCKET}/${path}`,{
+  const ext=file.name.split('.').pop();
+  const path=`mandala/${docId}_${Date.now()}.${ext}`;
+  const res=await fetch(`${SUPA_URL}/storage/v1/object/${BUCKET}/${path}`,{
     method:'POST',
     headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${getToken()||SUPA_KEY}`,'Content-Type':file.type},
     body:file
   });
-  return res.ok
-    ? {url:`${SUPA_URL}/storage/v1/object/public/${BUCKET}/${path}`, path}
-    : null;
+  return res.ok ? {url:`${SUPA_URL}/storage/v1/object/public/${BUCKET}/${path}`,path} : null;
 }
 
 // ── SALVAR ────────────────────────────────────────────────
 async function salvar(){
-  const titulo = document.getElementById('fTitulo').value.trim();
-  const cat    = document.getElementById('fCategoria').value;
+  const titulo=document.getElementById('fTitulo').value.trim();
+  const cat=document.getElementById('fCategoria').value;
   if(!titulo){ showAlert('Informe o título do documento.','error'); return; }
   if(!cat)   { showAlert('Selecione a categoria.','error'); return; }
-
-  const btn = document.getElementById('btnSalvar');
+  const btn=document.getElementById('btnSalvar');
   btn.disabled=true; btn.textContent='Salvando...';
-
-  const payload = {
-    empresa:          EMPRESA,
-    titulo,
-    categoria:        cat,
+  const payload={
+    empresa:EMPRESA, titulo, categoria:cat,
     subcategoria:     document.getElementById('fSub').value.trim()||null,
     data_documento:   document.getElementById('fData').value||null,
     data_validade:    document.getElementById('fValidade').value||null,
@@ -902,201 +853,128 @@ async function salvar(){
     prestador_cnpj:   document.getElementById('fPrestCnpj').value.trim()||null,
     prestador_servico:document.getElementById('fPrestServ').value.trim()||null,
     valor_contrato:   parseBR(document.getElementById('fValor').value)||null,
-    publicado:        document.getElementById('fCategoria').value==='Proposta'
-                        ? false  // proposta começa não publicada até aprovação
-                        : document.getElementById('fPublicado').checked,
+    publicado:        cat==='Proposta' ? false : document.getElementById('fPublicado').checked,
     destaque:         document.getElementById('fDestaque').checked,
-    cadastrado_por:   getToken() ? 'sindico' : 'admin',
+    cadastrado_por:   getToken()?'sindico':'admin',
     arquivo_nome:     _arquivo?.name||null,
     arquivo_tipo:     _arquivo?.type||null,
     arquivo_tamanho:  _arquivo?.size||null,
-    // Campos de proposta
-    prop_valor:        cat==='Proposta' ? (parseBR(document.getElementById('fPropValor').value)||null) : null,
-    prop_prazo_decisao:cat==='Proposta' ? (document.getElementById('fPropPrazo').value||null) : null,
-    prop_justificativa:cat==='Proposta' ? (document.getElementById('fPropJustif').value.trim()||null) : null,
-    aprovacao_status:  cat==='Proposta' && !_editId ? 'pendente' : undefined,
+    prop_valor:        cat==='Proposta'?(parseBR(document.getElementById('fPropValor').value)||null):null,
+    prop_prazo_decisao:cat==='Proposta'?(document.getElementById('fPropPrazo').value||null):null,
+    prop_justificativa:cat==='Proposta'?(document.getElementById('fPropJustif').value.trim()||null):null,
+    aprovacao_status:  cat==='Proposta'&&!_editId?'pendente':undefined,
   };
-  // Remover campos undefined do payload
-  Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
-
-  const h = hdrs();
-  let savedId = _editId;
-
-  try {
-    let res, json;
+  Object.keys(payload).forEach(k=>payload[k]===undefined&&delete payload[k]);
+  const h=hdrs(); let savedId=_editId;
+  try{
+    let res,json;
     if(_editId){
-      res  = await fetch(`${SUPA_URL}/rest/v1/condo_documentos?id=eq.${_editId}`,{
-        method:'PATCH', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)
-      });
-      json = await res.json();
+      res=await fetch(`${SUPA_URL}/rest/v1/condo_documentos?id=eq.${_editId}`,{method:'PATCH',headers:{...h,'Prefer':'return=representation'},body:JSON.stringify(payload)});
     } else {
-      res  = await fetch(`${SUPA_URL}/rest/v1/condo_documentos`,{
-        method:'POST', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)
-      });
-      json = await res.json();
-      savedId = (Array.isArray(json)?json[0]:json)?.id;
+      res=await fetch(`${SUPA_URL}/rest/v1/condo_documentos`,{method:'POST',headers:{...h,'Prefer':'return=representation'},body:JSON.stringify(payload)});
     }
-
-    if(!res.ok){
-      const msg = (Array.isArray(json)?json[0]:json)?.message || JSON.stringify(json);
-      showAlert(`❌ Erro ${res.status}: ${msg}`, 'error');
-      btn.disabled=false; btn.textContent='💾 Salvar Documento';
-      return;
-    }
-
-    // Upload do arquivo
-    if(_arquivo && savedId){
+    json=await res.json();
+    if(!res.ok){ showAlert(`❌ Erro ${res.status}: ${(Array.isArray(json)?json[0]:json)?.message||JSON.stringify(json)},'error'`); btn.disabled=false; btn.textContent='💾 Salvar Documento'; return; }
+    savedId=(Array.isArray(json)?json[0]:json)?.id||savedId;
+    if(_arquivo&&savedId){
       btn.textContent='Enviando arquivo...';
-      const up = await uploadArquivo(_arquivo, savedId);
+      const up=await uploadArquivo(_arquivo,savedId);
       if(up){
-        await fetch(`${SUPA_URL}/rest/v1/condo_documentos?id=eq.${savedId}`,{
-          method:'PATCH', headers:h,
-          body:JSON.stringify({arquivo_url:up.url, arquivo_nome:_arquivo.name})
-        });
+        await fetch(`${SUPA_URL}/rest/v1/condo_documentos?id=eq.${savedId}`,{method:'PATCH',headers:h,body:JSON.stringify({arquivo_url:up.url,arquivo_nome:_arquivo.name})});
       } else {
-        showAlert('⚠️ Documento salvo, mas falha no upload do arquivo. Verifique o bucket no Supabase Storage.','error');
+        showAlert('⚠️ Documento salvo, mas falha no upload. Verifique o bucket no Supabase Storage.','error');
       }
     }
-
-    showAlert(_editId ? '✅ Documento atualizado!' : '✅ Documento cadastrado com sucesso!');
-    fecharModal();
-    await loadDocs();
-  } catch(e){
-    showAlert('❌ Erro: '+e.message,'error');
-  }
+    showAlert(_editId?'✅ Documento atualizado!':'✅ Documento cadastrado com sucesso!');
+    fecharModal(); await loadDocs();
+  } catch(e){ showAlert('❌ Erro: '+e.message,'error'); }
   btn.disabled=false; btn.textContent='💾 Salvar Documento';
 }
 
-// ── VISUALIZAR / DELETAR ──────────────────────────────────
-function visualizar(id){
-  const d = _docs.find(d=>d.id===id);
-  if(d?.arquivo_url) verArquivo(d.arquivo_url);
-}
+// ── VER / DELETAR ─────────────────────────────────────────
+function visualizar(id){ const d=_docs.find(d=>d.id===id); if(d?.arquivo_url) verArquivo(d.arquivo_url); }
 function verArquivo(url){ window.open(url,'_blank'); }
-
-async function deletar(id, titulo){
+async function deletar(id,titulo){
   if(!confirm(`Excluir "${titulo}"?\nEsta ação não pode ser desfeita.`)) return;
-  const res = await fetch(
-    `${SUPA_URL}/rest/v1/condo_documentos?id=eq.${id}&empresa=eq.${EMPRESA}`,
-    {method:'DELETE', headers:{...hdrs(),'Prefer':'return=representation'}}
-  );
+  const res=await fetch(`${SUPA_URL}/rest/v1/condo_documentos?id=eq.${id}&empresa=eq.${EMPRESA}`,{method:'DELETE',headers:{...hdrs(),'Prefer':'return=representation'}});
   if(res.ok){ showAlert('Documento removido.'); await loadDocs(); }
   else showAlert('Erro ao remover.','error');
 }
 
-// ── MODAL APROVAÇÃO ──────────────────────────────────────
-let _aprDocId = null;
-
+// ── MODAL APROVAÇÃO ───────────────────────────────────────
+let _aprDocId=null;
 function abrirModalAprovacao(id){
-  _aprDocId = id;
-  const d = _docs.find(d=>d.id===id);
-  if(!d) return;
-
-  // Preencher resumo
-  document.getElementById('aprTitulo').textContent = d.titulo;
-  const cfg = CAT_CONFIG[d.categoria]||CAT_CONFIG['Outro'];
-  const prazo = d.prop_prazo_decisao ? ` • Prazo: ${fmtDate(d.prop_prazo_decisao)}` : '';
-  const valor = d.valor_contrato ? ` • ${fmt(d.valor_contrato)}` : (d.prop_valor ? ` • ${fmt(d.prop_valor)}` : '');
-  document.getElementById('aprMeta').textContent = `${cfg.label}${prazo}${valor}`;
-  document.getElementById('aprDesc').textContent  = d.prop_justificativa || d.descricao || 'Sem descrição.';
-
-  // Infos extras
-  const infos = [];
+  _aprDocId=id;
+  const d=_docs.find(d=>d.id===id); if(!d) return;
+  document.getElementById('aprTitulo').textContent=d.titulo;
+  const cfg=CAT_CONFIG[d.categoria]||CAT_CONFIG['Outro'];
+  document.getElementById('aprMeta').textContent=`${cfg.label}${d.prop_prazo_decisao?' • Prazo: '+fmtDate(d.prop_prazo_decisao):''}${d.valor_contrato?' • '+fmt(d.valor_contrato):d.prop_valor?' • '+fmt(d.prop_valor):''}`;
+  document.getElementById('aprDesc').textContent=d.prop_justificativa||d.descricao||'Sem descrição.';
+  const infos=[];
   if(d.data_documento) infos.push(`📅 ${fmtDate(d.data_documento)}`);
   if(d.prestador_nome) infos.push(`🏢 ${d.prestador_nome}`);
-  if(d.arquivo_url) infos.push(`<a href="${d.arquivo_url}" target="_blank" style="color:#f5a623;font-size:12px">📎 Ver arquivo</a>`);
-  document.getElementById('aprInfos').innerHTML = infos.map(i=>`<span style="font-size:12px;color:#94a3b8">${i}</span>`).join('');
-
-  // Status atual
-  const st  = d.aprovacao_status||'pendente';
-  const acfg = APR_CONFIG[st]||APR_CONFIG.pendente;
-  document.getElementById('aprStatusAtual').innerHTML =
-    `<div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:#1a1d27;border-radius:8px;border:1px solid #2a2d3e">
-      <span style="font-size:14px">${acfg.icon}</span>
-      <span class="apr-badge ${acfg.cls}">${acfg.label}</span>
-      ${d.aprovacao_por?`<span style="font-size:12px;color:#64748b">por ${d.aprovacao_por}</span>`:''}
-      ${d.aprovacao_data?`<span style="font-size:12px;color:#64748b">em ${fmtDate(d.aprovacao_data)}</span>`:''}
+  if(d.arquivo_url)    infos.push(`<a href="${d.arquivo_url}" target="_blank" style="color:var(--blue);font-size:12px">📎 Ver arquivo</a>`);
+  document.getElementById('aprInfos').innerHTML=infos.map(i=>`<span style="font-size:12px;color:var(--text-light)">${i}</span>`).join('');
+  const st=d.aprovacao_status||'pendente';
+  const acfg=APR_CONFIG[st]||APR_CONFIG.pendente;
+  document.getElementById('aprStatusAtual').innerHTML=
+    `<div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--off-white);border-radius:8px;border:1px solid var(--border)">
+      <span>${acfg.icon}</span><span class="apr-badge ${acfg.cls}">${acfg.label}</span>
+      ${d.aprovacao_por?`<span style="font-size:12px;color:var(--text-light)">por ${d.aprovacao_por}</span>`:''}
+      ${d.aprovacao_data?`<span style="font-size:12px;color:var(--text-light)">em ${fmtDate(d.aprovacao_data)}</span>`:''}
     </div>`;
-
-  // Histórico de pareceres
-  const hist = d.aprovacao_historico || [];
-  if(hist.length > 0){
-    document.getElementById('aprHistArea').style.display = 'block';
-    document.getElementById('aprHistLista').innerHTML = hist.map(h=>`
+  const hist=d.aprovacao_historico||[];
+  if(hist.length>0){
+    document.getElementById('aprHistArea').style.display='block';
+    document.getElementById('aprHistLista').innerHTML=hist.map(h=>`
       <div class="apr-hist-item">
-        <div style="width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;background:${h.decisao==='aprovado'?'#22c55e':h.decisao==='rejeitado'?'#ef4444':'#f59e0b'}"></div>
+        <div style="width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;background:${h.decisao==='aprovado'?'var(--green)':h.decisao==='rejeitado'?'var(--red)':'var(--amber)'}"></div>
         <div>
-          <div style="font-size:12px;font-weight:600;color:#f1f5f9">${h.membro||'Conselheiro'} <span class="apr-badge ${(APR_CONFIG[h.decisao]||APR_CONFIG.pendente).cls}" style="font-size:10px">${(APR_CONFIG[h.decisao]||APR_CONFIG.pendente).label}</span></div>
-          <div style="font-size:12px;color:#94a3b8;margin-top:2px">${h.parecer||''}</div>
-          <div style="font-size:11px;color:#4a5568;margin-top:2px">${h.data||''}</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text-dark)">${h.membro||'Conselheiro'} <span class="apr-badge ${(APR_CONFIG[h.decisao]||APR_CONFIG.pendente).cls}" style="font-size:10px">${(APR_CONFIG[h.decisao]||APR_CONFIG.pendente).label}</span></div>
+          <div style="font-size:12px;color:var(--text-mid);margin-top:2px">${h.parecer||''}</div>
+          <div style="font-size:11px;color:var(--text-light);margin-top:2px">${h.data||''}</div>
         </div>
       </div>`).join('');
-  } else {
-    document.getElementById('aprHistArea').style.display = 'none';
-  }
-
-  // Limpar form
-  document.getElementById('aprParece').value  = '';
-  document.getElementById('aprMembro').value  = '';
-  document.getElementById('aprFormDecisao').style.display = 'block';
-
+  } else { document.getElementById('aprHistArea').style.display='none'; }
+  document.getElementById('aprParece').value='';
+  document.getElementById('aprMembro').value='';
+  document.getElementById('aprFormDecisao').style.display='block';
   document.getElementById('modalAprBg').classList.add('open');
 }
-
-function fecharModalAprovacao(){
-  document.getElementById('modalAprBg').classList.remove('open');
-  _aprDocId = null;
-}
-
+function fecharModalAprovacao(){ document.getElementById('modalAprBg').classList.remove('open'); _aprDocId=null; }
 async function registrarDecisao(decisao){
-  const parecer = document.getElementById('aprParece').value.trim();
-  const membro  = document.getElementById('aprMembro').value.trim();
+  const parecer=document.getElementById('aprParece').value.trim();
+  const membro=document.getElementById('aprMembro').value.trim();
   if(!parecer){ showAlert('Informe o parecer antes de decidir.','error'); return; }
-
-  const d = _docs.find(d=>d.id===_aprDocId);
-  if(!d) return;
-
-  const hoje = new Date().toISOString().split('T')[0];
-  // Histórico existente
-  const hist = d.aprovacao_historico || [];
-  hist.push({ decisao, parecer, membro: membro||'Conselho Fiscal', data: fmtDate(hoje) });
-
-  const payload = {
-    aprovacao_status:    decisao,
-    aprovacao_por:       membro||'Conselho Fiscal',
-    aprovacao_data:      hoje,
-    aprovacao_parecer:   parecer,
-    aprovacao_historico: hist,
-    // Se aprovado, publica automaticamente
-    publicado: decisao==='aprovado' ? true : d.publicado,
-  };
-
-  const res = await fetch(`${SUPA_URL}/rest/v1/condo_documentos?id=eq.${_aprDocId}`,{
-    method:'PATCH', headers:hdrs(), body:JSON.stringify(payload)
+  const d=_docs.find(d=>d.id===_aprDocId); if(!d) return;
+  const yy=new Date().getFullYear(), mm=String(new Date().getMonth()+1).padStart(2,'0'), dd=String(new Date().getDate()).padStart(2,'0');
+  const hoje=`${yy}-${mm}-${dd}`;
+  const hist=d.aprovacao_historico||[];
+  hist.push({decisao,parecer,membro:membro||'Conselho Fiscal',data:fmtDate(hoje)});
+  const res=await fetch(`${SUPA_URL}/rest/v1/condo_documentos?id=eq.${_aprDocId}`,{
+    method:'PATCH',headers:hdrs(),
+    body:JSON.stringify({aprovacao_status:decisao,aprovacao_por:membro||'Conselho Fiscal',aprovacao_data:hoje,aprovacao_parecer:parecer,aprovacao_historico:hist,publicado:decisao==='aprovado'?true:d.publicado})
   });
-
-  if(res.ok){
-    const label = decisao==='aprovado' ? '✅ Proposta APROVADA!' : '❌ Proposta REJEITADA.';
-    showAlert(label, decisao==='aprovado' ? 'success' : 'error');
-    fecharModalAprovacao();
-    await loadDocs();
-  } else {
-    showAlert('Erro ao registrar decisão.','error');
-  }
+  if(res.ok){ showAlert(decisao==='aprovado'?'✅ Proposta APROVADA!':'❌ Proposta REJEITADA.',decisao==='aprovado'?'success':'error'); fecharModalAprovacao(); await loadDocs(); }
+  else showAlert('Erro ao registrar decisão.','error');
 }
 
 // ── FECHAR FORA ───────────────────────────────────────────
-document.getElementById('modalBg').addEventListener('click',e=>{
-  if(e.target===document.getElementById('modalBg')) fecharModal();
-});
-document.getElementById('modalAprBg').addEventListener('click',e=>{
-  if(e.target===document.getElementById('modalAprBg')) fecharModalAprovacao();
-});
+document.getElementById('modalBg').addEventListener('click',e=>{ if(e.target===document.getElementById('modalBg')) fecharModal(); });
+document.getElementById('modalAprBg').addEventListener('click',e=>{ if(e.target===document.getElementById('modalAprBg')) fecharModalAprovacao(); });
 
 // ── INIT ─────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async ()=>{
-  const k = Object.keys(localStorage).find(k=>k.includes('auth-token'));
-  if(k){ try{ document.getElementById('navUser').textContent=JSON.parse(localStorage.getItem(k))?.user?.email||''; }catch{} }
+  try{
+    let email='';
+    const sr=localStorage.getItem('mandala_session');
+    if(sr){ const s=JSON.parse(sr); email=s?.email||s?.user?.email||''; }
+    else{ const k=Object.keys(localStorage).find(k=>k.includes('auth-token')); if(k){ const s=JSON.parse(localStorage.getItem(k)); email=s?.user?.email||''; } }
+    if(email){
+      document.getElementById('user-name').textContent=email;
+      document.getElementById('avatar-initials').textContent=email.substring(0,2).toUpperCase();
+    }
+  }catch{}
   await loadDocs();
 });
 </script>
