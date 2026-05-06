@@ -360,86 +360,23 @@
 
     <div class="sec-title">Identificação</div>
     <div class="field">
-      <label>Título *</label>
+      <label>Nome do Documento *</label>
       <input id="fTitulo" type="text" placeholder="Ex: Contrato de Limpeza 2026"/>
     </div>
-    <div class="grid2">
-      <div class="field">
-        <label>Categoria *</label>
-        <select id="fCategoria" onchange="onCatChange()">
-          <option value="">Selecionar...</option>
-          <option>Ata</option>
-          <option>Contrato</option>
-          <option>Nota Fiscal</option>
-          <option>Comunicado</option>
-          <option>Convenção</option>
-          <option>Regimento</option>
-          <option>Financeiro</option>
-          <option>Proposta</option>
-          <option>Outro</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Subcategoria</label>
-        <input id="fSub" type="text" placeholder="Ex: Assembleia Ordinária"/>
-      </div>
-    </div>
-    <div class="grid2">
-      <div class="field">
-        <label>Data do Documento</label>
-        <input id="fData" type="date"/>
-      </div>
-      <div class="field">
-        <label>Validade</label>
-        <input id="fValidade" type="date"/>
-      </div>
-    </div>
-
-    <!-- BOX PRESTADOR -->
-    <div class="box-extra" id="boxPrestador">
-      <div class="sec-box-title amber">🏢 Dados do Prestador / Fornecedor</div>
-      <div class="grid2">
-        <div class="field" style="margin:0 0 12px">
-          <label>Nome / Razão Social</label>
-          <input id="fPrestNome" type="text" placeholder="Ex: Empresa XYZ Ltda"/>
-        </div>
-        <div class="field" style="margin:0 0 12px">
-          <label>CNPJ</label>
-          <input id="fPrestCnpj" type="text" placeholder="00.000.000/0000-00"/>
-        </div>
-      </div>
-      <div class="grid2">
-        <div class="field" style="margin:0">
-          <label>Serviço prestado</label>
-          <input id="fPrestServ" type="text" placeholder="Ex: Limpeza das áreas comuns"/>
-        </div>
-        <div class="field" style="margin:0">
-          <label>Valor (R$)</label>
-          <input id="fValor" type="text" placeholder="Ex: 21.858,40" oninput="mascaraValor(this)"/>
-        </div>
-      </div>
-    </div>
-
-    <!-- BOX PROPOSTA -->
-    <div class="box-extra" id="boxProposta">
-      <div class="sec-box-title blue">💡 Dados da Proposta</div>
-      <div class="grid2">
-        <div class="field" style="margin:0 0 12px">
-          <label>Valor estimado (R$)</label>
-          <input id="fPropValor" type="text" placeholder="Ex: 21.858,40" oninput="mascaraValor(this)"/>
-        </div>
-        <div class="field" style="margin:0 0 12px">
-          <label>Prazo para decisão</label>
-          <input id="fPropPrazo" type="date"/>
-        </div>
-      </div>
-      <div class="field" style="margin:0">
-        <label>Justificativa / Motivação</label>
-        <textarea id="fPropJustif" placeholder="Descreva o motivo e a necessidade desta proposta..." style="min-height:80px"></textarea>
-      </div>
-      <div style="margin-top:12px;padding:10px 12px;background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:8px;font-size:12px;color:var(--amber);display:flex;align-items:center;gap:8px">
-        ⚠️ Esta proposta será enviada para aprovação do <strong>Conselho Fiscal</strong> antes de ser publicada.
-      </div>
+    <div class="field">
+      <label>Categoria *</label>
+      <select id="fCategoria" onchange="onCatChange()">
+        <option value="">Selecionar...</option>
+        <option>Ata</option>
+        <option>Contrato</option>
+        <option>Nota Fiscal</option>
+        <option>Comunicado</option>
+        <option>Convenção</option>
+        <option>Regimento</option>
+        <option>Financeiro</option>
+        <option>Proposta</option>
+        <option>Outro</option>
+      </select>
     </div>
 
     <div class="sec-title">Arquivo</div>
@@ -457,26 +394,6 @@
       <span class="file-icon" id="fileIcon">📄</span>
       <div><div class="file-name" id="fileName">—</div><div class="file-size" id="fileSize">—</div></div>
       <button class="file-rm" onclick="removerArquivo()">✕</button>
-    </div>
-
-    <div class="sec-title" style="margin-top:18px">Descrição</div>
-    <div class="field">
-      <label>Descrição / Resumo</label>
-      <textarea id="fDesc" placeholder="Descreva brevemente o conteúdo do documento..."></textarea>
-    </div>
-    <div class="field">
-      <label>Observações internas</label>
-      <textarea id="fObs" placeholder="Notas internas (não visíveis para condôminos)..." style="min-height:60px"></textarea>
-    </div>
-
-    <div class="sec-title">Configurações</div>
-    <div class="toggle-row">
-      <span class="toggle-label">✅ Publicar (visível para condôminos)</span>
-      <label class="switch"><input type="checkbox" id="fPublicado" checked/><span class="slider"></span></label>
-    </div>
-    <div class="toggle-row">
-      <span class="toggle-label">⭐ Destacar no dashboard</span>
-      <label class="switch"><input type="checkbox" id="fDestaque"/><span class="slider"></span></label>
     </div>
 
   </div>
@@ -761,12 +678,7 @@ function abrirModal(id){
 }
 function fecharModal(){ document.getElementById('modalBg').classList.remove('open'); _editId=null; _arquivo=null; }
 function limparModal(){
-  ['fTitulo','fSub','fData','fValidade','fPrestNome','fPrestCnpj','fPrestServ','fValor','fDesc','fObs','fPropValor','fPropPrazo','fPropJustif'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-  document.getElementById('fCategoria').value='';
-  const pubEl=document.getElementById('fPublicado'); if(pubEl) pubEl.checked=true;
-  const destEl=document.getElementById('fDestaque'); if(destEl) destEl.checked=false;
-  const bpEl=document.getElementById('boxPrestador'); if(bpEl) bpEl.classList.remove('show');
-  const bprEl=document.getElementById('boxProposta'); if(bprEl) bprEl.classList.remove('show');
+  ['fTitulo','fCategoria'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   removerArquivo();
 }
 function preencherModal(d){
@@ -782,11 +694,7 @@ function preencherModal(d){
     document.getElementById('filePreview').classList.add('show');
   }
 }
-function onCatChange(){
-  const cat=document.getElementById('fCategoria').value;
-  document.getElementById('boxPrestador').classList.toggle('show', ['Contrato','Nota Fiscal'].includes(cat));
-  document.getElementById('boxProposta').classList.toggle('show', cat==='Proposta');
-}
+function onCatChange(){}
 
 // ── UPLOAD ────────────────────────────────────────────────
 function onDrop(e){ e.preventDefault(); document.getElementById('uploadArea').classList.remove('drag'); const f=e.dataTransfer.files[0]; if(f) processarArquivo(f); }
@@ -879,9 +787,9 @@ async function deletar(id,titulo){
   else showAlert('Erro ao remover.','error');
 }
 
-// ── MODAL APROVAÇÃO ───────────────────────────────────────
+// ── MODAL APROVAÇÃO — desabilitado (campos não existem na tabela atual) ──────
 let _aprDocId=null;
-function abrirModalAprovacao(id){
+function abrirModalAprovacao(id){ showAlert('Funcionalidade de aprovação disponível em breve.','error'); return;
   _aprDocId=id;
   const d=_docs.find(d=>d.id===id); if(!d) return;
   document.getElementById('aprTitulo').textContent=d.titulo;
