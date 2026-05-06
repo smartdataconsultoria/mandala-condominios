@@ -1105,6 +1105,7 @@ document.getElementById('modalBg').addEventListener('click',e=>{
 
 // ── INIT ─────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async ()=>{
+  // Pegar email do usuário logado
   const k = Object.keys(localStorage).find(k=>k.includes('auth-token'));
   if(k){
     try{
@@ -1112,6 +1113,32 @@ window.addEventListener('DOMContentLoaded', async ()=>{
       document.getElementById('navUser').textContent = u?.user?.email || 'Síndico';
     }catch{}
   }
+
+  // Buscar nome do condomínio na tabela condo_config (ou similar)
+  try{
+    const r = await fetch(
+      `${SUPA_URL}/rest/v1/condo_config?empresa=eq.${EMPRESA}&select=nome&limit=1`,
+      {headers:hdrs()}
+    );
+    if(r.ok){
+      const d = await r.json();
+      if(d && d[0]?.nome){
+        document.getElementById('condoNome').childNodes[0].textContent = d[0].nome + ' ';
+        document.title = `Moradores — ${d[0].nome}`;
+      } else {
+        // Fallback: formatar o EMPRESA
+        document.getElementById('condoNome').childNodes[0].textContent =
+          EMPRESA.charAt(0).toUpperCase() + EMPRESA.slice(1) + ' ';
+      }
+    } else {
+      document.getElementById('condoNome').childNodes[0].textContent =
+        EMPRESA.charAt(0).toUpperCase() + EMPRESA.slice(1) + ' ';
+    }
+  } catch {
+    document.getElementById('condoNome').childNodes[0].textContent =
+      EMPRESA.charAt(0).toUpperCase() + EMPRESA.slice(1) + ' ';
+  }
+
   await loadMoradores();
 });
 </script>
