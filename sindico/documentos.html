@@ -379,6 +379,35 @@
       </select>
     </div>
 
+    <div class="sec-title">Visibilidade & Notificação</div>
+    <div class="field">
+      <label>Quem pode ver este documento?</label>
+      <select id="fVisibilidade" onchange="onVisibChange()">
+        <option value="privado">🔒 Privado — apenas síndico e administração</option>
+        <option value="conselho">👥 Conselho — síndico + conselheiros</option>
+        <option value="todos">🌐 Todos os moradores</option>
+      </select>
+    </div>
+    <div id="boxNotificacao" style="display:none;margin-top:-4px;margin-bottom:14px">
+      <div style="background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:10px;padding:14px 16px">
+        <div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:10px">📢 Notificar moradores</div>
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:10px">
+          <input type="checkbox" id="fNotificar" style="width:16px;height:16px;margin-top:2px;accent-color:var(--blue)"/>
+          <span style="font-size:13px;color:var(--text-dark)">Criar aviso automático no painel dos moradores sobre este documento</span>
+        </label>
+        <div id="boxMensagem" style="display:none">
+          <div class="field" style="margin:0">
+            <label>Mensagem do aviso (opcional)</label>
+            <textarea id="fMensagem" placeholder="Ex: Um novo documento foi disponibilizado para consulta. Acesse o portal para visualizar." style="min-height:70px"></textarea>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:10px;font-size:12px;color:var(--text-mid)">
+            <input type="checkbox" id="fUrgente" style="width:14px;height:14px;accent-color:#DC2626"/>
+            🚨 Marcar como urgente
+          </label>
+        </div>
+      </div>
+    </div>
+
     <div class="sec-title">Arquivo</div>
     <div class="upload-area" id="uploadArea"
          ondragover="event.preventDefault();this.classList.add('drag')"
@@ -680,6 +709,12 @@ function abrirModal(id){
 function fecharModal(){ document.getElementById('modalBg').classList.remove('open'); _editId=null; _arquivo=null; }
 function limparModal(){
   ['fTitulo','fCategoria'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  const fVis = document.getElementById('fVisibilidade'); if(fVis) fVis.value='privado';
+  const fNot = document.getElementById('fNotificar'); if(fNot) fNot.checked=false;
+  const fUrg = document.getElementById('fUrgente'); if(fUrg) fUrg.checked=false;
+  const fMsg = document.getElementById('fMensagem'); if(fMsg) fMsg.value='';
+  const boxN = document.getElementById('boxNotificacao'); if(boxN) boxN.style.display='none';
+  const boxM = document.getElementById('boxMensagem'); if(boxM) boxM.style.display='none';
   removerArquivo();
 }
 function preencherModal(d){
@@ -696,6 +731,21 @@ function preencherModal(d){
   }
 }
 function onCatChange(){}
+function onVisibChange(){
+  const v = document.getElementById('fVisibilidade').value;
+  const box = document.getElementById('boxNotificacao');
+  box.style.display = (v === 'todos' || v === 'conselho') ? 'block' : 'none';
+  if(v === 'privado') {
+    document.getElementById('fNotificar').checked = false;
+    document.getElementById('boxMensagem').style.display = 'none';
+  }
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+  const fNotif = document.getElementById('fNotificar');
+  if(fNotif) fNotif.addEventListener('change', function(){
+    document.getElementById('boxMensagem').style.display = this.checked ? 'block' : 'none';
+  });
+});
 
 // ── UPLOAD ────────────────────────────────────────────────
 function onDrop(e){ e.preventDefault(); document.getElementById('uploadArea').classList.remove('drag'); const f=e.dataTransfer.files[0]; if(f) processarArquivo(f); }
@@ -754,12 +804,16 @@ async function salvar(){
     btn.textContent='Salvando...';
 
     // ── Monta payload apenas com campos que existem na tabela ─────────────────
+    const visib    = document.getElementById('fVisibilidade')?.value || 'privado';
+    const notificar= document.getElementById('fNotificar')?.checked || false;
+    const urgente  = document.getElementById('fUrgente')?.checked || false;
+    const mensagem = document.getElementById('fMensagem')?.value.trim() || '';
+
     const payload = { condominio_id: CONDO_ID, nome: titulo, categoria: cat };
     if(urlArquivo) payload.url = urlArquivo;
 
     let res, json;
     if(_editId){
-      // Edição: atualiza apenas nome, categoria e url se tiver novo arquivo
       const patch = { nome: titulo, categoria: cat };
       if(urlArquivo) patch.url = urlArquivo;
       res  = await fetch(`${SUPA_URL}/rest/v1/documentos?id=eq.${_editId}&condominio_id=eq.${CONDO_ID}`,
@@ -777,7 +831,38 @@ async function salvar(){
       btn.disabled=false; btn.textContent='💾 Salvar Documento'; return;
     }
 
-    showAlert(_editId ? '✅ Documento atualizado!' : '✅ Documento salvo com sucesso!');
+    // ── Criar aviso automático se solicitado ──────────────────────────────────
+    if(notificar && (visib === 'todos' || visib === 'conselho')){
+      btn.textContent = 'Criando aviso...';
+      const destinatarios = visib === 'todos' ? 'todos os moradores' : 'conselho fiscal';
+      const tituloAviso   = `📄 Novo documento disponível: ${titulo}`;
+      const conteudoAviso = mensagem ||
+        `Um novo documento foi disponibilizado no portal.
+
+Documento: ${titulo}
+Categoria: ${cat}
+
+Acesse o portal para visualizar.`;
+
+      try{
+        await fetch(`${SUPA_URL}/rest/v1/avisos`, {
+          method: 'POST',
+          headers: {...h, 'Prefer': 'return=minimal'},
+          body: JSON.stringify({
+            condominio_id: CONDO_ID,
+            titulo:        tituloAviso,
+            conteudo:      conteudoAviso,
+            urgente:       urgente,
+          })
+        });
+        showAlert(`✅ Documento salvo e aviso criado para ${destinatarios}!`);
+      } catch(e){
+        showAlert('✅ Documento salvo! (Aviso não pôde ser criado)');
+      }
+    } else {
+      showAlert(_editId ? '✅ Documento atualizado!' : '✅ Documento salvo com sucesso!');
+    }
+
     fecharModal();
     await loadDocs();
   } catch(e){
