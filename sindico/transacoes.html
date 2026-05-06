@@ -1824,9 +1824,7 @@ async function salvarLancamento(){
     btn.disabled=false; btn.textContent='Salvar lançamento';
     return;
   }
-  }
-
-  // Transferência: cria 2 lançamentos (saída + entrada)
+// Transferência: cria 2 lançamentos (saída + entrada)
   if(_tipoAtual==='transferencia'){
     const origem  = document.getElementById('fContaOrigem').value;
     const destino = document.getElementById('fContaDestino').value;
