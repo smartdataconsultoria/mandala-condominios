@@ -364,8 +364,8 @@ async function carregar(){
 
     // Guardar dados globais para o gráfico interativo de categorias
     window._catDados = { trans, catMap, cats, porMes, ano };
-    // Popular subcategorias no select e renderizar gráfico após o HTML ser inserido
-    setTimeout(()=>{ popularSubcats(); atualizarGrafoCat(); }, 0);
+    // Renderizar tabela comparativa após o HTML ser inserido
+    setTimeout(()=>{ renderCompTable(); }, 0);
 
     // Comparativo meses
     const compMeses = mesesFiltro && mesesFiltro.length>1
@@ -482,86 +482,30 @@ async function carregar(){
         </div>`:''}
       </div>
 
-      <!-- GRÁFICO DESPESAS POR CATEGORIA/SUBCATEGORIA MENSAL -->
-      <div class="card" style="margin-bottom:18px" id="card-cat-mensal">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <!-- COMPARATIVO CATEGORIA + SUBCATEGORIA POR MÊS -->
+      <div class="card" style="margin-bottom:16px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px">
           <div>
-            <div class="ct" style="margin-bottom:4px">Despesas por Categoria — Evolução Mensal ${ano}</div>
-            <div style="font-size:12px;color:var(--text-light)">Valor mensal + acumulado anual por categoria e subcategoria</div>
+            <div class="ct" style="margin-bottom:4px">Despesas por Categoria e Subcategoria — ${ano}</div>
+            <div style="font-size:12px;color:var(--text-light)">Clique em uma categoria para expandir as subcategorias</div>
           </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
             <div style="display:flex;flex-direction:column;gap:4px">
               <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-light)">Categoria</label>
-              <select id="filtCat" onchange="atualizarGrafoCat()" style="background:var(--white);border:1px solid var(--border);color:var(--text-dark);border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:600;min-width:140px">
+              <select id="filtCat" onchange="renderCompTable()" style="background:var(--white);border:1.5px solid var(--border);color:var(--text-dark);border-radius:8px;padding:8px 12px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:600;min-width:150px">
                 <option value="">Todas</option>
                 ${[...new Set(cats.map(c=>c.categoria).filter(Boolean))].sort().map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')}
               </select>
             </div>
             <div style="display:flex;flex-direction:column;gap:4px">
               <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-light)">Subcategoria</label>
-              <select id="filtSub" onchange="atualizarGrafoCat()" style="background:var(--white);border:1px solid var(--border);color:var(--text-dark);border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:600;min-width:160px">
+              <select id="filtSub" onchange="renderCompTable()" style="background:var(--white);border:1.5px solid var(--border);color:var(--text-dark);border-radius:8px;padding:8px 12px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:600;min-width:170px">
                 <option value="">Todas</option>
               </select>
             </div>
           </div>
         </div>
-        <div id="grafico-cat-mensal"></div>
-      </div>
-
-      <!-- COMPARATIVO MENSAL -->
-      <div class="card" style="margin-bottom:16px;overflow-x:auto">
-        <div class="ct">Comparativo por Categoria — ${compMeses.map(m=>MESES_ABREV[m]).join(', ')}</div>
-        <table class="comp-table">
-          <thead>
-            <tr>
-              <th style="text-align:left">Categoria</th>
-              ${compMeses.map(m=>`<th>${MESES_ABREV[m]}</th>`).join('')}
-              <th>Total</th>
-              <th>Represent.</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${compData.map((row,ri)=>{
-              const total=row.valores.reduce((s,v)=>s+v,0);
-              const rep=totalDes>0?Math.round(total/totalDes*100):0;
-              const ultimo=row.valores[row.valores.length-1];
-              const penult=row.valores.length>1?row.valores[row.valores.length-2]:0;
-              const tend=penult>0?((ultimo-penult)/penult*100):0;
-              return `<tr>
-                <td>
-                  <span style="width:7px;height:7px;border-radius:50%;background:${CORES_CAT[ri%CORES_CAT.length]};display:inline-block;margin-right:7px"></span>
-                  ${esc(row.nome)}
-                  ${tend!==0?`<span style="font-size:9px;font-weight:700;color:${tend>0?'#ef4444':'#22c55e'};margin-left:5px">${tend>0?'▲':'▼'}${Math.abs(Math.round(tend))}%</span>`:''}
-                </td>
-                ${row.valores.map((v,vi)=>{
-                  const prev=vi>0?row.valores[vi-1]:null;
-                  const d=prev!==null&&prev>0?((v-prev)/prev*100):null;
-                  return `<td style="color:${v===0?'rgba(241,245,249,.2)':'rgba(241,245,249,.75)'}">
-                    ${v===0?'—':brl(v)}
-                    ${d!==null&&v>0&&Math.abs(d)>5?`<div style="font-size:9px;color:${d>0?'#ef4444':'#22c55e'}">${d>0?'▲':'▼'}${Math.abs(Math.round(d))}%</div>`:''}
-                  </td>`;
-                }).join('')}
-                <td style="font-weight:700;color:var(--gold)">${brl(total)}</td>
-                <td>
-                  <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px">
-                    <div style="width:44px;height:4px;background:var(--border);border-radius:99px;overflow:hidden">
-                      <div style="height:100%;width:${rep}%;background:${CORES_CAT[ri%CORES_CAT.length]};border-radius:99px"></div>
-                    </div>
-                    <span style="font-size:11px;color:rgba(241,245,249,.4);min-width:26px">${rep}%</span>
-                  </div>
-                </td>
-              </tr>`;
-            }).join('')}
-          </tbody>
-          <tfoot>
-            <tr>
-              <td>TOTAL DESPESAS</td>
-              ${compMeses.map(m=>`<td style="color:#ef4444">${brl(porMes[m].des)}</td>`).join('')}
-              <td style="color:#ef4444">${brl(totalDes)}</td>
-              <td style="color:rgba(241,245,249,.35)">100%</td>
-            </tr>
-          </tfoot>
-        </table>
+        <div style="overflow-x:auto" id="comp-table-wrap"></div>
       </div>
 
       <!-- PROJEÇÃO ANUAL + ÚLTIMOS LANÇAMENTOS -->
@@ -615,8 +559,8 @@ async function carregar(){
   }
 }
 
-// ── GRÁFICO CATEGORIAS — FILTROS ──────────────────────────
-function popularSubcats(){
+// ── TABELA COMPARATIVA CATEGORIA + SUBCATEGORIA ───────────
+function popularSubcatsFiltro(){
   const d = window._catDados; if(!d) return;
   const filtCat = document.getElementById('filtCat');
   const filtSub = document.getElementById('filtSub');
@@ -625,21 +569,33 @@ function popularSubcats(){
   const subs = [...new Set(d.cats
     .filter(c=>!catSel||c.categoria===catSel)
     .map(c=>c.nome).filter(Boolean))].sort();
+  const prevSub = filtSub.value;
   filtSub.innerHTML = '<option value="">Todas</option>' +
-    subs.map(s=>`<option value="${s.replace(/"/g,'&quot;')}">${s}</option>`).join('');
+    subs.map(s=>`<option value="${s.replace(/"/g,'&quot;')}"${s===prevSub?' selected':''}>${s}</option>`).join('');
 }
 
-function atualizarGrafoCat(){
-  popularSubcats();
+function renderCompTable(){
+  popularSubcatsFiltro();
   const d = window._catDados;
-  const el = document.getElementById('grafico-cat-mensal');
-  if(!d||!el) return;
+  const wrap = document.getElementById('comp-table-wrap');
+  if(!d||!wrap) return;
   const { trans, catMap, porMes, ano } = d;
   const filtCat = document.getElementById('filtCat')?.value||'';
   const filtSub = document.getElementById('filtSub')?.value||'';
 
-  // Montar mapa: categoria → mes → { valor, subs: {sub: valor} }
-  const catMesData = {}; // { catNome: { [mes]: { val, subs:{} } } }
+  // Meses com dados
+  const mesesComDados = [];
+  for(let m=0;m<12;m++){
+    const temDados = trans.filter(t=>t.tipo==='despesa').some(t=>{
+      const tm=parseInt((t.data||'').split('-')[1])-1;
+      return tm===m;
+    });
+    if(temDados) mesesComDados.push(m);
+  }
+  if(!mesesComDados.length){ wrap.innerHTML='<div style="color:var(--text-light);font-size:14px;text-align:center;padding:40px">Sem dados</div>'; return; }
+
+  // Montar estrutura: catNome -> subNome -> [valor por mes]
+  const estrutura = {}; // { catNome: { total:[12], subs: { subNome: [12] } } }
   trans.filter(t=>t.tipo==='despesa').forEach(t=>{
     const cat = catMap[t.categoria_id];
     const catNome = cat?.categoria||'Outros';
@@ -649,110 +605,145 @@ function atualizarGrafoCat(){
     const mes = parseInt((t.data||'').split('-')[1])-1;
     if(mes<0||mes>11) return;
     const v = parseFloat(t.valor||0);
-    if(!catMesData[catNome]) catMesData[catNome]={};
-    if(!catMesData[catNome][mes]) catMesData[catNome][mes]={val:0,subs:{}};
-    catMesData[catNome][mes].val+=v;
-    catMesData[catNome][mes].subs[subNome]=(catMesData[catNome][mes].subs[subNome]||0)+v;
+    if(!estrutura[catNome]) estrutura[catNome]={total:Array(12).fill(0),subs:{}};
+    estrutura[catNome].total[mes]+=v;
+    if(!estrutura[catNome].subs[subNome]) estrutura[catNome].subs[subNome]=Array(12).fill(0);
+    estrutura[catNome].subs[subNome][mes]+=v;
   });
 
-  const categorias = Object.keys(catMesData).sort((a,b)=>{
-    const ta=Object.values(catMesData[a]).reduce((s,x)=>s+x.val,0);
-    const tb=Object.values(catMesData[b]).reduce((s,x)=>s+x.val,0);
+  const categorias = Object.keys(estrutura).sort((a,b)=>{
+    const ta=estrutura[a].total.reduce((s,x)=>s+x,0);
+    const tb=estrutura[b].total.reduce((s,x)=>s+x,0);
     return tb-ta;
   });
 
   if(!categorias.length){
-    el.innerHTML='<div style="color:var(--text-light);font-size:14px;text-align:center;padding:40px">Sem dados para o filtro selecionado</div>';
+    wrap.innerHTML='<div style="color:var(--text-light);font-size:14px;text-align:center;padding:40px">Sem dados para o filtro selecionado</div>';
     return;
   }
 
-  // Acumulado anual por categoria
-  const acumulado = {};
-  categorias.forEach(c=>{ acumulado[c]=Object.values(catMesData[c]).reduce((s,x)=>s+x.val,0); });
-  const maxAcum = Math.max(...Object.values(acumulado), 1);
-
-  // Máx valor mensal para escala das barras mensais
-  let maxMensal = 1;
-  categorias.forEach(c=>{
-    Object.values(catMesData[c]).forEach(x=>{ if(x.val>maxMensal) maxMensal=x.val; });
+  // Total despesas por mês (para linha de rodapé)
+  const totalPorMes = Array(12).fill(0);
+  trans.filter(t=>t.tipo==='despesa').forEach(t=>{
+    if(filtCat||filtSub) return; // só mostra total geral quando sem filtro
+    const mes=parseInt((t.data||'').split('-')[1])-1;
+    if(mes>=0&&mes<=11) totalPorMes[mes]+=parseFloat(t.valor||0);
   });
+  const totalGeral = totalPorMes.reduce((s,x)=>s+x,0);
 
-  const MESES_ABR = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const thStyle = `padding:11px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-light);background:var(--off-white);border-bottom:2px solid var(--border);white-space:nowrap;text-align:right`;
+  const thFirst = `padding:11px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-light);background:var(--off-white);border-bottom:2px solid var(--border);text-align:left;min-width:200px`;
 
-  let html = '';
+  let html = `<table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr>
+      <th style="${thFirst}">Categoria / Subcategoria</th>
+      ${mesesComDados.map(m=>`<th style="${thStyle}">${MESES_ABREV[m]}</th>`).join('')}
+      <th style="${thStyle}">Total</th>
+      <th style="${thStyle}">Represent.</th>
+    </tr></thead>
+    <tbody>`;
+
+  const totalTodas = Object.values(estrutura).reduce((s,c)=>s+c.total.reduce((a,x)=>a+x,0),0);
+
   categorias.forEach((catNome, ci)=>{
     const cor = CORES_CAT[ci % CORES_CAT.length];
-    const totalCat = acumulado[catNome];
-    const pctAcum = Math.round(totalCat/maxAcum*100);
-    const mesData = catMesData[catNome];
+    const totCat = estrutura[catNome].total.reduce((s,x)=>s+x,0);
+    const rep = totalTodas>0?Math.round(totCat/totalTodas*100):0;
+    const id = 'cat'+ci;
 
-    // Top subcategorias acumuladas
-    const subAcum={};
-    Object.values(mesData).forEach(md=>{ Object.entries(md.subs).forEach(([s,v])=>{ subAcum[s]=(subAcum[s]||0)+v; }); });
-    const topSubs = Object.entries(subAcum).sort((a,b)=>b[1]-a[1]);
+    // Tendência última variação
+    const vals = mesesComDados.map(m=>estrutura[catNome].total[m]);
+    const ult = vals[vals.length-1], pen = vals.length>1?vals[vals.length-2]:0;
+    const tend = pen>0?((ult-pen)/pen*100):0;
+    const tendHTML = tend!==0&&Math.abs(tend)>=1
+      ? `<span style="font-size:10px;font-weight:800;margin-left:6px;padding:1px 6px;border-radius:20px;background:${tend>0?'#FEE2E2':'#DCFCE7'};color:${tend>0?'#B91C1C':'#15803D'}">${tend>0?'▲':'▼'}${Math.abs(Math.round(tend))}%</span>`:'';
 
-    html += `<div style="margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--border-light)">
-      <!-- Cabeçalho categoria -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="width:14px;height:14px;border-radius:4px;background:${cor};display:inline-block;flex-shrink:0"></span>
-          <span style="font-size:16px;font-weight:800;color:var(--text-dark)">${catNome}</span>
-          ${topSubs.map(([s])=>`<span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:var(--off-white);border:1px solid var(--border);color:var(--text-mid)">${s}</span>`).slice(0,3).join('')}
+    // Linha categoria (clicável para expandir)
+    html += `<tr style="cursor:pointer;transition:background .15s" onclick="toggleSub('${id}')" onmouseover="this.style.background='#FAFAF8'" onmouseout="this.style.background=''">
+      <td style="padding:12px 16px;border-bottom:1px solid var(--border-light);font-weight:800;color:var(--text-dark);font-size:14px">
+        <span style="display:inline-flex;align-items:center;gap:10px">
+          <span style="width:10px;height:10px;border-radius:3px;background:${cor};display:inline-block;flex-shrink:0"></span>
+          ${esc(catNome)}
+          ${tendHTML}
+          <span id="arr-${id}" style="font-size:11px;color:var(--text-light);margin-left:4px;transition:transform .2s">▶</span>
+        </span>
+      </td>
+      ${mesesComDados.map((m,mi)=>{
+        const v=estrutura[catNome].total[m];
+        const prev=mi>0?estrutura[catNome].total[mesesComDados[mi-1]]:null;
+        const d=prev!==null&&prev>0?((v-prev)/prev*100):null;
+        return `<td style="padding:12px 14px;border-bottom:1px solid var(--border-light);text-align:right;font-size:13px">
+          ${v>0?`<span style="font-weight:700;color:var(--text-dark)">${brl(v)}</span>`:`<span style="color:var(--border)">—</span>`}
+          ${d!==null&&v>0&&Math.abs(d)>=1?`<div style="font-size:10px;font-weight:700;color:${d>0?'#EF4444':'#16A34A'}">${d>0?'▲':'▼'}${Math.abs(Math.round(d))}%</div>`:''}
+        </td>`;
+      }).join('')}
+      <td style="padding:12px 14px;border-bottom:1px solid var(--border-light);text-align:right;font-weight:800;color:var(--amber);font-size:14px">${brl(totCat)}</td>
+      <td style="padding:12px 14px;border-bottom:1px solid var(--border-light);text-align:right">
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px">
+          <div style="width:52px;height:6px;background:var(--border-light);border-radius:99px;overflow:hidden">
+            <div style="height:100%;width:${rep}%;background:${cor};border-radius:99px"></div>
+          </div>
+          <span style="font-size:12px;font-weight:700;color:var(--text-mid);min-width:30px">${rep}%</span>
         </div>
-        <div style="display:flex;align-items:center;gap:16px">
-          <span style="font-size:13px;color:var(--text-light);font-weight:600">Acumulado anual:</span>
-          <span style="font-size:20px;font-weight:800;color:${cor}">${brl(totalCat)}</span>
-        </div>
-      </div>
-      <!-- Barra acumulado -->
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-        <div style="font-size:10px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;min-width:60px">Total ${ano}</div>
-        <div style="flex:1;height:12px;background:var(--border-light);border-radius:99px;overflow:hidden">
-          <div style="height:100%;width:${pctAcum}%;background:${cor};border-radius:99px;transition:width .7s"></div>
-        </div>
-        <div style="font-size:12px;font-weight:700;color:var(--text-mid);min-width:36px;text-align:right">${pctAcum}%</div>
-      </div>
-      <!-- Gráfico barras mensais -->
-      <div style="display:flex;align-items:flex-end;gap:6px;height:130px;padding-top:8px">
-        ${MESES_ABR.map((mes,mi)=>{
-          const md = mesData[mi];
-          const v = md?md.val:0;
-          const bH = Math.max(2, Math.round(v/maxMensal*110));
-          const topSub = md?Object.entries(md.subs).sort((a,b)=>b[1]-a[1])[0]:null;
-          return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
-            <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:115px;width:100%">
-              ${v>0?`<div style="font-size:9px;font-weight:700;color:${cor};margin-bottom:3px;white-space:nowrap">${brl(v).replace('R$ ','')}</div>`:''}
-              <div style="width:100%;max-width:36px;height:${bH}px;background:${cor};border-radius:4px 4px 0 0;opacity:${v>0?1:.15};transition:height .5s;position:relative" title="${v>0?catNome+' '+mes+': '+brl(v):'Sem dados'}">
-                ${topSub&&v>0?`<div style="position:absolute;bottom:100%;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:8px;color:var(--text-light);margin-bottom:1px;max-width:60px;overflow:hidden;text-overflow:ellipsis">${topSub[0]}</div>`:''}
-              </div>
-            </div>
-            <div style="font-size:10px;font-weight:${v>0?700:500};color:${v>0?'var(--text-mid)':'var(--text-light)'};text-transform:uppercase">${mes}</div>
-          </div>`;
+      </td>
+    </tr>`;
+
+    // Linhas subcategoria (colapsadas por padrão)
+    const subs = Object.keys(estrutura[catNome].subs).sort((a,b)=>{
+      const ta=estrutura[catNome].subs[a].reduce((s,x)=>s+x,0);
+      const tb=estrutura[catNome].subs[b].reduce((s,x)=>s+x,0);
+      return tb-ta;
+    });
+    subs.forEach((subNome,si)=>{
+      const totSub=estrutura[catNome].subs[subNome].reduce((s,x)=>s+x,0);
+      const repSub=totCat>0?Math.round(totSub/totCat*100):0;
+      html += `<tr class="sub-${id}" style="display:none;background:#FAFAF8">
+        <td style="padding:9px 16px 9px 36px;border-bottom:1px dashed var(--border-light);color:var(--text-mid);font-size:13px">
+          <span style="color:var(--border-light);margin-right:6px">└</span>
+          <span style="font-weight:600">${esc(subNome)}</span>
+        </td>
+        ${mesesComDados.map((m,mi)=>{
+          const v=estrutura[catNome].subs[subNome][m];
+          const prev=mi>0?estrutura[catNome].subs[subNome][mesesComDados[mi-1]]:null;
+          const d=prev!==null&&prev>0?((v-prev)/prev*100):null;
+          return `<td style="padding:9px 14px;border-bottom:1px dashed var(--border-light);text-align:right;font-size:12px">
+            ${v>0?`<span style="color:var(--text-mid);font-weight:600">${brl(v)}</span>`:`<span style="color:var(--border)">—</span>`}
+            ${d!==null&&v>0&&Math.abs(d)>=1?`<div style="font-size:10px;font-weight:700;color:${d>0?'#EF4444':'#16A34A'}">${d>0?'▲':'▼'}${Math.abs(Math.round(d))}%</div>`:''}
+          </td>`;
         }).join('')}
-      </div>
-      <!-- Subcategorias acumuladas -->
-      ${topSubs.length>0?`<div style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--border-light)">
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-light);margin-bottom:8px">Subcategorias — acumulado ${ano}</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px">
-          ${topSubs.map(([sub,val])=>{
-            const pct=Math.round(val/totalCat*100);
-            return `<div style="padding:10px 12px;background:var(--off-white);border:1px solid var(--border-light);border-radius:10px">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-                <span style="font-size:12px;font-weight:700;color:var(--text-dark)">${esc(sub)}</span>
-                <span style="font-size:13px;font-weight:800;color:${cor}">${brl(val)}</span>
-              </div>
-              <div style="height:5px;background:var(--border-light);border-radius:99px;overflow:hidden">
-                <div style="height:100%;width:${pct}%;background:${cor};border-radius:99px"></div>
-              </div>
-              <div style="font-size:10px;color:var(--text-light);margin-top:4px;font-weight:600">${pct}% do total da categoria</div>
-            </div>`;
-          }).join('')}
-        </div>
-      </div>`:'' }
-    </div>`;
+        <td style="padding:9px 14px;border-bottom:1px dashed var(--border-light);text-align:right;font-weight:700;color:var(--text-mid);font-size:13px">${brl(totSub)}</td>
+        <td style="padding:9px 14px;border-bottom:1px dashed var(--border-light);text-align:right">
+          <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px">
+            <div style="width:52px;height:4px;background:var(--border-light);border-radius:99px;overflow:hidden">
+              <div style="height:100%;width:${repSub}%;background:${cor};border-radius:99px;opacity:.6"></div>
+            </div>
+            <span style="font-size:11px;font-weight:600;color:var(--text-light);min-width:30px">${repSub}%</span>
+          </div>
+        </td>
+      </tr>`;
+    });
   });
 
-  el.innerHTML = html;
+  // Rodapé total
+  if(!filtCat&&!filtSub){
+    html += `<tr style="background:var(--red-bg)">
+      <td style="padding:12px 16px;font-weight:800;font-size:13px;color:var(--text-dark);border-top:2px solid var(--border)">TOTAL DESPESAS</td>
+      ${mesesComDados.map(m=>`<td style="padding:12px 14px;text-align:right;font-weight:800;color:var(--red);font-size:13px;border-top:2px solid var(--border)">${totalPorMes[m]>0?brl(totalPorMes[m]):'—'}</td>`).join('')}
+      <td style="padding:12px 14px;text-align:right;font-weight:800;color:var(--red);font-size:14px;border-top:2px solid var(--border)">${brl(totalGeral)}</td>
+      <td style="padding:12px 14px;text-align:right;font-size:12px;color:var(--text-light);border-top:2px solid var(--border)">100%</td>
+    </tr>`;
+  }
+
+  html += `</tbody></table>`;
+  wrap.innerHTML = html;
+}
+
+function toggleSub(id){
+  const rows = document.querySelectorAll('.sub-'+id);
+  const arr = document.getElementById('arr-'+id);
+  const expanded = rows[0]&&rows[0].style.display!=='none';
+  rows.forEach(r=>r.style.display=expanded?'none':'table-row');
+  if(arr) arr.style.transform=expanded?'':'rotate(90deg)';
 }
 </script>
 
