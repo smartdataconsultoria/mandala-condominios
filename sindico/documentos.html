@@ -671,8 +671,7 @@ function abrirModal(id){
     document.getElementById('modalTitle').textContent='Editar Documento';
   } else {
     document.getElementById('modalTitle').textContent='Novo Documento';
-    const yy=new Date().getFullYear(), mm=String(new Date().getMonth()+1).padStart(2,'0'), dd=String(new Date().getDate()).padStart(2,'0');
-    document.getElementById('fData').value=`${yy}-${mm}-${dd}`;
+
   }
   document.getElementById('modalBg').classList.add('open');
 }
