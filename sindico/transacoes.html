@@ -2144,7 +2144,7 @@ function processarArquivo(file){
     try{
       const wb   = XLSX.read(e.target.result, {type:'array'});
       const ws   = wb.Sheets[wb.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json(ws, {header:1, raw:false});
+      const data = XLSX.utils.sheet_to_json(ws, {header:1, raw:true, defval:''});
 
       // Encontrar linha de cabeçalho (contém DATA e TIPO)
       let headerRow = -1;
@@ -2177,29 +2177,37 @@ function processarArquivo(file){
 
         let dataISO = '';
         const dataRaw = row[iData];
-        if(dataRaw){
-          // XLSX às vezes retorna número serial do Excel (data como número)
+        if(dataRaw !== '' && dataRaw !== null && dataRaw !== undefined){
           let dataObj = null;
-          if(typeof dataRaw === 'number'){
-            // Serial date do Excel: dias desde 1900-01-01
-            dataObj = new Date(Math.round((dataRaw - 25569) * 86400 * 1000));
+          if(typeof dataRaw === 'number' && dataRaw > 1000){
+            // Serial do Excel: dias desde 01/01/1900 (com bug do Lotus 1-2-3)
+            dataObj = new Date(Date.UTC(1899,11,30) + dataRaw * 86400000);
           } else {
             const dataStr = dataRaw.toString().trim();
-            if(dataStr.match(/^\d{2}\/\d{2}\/\d{4}$/)){
-              const [d,m,y]=dataStr.split('/');
-              dataObj = new Date(`${y}-${m}-${d}`);
-            } else if(dataStr.match(/^\d{4}-\d{2}-\d{2}$/)){
-              dataObj = new Date(dataStr);
-            } else if(dataStr.match(/^\d{2}\/\d{2}\/\d{2}$/)){
-              // DD/MM/YY
-              const [d,m,y]=dataStr.split('/');
-              dataObj = new Date(`20${y}-${m}-${d}`);
+            // Tenta vários formatos
+            const m1 = dataStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/); // D/M/YY ou DD/MM/YYYY
+            const m2 = dataStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);           // YYYY-MM-DD
+            const m3 = dataStr.match(/^(\d{1,2})-(\d{1,2})-(\d{2,4})$/);     // D-M-YY
+            if(m2){
+              dataObj = new Date(Date.UTC(+m2[1],+m2[2]-1,+m2[3]));
+            } else if(m1){
+              // Detectar se é MM/DD/YYYY (americano) ou DD/MM/YYYY (brasileiro)
+              // Se parte[0] > 12, é dia; se parte[1] > 12, é dia
+              let dd2,mm2,yy2;
+              if(+m1[1] > 12){ dd2=+m1[1]; mm2=+m1[2]; } // definitivamente DD/MM
+              else if(+m1[2] > 12){ dd2=+m1[2]; mm2=+m1[1]; } // definitivamente MM/DD (americano)
+              else { mm2=+m1[1]; dd2=+m1[2]; } // ambíguo: assume MM/DD (padrão XLSX.js)
+              yy2 = +m1[3] < 100 ? 2000 + +m1[3] : +m1[3];
+              dataObj = new Date(Date.UTC(yy2, mm2-1, dd2));
+            } else if(m3){
+              const yy3 = +m3[3] < 100 ? 2000 + +m3[3] : +m3[3];
+              dataObj = new Date(Date.UTC(yy3, +m3[2]-1, +m3[1]));
             }
           }
-          if(dataObj && !isNaN(dataObj)){
-            const yy = dataObj.getFullYear();
-            const mm = String(dataObj.getMonth()+1).padStart(2,'0');
-            const dd = String(dataObj.getDate()).padStart(2,'0');
+          if(dataObj && !isNaN(dataObj.getTime())){
+            const yy = dataObj.getUTCFullYear();
+            const mm = String(dataObj.getUTCMonth()+1).padStart(2,'0');
+            const dd = String(dataObj.getUTCDate()).padStart(2,'0');
             dataISO = `${yy}-${mm}-${dd}`;
           }
         }
@@ -2209,8 +2217,12 @@ function processarArquivo(file){
         const cat   = (row[iCat]||'').toString().toLowerCase().trim();
         const sub   = (row[iSub]||'').toString().toLowerCase().trim();
         const conta = (row[iConta]||'').toString().toLowerCase().trim();
-        const valorRaw = (row[iValor]||'0').toString().replace(/[R$\s.]/g,'').replace(',','.');
-        const valor = parseFloat(valorRaw)||0;
+        // Com raw:true, valor pode ser número direto ou string formatada
+        let valorRaw2 = row[iValor];
+        let valor;
+        if(typeof valorRaw2 === 'number'){ valor = valorRaw2; }
+        else { valor = parseFloat((valorRaw2||'0').toString().replace(/[R$\s]/g,'').replace(/\.(\d{3})/g,'$1').replace(',','.')) || 0; }
+
         const sit   = iSit>=0 ? ((row[iSit]||'').toString().toLowerCase().trim()||'pago') : 'pago';
         const obs   = (row[iObs]||'').toString().trim();
 
