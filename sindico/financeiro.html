@@ -480,28 +480,69 @@ async function carregar(){
         <div style="overflow-x:auto" id="comp-table-wrap"></div>
       </div>
 
-      <!-- PROJEÇÃO ANUAL + ÚLTIMOS LANÇAMENTOS -->
+      <!-- PIZZA CATEGORIAS + ÚLTIMOS LANÇAMENTOS -->
       <div class="g2">
         <div class="card">
-          <div class="ct">📈 Projeção Anual — ${ano}</div>
-          ${Array.from({length:12},(_,i)=>{
-            const futuro=i>ultimoMes;
-            const atual=i===ultimoMes;
-            const des=futuro?mediaDes:porMes[i].des;
-            const rec=futuro?mediaRec:porMes[i].rec;
-            return `<div class="proj-row">
-              <div class="proj-mes" style="color:${atual?'var(--amber)':futuro?'var(--text-light)':'var(--text-mid)'};${atual?'font-size:12px':''}">${MESES_ABREV[i]}</div>
-              <div class="proj-bar-wrap">
-                <div class="proj-bar" style="width:${Math.round(des/Math.max(mediaDes,maxBar/10,1)*70)}%;background:${futuro?'#FCA5A5':'var(--red-light)'};${futuro?'opacity:.5':''}"></div>
+          <div class="ct">Despesas por Categoria — ${labelPeriodo}</div>
+          ${(()=>{
+            // Montar dados das categorias do período selecionado
+            const catPizzaMap = {};
+            const transPeriodo = mesesFiltro
+              ? mesesFiltro.flatMap(m=>porMes[m].trans)
+              : porMes.flatMap(p=>p.trans);
+            transPeriodo.filter(t=>t.tipo==='despesa').forEach(t=>{
+              const cat = catMap[t.categoria_id];
+              const nome = cat?.categoria||'Outros';
+              catPizzaMap[nome] = (catPizzaMap[nome]||0) + parseFloat(t.valor||0);
+            });
+            const dadosPizza = Object.entries(catPizzaMap).sort((a,b)=>b[1]-a[1]);
+            const totalPizza = dadosPizza.reduce((s,[,v])=>s+v,0);
+            if(!dadosPizza.length) return '<div style="color:var(--text-light);text-align:center;padding:40px">Sem dados</div>';
+
+            // Gerar fatias SVG
+            const cx=120, cy=120, r=100, ri=52;
+            let angulo = -Math.PI/2;
+            const fatias = dadosPizza.map(([nome,val],ci)=>{
+              const pct = val/totalPizza;
+              const ang = pct * 2 * Math.PI;
+              const x1=cx+r*Math.cos(angulo), y1=cy+r*Math.sin(angulo);
+              const x2=cx+r*Math.cos(angulo+ang), y2=cy+r*Math.sin(angulo+ang);
+              const xi1=cx+ri*Math.cos(angulo), yi1=cy+ri*Math.sin(angulo);
+              const xi2=cx+ri*Math.cos(angulo+ang), yi2=cy+ri*Math.sin(angulo+ang);
+              const large=ang>Math.PI?1:0;
+              const cor = CORES_CAT[ci%CORES_CAT.length].replace('var(--gold)','#E8A320').replace('var(--green-light)','#22c55e');
+              const path=`M${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r} 0 ${large},1 ${x2.toFixed(2)},${y2.toFixed(2)} L${xi2.toFixed(2)},${yi2.toFixed(2)} A${ri},${ri} 0 ${large},0 ${xi1.toFixed(2)},${yi1.toFixed(2)} Z`;
+              angulo+=ang;
+              return {path,cor,nome,val,pct};
+            });
+
+            const svgFatias = fatias.map((f,ci)=>`
+              <path d="${f.path}" fill="${f.cor}" stroke="white" stroke-width="2" style="cursor:pointer;transition:opacity .2s" 
+                onmouseover="this.style.opacity='.75';document.getElementById('pizza-tip').textContent='${f.nome.replace(/'/g,"\\'")}'" 
+                onmouseout="this.style.opacity='1';document.getElementById('pizza-tip').textContent=''">
+                <title>${f.nome}: ${brl(f.val)} (${Math.round(f.pct*100)}%)</title>
+              </path>`).join('');
+
+            const legenda = fatias.map((f,ci)=>`
+              <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-light)">
+                <span style="width:12px;height:12px;border-radius:3px;background:${f.cor};display:inline-block;flex-shrink:0"></span>
+                <span style="flex:1;font-size:13px;font-weight:600;color:var(--text-dark)">${esc(f.nome)}</span>
+                <span style="font-size:13px;font-weight:800;color:var(--text-dark)">${brl(f.val)}</span>
+                <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--off-white);border:1px solid var(--border);color:var(--text-mid);min-width:40px;text-align:center">${Math.round(f.pct*100)}%</span>
+              </div>`).join('');
+
+            return `<div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap">
+              <div style="flex-shrink:0;position:relative">
+                <svg width="240" height="240" viewBox="0 0 240 240">
+                  ${svgFatias}
+                  <text x="120" y="114" text-anchor="middle" style="font-size:11px;font-weight:700;fill:#7A8FA6;font-family:inherit">TOTAL</text>
+                  <text x="120" y="133" text-anchor="middle" style="font-size:13px;font-weight:800;fill:#0D1B2A;font-family:inherit">${brl(totalPizza).replace('R$ ','R$')}</text>
+                </svg>
+                <div id="pizza-tip" style="position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:11px;font-weight:700;color:var(--text-mid);min-height:16px"></div>
               </div>
-              <div class="proj-val" style="color:${atual?'var(--amber)':futuro?'var(--text-light)':'var(--text-dark)'};font-weight:${atual?800:600}">${futuro?'<span style="color:var(--text-light);font-size:10px">est.</span> ':''} ${brl(des)}</div>
-              <div class="proj-ico">${futuro?'<span style="color:var(--text-light);font-size:9px">―</span>':des>0?'<span style="color:var(--green);font-size:11px">✓</span>':''}</div>
+              <div style="flex:1;min-width:180px">${legenda}</div>
             </div>`;
-          }).join('')}
-          <div style="margin-top:12px;padding:12px 14px;background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:10px;font-size:13px;display:flex;justify-content:space-between;align-items:center">
-            <span style="color:var(--amber);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Projeção total ${ano}</span>
-            <strong style="color:var(--amber);font-size:16px;font-weight:800">${brl(totalDes + mediaDes*(11-ultimoMes))}</strong>
-          </div>
+          })()}
         </div>
 
         <div class="card">
