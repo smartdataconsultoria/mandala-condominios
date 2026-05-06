@@ -1291,13 +1291,27 @@ function renderTabela(){
     if(_filtro==='pendente' && t.situacao!=='pendente') return false;
     if(_filtro==='parcelado'&& !t.parcela_total) return false;
     if(_filtro==='fixo'     && !t.recorrente) return false;
-    if(busca){
-      const cat = catMap[t.categoria_id];
-      const catNome  = (cat?.categoria||'').toLowerCase();
-      const subNome  = (cat?.nome||'').toLowerCase();
-      const descNome = (t.descricao||'').toLowerCase();
-      if(!descNome.includes(busca) && !catNome.includes(busca) && !subNome.includes(busca)) return false;
-    }
+    if (busca) {
+  const cat = catMap[t.categoria_id];
+  const conta = contaMap[t.conta_id];
+
+  const campos = [
+    t.descricao,
+    cat?.categoria,
+    cat?.nome,
+    conta?.nome,
+    t.observacao
+  ]
+    .map(normalizar)
+    .join(' ');
+
+  const palavras = campos.split(/\s+/);
+
+  const encontrou = palavras.some(p => p.startsWith(busca));
+
+  if (!encontrou) return false;
+}
+``
     return true;
   });
 
