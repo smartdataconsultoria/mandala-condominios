@@ -362,26 +362,8 @@ async function carregar(){
     });
     const catsAno=Object.entries(catAnoMap).sort((a,b)=>b[1]-a[1]);
 
-    // Guardar dados globais para o gráfico interativo de categorias
+    // Guardar dados globais para a tabela comparativa
     window._catDados = { trans, catMap, cats, porMes, ano };
-    // Renderizar tabela comparativa após o HTML ser inserido
-    setTimeout(()=>{ renderCompTable(); }, 0);
-
-    // Comparativo meses
-    const compMeses = mesesFiltro && mesesFiltro.length>1
-      ? mesesFiltro
-      : Array.from({length:6},(_,i)=>Math.max(0,ultimoMes-5+i)).filter(m=>m<=ultimoMes);
-    const topCats   = catsAno.slice(0,5).map(c=>c[0]);
-    const compData  = topCats.map(nome=>({
-      nome,
-      valores: compMeses.map(m=>{
-        let v=0;
-        porMes[m].trans.filter(t=>t.tipo==='despesa').forEach(t=>{
-          if((catMap[t.categoria_id]?.categoria||'Outros')===nome) v+=parseFloat(t.valor||0);
-        });
-        return v;
-      })
-    }));
 
     // Label
     const mesFiltrado = _mesesSel.length>0;
@@ -554,6 +536,8 @@ async function carregar(){
         </div>
       </div>
     `;
+    // Renderizar tabela comparativa APÓS o HTML estar no DOM
+    renderCompTable();
   }catch(e){
     document.getElementById('conteudo').innerHTML=`<div style="color:#ef4444;padding:20px">Erro ao carregar: ${e.message}</div>`;
   }
