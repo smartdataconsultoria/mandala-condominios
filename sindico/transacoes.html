@@ -981,6 +981,7 @@ function editarTransacao(id){ return _call('_editarTransacao', id); }
 function executarDelete(){ return _call('_executarDelete'); }
 function exportarExcel(){ return _call('_exportarExcel'); }
 function baixarModelo(){ return _call('_baixarModelo'); }
+function processarArquivo(file){ return _call('_processarArquivo', file); }
 function abrirImportar(){ return _call('_abrirImportar'); }
 function confirmarImportacao(){ return _call('_confirmarImportacao'); }
 function selecionarOpt(opt, el){ return _call('_selecionarOpt', opt, el); }
@@ -1755,7 +1756,7 @@ async function salvarLancamento(){
     const destino = document.getElementById('fContaDestino').value;
     if(!origem || !destino){ showAlert('Selecione a conta de origem e destino.','error'); btn.disabled=false; btn.textContent='Salvar lançamento'; return; }
     if(origem===destino){ showAlert('Conta de origem e destino não podem ser iguais.','error'); btn.disabled=false; btn.textContent='Salvar lançamento'; return; }
-    const base = {condominio_id:CONDO_ID, empresa:CONDO_ID, descricao:desc, valor, data, situacao:'pago', observacao:document.getElementById('fObs').value.trim()||null};
+    const base = {condominio_id:CONDO_ID, descricao:desc, valor, data, situacao:'pago', observacao:document.getElementById('fObs').value.trim()||null};
     const h = hdrs();
     await Promise.all([
       fetch(`${_BASE}/condo_transacoes`,{method:'POST',headers:{...h,'Prefer':'return=representation'},body:JSON.stringify({...base,tipo:'despesa',conta_id:origem, descricao:`Transf. para ${_contas.find(ct=>ct.id==destino)?.nome||'conta'}: ${desc}`})}),
@@ -1776,8 +1777,7 @@ async function salvarLancamento(){
 
   const basePayload = {
     condominio_id: CONDO_ID,
-    empresa: CONDO_ID,
-    tipo:         (TIPO_CONFIG[_tipoAtual]?.tipoDB)||_tipoAtual,
+        tipo:         (TIPO_CONFIG[_tipoAtual]?.tipoDB)||_tipoAtual,
     descricao:    desc,
     valor:        parcelado ? valor/nParcelas : valor,
     categoria_id: document.getElementById('fCat').value ? parseInt(document.getElementById('fCat').value) : null,
@@ -2195,7 +2195,7 @@ function processarArquivo(file){
         const catId   = catMap[cat+'|'+sub] || null;
         const contaId = contaMap[conta] || null;
 
-        _dadosImport.push({data:dataISO, tipo, descricao:desc, categoria_id:catId, conta_id:contaId, valor, situacao:sit, observacao:obs||null, condominio_id:CONDO_ID, empresa:CONDO_ID});
+        _dadosImport.push({data:dataISO, tipo, descricao:desc, categoria_id:catId, conta_id:contaId, valor, situacao:sit, observacao:obs||null, condominio_id:CONDO_ID});
       }
 
       // Preview
@@ -2268,8 +2268,7 @@ async function confirmarImportacao(){
       method:'POST', headers:{...h,'Prefer':'return=minimal'},
       body: JSON.stringify({
         condominio_id:CONDO_ID,
-        empresa:CONDO_ID,
-        tipo:r.tipo,
+                tipo:r.tipo,
         descricao:r.descricao,
         data:r.data,
         valor:r.valor,
@@ -2470,7 +2469,7 @@ window._fecharModal=fecharModal;window._fecharConfirm=fecharConfirm;window._fech
 window._fecharImportar=fecharImportar;window._salvarLancamento=salvarLancamento;
 window._editarTransacao=editarTransacao;window._executarDelete=executarDelete;
 window._exportarExcel=exportarExcel;window._baixarModelo=baixarModelo;window._abrirImportar=abrirImportar;
-window._confirmarImportacao=confirmarImportacao;window._selecionarOpt=selecionarOpt;
+window._confirmarImportacao=confirmarImportacao;window._processarArquivo=processarArquivo;window._selecionarOpt=selecionarOpt;
 window._setDataRapida=setDataRapida;window._toggleCal=toggleCal;window._calNavMes=calNavMes;
 window._calToggleAno=calToggleAno;window._calSelecionarDia=calSelecionarDia;window._calConfirmar=calConfirmar;
 window._removerAnexo=removerAnexo;window._toggleSecao=toggleSecao;window._fazerLogout=fazerLogout;
