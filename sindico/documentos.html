@@ -715,63 +715,72 @@ function removerArquivo(){
   document.getElementById('uploadArea').style.display='block';
   document.getElementById('filePreview').classList.remove('show');
 }
-async function uploadArquivo(file, docId){
-  const ext=file.name.split('.').pop();
-  const path=`mandala/${docId}_${Date.now()}.${ext}`;
-  const res=await fetch(`${SUPA_URL}/storage/v1/object/${BUCKET}/${path}`,{
-    method:'POST',
-    headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${getToken()||SUPA_KEY}`,'Content-Type':file.type},
-    body:file
-  });
-  return res.ok ? {url:`${SUPA_URL}/storage/v1/object/public/${BUCKET}/${path}`,path} : null;
-}
+// upload feito inline na função salvar()
 
 // ── SALVAR ────────────────────────────────────────────────
 async function salvar(){
-  const titulo=document.getElementById('fTitulo').value.trim();
-  const cat=document.getElementById('fCategoria').value;
-  if(!titulo){ showAlert('Informe o título do documento.','error'); return; }
+  const titulo = document.getElementById('fTitulo').value.trim();
+  const cat    = document.getElementById('fCategoria').value;
+  if(!titulo){ showAlert('Informe o nome do documento.','error'); return; }
   if(!cat)   { showAlert('Selecione a categoria.','error'); return; }
-  const btn=document.getElementById('btnSalvar');
+
+  const btn = document.getElementById('btnSalvar');
   btn.disabled=true; btn.textContent='Salvando...';
-  // Payload com os campos REAIS da tabela: id, condominio_id, nome, categoria, url, enviado_por, criado_em
-  const payload = {
-    condominio_id: CONDO_ID,
-    nome:          titulo,
-    categoria:     cat,
-    url:           null, // preenchido após upload
-  };
-  const h = hdrs(); let savedId = _editId;
+  const h = hdrs();
+
   try{
+    // ── Se tem arquivo: faz upload primeiro, depois salva com a URL ──────────
+    let urlArquivo = null;
+    if(_arquivo){
+      btn.textContent='Enviando arquivo...';
+      const tempId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString();
+      const ext    = _arquivo.name.split('.').pop();
+      const path   = `mandala/${tempId}.${ext}`;
+      const upRes  = await fetch(`${SUPA_URL}/storage/v1/object/${BUCKET}/${path}`,{
+        method:'POST',
+        headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${getToken()||SUPA_KEY}`,'Content-Type':_arquivo.type},
+        body: _arquivo
+      });
+      if(upRes.ok){
+        urlArquivo = `${SUPA_URL}/storage/v1/object/public/${BUCKET}/${path}`;
+      } else {
+        showAlert('⚠️ Falha no upload do arquivo. Verifique o bucket no Supabase Storage.','error');
+        btn.disabled=false; btn.textContent='💾 Salvar Documento'; return;
+      }
+    }
+
+    btn.textContent='Salvando...';
+
+    // ── Monta payload apenas com campos que existem na tabela ─────────────────
+    const payload = { condominio_id: CONDO_ID, nome: titulo, categoria: cat };
+    if(urlArquivo) payload.url = urlArquivo;
+
     let res, json;
     if(_editId){
-      res = await fetch(`${SUPA_URL}/rest/v1/documentos?id=eq.${_editId}&condominio_id=eq.${CONDO_ID}`,
-        {method:'PATCH', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify({nome:titulo, categoria:cat})});
+      // Edição: atualiza apenas nome, categoria e url se tiver novo arquivo
+      const patch = { nome: titulo, categoria: cat };
+      if(urlArquivo) patch.url = urlArquivo;
+      res  = await fetch(`${SUPA_URL}/rest/v1/documentos?id=eq.${_editId}&condominio_id=eq.${CONDO_ID}`,
+        {method:'PATCH', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(patch)});
     } else {
-      res = await fetch(`${SUPA_URL}/rest/v1/documentos`,
+      res  = await fetch(`${SUPA_URL}/rest/v1/documentos`,
         {method:'POST', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)});
     }
     json = await res.json();
+
     if(!res.ok){
-      showAlert(`❌ Erro ${res.status}: ${(Array.isArray(json)?json[0]:json)?.message||JSON.stringify(json)}`,'error');
+      const msg = (Array.isArray(json)?json[0]:json)?.message || JSON.stringify(json);
+      const dica = res.status===403 ? ' — Sem permissão (RLS). Desabilite no Supabase.' : '';
+      showAlert(`❌ Erro ${res.status}: ${msg}${dica}`,'error');
       btn.disabled=false; btn.textContent='💾 Salvar Documento'; return;
     }
-    savedId = (Array.isArray(json)?json[0]:json)?.id || savedId;
 
-    // Upload do arquivo e atualiza url
-    if(_arquivo && savedId){
-      btn.textContent='Enviando arquivo...';
-      const up = await uploadArquivo(_arquivo, savedId);
-      if(up){
-        await fetch(`${SUPA_URL}/rest/v1/documentos?id=eq.${savedId}&condominio_id=eq.${CONDO_ID}`,
-          {method:'PATCH', headers:h, body:JSON.stringify({url: up.url})});
-      } else {
-        showAlert('⚠️ Documento salvo, mas falha no upload do arquivo.','error');
-      }
-    }
-    showAlert(_editId?'✅ Documento atualizado!':'✅ Documento cadastrado com sucesso!');
-    fecharModal(); await loadDocs();
-  } catch(e){ showAlert('❌ Erro: '+e.message,'error'); }
+    showAlert(_editId ? '✅ Documento atualizado!' : '✅ Documento salvo com sucesso!');
+    fecharModal();
+    await loadDocs();
+  } catch(e){
+    showAlert('❌ Erro: '+e.message,'error');
+  }
   btn.disabled=false; btn.textContent='💾 Salvar Documento';
 }
 
