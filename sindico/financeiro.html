@@ -6,127 +6,129 @@
 <title>CondoGestor — Financeiro</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --navy: #0B1F3A; --navy-light: #142D52; --gold: #E8A320; --gold-light: #F5C35A;
-    --white: #FFFFFF; --off-white: #F7F6F2; --border: #E2E8F0;
-    --text-dark: #0B1F3A; --text-mid: #445571; --text-light: #8899B4;
-    --green: #16A34A; --green-bg: #DCFCE7; --red: #DC2626; --red-bg: #FEF2F2;
-    --amber: #D97706; --amber-bg: #FEF3C7; --blue: #2563EB; --blue-bg: #EFF6FF;
-    --sidebar-w: 240px; --radius: 12px; --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
-  }
-  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--off-white); color: var(--text-dark); display: flex; min-height: 100vh; }
-  .sidebar { width: var(--sidebar-w); background: var(--navy); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; overflow-y: auto; }
-  .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 1.5rem 1.25rem 1.25rem; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 0.5rem; }
-  .logo-icon { width: 34px; height: 34px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-  .logo-icon svg { width: 18px; height: 18px; }
-  .logo-name { font-size: 1.05rem; font-weight: 800; color: var(--white); }
-  .logo-name span { color: var(--gold); }
-  .condo-selector { margin: 0 0.75rem 0.5rem; background: rgba(255,255,255,0.06); border-radius: 8px; padding: 8px 10px; }
-  .condo-selector label { font-size: 0.68rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,0.3); display: block; margin-bottom: 4px; }
-  .condo-selector select { width: 100%; background: transparent; border: none; outline: none; color: var(--white); font-family: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
-  .condo-selector select option { background: var(--navy); }
-  .sidebar-section { padding: 0 0.75rem; margin-bottom: 0.25rem; }
-  .sidebar-section-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0.75rem 0.5rem 0.4rem; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.6); transition: all var(--transition); margin-bottom: 2px; }
-  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
-  .nav-item:hover { background: rgba(255,255,255,0.07); color: var(--white); }
-  .nav-item.active { background: rgba(232,163,32,0.15); color: #F5C35A; }
-  .nav-item.active svg { opacity: 1; }
-  .sidebar-bottom { margin-top: auto; padding: 1rem 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); }
-  .user-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,0.06); }
-  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--navy); flex-shrink: 0; }
-  .user-name { font-size: 0.82rem; font-weight: 600; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
-  .user-role-lbl { font-size: 0.7rem; color: rgba(255,255,255,0.4); }
-  .logout-btn { margin-left: auto; background: none; border: none; cursor: pointer; padding: 4px; color: rgba(255,255,255,0.4); }
-  .logout-btn:hover { color: var(--white); }
-  .logout-btn svg { width: 15px; height: 15px; }
-  .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
-  .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 40; }
-  .topbar h1 { font-size: 1rem; font-weight: 700; color: var(--navy); }
-  .topbar p { font-size: 0.75rem; color: var(--text-light); }
-  .topbar-right { display: flex; gap: 10px; }
-  .btn-sm { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; font-family: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all var(--transition); text-decoration: none; border: none; }
-  .btn-primary-sm { background: var(--navy); color: var(--white); }
-  .btn-primary-sm:hover { background: var(--navy-light); }
-  .btn-ghost-sm { background: var(--off-white); color: var(--text-mid); border: 1px solid var(--border); }
-  .btn-ghost-sm:hover { background: var(--border); }
-  .content { padding: 1.75rem 2rem; flex: 1; }
-
-
-*{box-sizing:border-box;margin:0;padding:0}
-
-
-.nav-brand{display:flex;align-items:center;gap:10px;margin-right:32px;text-decoration:none}
-.nav-logo{width:36px;height:36px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
-.nav-brand-text{font-size:13px;font-weight:700;color:var(--text-dark);line-height:1.2}
-.nav-brand-text span{display:block;font-size:10px;color:var(--text-light);font-weight:400}
-.nav-links{display:flex;gap:4px}
-.nav-links a{color:var(--text-light);text-decoration:none;padding:8px 14px;border-radius:6px;font-size:13px;transition:.2s}
-.nav-links a:hover{background:var(--border);color:var(--text-dark)}
-.nav-links a.active{background:var(--gold);color:var(--off-white);font-weight:700}
-.nav-right{margin-left:auto;display:flex;align-items:center;gap:14px}
-.nav-role{background:var(--gold)20;border:1px solid var(--gold)40;color:var(--gold);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
-.nav-user{font-size:13px;color:var(--text-mid)}
-
-main{max-width:1200px;margin:0 auto;padding:28px 24px}
-
-/* HEADER */
-.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:16px;flex-wrap:wrap}
-.page-title{font-size:24px;font-weight:700}
-.page-sub{font-size:14px;color:var(--text-mid);margin-top:4px}
-
-/* FILTROS */
-.filtros-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;align-items:center}
-.btn-mes{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:rgba(241,245,249,.55);font-size:12px;font-weight:600;cursor:pointer;transition:.2s;font-family:inherit}
-.btn-mes:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
-.btn-mes.ativo{background:var(--gold)20;border-color:var(--gold);color:var(--gold);font-weight:700}
-.btn-mes:disabled{opacity:.3;cursor:default}
-.btn-todos{padding:5px 14px;border-radius:20px;border:1px solid var(--gold);background:var(--gold)20;color:var(--gold);font-size:12px;font-weight:700;cursor:pointer;transition:.2s;font-family:inherit}
-.sep{width:1px;height:20px;background:var(--border)}
-
-/* MÉTRICAS */
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-.mc{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
-.mc-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:rgba(241,245,249,.3);margin-bottom:8px}
-.mc-val{font-size:24px;font-weight:700;line-height:1;margin-bottom:4px}
-.mc-sub{font-size:12px;color:rgba(241,245,249,.35)}
-.g{color:#22c55e}.r{color:#ef4444}.o{color:var(--gold)}.b{color:#3b82f6}
-
-/* GRID */
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
-.card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px}
-.ct{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(241,245,249,.35);margin-bottom:16px}
-.prog{height:6px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:2px}
-
-/* TABELA COMPARATIVA */
-.comp-table{width:100%;border-collapse:collapse;font-size:12px}
-.comp-table th{text-align:right;padding:8px 10px;color:rgba(241,245,249,.35);font-weight:700;font-size:10px;text-transform:uppercase;border-bottom:1px solid var(--border)}
-.comp-table th:first-child{text-align:left}
-.comp-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)}
-.comp-table td:first-child{text-align:left;font-weight:600;color:var(--text-dark)}
-.comp-table td:not(:first-child){text-align:right;color:rgba(241,245,249,.65)}
-.comp-table tr:hover td{background:rgba(245,166,35,.03)}
-.comp-table tfoot td{font-weight:700;color:var(--gold);border-top:2px solid var(--border);background:rgba(245,166,35,.04)}
-
-/* PROJEÇÃO */
-.proj-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04)}
-.proj-row:last-child{border:none}
-.proj-mes{min-width:32px;font-size:11px;font-weight:700;color:rgba(241,245,249,.5)}
-.proj-bar-wrap{flex:1;height:5px;background:#1e2130;border-radius:99px;overflow:hidden}
-.proj-bar{height:100%;border-radius:99px;transition:width .6s}
-.proj-val{text-align:right;min-width:90px;font-size:12px}
-.proj-ico{min-width:16px;font-size:9px}
-
-/* LOADER */
-.loader{text-align:center;padding:60px;color:rgba(241,245,249,.25);font-size:14px}
-
-@media(max-width:768px){
-  .metrics{grid-template-columns:1fr 1fr}
-  .g2{grid-template-columns:1fr}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy: #0B1F3A; --navy-light: #142D52; --gold: #E8A320; --gold-light: #F5B93A;
+  --white: #FFFFFF; --off-white: #F4F2ED; --border: #DDD9D0; --border-light: #EAE7E0;
+  --text-dark: #0D1B2A; --text-mid: #3D526B; --text-light: #7A8FA6;
+  --green: #15803D; --green-light: #22C55E; --green-bg: #DCFCE7; --green-border: #86EFAC;
+  --red: #B91C1C; --red-light: #EF4444; --red-bg: #FEE2E2; --red-border: #FCA5A5;
+  --amber: #B45309; --amber-bg: #FEF3C7; --amber-border: #FCD34D;
+  --blue: #1D4ED8; --blue-bg: #EFF6FF; --blue-border: #93C5FD;
+  --purple: #7C3AED; --purple-bg: #F5F3FF;
+  --sidebar-w: 240px; --radius: 14px; --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
 }
 
+body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--off-white); color: var(--text-dark); display: flex; min-height: 100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar { width: var(--sidebar-w); background: var(--navy); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; overflow-y: auto; }
+.sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 1.4rem 1.25rem 1.2rem; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 0.5rem; }
+.logo-icon { width: 34px; height: 34px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.logo-icon svg { width: 18px; height: 18px; }
+.logo-name { font-size: 1.05rem; font-weight: 800; color: var(--white); }
+.logo-name span { color: var(--gold); }
+.condo-selector { margin: 0 0.75rem 0.5rem; background: rgba(255,255,255,0.07); border-radius: 8px; padding: 9px 12px; border: 1px solid rgba(255,255,255,0.07); }
+.condo-selector label { font-size: 0.65rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: rgba(255,255,255,0.35); display: block; margin-bottom: 4px; }
+.condo-selector div { color: var(--white); font-size: 0.84rem; font-weight: 700; }
+.sidebar-section { padding: 0 0.75rem; margin-bottom: 0.2rem; }
+.sidebar-section-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.28); padding: 0.8rem 0.5rem 0.35rem; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; text-decoration: none; font-size: 0.84rem; font-weight: 500; color: rgba(255,255,255,0.58); transition: all var(--transition); margin-bottom: 1px; }
+.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.65; }
+.nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.9); }
+.nav-item.active { background: rgba(232,163,32,0.18); color: #F5C35A; font-weight: 700; }
+.nav-item.active svg { opacity: 1; }
+.sidebar-bottom { margin-top: auto; padding: 1rem 0.75rem; border-top: 1px solid rgba(255,255,255,0.07); }
+.user-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,0.06); }
+.user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; color: var(--navy); flex-shrink: 0; }
+.user-name { font-size: 0.78rem; font-weight: 600; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+.user-role-lbl { font-size: 0.68rem; color: rgba(255,255,255,0.38); }
+.logout-btn { margin-left: auto; background: none; border: none; cursor: pointer; padding: 4px; color: rgba(255,255,255,0.35); transition: color .2s; }
+.logout-btn:hover { color: #FCA5A5; }
+.logout-btn svg { width: 15px; height: 15px; }
+
+/* ── MAIN ── */
+.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+.topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 62px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 40; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+.topbar h1 { font-size: 1.02rem; font-weight: 800; color: var(--navy); }
+.topbar p { font-size: 0.73rem; color: var(--text-light); margin-top:1px; }
+.content { padding: 1.75rem 2rem; flex: 1; }
+
+/* ── PAGE HEADER ── */
+main { max-width: 1280px; margin: 0 auto; }
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; gap: 16px; flex-wrap: wrap; }
+.page-title { font-size: 22px; font-weight: 800; color: var(--text-dark); }
+.page-sub { font-size: 13px; color: var(--text-light); margin-top: 4px; }
+
+/* ── FILTROS MÊS ── */
+.filtros-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 22px; align-items: center; background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; }
+.btn-mes { padding: 5px 13px; border-radius: 20px; border: 1px solid var(--border-light); background: transparent; color: var(--text-light); font-size: 12px; font-weight: 600; cursor: pointer; transition: .2s; font-family: inherit; }
+.btn-mes:hover:not(:disabled) { border-color: var(--gold); color: var(--amber); background: var(--amber-bg); }
+.btn-mes.ativo { background: var(--amber-bg); border-color: var(--amber-border); color: var(--amber); font-weight: 700; }
+.btn-mes:disabled { opacity: .3; cursor: default; }
+.btn-todos { padding: 5px 15px; border-radius: 20px; border: 2px solid var(--gold); background: var(--amber-bg); color: var(--amber); font-size: 12px; font-weight: 800; cursor: pointer; transition: .2s; font-family: inherit; }
+.btn-todos:hover { background: #FDE68A; }
+.sep { width: 1px; height: 20px; background: var(--border); margin: 0 2px; }
+
+/* ── KPI CARDS ── */
+.metrics { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 22px; }
+.mc { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 22px; position: relative; overflow: hidden; transition: box-shadow .2s; }
+.mc:hover { box-shadow: 0 4px 16px rgba(0,0,0,.07); }
+.mc-accent { position: absolute; top: 0; left: 0; width: 4px; height: 100%; border-radius: 14px 0 0 14px; }
+.mc-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-light); margin-bottom: 10px; }
+.mc-val { font-size: 26px; font-weight: 800; line-height: 1; margin-bottom: 6px; }
+.mc-sub { font-size: 12px; color: var(--text-light); display: flex; align-items: center; gap: 4px; }
+.mc-badge { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+.g { color: var(--green); }
+.r { color: var(--red-light); }
+.o { color: var(--amber); }
+.b { color: var(--blue); }
+.mc-rec .mc-accent { background: var(--green-light); }
+.mc-rec .mc-val { color: var(--green); }
+.mc-des .mc-accent { background: var(--red-light); }
+.mc-des .mc-val { color: var(--red); }
+.mc-sal .mc-accent { background: var(--blue); }
+.mc-proj { background: linear-gradient(135deg, #FFFBEB 0%, #FEF9EC 100%); border-color: var(--amber-border); }
+.mc-proj .mc-accent { background: var(--gold); }
+
+/* ── CARDS GERAIS ── */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+.card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
+.card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.05); }
+.ct { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: var(--text-light); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+.ct::before { content: ''; width: 3px; height: 14px; border-radius: 99px; background: var(--gold); display: inline-block; }
+.prog { height: 7px; background: var(--border-light); border-radius: 99px; overflow: hidden; margin-bottom: 3px; }
+
+/* ── TABELA COMPARATIVA ── */
+.comp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.comp-table th { text-align: right; padding: 10px 12px; color: var(--text-light); font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; border-bottom: 2px solid var(--border); background: var(--off-white); }
+.comp-table th:first-child { text-align: left; border-radius: 8px 0 0 0; }
+.comp-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-light); color: var(--text-dark); }
+.comp-table td:first-child { text-align: left; font-weight: 700; color: var(--text-dark); }
+.comp-table td:not(:first-child) { text-align: right; color: var(--text-mid); font-weight: 600; }
+.comp-table tr:hover td { background: #FAFAF8; }
+.comp-table tfoot td { font-weight: 800; color: var(--red); border-top: 2px solid var(--border); background: var(--red-bg); font-size: 12px; }
+.comp-table tfoot td:first-child { color: var(--text-dark); border-radius: 0 0 0 8px; }
+
+/* ── PROJEÇÃO ── */
+.proj-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border-light); }
+.proj-row:last-child { border: none; }
+.proj-mes { min-width: 32px; font-size: 11px; font-weight: 800; color: var(--text-mid); text-transform: uppercase; }
+.proj-bar-wrap { flex: 1; height: 6px; background: var(--border-light); border-radius: 99px; overflow: hidden; }
+.proj-bar { height: 100%; border-radius: 99px; transition: width .6s; }
+.proj-val { text-align: right; min-width: 96px; font-size: 12px; font-weight: 700; }
+.proj-ico { min-width: 18px; font-size: 10px; }
+
+/* ── LOADER ── */
+.loader { text-align: center; padding: 80px; color: var(--text-light); font-size: 14px; }
+
+/* ── SELECT ANO ── */
+#finAno { background: var(--navy); border: 1px solid rgba(255,255,255,.15); color: #fff; border-radius: 10px; padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+
+@media(max-width:768px){
+  .metrics { grid-template-columns: 1fr 1fr; }
+  .g2 { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
@@ -388,33 +390,53 @@ async function carregar(){
     // ── RENDER ────────────────────────────────────────────
     document.getElementById('conteudo').innerHTML = `
       <!-- KPIs -->
-      <div class="metrics" style="margin-bottom:20px">
-        <div class="mc">
-          <div class="mc-lbl">Receitas — ${labelPeriodo}</div>
-          <div class="mc-val g">${brl(totalRec)}</div>
-          <div class="mc-sub">${mesFiltrado ? _mesesSel.length+' mês(es)' : mesesComDados.length+' meses c/ dados'}</div>
+      <div class="metrics">
+        <div class="mc mc-rec">
+          <div class="mc-accent"></div>
+          <div class="mc-lbl">💰 Receitas — ${labelPeriodo}</div>
+          <div class="mc-val">${brl(totalRec)}</div>
+          <div class="mc-sub">
+            <span class="mc-badge" style="background:var(--green-bg);color:var(--green)">▲ ${mesFiltrado ? _mesesSel.length+' mês(es)' : mesesComDados.length+' meses'}</span>
+          </div>
         </div>
-        <div class="mc">
-          <div class="mc-lbl">Despesas — ${labelPeriodo}</div>
-          <div class="mc-val r">${brl(totalDes)}</div>
-          <div class="mc-sub">${catsMes.length} categorias</div>
+        <div class="mc mc-des">
+          <div class="mc-accent"></div>
+          <div class="mc-lbl">💸 Despesas — ${labelPeriodo}</div>
+          <div class="mc-val">${brl(totalDes)}</div>
+          <div class="mc-sub">
+            <span class="mc-badge" style="background:var(--red-bg);color:var(--red)">${catsMes.length} categorias</span>
+          </div>
         </div>
-        <div class="mc">
-          <div class="mc-lbl">Saldo — ${labelPeriodo}</div>
-          <div class="mc-val ${saldo>=0?'g':'r'}">${brl(saldo)}</div>
-          <div class="mc-sub" style="color:${saldo>=0?'#22c55e':'#ef4444'}">${saldo>=0?'↑ Superávit':'↓ Déficit'}</div>
+        <div class="mc mc-sal">
+          <div class="mc-accent" style="background:${saldo>=0?'var(--blue)':'var(--red-light)'}"></div>
+          <div class="mc-lbl">⚖️ Saldo — ${labelPeriodo}</div>
+          <div class="mc-val" style="color:${saldo>=0?'var(--blue)':'var(--red)'}">${brl(saldo)}</div>
+          <div class="mc-sub">
+            <span class="mc-badge" style="background:${saldo>=0?'var(--blue-bg)':'var(--red-bg)'};color:${saldo>=0?'var(--blue)':'var(--red)'}">
+              ${saldo>=0?'✓ Superávit':'✗ Déficit'}
+            </span>
+          </div>
         </div>
-        <div class="mc" style="background:rgba(245,166,35,.05);border:1px solid rgba(245,166,35,.15)">
-          <div class="mc-lbl" style="color:var(--gold)">📈 Projeção — próximo mês</div>
-          <div style="display:flex;flex-direction:column;gap:5px;margin-top:4px">
-            <div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:rgba(241,245,249,.4)">Receita est.</span><span style="font-size:13px;font-weight:700;color:#22c55e">${brl(mediaRec)}</span></div>
-            <div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:rgba(241,245,249,.4)">Despesa est.</span><span style="font-size:13px;font-weight:700;color:#ef4444">${brl(mediaDes)}</span></div>
-            <div style="border-top:1px solid rgba(245,166,35,.12);margin-top:3px;padding-top:5px;display:flex;justify-content:space-between">
-              <span style="font-size:11px;font-weight:700;color:var(--gold)">Saldo proj.</span>
-              <span style="font-size:15px;font-weight:800;color:${(mediaRec-mediaDes)>=0?'#22c55e':'#ef4444'}">${brl(mediaRec-mediaDes)}</span>
+        <div class="mc mc-proj">
+          <div class="mc-accent"></div>
+          <div class="mc-lbl" style="color:var(--amber)">📈 Projeção — próximo mês</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:11px;color:var(--text-light);font-weight:600">Receita est.</span>
+              <span style="font-size:14px;font-weight:800;color:var(--green)">${brl(mediaRec)}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:11px;color:var(--text-light);font-weight:600">Despesa est.</span>
+              <span style="font-size:14px;font-weight:800;color:var(--red)">${brl(mediaDes)}</span>
+            </div>
+            <div style="border-top:2px solid var(--amber-border);margin-top:2px;padding-top:8px;display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:11px;font-weight:800;color:var(--amber);text-transform:uppercase;letter-spacing:.05em">Saldo proj.</span>
+              <span style="font-size:18px;font-weight:800;color:${(mediaRec-mediaDes)>=0?'var(--green)':'var(--red)'}">${brl(mediaRec-mediaDes)}</span>
             </div>
           </div>
-          <div class="mc-sub" style="margin-top:5px">média ${mesesComDados.length} meses</div>
+          <div class="mc-sub" style="margin-top:8px;font-size:11px">
+            <span class="mc-badge" style="background:var(--amber-bg);color:var(--amber)">média ${mesesComDados.length} meses</span>
+          </div>
         </div>
       </div>
 
@@ -422,28 +444,29 @@ async function carregar(){
       <div class="g2">
         <div class="card">
           <div class="ct">Receitas × Despesas — ${ano}</div>
-          <div style="display:flex;align-items:flex-end;gap:5px;height:110px;padding-top:10px">
+          <div style="display:flex;align-items:flex-end;gap:5px;height:120px;padding-top:10px">
             ${porMes.map((m,i)=>{
-              const rH=Math.max(2,Math.round(m.rec/maxBar*90));
-              const dH=Math.max(2,Math.round(m.des/maxBar*90));
+              const rH=Math.max(2,Math.round(m.rec/maxBar*100));
+              const dH=Math.max(2,Math.round(m.des/maxBar*100));
               const futuro=ano===_anoHoje&&i>_mesHoje&&!m.rec&&!m.des;
               const sel=_mesesSel.includes(i);
-              return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;opacity:${futuro?.35:sel||!_mesesSel.length?1:.4};transition:.3s">
-                <div style="display:flex;align-items:flex-end;gap:2px;height:90px">
-                  <div style="width:8px;height:${rH}px;background:${futuro?'rgba(34,197,94,.2)':'#22c55e'};border-radius:3px 3px 0 0" title="Rec ${MESES_ABREV[i]}: ${brl(m.rec)}"></div>
-                  <div style="width:8px;height:${dH}px;background:${futuro?'rgba(239,68,68,.2)':'#ef4444'};border-radius:3px 3px 0 0" title="Des ${MESES_ABREV[i]}: ${brl(m.des)}"></div>
+              const isAtual = i === (ano===_anoHoje?_mesHoje:ultimoMes);
+              return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;opacity:${futuro?.3:sel||!_mesesSel.length?1:.45};transition:.3s;cursor:pointer" onclick="toggleMes(${i})">
+                <div style="display:flex;align-items:flex-end;gap:2px;height:100px">
+                  <div style="width:9px;height:${rH}px;background:${futuro?'#BBF7D0':'#16A34A'};border-radius:3px 3px 0 0;${isAtual?'box-shadow:0 0 0 2px #15803D40':''}" title="Receita ${MESES_ABREV[i]}: ${brl(m.rec)}"></div>
+                  <div style="width:9px;height:${dH}px;background:${futuro?'#FECACA':'#DC2626'};border-radius:3px 3px 0 0;${isAtual?'box-shadow:0 0 0 2px #B91C1C40':''}" title="Despesa ${MESES_ABREV[i]}: ${brl(m.des)}"></div>
                 </div>
-                <div style="font-size:9px;color:rgba(241,245,249,.3)">${MESES_ABREV[i]}</div>
+                <div style="font-size:9px;font-weight:${isAtual?700:600};color:${isAtual?'var(--amber)':'var(--text-light)'};text-transform:uppercase">${MESES_ABREV[i]}</div>
               </div>`;
             }).join('')}
           </div>
-          <div style="display:flex;gap:16px;margin-top:10px;font-size:11px;color:rgba(241,245,249,.35);justify-content:center">
-            <span><span style="display:inline-block;width:8px;height:8px;background:#22c55e;border-radius:2px;margin-right:4px"></span>Receita</span>
-            <span><span style="display:inline-block;width:8px;height:8px;background:#ef4444;border-radius:2px;margin-right:4px"></span>Despesa</span>
+          <div style="display:flex;gap:20px;margin-top:12px;font-size:11px;color:var(--text-mid);justify-content:center;padding-top:10px;border-top:1px solid var(--border-light)">
+            <span style="display:flex;align-items:center;gap:5px;font-weight:600"><span style="display:inline-block;width:10px;height:10px;background:#16A34A;border-radius:3px"></span>Receitas</span>
+            <span style="display:flex;align-items:center;gap:5px;font-weight:600"><span style="display:inline-block;width:10px;height:10px;background:#DC2626;border-radius:3px"></span>Despesas</span>
           </div>
-          ${ultimoMes<11&&!mesFiltrado?`<div style="margin-top:12px;padding:10px 12px;background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.15);border-radius:8px;font-size:12px">
-            <span style="color:var(--gold);font-weight:700">📈 Projeção ${MESES_FULL[ultimoMes+1]} – Dez:</span>
-            <span style="color:rgba(241,245,249,.45);margin-left:8px">~ ${brl(mediaDes)}/mês = ${brl(mediaDes*(11-ultimoMes))} em ${11-ultimoMes} meses</span>
+          ${ultimoMes<11&&!mesFiltrado?`<div style="margin-top:12px;padding:11px 14px;background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:10px;font-size:12px;display:flex;justify-content:space-between;align-items:center">
+            <span style="color:var(--amber);font-weight:700">📈 Projeção ${MESES_FULL[ultimoMes+1]} – Dez</span>
+            <span style="color:var(--amber);font-weight:800">~ ${brl(mediaDes)}/mês</span>
           </div>`:''}
         </div>
 
@@ -461,27 +484,28 @@ async function carregar(){
               });
               if(vAnt>0) varPct=((data.val-vAnt)/vAnt*100);
             }
-            return `<div style="margin-bottom:13px">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-                <div style="display:flex;align-items:center;gap:7px">
-                  <span style="width:9px;height:9px;border-radius:50%;background:${CORES_CAT[ci%CORES_CAT.length]};display:inline-block;flex-shrink:0"></span>
-                  <span style="font-size:13px;color:rgba(241,245,249,.85);font-weight:600">${esc(nome)}</span>
+            return `<div style="margin-bottom:16px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="width:10px;height:10px;border-radius:3px;background:${CORES_CAT[ci%CORES_CAT.length]};display:inline-block;flex-shrink:0"></span>
+                  <span style="font-size:13px;color:var(--text-dark);font-weight:700">${esc(nome)}</span>
+                  <span style="font-size:10px;font-weight:700;color:var(--text-light);background:var(--off-white);border:1px solid var(--border);border-radius:20px;padding:1px 7px">${pct}%</span>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px">
-                  ${varPct!==null?`<span style="font-size:10px;font-weight:700;color:${varPct>0?'#ef4444':'#22c55e'}">${varPct>0?'▲':'▼'}${Math.abs(Math.round(varPct))}%</span>`:''}
-                  <span style="font-size:13px;font-weight:700;color:#f1f5f9">${brl(data.val)}</span>
-                  <span style="font-size:11px;color:rgba(241,245,249,.3);min-width:30px;text-align:right">${pct}%</span>
+                  ${varPct!==null?`<span style="font-size:10px;font-weight:800;padding:2px 6px;border-radius:20px;background:${varPct>0?'var(--red-bg)':'var(--green-bg)'};color:${varPct>0?'var(--red)':'var(--green)'}">${varPct>0?'▲':'▼'}${Math.abs(Math.round(varPct))}%</span>`:''}
+                  <span style="font-size:14px;font-weight:800;color:var(--text-dark)">${brl(data.val)}</span>
                 </div>
               </div>
-              <div class="prog"><div style="height:100%;width:${pctBar}%;background:${CORES_CAT[ci%CORES_CAT.length]};border-radius:99px;opacity:.75"></div></div>
-              <div style="margin-top:4px;padding-left:16px">
+              <div class="prog"><div style="height:100%;width:${pctBar}%;background:${CORES_CAT[ci%CORES_CAT.length]};border-radius:99px"></div></div>
+              <div style="margin-top:5px;padding-left:18px">
                 ${Object.entries(data.sub).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([s,v])=>`
-                  <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(241,245,249,.32);margin-top:2px">
-                    <span>└ ${esc(s)}</span><span>${brl(v)} (${Math.round(v/data.val*100)}%)</span>
+                  <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-light);margin-top:3px;padding:2px 0;border-bottom:1px dashed var(--border-light)">
+                    <span style="display:flex;align-items:center;gap:4px"><span style="color:var(--border)">└</span> ${esc(s)}</span>
+                    <span style="font-weight:700;color:var(--text-mid)">${brl(v)} <span style="color:var(--text-light);font-weight:500">(${Math.round(v/data.val*100)}%)</span></span>
                   </div>`).join('')}
               </div>
             </div>`;
-          }).join('') : '<div style="color:rgba(241,245,249,.25);font-size:13px;text-align:center;padding:20px">Sem despesas no período</div>'}
+          }).join('') : '<div style="color:var(--text-light);font-size:13px;text-align:center;padding:30px">Sem despesas no período</div>'}
         </div>
       </div>
 
@@ -549,18 +573,19 @@ async function carregar(){
             const futuro=i>ultimoMes;
             const atual=i===ultimoMes;
             const des=futuro?mediaDes:porMes[i].des;
+            const rec=futuro?mediaRec:porMes[i].rec;
             return `<div class="proj-row">
-              <div class="proj-mes" style="color:${atual?'var(--gold)':futuro?'rgba(241,245,249,.25)':'rgba(241,245,249,.55)'}">${MESES_ABREV[i]}</div>
+              <div class="proj-mes" style="color:${atual?'var(--amber)':futuro?'var(--text-light)':'var(--text-mid)'};${atual?'font-size:12px':''}">${MESES_ABREV[i]}</div>
               <div class="proj-bar-wrap">
-                <div class="proj-bar" style="width:${Math.round(des/Math.max(mediaDes,1)*70)}%;background:${futuro?'rgba(239,68,68,.25)':'#ef4444'};${futuro?'border:1px dashed rgba(239,68,68,.4)':''}"></div>
+                <div class="proj-bar" style="width:${Math.round(des/Math.max(mediaDes,maxBar/10,1)*70)}%;background:${futuro?'#FCA5A5':'var(--red-light)'};${futuro?'opacity:.5':''}"></div>
               </div>
-              <div class="proj-val" style="color:${atual?'var(--gold)':futuro?'rgba(241,245,249,.3)':'rgba(241,245,249,.65)'};font-weight:${atual?700:500};font-size:12px">${futuro?'~':''} ${brl(des)}</div>
-              <div class="proj-ico" style="color:${futuro?'rgba(241,245,249,.2)':'#22c55e'}">${futuro?'📊':des>0?'✓':''}</div>
+              <div class="proj-val" style="color:${atual?'var(--amber)':futuro?'var(--text-light)':'var(--text-dark)'};font-weight:${atual?800:600}">${futuro?'<span style="color:var(--text-light);font-size:10px">est.</span> ':''} ${brl(des)}</div>
+              <div class="proj-ico">${futuro?'<span style="color:var(--text-light);font-size:9px">―</span>':des>0?'<span style="color:var(--green);font-size:11px">✓</span>':''}</div>
             </div>`;
           }).join('')}
-          <div style="margin-top:10px;padding:9px 12px;background:var(--off-white);border-radius:8px;font-size:12px;display:flex;justify-content:space-between">
-            <span style="color:rgba(241,245,249,.35)">Projeção total ${ano}:</span>
-            <strong style="color:var(--gold)">${brl(totalDes + mediaDes*(11-ultimoMes))}</strong>
+          <div style="margin-top:12px;padding:12px 14px;background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:10px;font-size:13px;display:flex;justify-content:space-between;align-items:center">
+            <span style="color:var(--amber);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Projeção total ${ano}</span>
+            <strong style="color:var(--amber);font-size:16px;font-weight:800">${brl(totalDes + mediaDes*(11-ultimoMes))}</strong>
           </div>
         </div>
 
@@ -570,16 +595,19 @@ async function carregar(){
             const cat=catMap[t.categoria_id];
             const rec=t.tipo==='receita';
             const dp=t.data?t.data.split('-').reverse().slice(0,2).join('/'):'-';
-            return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)">
-              <div style="width:26px;height:26px;border-radius:7px;background:${rec?'rgba(34,197,94,.15)':'rgba(239,68,68,.15)'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:${rec?'#22c55e':'#ef4444'};flex-shrink:0">${rec?'↑':'↓'}</div>
+            return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-light)">
+              <div style="width:30px;height:30px;border-radius:8px;background:${rec?'var(--green-bg)':'var(--red-bg)'};border:1px solid ${rec?'var(--green-border)':'var(--red-border)'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:${rec?'var(--green)':'var(--red)'};flex-shrink:0">${rec?'↑':'↓'}</div>
               <div style="flex:1;min-width:0">
-                <div style="font-size:12px;color:#f1f5f9;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.descricao||'—')}</div>
-                <div style="font-size:10px;color:rgba(241,245,249,.3)">${dp}${cat?' · '+esc(cat.categoria||cat.nome||''):''}</div>
+                <div style="font-size:13px;color:var(--text-dark);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.descricao||'—')}</div>
+                <div style="font-size:11px;color:var(--text-light);margin-top:2px;display:flex;align-items:center;gap:5px">
+                  <span>${dp}</span>
+                  ${cat?`<span style="width:3px;height:3px;border-radius:50%;background:var(--border);display:inline-block"></span><span>${esc(cat.categoria||cat.nome||'')}</span>`:''}
+                </div>
               </div>
-              <div style="font-size:12px;font-weight:700;color:${rec?'#22c55e':'#ef6060'};white-space:nowrap">${rec?'+':'-'}${brl(t.valor)}</div>
+              <div style="font-size:14px;font-weight:800;color:${rec?'var(--green)':'var(--red)'};white-space:nowrap">${rec?'+':'-'}${brl(t.valor)}</div>
             </div>`;
           }).join('')}
-          ${!porMes[mesRef].trans.length?'<div style="color:rgba(241,245,249,.25);font-size:13px;text-align:center;padding:20px">Sem lançamentos</div>':''}
+          ${!porMes[mesRef].trans.length?'<div style="color:var(--text-light);font-size:13px;text-align:center;padding:30px">Sem lançamentos</div>':''}
         </div>
       </div>
     `;
