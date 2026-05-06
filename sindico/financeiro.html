@@ -137,7 +137,7 @@ main{max-width:1200px;margin:0 auto;padding:28px 24px}
   </a>
   <div class="condo-selector">
     <label>Condomínio</label>
-    <select id="select-condo" onchange="trocarCondo()"><option>Carregando...</option></select>
+    <div id="select-condo" style="color:var(--white);font-size:0.82rem;font-weight:600">Edifício Mandala</div>
   </div>
   <div class="sidebar-section">
     <div class="sidebar-section-label">Principal</div>
@@ -190,10 +190,20 @@ main{max-width:1200px;margin:0 auto;padding:28px 24px}
 </div>
 <script>
 // ── CONFIG ────────────────────────────────────────────────
-const SB_URL  = 'https://siczyohqmlrmirqgzlxb.supabase.co';
-const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw';
-const EMPRESA = 'mandala';
-const ADMINS  = ['admrafaelcavalcanti@gmail.com','tecnologia@smartdataconsultoria.com'];
+const SB_URL    = 'https://siczyohqmlrmirqgzlxb.supabase.co';
+const SB_KEY    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw';
+const CONDO_ID  = 'eefc41c0-519b-419b-847f-eb4724455baa';
+const EMPRESA   = 'mandala'; // mantido para compatibilidade
+const ADMINS    = ['admrafaelcavalcanti@gmail.com','tecnologia@smartdataconsultoria.com'];
+
+// ── LOGOUT ────────────────────────────────────────────────
+function fazerLogout(){
+  localStorage.removeItem('mandala_session');
+  localStorage.removeItem('mandala_perfil');
+  const k = Object.keys(localStorage).find(k=>k.includes('auth-token'));
+  if(k) localStorage.removeItem(k);
+  window.location.href = '/login.html';
+}
 
 const MESES_ABREV = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const MESES_FULL  = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -217,11 +227,18 @@ function hdrs(){ const tk=getToken(); return {'Content-Type':'application/json',
 
 // ── INIT ─────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', ()=>{
-  // Auth
+  // Auth — preenche nome e avatar na sidebar
   try{
+    let email = '';
     const sr = localStorage.getItem('mandala_session');
-    if(sr){ const s=JSON.parse(sr); const em=s?.email||s?.user?.email||''; document.getElementById('navUser').textContent=em; if(ADMINS.includes(em)||(localStorage.getItem('mandala_perfil')||'')==='sindico') document.getElementById('navRole').style.display='inline-flex'; }
-    else{ const k=Object.keys(localStorage).find(k=>k.includes('auth-token')); if(k){ const s=JSON.parse(localStorage.getItem(k)); document.getElementById('navUser').textContent=s?.user?.email||''; } }
+    if(sr){ const s=JSON.parse(sr); email=s?.email||s?.user?.email||''; }
+    else{ const k=Object.keys(localStorage).find(k=>k.includes('auth-token')); if(k){ const s=JSON.parse(localStorage.getItem(k)); email=s?.user?.email||''; } }
+    if(email){
+      const nameEl = document.getElementById('user-name');
+      const avatEl = document.getElementById('avatar-initials');
+      if(nameEl) nameEl.textContent = email;
+      if(avatEl) avatEl.textContent = email.substring(0,2).toUpperCase();
+    }
   }catch(e){}
 
   // Popular seletor de ano
@@ -272,8 +289,8 @@ async function carregar(){
 
   try{
     const [rTrans,rCats] = await Promise.all([
-      fetch(`${SB_URL}/rest/v1/condo_transacoes?empresa=eq.${EMPRESA}&data=gte.${primDia}&data=lte.${ultDia}&order=data.desc&limit=2000`,{headers:h}),
-      fetch(`${SB_URL}/rest/v1/condo_categorias?empresa=eq.${EMPRESA}`,{headers:h}),
+      fetch(`${SB_URL}/rest/v1/condo_transacoes?condominio_id=eq.${CONDO_ID}&data=gte.${primDia}&data=lte.${ultDia}&order=data.desc&limit=2000`,{headers:h}),
+      fetch(`${SB_URL}/rest/v1/condo_categorias?condominio_id=eq.${CONDO_ID}`,{headers:h}),
     ]);
     const trans  = rTrans.ok ? await rTrans.json() : [];
     const cats   = rCats.ok  ? await rCats.json()  : [];
