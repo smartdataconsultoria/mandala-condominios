@@ -638,7 +638,7 @@ function renderDocs(){
     return `<div class="doc-card${d.destaque?' destaque':''}" onclick="visualizar(${d.id})">
       <div class="doc-type-icon" style="background:${bg}">${cfg.icon}</div>
       <div class="doc-info">
-        <div class="doc-titulo">${d.titulo}${d.destaque?' ⭐':''}</div>
+        <div class="doc-titulo">${d.nome||'Sem título'}</div>
         <div class="doc-meta">
           <span class="doc-cat-badge ${cfg.cls}">${cfg.label}</span>
           ${d.subcategoria?`<span style="font-size:11px;color:var(--text-light)">${d.subcategoria}</span>`:''}
@@ -655,7 +655,7 @@ function renderDocs(){
         ${d.arquivo_url?`<button class="btn-action primary" onclick="verArquivo('${d.arquivo_url}')">👁 Ver</button>
           <a class="btn-action" href="${d.arquivo_url}" download="${d.arquivo_nome||'documento'}" style="text-decoration:none">⬇</a>`:''}
         <button class="btn-action" onclick="abrirModal(${d.id})">✏</button>
-        <button class="btn-action del" onclick="deletar(${d.id},'${(d.titulo||'').replace(/'/g,"\\'")}')">🗑</button>
+        <button class="btn-action del" onclick="deletar('${d.id}','${(d.nome||'').replace(/'/g,String.fromCharCode(39))}')">🗑</button>
       </div>
     </div>`;
   }).join('');
@@ -800,7 +800,7 @@ let _aprDocId=null;
 function abrirModalAprovacao(id){ showAlert('Funcionalidade de aprovação disponível em breve.','error'); return;
   _aprDocId=id;
   const d=_docs.find(d=>d.id===id); if(!d) return;
-  document.getElementById('aprTitulo').textContent=d.titulo;
+  document.getElementById('aprTitulo').textContent=d.nome||'—';
   const cfg=CAT_CONFIG[d.categoria]||CAT_CONFIG['Outro'];
   document.getElementById('aprMeta').textContent=`${cfg.label}${d.prop_prazo_decisao?' • Prazo: '+fmtDate(d.prop_prazo_decisao):''}${d.valor_contrato?' • '+fmt(d.valor_contrato):d.prop_valor?' • '+fmt(d.prop_valor):''}`;
   document.getElementById('aprDesc').textContent=d.prop_justificativa||d.descricao||'Sem descrição.';
