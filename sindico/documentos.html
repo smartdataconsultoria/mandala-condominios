@@ -621,7 +621,7 @@ function statusValidade(dataStr){
 // ── LOAD ─────────────────────────────────────────────────
 async function loadDocs(){
   const res = await fetch(
-    `${SUPA_URL}/rest/v1/condo_documentos?empresa=eq.${EMPRESA}&order=created_at.desc`,
+    `${SUPA_URL}/rest/v1/documentos?condominio_id=eq.${CONDO_ID}&order=criado_em.desc`,
     {headers:hdrs()}
   );
   if(!res.ok){ showAlert(`Erro ${res.status} ao carregar documentos`,'error'); return; }
@@ -633,8 +633,6 @@ async function loadDocs(){
 
 // ── STATS ─────────────────────────────────────────────────
 function renderStats(){
-  const hoje=new Date(); hoje.setHours(0,0,0,0);
-  const em30=new Date(hoje); em30.setDate(em30.getDate()+30);
   document.getElementById('stTodos').textContent    = _docs.length;
   document.getElementById('stAta').textContent      = _docs.filter(d=>d.categoria==='Ata').length;
   document.getElementById('stContrato').textContent = _docs.filter(d=>d.categoria==='Contrato').length;
@@ -644,9 +642,6 @@ function renderStats(){
 
 function renderSidebar(){
   const cnt = cat => _docs.filter(d=>d.categoria===cat).length;
-  const hoje=new Date(); hoje.setHours(0,0,0,0);
-  const em30=new Date(hoje); em30.setDate(em30.getDate()+30);
-  const props = _docs.filter(d=>d.categoria==='Proposta');
   document.getElementById('sbCTodos').textContent    = _docs.length;
   document.getElementById('sbCAta').textContent      = cnt('Ata');
   document.getElementById('sbCContrato').textContent = cnt('Contrato');
@@ -656,14 +651,15 @@ function renderSidebar(){
   document.getElementById('sbCReg').textContent      = cnt('Regimento');
   document.getElementById('sbCFin').textContent      = cnt('Financeiro');
   document.getElementById('sbCOut').textContent      = cnt('Outro');
-  document.getElementById('sbCProp').textContent     = props.length;
-  document.getElementById('sbAPub').textContent      = _docs.filter(d=>d.publicado).length;
-  document.getElementById('sbADest').textContent     = _docs.filter(d=>d.destaque).length;
-  document.getElementById('sbAVenc').textContent     = _docs.filter(d=>{ if(!d.data_validade) return false; const v=new Date(d.data_validade); return v>=hoje&&v<=em30; }).length;
-  document.getElementById('sbAExp').textContent      = _docs.filter(d=>d.data_validade&&new Date(d.data_validade)<hoje).length;
-  document.getElementById('sbAPend').textContent     = props.filter(d=>!d.aprovacao_status||d.aprovacao_status==='pendente').length;
-  document.getElementById('sbAAprov').textContent    = props.filter(d=>d.aprovacao_status==='aprovado').length;
-  document.getElementById('sbARej').textContent      = props.filter(d=>d.aprovacao_status==='rejeitado').length;
+  document.getElementById('sbCProp').textContent     = cnt('Proposta');
+  // campos extras não existem na tabela — zerar
+  document.getElementById('sbAPub').textContent  = '—';
+  document.getElementById('sbADest').textContent = '—';
+  document.getElementById('sbAVenc').textContent = '—';
+  document.getElementById('sbAExp').textContent  = '—';
+  document.getElementById('sbAPend').textContent = '—';
+  document.getElementById('sbAAprov').textContent= '—';
+  document.getElementById('sbARej').textContent  = '—';
 }
 
 // ── FILTROS ───────────────────────────────────────────────
@@ -697,26 +693,21 @@ function renderDocs(){
   const em30  = new Date(hoje); em30.setDate(em30.getDate()+30);
 
   let lista = _docs.filter(d=>{
-    if(_filtrosit==='publicado' && !d.publicado) return false;
-    if(_filtrosit==='destaque'  && !d.destaque)  return false;
-    if(_filtrosit==='vencendo'){ if(!d.data_validade) return false; const v=new Date(d.data_validade); if(v<hoje||v>em30) return false; }
-    if(_filtrosit==='vencido'){  if(!d.data_validade) return false; if(new Date(d.data_validade)>=hoje) return false; }
-    if(_filtrosit==='pendente'){  if(d.categoria!=='Proposta') return false; if(d.aprovacao_status&&d.aprovacao_status!=='pendente') return false; }
-    if(_filtrosit==='aprovado'){  if(d.categoria!=='Proposta'||d.aprovacao_status!=='aprovado') return false; }
-    if(_filtrosit==='rejeitado'){ if(d.categoria!=='Proposta'||d.aprovacao_status!=='rejeitado') return false; }
     if(!_filtrosit && _filtrocat==='__outros__' && ['Ata','Contrato','Nota Fiscal'].includes(d.categoria)) return false;
     if(!_filtrosit && _filtrocat!=='Todos' && _filtrocat!=='__outros__' && d.categoria!==_filtrocat) return false;
-    if(busca && !(d.titulo?.toLowerCase().includes(busca)||d.descricao?.toLowerCase().includes(busca)||d.prestador_nome?.toLowerCase().includes(busca)||d.categoria?.toLowerCase().includes(busca))) return false;
+    if(busca && !(
+      d.nome?.toLowerCase().includes(busca) ||
+      d.categoria?.toLowerCase().includes(busca)
+    )) return false;
     return true;
   });
 
   lista.sort((a,b)=>{
-    if(sort==='data_asc')  return (a.data_documento||a.created_at)>(b.data_documento||b.created_at)?1:-1;
-    if(sort==='titulo')    return a.titulo.localeCompare(b.titulo);
-    if(sort==='categoria') return a.categoria.localeCompare(b.categoria);
-    return (b.data_documento||b.created_at)>(a.data_documento||a.created_at)?1:-1;
+    if(sort==='data_asc')  return a.criado_em > b.criado_em ? 1 : -1;
+    if(sort==='titulo')    return (a.nome||'').localeCompare(b.nome||'');
+    if(sort==='categoria') return (a.categoria||'').localeCompare(b.categoria||'');
+    return b.criado_em > a.criado_em ? 1 : -1;
   });
-  lista.sort((a,b)=>(!b.destaque-!a.destaque));
 
   const grid = document.getElementById('docsGrid');
   if(!lista.length){ grid.innerHTML='<div class="empty-state">📭 Nenhum documento encontrado.</div>'; return; }
@@ -772,28 +763,22 @@ function fecharModal(){ document.getElementById('modalBg').classList.remove('ope
 function limparModal(){
   ['fTitulo','fSub','fData','fValidade','fPrestNome','fPrestCnpj','fPrestServ','fValor','fDesc','fObs','fPropValor','fPropPrazo','fPropJustif'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('fCategoria').value='';
-  document.getElementById('fPublicado').checked=true;
-  document.getElementById('fDestaque').checked=false;
-  document.getElementById('boxPrestador').classList.remove('show');
-  document.getElementById('boxProposta').classList.remove('show');
+  const pubEl=document.getElementById('fPublicado'); if(pubEl) pubEl.checked=true;
+  const destEl=document.getElementById('fDestaque'); if(destEl) destEl.checked=false;
+  const bpEl=document.getElementById('boxPrestador'); if(bpEl) bpEl.classList.remove('show');
+  const bprEl=document.getElementById('boxProposta'); if(bprEl) bprEl.classList.remove('show');
   removerArquivo();
 }
 function preencherModal(d){
   const set=(id,v)=>{ const el=document.getElementById(id); if(el&&v!=null) el.value=v; };
-  set('fTitulo',d.titulo); set('fSub',d.subcategoria);
-  set('fCategoria',d.categoria); set('fData',d.data_documento);
-  set('fValidade',d.data_validade);
-  set('fPrestNome',d.prestador_nome); set('fPrestCnpj',d.prestador_cnpj);
-  set('fPrestServ',d.prestador_servico); set('fValor',d.valor_contrato);
-  set('fDesc',d.descricao); set('fObs',d.observacao);
-  document.getElementById('fPublicado').checked = d.publicado!==false;
-  document.getElementById('fDestaque').checked  = !!d.destaque;
+  set('fTitulo', d.nome);       // campo real: nome
+  set('fCategoria', d.categoria);
   onCatChange();
-  if(d.arquivo_url){
+  if(d.url){
     document.getElementById('uploadArea').style.display='none';
-    document.getElementById('fileIcon').textContent = FILE_ICONS[d.arquivo_tipo]||'📄';
-    document.getElementById('fileName').textContent = d.arquivo_nome||'arquivo';
-    document.getElementById('fileSize').textContent = d.arquivo_tamanho ? fmtSize(d.arquivo_tamanho) : 'Arquivo existente';
+    document.getElementById('fileIcon').textContent = '📄';
+    document.getElementById('fileName').textContent = d.nome||'arquivo';
+    document.getElementById('fileSize').textContent = 'Arquivo existente';
     document.getElementById('filePreview').classList.add('show');
   }
 }
@@ -842,47 +827,39 @@ async function salvar(){
   if(!cat)   { showAlert('Selecione a categoria.','error'); return; }
   const btn=document.getElementById('btnSalvar');
   btn.disabled=true; btn.textContent='Salvando...';
-  const payload={
-    empresa:EMPRESA, titulo, categoria:cat,
-    subcategoria:     document.getElementById('fSub').value.trim()||null,
-    data_documento:   document.getElementById('fData').value||null,
-    data_validade:    document.getElementById('fValidade').value||null,
-    descricao:        document.getElementById('fDesc').value.trim()||null,
-    observacao:       document.getElementById('fObs').value.trim()||null,
-    prestador_nome:   document.getElementById('fPrestNome').value.trim()||null,
-    prestador_cnpj:   document.getElementById('fPrestCnpj').value.trim()||null,
-    prestador_servico:document.getElementById('fPrestServ').value.trim()||null,
-    valor_contrato:   parseBR(document.getElementById('fValor').value)||null,
-    publicado:        cat==='Proposta' ? false : document.getElementById('fPublicado').checked,
-    destaque:         document.getElementById('fDestaque').checked,
-    cadastrado_por:   getToken()?'sindico':'admin',
-    arquivo_nome:     _arquivo?.name||null,
-    arquivo_tipo:     _arquivo?.type||null,
-    arquivo_tamanho:  _arquivo?.size||null,
-    prop_valor:        cat==='Proposta'?(parseBR(document.getElementById('fPropValor').value)||null):null,
-    prop_prazo_decisao:cat==='Proposta'?(document.getElementById('fPropPrazo').value||null):null,
-    prop_justificativa:cat==='Proposta'?(document.getElementById('fPropJustif').value.trim()||null):null,
-    aprovacao_status:  cat==='Proposta'&&!_editId?'pendente':undefined,
+  // Payload com os campos REAIS da tabela: id, condominio_id, nome, categoria, url, enviado_por, criado_em
+  const payload = {
+    condominio_id: CONDO_ID,
+    nome:          titulo,
+    categoria:     cat,
+    url:           null, // preenchido após upload
   };
-  Object.keys(payload).forEach(k=>payload[k]===undefined&&delete payload[k]);
-  const h=hdrs(); let savedId=_editId;
+  const h = hdrs(); let savedId = _editId;
   try{
-    let res,json;
+    let res, json;
     if(_editId){
-      res=await fetch(`${SUPA_URL}/rest/v1/condo_documentos?id=eq.${_editId}`,{method:'PATCH',headers:{...h,'Prefer':'return=representation'},body:JSON.stringify(payload)});
+      res = await fetch(`${SUPA_URL}/rest/v1/documentos?id=eq.${_editId}&condominio_id=eq.${CONDO_ID}`,
+        {method:'PATCH', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify({nome:titulo, categoria:cat})});
     } else {
-      res=await fetch(`${SUPA_URL}/rest/v1/condo_documentos`,{method:'POST',headers:{...h,'Prefer':'return=representation'},body:JSON.stringify(payload)});
+      res = await fetch(`${SUPA_URL}/rest/v1/documentos`,
+        {method:'POST', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)});
     }
-    json=await res.json();
-    if(!res.ok){ showAlert(`❌ Erro ${res.status}: ${(Array.isArray(json)?json[0]:json)?.message||JSON.stringify(json)},'error'`); btn.disabled=false; btn.textContent='💾 Salvar Documento'; return; }
-    savedId=(Array.isArray(json)?json[0]:json)?.id||savedId;
-    if(_arquivo&&savedId){
+    json = await res.json();
+    if(!res.ok){
+      showAlert(`❌ Erro ${res.status}: ${(Array.isArray(json)?json[0]:json)?.message||JSON.stringify(json)}`,'error');
+      btn.disabled=false; btn.textContent='💾 Salvar Documento'; return;
+    }
+    savedId = (Array.isArray(json)?json[0]:json)?.id || savedId;
+
+    // Upload do arquivo e atualiza url
+    if(_arquivo && savedId){
       btn.textContent='Enviando arquivo...';
-      const up=await uploadArquivo(_arquivo,savedId);
+      const up = await uploadArquivo(_arquivo, savedId);
       if(up){
-        await fetch(`${SUPA_URL}/rest/v1/condo_documentos?id=eq.${savedId}`,{method:'PATCH',headers:h,body:JSON.stringify({arquivo_url:up.url,arquivo_nome:_arquivo.name})});
+        await fetch(`${SUPA_URL}/rest/v1/documentos?id=eq.${savedId}&condominio_id=eq.${CONDO_ID}`,
+          {method:'PATCH', headers:h, body:JSON.stringify({url: up.url})});
       } else {
-        showAlert('⚠️ Documento salvo, mas falha no upload. Verifique o bucket no Supabase Storage.','error');
+        showAlert('⚠️ Documento salvo, mas falha no upload do arquivo.','error');
       }
     }
     showAlert(_editId?'✅ Documento atualizado!':'✅ Documento cadastrado com sucesso!');
@@ -892,11 +869,12 @@ async function salvar(){
 }
 
 // ── VER / DELETAR ─────────────────────────────────────────
-function visualizar(id){ const d=_docs.find(d=>d.id===id); if(d?.arquivo_url) verArquivo(d.arquivo_url); }
+function visualizar(id){ const d=_docs.find(d=>d.id===id); if(d?.url) verArquivo(d.url); }
 function verArquivo(url){ window.open(url,'_blank'); }
 async function deletar(id,titulo){
   if(!confirm(`Excluir "${titulo}"?\nEsta ação não pode ser desfeita.`)) return;
-  const res=await fetch(`${SUPA_URL}/rest/v1/condo_documentos?id=eq.${id}&empresa=eq.${EMPRESA}`,{method:'DELETE',headers:{...hdrs(),'Prefer':'return=representation'}});
+  const res=await fetch(`${SUPA_URL}/rest/v1/documentos?id=eq.${id}&condominio_id=eq.${CONDO_ID}`,
+    {method:'DELETE',headers:{...hdrs(),'Prefer':'return=representation'}});
   if(res.ok){ showAlert('Documento removido.'); await loadDocs(); }
   else showAlert('Erro ao remover.','error');
 }
@@ -951,7 +929,7 @@ async function registrarDecisao(decisao){
   const hoje=`${yy}-${mm}-${dd}`;
   const hist=d.aprovacao_historico||[];
   hist.push({decisao,parecer,membro:membro||'Conselho Fiscal',data:fmtDate(hoje)});
-  const res=await fetch(`${SUPA_URL}/rest/v1/condo_documentos?id=eq.${_aprDocId}`,{
+  const res=await fetch(`${SUPA_URL}/rest/v1/documentos?id=eq.${_aprDocId}`,{
     method:'PATCH',headers:hdrs(),
     body:JSON.stringify({aprovacao_status:decisao,aprovacao_por:membro||'Conselho Fiscal',aprovacao_data:hoje,aprovacao_parecer:parecer,aprovacao_historico:hist,publicado:decisao==='aprovado'?true:d.publicado})
   });
