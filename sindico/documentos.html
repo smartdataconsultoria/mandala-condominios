@@ -654,7 +654,7 @@ function renderDocs(){
         </div>
       </div>
       <div class="doc-actions" onclick="event.stopPropagation()">
-        ${d.url ? `<button class="btn-action primary" onclick="verArquivo('${urlSegura}')" title="Visualizar">👁 Ver</button><a class="btn-action" href="${urlSegura}" download target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;gap:4px">⬇ Baixar</a>` : ''}
+        ${d.url ? `<button class="btn-action primary" onclick="verArquivo('${urlSegura}')" title="Visualizar">👁 Ver</button><button class="btn-action" onclick="downloadArquivo('${urlSegura}','${(d.nome||'documento').replace(/'/g,'')}')" title="Baixar">⬇ Baixar</button>` : ''}
         <button class="btn-action" onclick="abrirModal('${d.id}')" title="Editar">✏</button>
         <button class="btn-action del" onclick="deletar('${d.id}','${nomeSeguro}')" title="Excluir">🗑</button>
       </div>
@@ -786,8 +786,39 @@ async function salvar(){
   btn.disabled=false; btn.textContent='💾 Salvar Documento';
 }
 
+// ── DOWNLOAD FORÇADO ─────────────────────────────────────
+async function downloadArquivo(url, nome){
+  try{
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = nome || 'documento';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  } catch(e){
+    // Fallback: abrir em nova aba se fetch falhar
+    window.open(url, '_blank');
+  }
+}
+
 // ── VER / DELETAR ─────────────────────────────────────────
 function visualizar(id){ const d=_docs.find(d=>d.id===id); if(d?.url) verArquivo(d.url); }
+async function downloadArquivo(url, nome){
+  try{
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = nome || 'documento';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  } catch(e){
+    window.open(url, '_blank');
+  }
+}
 function verArquivo(url){ window.open(url,'_blank'); }
 async function deletar(id,titulo){
   if(!confirm(`Excluir "${titulo}"?\nEsta ação não pode ser desfeita.`)) return;
