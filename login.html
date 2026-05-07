@@ -129,18 +129,18 @@
 
   // ✅ FUNÇÃO AJUSTADA (ESSENCIAL)
   function traduzirErro(msg) {
-    const erros = {
-      'Invalid login credentials': 'E-mail ou senha incorretos.',
-      'Too many requests': 'Muitas tentativas. Aguarde alguns minutos.'
-    }
-
-    // ✅ Não bloqueia mais login por confirmação de e-mail
-    if (msg === 'Email not confirmed') {
-      return 'Conta em sincronização. Tente novamente em alguns segundos.'
-    }
-
-    return erros[msg] ?? 'Erro ao fazer login. Tente novamente.'
+  const erros = {
+    'Invalid login credentials': 'E-mail ou senha incorretos.',
+    'Too many requests': 'Muitas tentativas. Aguarde alguns minutos.'
   }
+
+  // ✅ Não bloqueia mais login por confirmação de e-mail
+  if (msg === 'Email not confirmed') {
+    return 'Conta em sincronização. Tente novamente em alguns segundos.'
+  }
+
+  return erros[msg] ?? 'Erro ao fazer login. Tente novamente.'
+}
 
   // Se já estiver logado, redireciona direto
   const { data: { session } } = await supabase.auth.getSession()
