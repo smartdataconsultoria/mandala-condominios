@@ -104,14 +104,29 @@
   .toast.error { background: var(--red); }
   .spinner { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  .condo-selector { margin: 0 0.75rem 0.5rem; background: rgba(255,255,255,0.07); border-radius: 8px; padding: 9px 12px; border: 1px solid rgba(255,255,255,0.07); }
+  .condo-selector label { font-size: 0.65rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: rgba(255,255,255,0.35); display: block; margin-bottom: 4px; }
+  .condo-selector div { color: var(--white); font-size: 0.84rem; font-weight: 700; }
+  .user-role-lbl { font-size: 0.68rem; color: rgba(255,255,255,0.38); }
+  /* KPI cards */
+  .kpis { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 1.5rem; }
+  .kpi { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.25rem; position: relative; overflow: hidden; }
+  .kpi-accent { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 99px 0 0 99px; }
+  .kpi-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-light); margin-bottom: 6px; }
+  .kpi-val { font-size: 1.6rem; font-weight: 800; color: var(--navy); line-height: 1; }
+  .kpi-sub { font-size: 0.75rem; color: var(--text-light); margin-top: 6px; }
+  @media(max-width:900px){ .kpis { grid-template-columns: repeat(2,1fr); } }
 </style>
 </head>
 <body>
 <aside class="sidebar">
   <a href="/sindico/dashboard.html" class="sidebar-logo">
-    <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="#0B1F3A" stroke-width="2.5" stroke-linejoin="round"/><path d="M9 22V12h6v10" stroke="#0B1F3A" stroke-width="2.5"/></svg></div>
     <span class="logo-name">Condo<span>Gestor</span></span>
   </a>
+  <div class="condo-selector">
+    <label>Condomínio</label>
+    <div id="select-condo">Carregando...</div>
+  </div>
   <div class="sidebar-section">
     <div class="sidebar-section-label">Principal</div>
     <a href="/sindico/dashboard.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
@@ -122,12 +137,15 @@
   <div class="sidebar-section">
     <div class="sidebar-section-label">Financeiro</div>
     <a href="/sindico/financeiro.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Financeiro</a>
+    <a href="/sindico/transacoes.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Transações</a>
+    <a href="/sindico/categorias.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Categorias</a>
+    <a href="/sindico/metas.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Metas & Projetos</a>
     <a href="/sindico/orcamento.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Orçamento</a>
   </div>
   <div class="sidebar-bottom">
     <div class="user-card">
       <div class="user-avatar" id="avatar-initials">--</div>
-      <div><div class="user-name" id="user-name">Carregando...</div><div class="user-sub">Síndico</div></div>
+      <div><div class="user-name" id="user-name">Carregando...</div><div class="user-role-lbl">Síndico</div></div>
       <button class="logout-btn" onclick="fazerLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
     </div>
   </div>
@@ -136,9 +154,20 @@
 <div class="main">
   <header class="topbar">
     <div><h1>Chamados</h1><p id="subtitulo">Carregando...</p></div>
-    <div class="topbar-right"></div>
+    <div class="topbar-right">
+      <button class="btn-sm btn-primary-sm" onclick="abrirNovoModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Novo Chamado
+      </button>
+    </div>
   </header>
   <div class="content">
+    <div class="kpis" id="kpis">
+      <div class="kpi"><div class="kpi-accent" style="background:var(--amber)"></div><div class="kpi-label">Total de Chamados</div><div class="kpi-val" id="kpi-total">—</div><div class="kpi-sub">registrados</div></div>
+      <div class="kpi"><div class="kpi-accent" style="background:var(--red)"></div><div class="kpi-label">Abertos</div><div class="kpi-val" id="kpi-abertos" style="color:var(--red)">—</div><div class="kpi-sub">aguardando resposta</div></div>
+      <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-label">Em Andamento</div><div class="kpi-val" id="kpi-andamento" style="color:var(--blue)">—</div><div class="kpi-sub">sendo tratados</div></div>
+      <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-label">Resolvidos</div><div class="kpi-val" id="kpi-resolvidos" style="color:var(--green)">—</div><div class="kpi-sub">concluídos</div></div>
+    </div>
     <div class="filters">
       <div class="search-box">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -216,11 +245,23 @@
   const statusBadge = { aberto: 'badge-amber', em_andamento: 'badge-blue', resolvido: 'badge-green', cancelado: 'badge-gray' }
   const priorBadge  = { urgente: 'badge-red', normal: 'badge-amber', baixa: 'badge-green' }
 
+  // Popula nome do condomínio
+  try {
+    const { data: condo } = await supabase.from('condominios').select('nome').eq('id', perfil.condominio_id).single()
+    if (condo) document.getElementById('select-condo').textContent = condo.nome
+  } catch(e) {}
+
   async function carregar() {
     const { data } = await supabase.from('chamados').select('*').eq('condominio_id', perfil.condominio_id).order('criado_em', { ascending: false })
     chamados = data || []
-    const abertos = chamados.filter(c => c.status === 'aberto').length
+    const abertos    = chamados.filter(c => c.status === 'aberto').length
+    const andamento  = chamados.filter(c => c.status === 'em_andamento').length
+    const resolvidos = chamados.filter(c => c.status === 'resolvido').length
     document.getElementById('subtitulo').textContent = `${chamados.length} chamado${chamados.length!==1?'s':''} · ${abertos} aberto${abertos!==1?'s':''}`
+    document.getElementById('kpi-total').textContent     = chamados.length
+    document.getElementById('kpi-abertos').textContent   = abertos
+    document.getElementById('kpi-andamento').textContent = andamento
+    document.getElementById('kpi-resolvidos').textContent= resolvidos
     renderizar(chamados)
   }
 
@@ -299,6 +340,16 @@
   }
 
   await carregar()
+
+  window.abrirNovoModal = function() {
+    chamadoAtualId = null
+    document.getElementById('modal-titulo').textContent = 'Novo Chamado'
+    document.getElementById('modal-info').innerHTML = '<span style="color:var(--text-light);font-size:0.82rem">Preencha os dados do novo chamado.</span>'
+    document.getElementById('f-resposta').value = ''
+    document.getElementById('f-status').value   = 'aberto'
+    document.getElementById('btn-salvar').textContent = 'Abrir chamado'
+    document.getElementById('modal-overlay').classList.add('open')
+  }
 </script>
 </body>
 </html>
