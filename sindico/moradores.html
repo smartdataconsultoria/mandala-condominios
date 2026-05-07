@@ -401,61 +401,32 @@ input[type=file]#fFoto{display:none}
         </div>
       </div>
 
-      <!-- EMAIL 1 -->
+      <!-- CONTATO E ACESSO -->
+      <div class="grid2">
+        <div class="field">
+          <label>E-mail</label>
+          <input id="fEmail" type="email" placeholder="email@exemplo.com" oninput="verificarEmailAuth('1')"/>
+          <div id="statusAcessoPortal" style="margin-top:4px;font-size:11px;display:none"></div>
+        </div>
+        <div class="field">
+          <label>Telefone</label>
+          <input id="fTel" type="text" placeholder="(81) 99999-9999" oninput="mascaraTel(this)"/>
+        </div>
+      </div>
+
       <div class="acesso-box">
-        <div class="acesso-box-title amber">👤 Acesso 1 — Titular</div>
-        <div class="grid2" style="margin-bottom:10px">
-          <div class="field" style="margin:0">
-            <label>E-mail</label>
-            <input id="fEmail" type="email" placeholder="email@exemplo.com" oninput="verificarEmailAuth('1')"/>
-          </div>
-          <div class="field" style="margin:0">
-            <label>Telefone Principal</label>
-            <input id="fTel" type="text" placeholder="(81) 99999-9999" oninput="mascaraTel(this)"/>
-          </div>
-        </div>
-        <div class="field" style="margin:0 0 6px">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:12px;color:#1a1d27;font-weight:600">
-            <input type="checkbox" id="fCriarAcesso" onchange="toggleCampoSenha('1')" style="width:15px;height:15px;accent-color:#f5a623"/>
-            🔑 Criar acesso ao portal
-          </label>
-          <div id="statusAcessoPortal" style="margin-top:5px;font-size:11px;display:none"></div>
-        </div>
+        <div class="acesso-box-title amber">🔑 Acesso ao Portal</div>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:#1a1d27;font-weight:600;margin-bottom:10px">
+          <input type="checkbox" id="fCriarAcesso" onchange="toggleCampoSenha('1')" style="width:16px;height:16px;accent-color:#f5a623"/>
+          Criar senha de acesso para este morador
+        </label>
         <div class="field" id="campoSenha" style="display:none;margin:0">
-          <label>Senha Inicial</label>
+          <label>Senha inicial</label>
           <div style="position:relative">
             <input id="fSenha" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/>
             <button type="button" onclick="toggleSenha('fSenha')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;font-size:15px">👁</button>
           </div>
-        </div>
-      </div>
-
-      <!-- EMAIL 2 -->
-      <div class="acesso-box">
-        <div class="acesso-box-title purple">👤 Acesso 2 — Cônjuge / Segundo Morador</div>
-        <div class="grid2" style="margin-bottom:10px">
-          <div class="field" style="margin:0">
-            <label>E-mail 2</label>
-            <input id="fEmail2" type="email" placeholder="email2@exemplo.com" oninput="verificarEmailAuth('2')"/>
-          </div>
-          <div class="field" style="margin:0">
-            <label>Telefone Secundário</label>
-            <input id="fTel2" type="text" placeholder="(81) 99999-9999" oninput="mascaraTel(this)"/>
-          </div>
-        </div>
-        <div class="field" style="margin:0 0 6px">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:12px;color:#1a1d27;font-weight:600">
-            <input type="checkbox" id="fCriarAcesso2" onchange="toggleCampoSenha('2')" style="width:15px;height:15px;accent-color:#7c3aed"/>
-            🔑 Criar acesso ao portal
-          </label>
-          <div id="statusAcessoPortal2" style="margin-top:5px;font-size:11px;display:none"></div>
-        </div>
-        <div class="field" id="campoSenha2" style="display:none;margin:0">
-          <label>Senha Inicial</label>
-          <div style="position:relative">
-            <input id="fSenha2" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/>
-            <button type="button" onclick="toggleSenha('fSenha2')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;font-size:15px">👁</button>
-          </div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:5px">O morador usará o e-mail acima + esta senha para entrar no portal</div>
         </div>
       </div>
     </div>
@@ -693,10 +664,10 @@ function renderCards(){
     if(_filtro==='inativo'      && m.ativo)  return false;
     if(_filtro==='proprietario' && m.tipo_ocupacao!=='proprietario') return false;
     if(_filtro==='inquilino'    && m.tipo_ocupacao!=='inquilino') return false;
-    if(filtApto && m.apartamento!==filtApto) return false;
+    if(filtApto && m.unidade!==filtApto) return false;
     if(busca && !(
       m.nome?.toLowerCase().includes(busca) ||
-      m.apartamento?.toLowerCase().includes(busca) ||
+      m.unidade?.toLowerCase().includes(busca) ||
       m.cpf?.includes(busca) ||
       m.email?.toLowerCase().includes(busca)
     )) return false;
@@ -713,7 +684,7 @@ function renderCards(){
     const residentes = m.residentes || [];
     const pets       = m.pets || [];
     const tipoLabel  = m.tipo_ocupacao==='proprietario' ? 'Proprietário' : 'Inquilino';
-    const aptoLabel  = m.bloco ? `Apto ${m.apartamento} — Bloco ${m.bloco}` : `Apto ${m.apartamento}`;
+    const aptoLabel  = m.bloco ? `Apto ${m.unidade} — Bloco ${m.bloco}` : m.unidade ? `Apto ${m.unidade}` : 'Sem apto';
     const avatarBg   = m.tipo_ocupacao==='proprietario'
       ? 'linear-gradient(135deg,#f5a623,#e09210)'
       : 'linear-gradient(135deg,#3b82f6,#1d4ed8)';
@@ -808,8 +779,8 @@ function preencherModal(m){
   const set = (id,v) => { const el=document.getElementById(id); if(el&&v!=null) el.value=v; };
   set('fNome',m.nome);
   set('fEmail',m.email);
-  set('fTel',m.telefone);
-  set('fApto',m.unidade);
+  set('fTel',m.telefone||'');
+  set('fApto',m.unidade||'');
   set('fBloco',m.bloco);
   set('fTipoOcup',m.role||'morador');
   if(m.ativo!=null) document.getElementById('fAtivo').checked = m.ativo;
