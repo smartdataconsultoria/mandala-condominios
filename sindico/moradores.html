@@ -991,11 +991,17 @@ async function salvar(){
     json = await res.json();
 
     if(!res.ok){
-      const msg = json?.message || json?.hint || JSON.stringify(json);
+      const errData = Array.isArray(json) ? json[0] : json;
+      const msg  = errData?.message || errData?.hint || errData?.details || JSON.stringify(json);
+      const code = errData?.code || '';
       let dica = '';
-      if(res.status===401) dica = ' — JWT expirado. Faça logout e login novamente.';
-      if(res.status===403) dica = ' — Sem permissão (RLS). Desabilite no Supabase.';
-      showAlert(`❌ Erro ${res.status}: ${msg}${dica}`, 'error');
+      if(res.status===401) dica = ' — Sessão expirada. Faça logout e login novamente.';
+      if(res.status===403) dica = ' — Sem permissão. Rode no Supabase: ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;';
+      if(res.status===409) dica = ' — E-mail já cadastrado neste condomínio.';
+      if(code==='23502')   dica = ' — Campo obrigatório vazio.';
+      if(code==='23503')   dica = ' — Referência inválida (condominio_id).';
+      console.error('Supabase error:', JSON.stringify(json));
+      showAlert(`❌ Erro ${res.status} [${code}]: ${msg}${dica}`, 'error');
       btn.disabled=false; btn.textContent='💾 Salvar Morador';
       return;
     }
