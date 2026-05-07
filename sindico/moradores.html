@@ -6,66 +6,38 @@
 <title>Moradores — CondoGestor</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',sans-serif;background:#f0ede8;color:#1a1d27;min-height:100vh;display:flex}
-
-/* ═══════════ SIDEBAR ═══════════ */
-.sidebar{width:200px;min-height:100vh;background:#1a1d27;display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;height:100vh;overflow-y:auto}
-
-.sidebar-brand{padding:18px 16px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #2a2d3e;text-decoration:none}
+body{font-family:'Segoe UI',sans-serif;background:#f0ede8;color:#1a1d27;min-height:100vh;display:flex}/* ═══════════ SIDEBAR ═══════════ */
+.sidebar{width:200px;min-height:100vh;background:#1a1d27;display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;height:100vh;overflow-y:auto}.sidebar-brand{padding:18px 16px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #2a2d3e;text-decoration:none}
 .sidebar-logo{width:36px;height:36px;background:#f5a623;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .sidebar-brand-text{font-size:14px;font-weight:800;color:#f1f5f9;letter-spacing:.02em;line-height:1}
-.sidebar-brand-text span{display:block;font-size:10px;color:#64748b;font-weight:400;margin-top:2px}
-
-.sidebar-condo{padding:12px 16px 8px;border-bottom:1px solid #2a2d3e20}
+.sidebar-brand-text span{display:block;font-size:10px;color:#64748b;font-weight:400;margin-top:2px}.sidebar-condo{padding:12px 16px 8px;border-bottom:1px solid #2a2d3e20}
 .sidebar-condo-label{font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
 .sidebar-condo-name{font-size:13px;font-weight:600;color:#f1f5f9;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
-.sidebar-condo-name svg{width:12px;height:12px;fill:#64748b}
-
-.sidebar-section{padding:16px 16px 4px}
-.sidebar-section-label{font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
-
-.sidebar-nav{display:flex;flex-direction:column;gap:2px;padding:0 8px}
+.sidebar-condo-name svg{width:12px;height:12px;fill:#64748b}.sidebar-section{padding:16px 16px 4px}
+.sidebar-section-label{font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}.sidebar-nav{display:flex;flex-direction:column;gap:2px;padding:0 8px}
 .sidebar-link{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;text-decoration:none;font-size:13px;color:#94a3b8;transition:.15s;cursor:pointer}
 .sidebar-link:hover{background:#2a2d3e;color:#f1f5f9}
 .sidebar-link.active{background:#2a2d3e;color:#f5a623;font-weight:600}
 .sidebar-link svg{width:16px;height:16px;flex-shrink:0;fill:currentColor;opacity:.7}
-.sidebar-link.active svg{opacity:1}
-
-.sidebar-sep{height:1px;background:#2a2d3e;margin:10px 16px}
-
-.sidebar-bottom{margin-top:auto;padding:14px 16px;border-top:1px solid #2a2d3e}
+.sidebar-link.active svg{opacity:1}.sidebar-sep{height:1px;background:#2a2d3e;margin:10px 16px}.sidebar-bottom{margin-top:auto;padding:14px 16px;border-top:1px solid #2a2d3e}
 .sidebar-user{display:flex;align-items:center;gap:10px}
 .sidebar-avatar{width:30px;height:30px;border-radius:50%;background:#f5a62330;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
 .sidebar-user-info{flex:1;min-width:0}
 .sidebar-user-name{font-size:12px;font-weight:600;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sidebar-logout{font-size:11px;color:#64748b;text-decoration:none;margin-top:2px;display:block;transition:.15s}
-.sidebar-logout:hover{color:#ef4444}
-
-/* ═══════════ MAIN WRAPPER ═══════════ */
-.main-wrapper{margin-left:200px;flex:1;min-height:100vh;display:flex;flex-direction:column}
-
-/* TOP BAR */
+.sidebar-logout:hover{color:#ef4444}/* ═══════════ MAIN WRAPPER ═══════════ */
+.main-wrapper{margin-left:200px;flex:1;min-height:100vh;display:flex;flex-direction:column}/* TOP BAR */
 .topbar{background:#fff;border-bottom:1px solid #e2e0da;padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .topbar-title{font-size:16px;font-weight:700;color:#1a1d27}
-.topbar-subtitle{font-size:12px;color:#94a3b8;margin-top:1px}
-
-/* PAGE CONTENT */
-.page{padding:28px 28px 40px;flex:1}
-
-/* ALERT */
+.topbar-subtitle{font-size:12px;color:#94a3b8;margin-top:1px}/* PAGE CONTENT */
+.page{padding:28px 28px 40px;flex:1}/* ALERT */
 .alert{padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:20px;display:none;border:1px solid}
 .alert.success{background:#f0fdf4;border-color:#bbf7d0;color:#15803d}
-.alert.error{background:#fff1f2;border-color:#fecdd3;color:#be123c}
-
-/* PAGE HEADER */
+.alert.error{background:#fff1f2;border-color:#fecdd3;color:#be123c}/* PAGE HEADER */
 .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:12px}
 .page-header-left h1{font-size:22px;font-weight:700;color:#1a1d27}
-.page-header-left p{font-size:13px;color:#94a3b8;margin-top:3px}
-
-.btn-new{background:#1a1d27;color:#f5a623;border:none;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.2s;white-space:nowrap}
-.btn-new:hover{background:#2a2d3e;transform:translateY(-1px)}
-
-/* STATS */
+.page-header-left p{font-size:13px;color:#94a3b8;margin-top:3px}.btn-new{background:#1a1d27;color:#f5a623;border:none;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.2s;white-space:nowrap}
+.btn-new:hover{background:#2a2d3e;transform:translateY(-1px)}/* STATS */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
 .stat{background:#fff;border:1px solid #e2e0da;border-radius:12px;padding:18px 20px}
 .stat-label{font-size:10px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
@@ -73,9 +45,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f0ede8;color:#1a1d27;min-heig
 .stat-val.green{color:#22c55e}
 .stat-val.blue{color:#3b82f6}
 .stat-val.purple{color:#a855f7}
-.stat-val.amber{color:#f5a623}
-
-/* CONTROLS */
+.stat-val.amber{color:#f5a623}/* CONTROLS */
 .controls{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
 .search-box{flex:1;min-width:220px;position:relative}
 .search-box input{width:100%;background:#fff;border:1px solid #e2e0da;border-radius:10px;padding:9px 14px 9px 38px;color:#1a1d27;font-size:13px;outline:none;transition:.2s}
@@ -86,12 +56,8 @@ body{font-family:'Segoe UI',sans-serif;background:#f0ede8;color:#1a1d27;min-heig
 .filter-select:focus{border-color:#1a1d27}
 .filter-chip{background:#fff;border:1px solid #e2e0da;color:#64748b;padding:8px 16px;border-radius:20px;font-size:12px;cursor:pointer;transition:.2s;font-weight:500}
 .filter-chip.active{background:#1a1d27;border-color:#1a1d27;color:#f5a623;font-weight:700}
-.filter-chip:not(.active):hover{background:#f8f7f5;border-color:#1a1d27;color:#1a1d27}
-
-/* MORADORES GRID */
-.moradores-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
-
-/* MORADOR CARD */
+.filter-chip:not(.active):hover{background:#f8f7f5;border-color:#1a1d27;color:#1a1d27}/* MORADORES GRID */
+.moradores-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}/* MORADOR CARD */
 .morador-card{background:#fff;border:1px solid #e2e0da;border-radius:14px;overflow:hidden;transition:.2s;cursor:pointer}
 .morador-card:hover{border-color:#1a1d2740;transform:translateY(-2px);box-shadow:0 8px 24px #1a1d2715}
 .card-top{padding:18px 18px 14px;display:flex;align-items:flex-start;gap:14px}
@@ -117,28 +83,18 @@ body{font-family:'Segoe UI',sans-serif;background:#f0ede8;color:#1a1d27;min-heig
 .btn-icon:hover{background:#e2e0da;color:#1a1d27}
 .btn-icon.del:hover{background:#fff1f2;color:#be123c;border-color:#fecdd3}
 .empty-state{text-align:center;padding:60px;color:#94a3b8;grid-column:1/-1;font-size:14px}
-.loading{text-align:center;padding:60px;color:#94a3b8;grid-column:1/-1}
-
-/* ═══════════ MODAL ═══════════ */
+.loading{text-align:center;padding:60px;color:#94a3b8;grid-column:1/-1}/* ═══════════ MODAL ═══════════ */
 .modal-bg{position:fixed;inset:0;background:#1a1d2780;display:none;align-items:flex-start;justify-content:center;z-index:999;overflow-y:auto;padding:20px 16px;backdrop-filter:blur(2px)}
 .modal-bg.open{display:flex}
-.modal{background:#fff;border:1px solid #e2e0da;border-radius:16px;width:100%;max-width:760px;margin:auto;box-shadow:0 20px 60px #1a1d2720}
-
-.modal-header{padding:22px 24px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #f0ede8}
+.modal{background:#fff;border:1px solid #e2e0da;border-radius:16px;width:100%;max-width:760px;margin:auto;box-shadow:0 20px 60px #1a1d2720}.modal-header{padding:22px 24px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #f0ede8}
 .modal-title{font-size:17px;font-weight:700;flex:1;color:#1a1d27}
 .modal-close{background:none;border:1px solid #e2e0da;color:#64748b;font-size:16px;cursor:pointer;line-height:1;padding:4px 8px;border-radius:8px;transition:.2s}
-.modal-close:hover{background:#f8f7f5;color:#1a1d27}
-
-.modal-tabs{display:flex;gap:0;padding:0 24px;border-bottom:1px solid #f0ede8;background:#f8f7f5}
+.modal-close:hover{background:#f8f7f5;color:#1a1d27}.modal-tabs{display:flex;gap:0;padding:0 24px;border-bottom:1px solid #f0ede8;background:#f8f7f5}
 .modal-tab{padding:12px 16px;font-size:12px;font-weight:600;color:#94a3b8;cursor:pointer;border-bottom:2px solid transparent;transition:.2s;background:none;border-top:none;border-left:none;border-right:none}
 .modal-tab:hover{color:#1a1d27}
-.modal-tab.active{color:#1a1d27;border-bottom-color:#f5a623}
-
-.modal-body{padding:20px 24px;background:#fff}
+.modal-tab.active{color:#1a1d27;border-bottom-color:#f5a623}.modal-body{padding:20px 24px;background:#fff}
 .tab-content{display:none}
-.tab-content.active{display:block}
-
-/* FORM */
+.tab-content.active{display:block}/* FORM */
 .section-title{font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;margin-top:20px;display:flex;align-items:center;gap:8px}
 .section-title:first-child{margin-top:0}
 .section-title::after{content:'';flex:1;height:1px;background:#f0ede8}
@@ -150,9 +106,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f0ede8;color:#1a1d27;min-heig
 .field input:focus,.field select:focus,.field textarea:focus{border-color:#1a1d27;background:#fff;box-shadow:0 0 0 3px #1a1d2710}
 .field select option{background:#fff}
 .field textarea{resize:vertical;min-height:70px}
-.field-hint{font-size:11px;color:#94a3b8;margin-top:4px}
-
-/* TOGGLE */
+.field-hint{font-size:11px;color:#94a3b8;margin-top:4px}/* TOGGLE */
 .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0ede8}
 .toggle-label{font-size:13px;color:#64748b;display:flex;align-items:center;gap:8px}
 .switch{position:relative;width:44px;height:24px;flex-shrink:0}
@@ -160,33 +114,25 @@ body{font-family:'Segoe UI',sans-serif;background:#f0ede8;color:#1a1d27;min-heig
 .switch .slider{position:absolute;inset:0;background:#e2e0da;border-radius:24px;cursor:pointer;transition:.3s}
 .switch .slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:#94a3b8;border-radius:50%;transition:.3s}
 .switch input:checked+.slider{background:#1a1d27}
-.switch input:checked+.slider::before{transform:translateX(20px);background:#f5a623}
-
-/* LISTA DINÂMICA */
+.switch input:checked+.slider::before{transform:translateX(20px);background:#f5a623}/* LISTA DINÂMICA */
 .lista-dinamica{display:flex;flex-direction:column;gap:10px;margin-top:10px}
 .lista-item{background:#f8f7f5;border:1px solid #e2e0da;border-radius:10px;padding:14px;position:relative}
 .lista-item .remove-item{position:absolute;top:10px;right:10px;background:none;border:none;color:#be123c;cursor:pointer;font-size:14px;padding:2px 6px;border-radius:6px;transition:.2s}
 .lista-item .remove-item:hover{background:#fff1f2}
 .btn-add-item{background:none;border:1px dashed #e2e0da;color:#94a3b8;width:100%;padding:10px;border-radius:8px;cursor:pointer;font-size:13px;transition:.2s;margin-top:8px}
-.btn-add-item:hover{border-color:#1a1d27;color:#1a1d27;background:#f8f7f5}
-
-/* FOTO UPLOAD */
+.btn-add-item:hover{border-color:#1a1d27;color:#1a1d27;background:#f8f7f5}/* FOTO UPLOAD */
 .foto-upload{display:flex;align-items:center;gap:16px;margin-bottom:16px}
 .foto-preview{width:80px;height:80px;border-radius:12px;background:#f0ede8;display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;flex-shrink:0;border:2px solid #e2e0da}
 .foto-preview img{width:100%;height:100%;object-fit:cover}
 .foto-btn{background:none;border:1px solid #e2e0da;color:#64748b;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;transition:.2s}
 .foto-btn:hover{background:#f0ede8;color:#1a1d27}
-input[type=file]#fFoto{display:none}
-
-/* MODAL FOOTER */
+input[type=file]#fFoto{display:none}/* MODAL FOOTER */
 .modal-footer{display:flex;gap:10px;justify-content:flex-end;padding:18px 24px;border-top:1px solid #f0ede8;background:#f8f7f5;border-radius:0 0 16px 16px}
 .btn-cancel{background:none;border:1px solid #e2e0da;color:#64748b;padding:10px 20px;border-radius:8px;font-size:13px;cursor:pointer;transition:.2s}
 .btn-cancel:hover{background:#e2e0da;color:#1a1d27}
 .btn-save{background:#1a1d27;color:#f5a623;border:none;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;transition:.2s}
 .btn-save:hover{background:#2a2d3e}
-.btn-save:disabled{opacity:.5;cursor:not-allowed}
-
-/* DETALHE */
+.btn-save:disabled{opacity:.5;cursor:not-allowed}/* DETALHE */
 .detalhe-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .detalhe-item{padding:10px 0;border-bottom:1px solid #f0ede8}
 .detalhe-label{font-size:10px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
@@ -194,9 +140,7 @@ input[type=file]#fFoto{display:none}
 .detalhe-val.empty{color:#94a3b8;font-style:italic}
 .residente-card{background:#f8f7f5;border:1px solid #e2e0da;border-radius:8px;padding:12px;margin-bottom:8px}
 .residente-nome{font-size:13px;font-weight:600;color:#1a1d27}
-.residente-info{font-size:11px;color:#64748b;margin-top:2px}
-
-/* Acesso box */
+.residente-info{font-size:11px;color:#64748b;margin-top:2px}/* Acesso box */
 .acesso-box{background:#f8f7f5;border:1px solid #e2e0da;border-radius:10px;padding:14px;margin-bottom:12px}
 .acesso-box-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
 .acesso-box-title.amber{color:#d97706}
@@ -585,10 +529,8 @@ function getToken(){
 }
 function hdrs(){
   const tk = getToken();
-  return {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${tk||SUPA_KEY}`};
-}
-
-// ── UTILS ────────────────────────────────────────────────
+  return {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization': `Bearer ${tk || SUPA_KEY}`};
+}// ── UTILS ────────────────────────────────────────────────
 function showAlert(msg,type='success'){
   const el=document.getElementById('alert');
   el.textContent=msg; el.className=`alert ${type}`; el.style.display='block';
@@ -610,9 +552,7 @@ function mascaraTel(el){
     ? v.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3')
     : v.replace(/(\d{2})(\d{4})(\d{4})/,'($1) $2-$3');
   el.value = v;
-}
-
-// ── LOAD ─────────────────────────────────────────────────
+}// ── LOAD ─────────────────────────────────────────────────
 async function loadMoradores(){
   const res = await fetch(
     `${SUPA_URL}/rest/v1/usuarios?condominio_id=eq.${CONDO_ID}&order=unidade,nome`,
@@ -622,11 +562,9 @@ async function loadMoradores(){
   renderStats();
   renderFiltroApto();
   renderCards();
-}
-
-function renderStats(){
+}function renderStats(){
   const ativos    = _moradores.filter(m=>m.ativo);
-  const pendentes = _moradores.filter(m=>!m.ativo || m.status==='pendente');
+  const pendentes = _moradores.filter(m=>!m.ativo || || m.status==='pendente');
   const aptos     = [...new Set(ativos.map(m=>m.unidade))].length;
   document.getElementById('statAptos').textContent        = aptos;
   document.getElementById('statAtivos').textContent       = ativos.length;
@@ -638,23 +576,17 @@ function renderStats(){
     pendEl.textContent = pendentes.length;
     pendEl.parentElement.style.display = pendentes.length > 0 ? 'block' : 'none';
   }
-}
-
-function renderFiltroApto(){
+}function renderFiltroApto(){
   const aptos = [...new Set(_moradores.map(m=>m.unidade).filter(Boolean))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
   const sel = document.getElementById('filtroApto');
   sel.innerHTML = '<option value="">Todos os aptos</option>' +
     aptos.map(a=>`<option value="${a}">Apto ${a}</option>`).join('');
-}
-
-function setFiltro(f,el){
+}function setFiltro(f,el){
   _filtro = f;
   document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
   renderCards();
-}
-
-function renderCards(){
+}function renderCards(){
   const busca    = document.getElementById('busca').value.toLowerCase();
   const filtApto = document.getElementById('filtroApto').value;
 
@@ -677,9 +609,7 @@ function renderCards(){
   if(lista.length===0){
     grid.innerHTML='<div class="empty-state">Nenhum morador encontrado.</div>';
     return;
-  }
-
-  grid.innerHTML = lista.map(m=>{
+  }  grid.innerHTML = lista.map(m=>{
     const residentes = m.residentes || [];
     const pets       = m.pets || [];
     const tipoLabel  = m.tipo_ocupacao==='proprietario' ? 'Proprietário' : 'Inquilino';
@@ -711,21 +641,17 @@ function renderCards(){
         <div class="card-contato">${m.telefone||m.email||'Sem contato'}</div>
         <div class="card-actions" onclick="event.stopPropagation()">
           <button class="btn-icon" onclick="abrirModal(${m.id})" title="Editar">✏</button>
-          <button class="btn-icon del" onclick="deletar(${m.id},'${m.nome.replace(/'/g,"'")}')">🗑</button>
+          <button class="btn-icon del" onclick="deletar(${m.id},'${m.nome.replace(/'/g,"\\'")}')">🗑</button>
         </div>
       </div>
     </div>`;
   }).join('');
-}
-
-// ── TABS DO MODAL ────────────────────────────────────────
+}// ── TABS DO MODAL ────────────────────────────────────────
 function setTab(idx, el){
   document.querySelectorAll('.tab-content').forEach((t,i)=>t.classList.toggle('active',i===idx));
   document.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-}
-
-// ── MODAL ────────────────────────────────────────────────
+}// ── MODAL ────────────────────────────────────────────────
 function abrirModal(id){
   _editId   = id || null;
   _fotoFile = null;
@@ -741,14 +667,10 @@ function abrirModal(id){
     document.getElementById('modalTitle').textContent = 'Cadastrar Morador';
   }
   document.getElementById('modalBg').classList.add('open');
-}
-
-function fecharModal(){
+}function fecharModal(){
   document.getElementById('modalBg').classList.remove('open');
   _editId = null; _fotoFile = null;
-}
-
-function limparModal(){
+}function limparModal(){
   ['fNome','fCpf','fRg','fEmail','fEmail2','fTel','fTel2','fApto','fBloco',
    'fEntrada','fSaida','fPlaca','fModelo','fCorVei','fVaga',
    'fEmergNome','fEmergTel','fObs','fNasc'].forEach(id=>{
@@ -772,9 +694,7 @@ function limparModal(){
   document.getElementById('listaResidentes').innerHTML = '';
   document.getElementById('listaPets').innerHTML = '';
   document.getElementById('fotoPreview').innerHTML = '👤';
-}
-
-function preencherModal(m){
+}function preencherModal(m){
   const set = (id,v) => { const el=document.getElementById(id); if(el&&v!=null) el.value=v; };
   set('fNome',m.nome);
   set('fEmail',m.email);
@@ -783,9 +703,7 @@ function preencherModal(m){
   set('fBloco',m.bloco);
   set('fTipoOcup',m.role||'morador');
   if(m.ativo!=null) document.getElementById('fAtivo').checked = m.ativo;
-}
-
-// ── FOTO ─────────────────────────────────────────────────
+}// ── FOTO ─────────────────────────────────────────────────
 function onFotoChange(){
   const file = document.getElementById('fFoto').files[0];
   if(!file) return;
@@ -796,9 +714,7 @@ function onFotoChange(){
     document.getElementById('fotoPreview').innerHTML = `<img src="${e.target.result}" alt="foto"/>`;
   };
   reader.readAsDataURL(file);
-}
-
-// ── RESIDENTES DINÂMICOS ─────────────────────────────────
+}// ── RESIDENTES DINÂMICOS ─────────────────────────────────
 function addResidente(dados){
   const d  = dados || {};
   const el = document.createElement('div');
@@ -817,15 +733,11 @@ function addResidente(dados){
         <input type="text" class="r-cpf" placeholder="000.000.000-00" value="${d.cpf||''}" oninput="mascaraCpf(this)"/></div>
     </div>`;
   document.getElementById('listaResidentes').appendChild(el);
-}
-
-// ── PETS DINÂMICOS ───────────────────────────────────────
+}// ── PETS DINÂMICOS ───────────────────────────────────────
 function togglePets(){
   const on = document.getElementById('fTemPet').checked;
   document.getElementById('petsArea').style.display = on ? 'block' : 'none';
-}
-
-function addPet(dados){
+}function addPet(dados){
   const d  = dados || {};
   const el = document.createElement('div');
   el.className = 'lista-item';
@@ -843,13 +755,9 @@ function addPet(dados){
         <input type="text" class="p-raca" placeholder="Ex: Labrador" value="${d.raca||''}"/></div>
     </div>`;
   document.getElementById('listaPets').appendChild(el);
-}
-
-function removeItem(btn, listaId){
+}function removeItem(btn, listaId){
   btn.closest('.lista-item').remove();
-}
-
-function coletarResidentes(){
+}function coletarResidentes(){
   return [...document.querySelectorAll('#listaResidentes .lista-item')].map(el=>({
     nome:       el.querySelector('.r-nome')?.value?.trim()||'',
     parentesco: el.querySelector('.r-par')?.value||'',
@@ -862,36 +770,28 @@ function coletarPets(){
     especie: el.querySelector('.p-esp')?.value||'',
     raca:    el.querySelector('.p-raca')?.value?.trim()||''
   })).filter(p=>p.nome);
-}
-
-// ── UPLOAD FOTO ───────────────────────────────────────────
+}// ── UPLOAD FOTO ───────────────────────────────────────────
 async function uploadFoto(file, moradorId){
   const ext  = file.name.split('.').pop();
   const path = `mandala/moradores/${moradorId}.${ext}`;
   const res  = await fetch(`${SUPA_URL}/storage/v1/object/moradores-fotos/${path}`,{
     method:'POST',
-    headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${getToken()||SUPA_KEY}`,'Content-Type':file.type},
+    headers:{'apikey':SUPA_KEY,'Authorization': `Bearer ${tk || SUPA_KEY}`,'Content-Type':file.type},
     body:file
   });
   return res.ok ? `${SUPA_URL}/storage/v1/object/public/moradores-fotos/${path}` : null;
-}
-
-// ── ACESSO AO PORTAL ─────────────────────────────────────
+}// ── ACESSO AO PORTAL ─────────────────────────────────────
 function toggleSenha(inputId){
   const inp = document.getElementById(inputId||'fSenha');
   if(inp) inp.type = inp.type==='password' ? 'text' : 'password';
-}
-
-function toggleCampoSenha(num){
+}function toggleCampoSenha(num){
   const sfx     = num==='2' ? '2' : '';
   const checked = document.getElementById('fCriarAcesso'+sfx).checked;
   const campo   = document.getElementById('campoSenha'+sfx);
   if(campo) campo.style.display = checked ? 'block' : 'none';
   const fSenha  = document.getElementById('fSenha'+sfx);
   if(fSenha && !checked) fSenha.value='';
-}
-
-async function verificarEmailAuth(num){
+}async function verificarEmailAuth(num){
   const sfx    = num==='2' ? '2' : '';
   const email  = document.getElementById('fEmail'+sfx)?.value.trim();
   const status = document.getElementById('statusAcessoPortal'+sfx);
@@ -917,9 +817,7 @@ async function verificarEmailAuth(num){
     status.style.cssText='display:block;color:#94a3b8;font-size:11px;margin-top:4px';
     chk.disabled=false;
   } catch(e){ status.style.display='none'; }
-}
-
-async function criarAcessoPortal(email, nome, apto, sfxNum){
+}async function criarAcessoPortal(email, nome, apto, sfxNum){
   const sfx   = sfxNum==='2' ? '2' : '';
   const senha = document.getElementById('fSenha'+sfx).value.trim();
   if(!senha || senha.length<6){
@@ -949,16 +847,12 @@ async function criarAcessoPortal(email, nome, apto, sfxNum){
     body: JSON.stringify({ ativo: true, status: 'aprovado' })
   });
   return true;
-}
-
-// ── SALVAR ────────────────────────────────────────────────
+}// ── SALVAR ────────────────────────────────────────────────
 async function salvar(){
   const nome = document.getElementById('fNome').value.trim();
   const apto = document.getElementById('fApto').value.trim();
   if(!nome){ showAlert('Informe o nome do morador.','error'); setTab(0,document.querySelectorAll('.modal-tab')[0]); return; }
-  if(!apto){ showAlert('Informe o número do apartamento.','error'); setTab(1,document.querySelectorAll('.modal-tab')[1]); return; }
-
-  const btn = document.getElementById('btnSalvar');
+  if(!apto){ showAlert('Informe o número do apartamento.','error'); setTab(1,document.querySelectorAll('.modal-tab')[1]); return; }  const btn = document.getElementById('btnSalvar');
   btn.disabled=true; btn.textContent='Salvando...';
 
   const emailVal = document.getElementById('fEmail').value.trim();
@@ -988,39 +882,29 @@ async function salvar(){
         const msg = (Array.isArray(json)?json[0]:json)?.message || JSON.stringify(json);
         showAlert(`❌ Erro ao atualizar: ${msg}`, 'error');
         btn.disabled=false; btn.textContent='💾 Salvar Morador'; return;
-      }
-
-      // Criar acesso se solicitado
+      }      // Criar acesso se solicitado
       const criarAcesso = document.getElementById('fCriarAcesso')?.checked;
       if(criarAcesso && emailVal){
         btn.textContent='Criando acesso...';
         await criarAcessoPortal(emailVal, nome, apto, '');
-      }
-
-      showAlert('✅ Morador atualizado!');
+      }      showAlert('✅ Morador atualizado!');
       fecharModal();
       await loadMoradores();
       btn.disabled=false; btn.textContent='💾 Salvar Morador';
       return;
-    }
-
-    // ── NOVO CADASTRO: precisa criar no Auth primeiro ─────────────────────────
+    }    // ── NOVO CADASTRO: precisa criar no Auth primeiro ─────────────────────────
     if(!emailVal){
       showAlert('Informe o e-mail para criar o cadastro.','error');
       setTab(0,document.querySelectorAll('.modal-tab')[0]);
       btn.disabled=false; btn.textContent='💾 Salvar Morador'; return;
-    }
-
-    const criarAcesso = document.getElementById('fCriarAcesso')?.checked;
+    }    const criarAcesso = document.getElementById('fCriarAcesso')?.checked;
     const senha = document.getElementById('fSenha')?.value.trim();
 
     if(!criarAcesso || !senha || senha.length < 6){
       showAlert('Para cadastrar um novo morador, marque "Criar senha de acesso" e defina uma senha de pelo menos 6 caracteres.','error');
       setTab(0,document.querySelectorAll('.modal-tab')[0]);
       btn.disabled=false; btn.textContent='💾 Salvar Morador'; return;
-    }
-
-    // 1. Criar no Supabase Auth via Admin API (sem limite de email, sem confirmação)
+    }    // 1. Criar no Supabase Auth via Admin API (sem limite de email, sem confirmação)
     btn.textContent='Criando conta...';
     const rAuth = await fetch(`${SUPA_URL}/auth/v1/admin/users`,{
       method:'POST',
@@ -1044,7 +928,7 @@ async function salvar(){
         // Email já existe — buscar o UUID existente
         btn.textContent='Buscando conta existente...';
         const rList = await fetch(`${SUPA_URL}/auth/v1/admin/users?email=${encodeURIComponent(emailVal)}`,{
-          headers:{'apikey':SERVICE_KEY,'Authorization':`Bearer ${SERVICE_KEY}`}
+          headers:{'apikey':SERVICE_KEY,'Authorization': `Bearer ${tk || SUPA_KEY}`}
         });
         const dList = await rList.json();
         const existingUser = dList?.users?.[0];
@@ -1078,15 +962,11 @@ async function salvar(){
         showAlert('❌ Erro ao criar conta: '+msg,'error');
       }
       btn.disabled=false; btn.textContent='💾 Salvar Morador'; return;
-    }
-
-    const authId = dAuth?.id || dAuth?.user?.id;
+    }    const authId = dAuth?.id || dAuth?.user?.id;
     if(!authId){
       showAlert('❌ Não foi possível obter o ID do usuário criado.','error');
       btn.disabled=false; btn.textContent='💾 Salvar Morador'; return;
-    }
-
-    // 2. Inserir em usuarios com o ID do Auth
+    }    // 2. Inserir em usuarios com o ID do Auth
     btn.textContent='Salvando cadastro...';
     const payload = {
       id:            authId,
@@ -1110,18 +990,14 @@ async function salvar(){
       const msg = (Array.isArray(json)?json[0]:json)?.message || JSON.stringify(json);
       showAlert(`❌ Conta criada mas erro ao salvar dados: ${msg}`, 'error');
       btn.disabled=false; btn.textContent='💾 Salvar Morador'; return;
-    }
-
-    showAlert('✅ Morador cadastrado com acesso ao portal!');
+    }    showAlert('✅ Morador cadastrado com acesso ao portal!');
     fecharModal();
     await loadMoradores();
   } catch(e){
     showAlert('❌ Erro: '+e.message,'error');
   }
   btn.disabled=false; btn.textContent='💾 Salvar Morador';
-}
-
-// ── APROVAR MORADOR ──────────────────────────────────────────────────────────
+}// ── APROVAR MORADOR ──────────────────────────────────────────────────────────
 async function aprovarMorador(id, nome){
   if(!confirm(`Aprovar o cadastro de "${nome}"?\nEle receberá acesso ao portal.`)) return;
   const res = await fetch(
@@ -1134,9 +1010,7 @@ async function aprovarMorador(id, nome){
   } else {
     showAlert('Erro ao aprovar morador.','error');
   }
-}
-
-// ── DELETAR ───────────────────────────────────────────────
+}// ── DELETAR ───────────────────────────────────────────────
 async function deletar(id, nome){
   if(!confirm(`Excluir o morador "${nome}"?\nEsta ação não pode ser desfeita.`)) return;
   const res = await fetch(
@@ -1145,9 +1019,7 @@ async function deletar(id, nome){
   );
   if(res.ok){ showAlert('Morador removido.'); await loadMoradores(); }
   else showAlert('Erro ao remover.','error');
-}
-
-// ── FECHAR AO CLICAR FORA ────────────────────────────────
+}// ── FECHAR AO CLICAR FORA ────────────────────────────────
 document.getElementById('modalBg').addEventListener('click',e=>{
   if(e.target===document.getElementById('modalBg')) fecharModal();
 });
