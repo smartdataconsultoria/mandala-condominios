@@ -487,7 +487,7 @@
       // 2. Busca o perfil do usuário na tabela `usuarios`
       const { data: perfil, error: erroPerfil } = await supabase
         .from('usuarios')
-        .select('role, ativo, condominio_id, administradora_id')
+        .select('role, ativo, status, condominio_id, administradora_id')
         .eq('id', data.user.id)
         .single()
 
@@ -498,8 +498,14 @@
       }
 
       if (!perfil.ativo) {
-        mostrarErro('Conta desativada. Contate a administradora.')
         await supabase.auth.signOut()
+        if (perfil.status === 'pendente') {
+          mostrarErro('⏳ Seu cadastro está aguardando aprovação do síndico. Você receberá acesso assim que for aprovado.')
+        } else if (perfil.status === 'rejeitado') {
+          mostrarErro('❌ Seu cadastro foi recusado. Entre em contato com a administração do condomínio.')
+        } else {
+          mostrarErro('Conta desativada. Contate a administradora.')
+        }
         return
       }
 
