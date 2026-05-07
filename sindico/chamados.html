@@ -3,122 +3,225 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CondoGestor — Chamados</title>
+<title>CondoGestor — Comunicação</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --navy: #0B1F3A; --navy-light: #142D52; --gold: #E8A320;
-    --white: #FFFFFF; --off-white: #F7F6F2; --border: #E2E8F0;
-    --text-dark: #0B1F3A; --text-mid: #445571; --text-light: #8899B4;
-    --green: #16A34A; --green-bg: #DCFCE7; --red: #DC2626; --red-bg: #FEF2F2;
-    --amber: #D97706; --amber-bg: #FEF3C7; --blue: #2563EB; --blue-bg: #EFF6FF;
-    --sidebar-w: 240px; --radius: 12px; --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
-  }
-  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--off-white); color: var(--text-dark); display: flex; min-height: 100vh; }
-  .sidebar { width: var(--sidebar-w); background: var(--navy); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; overflow-y: auto; }
-  .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 1.5rem 1.25rem 1.25rem; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 0.5rem; }
-  .logo-icon { width: 34px; height: 34px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-  .logo-icon svg { width: 18px; height: 18px; }
-  .logo-name { font-size: 1.05rem; font-weight: 800; color: var(--white); }
-  .logo-name span { color: var(--gold); }
-  .sidebar-section { padding: 0 0.75rem; margin-bottom: 0.25rem; }
-  .sidebar-section-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0.75rem 0.5rem 0.4rem; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.6); transition: all var(--transition); margin-bottom: 2px; }
-  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
-  .nav-item:hover { background: rgba(255,255,255,0.07); color: var(--white); }
-  .nav-item.active { background: rgba(232,163,32,0.15); color: #F5C35A; }
-  .nav-item.active svg { opacity: 1; }
-  .sidebar-bottom { margin-top: auto; padding: 1rem 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); }
-  .user-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,0.06); }
-  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--navy); flex-shrink: 0; }
-  .user-name { font-size: 0.82rem; font-weight: 600; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
-  .user-sub { font-size: 0.7rem; color: rgba(255,255,255,0.4); }
-  .logout-btn { margin-left: auto; background: none; border: none; cursor: pointer; padding: 4px; color: rgba(255,255,255,0.4); }
-  .logout-btn:hover { color: var(--white); }
-  .logout-btn svg { width: 15px; height: 15px; }
-  .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
-  .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 40; }
-  .topbar h1 { font-size: 1rem; font-weight: 700; color: var(--navy); }
-  .topbar p { font-size: 0.75rem; color: var(--text-light); }
-  .topbar-right { display: flex; gap: 10px; }
-  .btn-sm { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; font-family: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all var(--transition); text-decoration: none; border: none; }
-  .btn-sm svg { width: 14px; height: 14px; }
-  .btn-primary-sm { background: var(--navy); color: var(--white); }
-  .btn-primary-sm:hover { background: var(--navy-light); }
-  .btn-ghost-sm { background: var(--off-white); color: var(--text-mid); border: 1px solid var(--border); }
-  .btn-ghost-sm:hover { background: var(--border); }
-  .content { padding: 1.75rem 2rem; flex: 1; }
-  .filters { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; flex-wrap: wrap; }
-  .search-box { display: flex; align-items: center; gap: 8px; background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 0 12px; height: 38px; flex: 1; max-width: 300px; }
-  .search-box:focus-within { border-color: var(--navy); }
-  .search-box svg { width: 15px; height: 15px; color: var(--text-light); flex-shrink: 0; }
-  .search-box input { border: none; outline: none; font-family: inherit; font-size: 0.85rem; color: var(--text-dark); background: transparent; width: 100%; }
-  .search-box input::placeholder { color: var(--text-light); }
-  .filter-select { height: 38px; padding: 0 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.82rem; color: var(--text-mid); background: var(--white); cursor: pointer; outline: none; }
-  .results-count { font-size: 0.8rem; color: var(--text-light); margin-left: auto; }
-  .chamados-list { display: flex; flex-direction: column; gap: 0.75rem; }
-  .chamado-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; transition: all var(--transition); }
-  .chamado-card:hover { box-shadow: 0 2px 12px rgba(11,31,58,0.08); }
-  .chamado-card.urgente { border-left: 3px solid var(--red); }
-  .chamado-card.normal { border-left: 3px solid var(--amber); }
-  .chamado-card.baixa { border-left: 3px solid var(--green); }
-  .chamado-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 0.6rem; }
-  .chamado-titulo { font-size: 0.95rem; font-weight: 700; color: var(--navy); }
-  .chamado-meta { font-size: 0.78rem; color: var(--text-light); margin-top: 2px; }
-  .chamado-badges { display: flex; gap: 6px; flex-shrink: 0; }
-  .chamado-descricao { font-size: 0.85rem; color: var(--text-mid); line-height: 1.6; margin-bottom: 1rem; }
-  .chamado-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-  .chamado-time { font-size: 0.75rem; color: var(--text-light); }
-  .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
-  .badge-green { background: var(--green-bg); color: var(--green); }
-  .badge-red   { background: var(--red-bg);   color: var(--red);   }
-  .badge-amber { background: var(--amber-bg); color: var(--amber); }
-  .badge-blue  { background: var(--blue-bg);  color: var(--blue);  }
-  .badge-gray  { background: #F1F5F9; color: #64748B; }
-  .resposta-box { background: var(--off-white); border-radius: 8px; padding: 10px 12px; margin-top: 0.75rem; font-size: 0.82rem; color: var(--text-mid); border-left: 3px solid var(--navy); }
-  .resposta-box strong { color: var(--navy); display: block; margin-bottom: 2px; font-size: 0.75rem; }
-  .empty-state { display: flex; flex-direction: column; align-items: center; padding: 4rem 2rem; gap: 0.75rem; text-align: center; }
-  .empty-state svg { width: 36px; height: 36px; opacity: 0.2; }
-  .empty-state h3 { font-size: 1rem; font-weight: 700; color: var(--navy); }
-  .empty-state p { font-size: 0.83rem; color: var(--text-light); }
-  .modal-overlay { position: fixed; inset: 0; background: rgba(11,31,58,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity var(--transition); }
-  .modal-overlay.open { opacity: 1; pointer-events: all; }
-  .modal { background: var(--white); border-radius: 16px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; transform: translateY(16px); transition: transform var(--transition); }
-  .modal-overlay.open .modal { transform: translateY(0); }
-  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); }
-  .modal-title { font-size: 1rem; font-weight: 700; color: var(--navy); }
-  .modal-close { background: none; border: none; cursor: pointer; padding: 4px; color: var(--text-light); border-radius: 6px; }
-  .modal-close:hover { background: var(--off-white); color: var(--navy); }
-  .modal-close svg { width: 18px; height: 18px; }
-  .modal-body { padding: 1.5rem; }
-  .modal-footer { display: flex; gap: 8px; justify-content: flex-end; padding: 1rem 1.5rem; border-top: 1px solid var(--border); }
-  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 1rem; }
-  .field label { font-size: 0.8rem; font-weight: 600; color: var(--navy); }
-  .field select, .field textarea { padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.875rem; color: var(--text-dark); background: var(--white); outline: none; transition: border-color var(--transition); }
-  .field select:focus, .field textarea:focus { border-color: var(--navy); }
-  .field textarea { resize: vertical; min-height: 80px; }
-  .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--navy); color: var(--white); padding: 12px 18px; border-radius: 10px; font-size: 0.85rem; font-weight: 500; z-index: 200; transform: translateY(80px); opacity: 0; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
-  .toast.show { transform: translateY(0); opacity: 1; }
-  .toast.success { background: var(--green); }
-  .toast.error { background: var(--red); }
-  .spinner { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .condo-selector { margin: 0 0.75rem 0.5rem; background: rgba(255,255,255,0.07); border-radius: 8px; padding: 9px 12px; border: 1px solid rgba(255,255,255,0.07); }
-  .condo-selector label { font-size: 0.65rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: rgba(255,255,255,0.35); display: block; margin-bottom: 4px; }
-  .condo-selector div { color: var(--white); font-size: 0.84rem; font-weight: 700; }
-  .user-role-lbl { font-size: 0.68rem; color: rgba(255,255,255,0.38); }
-  /* KPI cards */
-  .kpis { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 1.5rem; }
-  .kpi { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.25rem; position: relative; overflow: hidden; }
-  .kpi-accent { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 99px 0 0 99px; }
-  .kpi-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-light); margin-bottom: 6px; }
-  .kpi-val { font-size: 1.6rem; font-weight: 800; color: var(--navy); line-height: 1; }
-  .kpi-sub { font-size: 0.75rem; color: var(--text-light); margin-top: 6px; }
-  @media(max-width:900px){ .kpis { grid-template-columns: repeat(2,1fr); } }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy: #0B1F3A; --navy-light: #142D52; --gold: #E8A320; --gold-light: #F5C35A;
+  --white: #FFFFFF; --off-white: #F4F2ED; --border: #DDD9D0; --border-light: #EAE7E0;
+  --text-dark: #0D1B2A; --text-mid: #3D526B; --text-light: #7A8FA6;
+  --green: #15803D; --green-bg: #DCFCE7; --green-border: #86EFAC;
+  --red: #B91C1C; --red-bg: #FEE2E2; --red-border: #FCA5A5;
+  --amber: #B45309; --amber-bg: #FEF3C7; --amber-border: #FCD34D;
+  --blue: #1D4ED8; --blue-bg: #EFF6FF; --blue-border: #93C5FD;
+  --sidebar-w: 240px; --radius: 12px; --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--off-white); color: var(--text-dark); display: flex; min-height: 100vh; }
+
+/* SIDEBAR */
+.sidebar { width: var(--sidebar-w); background: var(--navy); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; overflow-y: auto; }
+.sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 1.4rem 1.25rem 1.2rem; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 0.5rem; }
+.logo-name { font-size: 1.05rem; font-weight: 800; color: #fff; }
+.logo-name span { color: var(--gold); }
+.condo-selector { margin: 0 0.75rem 0.5rem; background: rgba(255,255,255,0.07); border-radius: 8px; padding: 9px 12px; border: 1px solid rgba(255,255,255,0.07); }
+.condo-selector label { font-size: 0.65rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: rgba(255,255,255,0.35); display: block; margin-bottom: 4px; }
+.condo-selector div { color: #fff; font-size: 0.84rem; font-weight: 700; }
+.sidebar-section { padding: 0 0.75rem; margin-bottom: 0.2rem; }
+.sidebar-section-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.28); padding: 0.8rem 0.5rem 0.35rem; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; text-decoration: none; font-size: 0.84rem; font-weight: 500; color: rgba(255,255,255,0.58); transition: all var(--transition); margin-bottom: 1px; }
+.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.65; }
+.nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.9); }
+.nav-item.active { background: rgba(232,163,32,0.18); color: #F5C35A; font-weight: 700; }
+.nav-item.active svg { opacity: 1; }
+.sidebar-bottom { margin-top: auto; padding: 1rem 0.75rem; border-top: 1px solid rgba(255,255,255,0.07); }
+.user-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,0.06); }
+.user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; color: var(--navy); flex-shrink: 0; }
+.user-name { font-size: 0.78rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+.user-role-lbl { font-size: 0.68rem; color: rgba(255,255,255,0.38); }
+.logout-btn { margin-left: auto; background: none; border: none; cursor: pointer; padding: 4px; color: rgba(255,255,255,0.35); transition: color .2s; }
+.logout-btn:hover { color: #FCA5A5; }
+.logout-btn svg { width: 15px; height: 15px; }
+
+/* MAIN */
+.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+.topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 1.5rem; height: 60px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+.topbar h1 { font-size: 1rem; font-weight: 800; color: var(--navy); }
+.topbar p { font-size: 0.72rem; color: var(--text-light); margin-top: 1px; }
+.topbar-right { display: flex; gap: 8px; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; font-family: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer; border: none; transition: all var(--transition); }
+.btn svg { width: 14px; height: 14px; }
+.btn-navy { background: var(--navy); color: #fff; }
+.btn-navy:hover { background: var(--navy-light); }
+.btn-gold { background: var(--gold); color: var(--navy); }
+.btn-gold:hover { background: var(--gold-light); }
+.btn-ghost { background: transparent; color: var(--text-mid); border: 1.5px solid var(--border); }
+.btn-ghost:hover { background: var(--off-white); }
+
+/* LAYOUT 3 COLUNAS */
+.comm-wrap { display: flex; flex: 1; overflow: hidden; }
+
+/* COLUNA 1 — lista chamados/avisos */
+.col-list { width: 300px; flex-shrink: 0; border-right: 1px solid var(--border); display: flex; flex-direction: column; background: var(--white); overflow: hidden; }
+
+/* ABAS */
+.tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.tab-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0 8px; height: 44px; font-size: 0.78rem; font-weight: 600; color: var(--text-light); cursor: pointer; border: none; border-bottom: 2px solid transparent; background: none; font-family: inherit; transition: all var(--transition); }
+.tab-btn svg { width: 13px; height: 13px; }
+.tab-btn:hover { color: var(--text-dark); }
+.tab-btn.active { color: var(--navy); border-bottom-color: var(--gold); }
+.tbadge { font-size: 0.62rem; font-weight: 800; padding: 1px 5px; border-radius: 99px; min-width: 16px; text-align: center; }
+.tbadge-red  { background: var(--red-bg); color: var(--red); }
+.tbadge-gold { background: var(--amber-bg); color: var(--amber); }
+
+/* FILTROS */
+.list-filters { display: flex; align-items: center; gap: 6px; padding: 10px 12px; background: var(--off-white); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.search-wrap { display: flex; align-items: center; gap: 6px; background: var(--white); border: 1.5px solid var(--border); border-radius: 7px; padding: 0 9px; height: 32px; flex: 1; }
+.search-wrap:focus-within { border-color: var(--navy); }
+.search-wrap svg { width: 13px; height: 13px; color: var(--text-light); flex-shrink: 0; }
+.search-wrap input { border: none; outline: none; font-family: inherit; font-size: 0.78rem; color: var(--text-dark); background: transparent; width: 100%; }
+.search-wrap input::placeholder { color: var(--text-light); }
+.fsel { height: 32px; padding: 0 8px; border: 1.5px solid var(--border); border-radius: 7px; font-family: inherit; font-size: 0.74rem; color: var(--text-mid); background: var(--white); cursor: pointer; outline: none; }
+
+/* ITENS DA LISTA */
+.list-scroll { flex: 1; overflow-y: auto; }
+.ch-item { padding: 12px 14px; border-bottom: 1px solid var(--border-light); cursor: pointer; transition: background var(--transition); position: relative; }
+.ch-item:hover { background: #FAFAF8; }
+.ch-item.sel { background: #FDF8EE; border-left: 3px solid var(--gold); }
+.ch-item .pbar { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
+.ch-item .pbar.urgente { background: var(--red); }
+.ch-item .pbar.normal  { background: var(--amber); }
+.ch-item .pbar.baixa   { background: var(--green); }
+.ch-tit { font-size: 0.84rem; font-weight: 700; color: var(--text-dark); margin-bottom: 2px; line-height: 1.3; }
+.ch-sub { font-size: 0.72rem; color: var(--text-light); margin-bottom: 5px; }
+.ch-prev { font-size: 0.74rem; color: var(--text-mid); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px; }
+.ch-foot { display: flex; align-items: center; gap: 5px; }
+.ch-time-lbl { font-size: 0.68rem; color: var(--text-light); margin-left: auto; }
+.badge { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 99px; font-size: 0.66rem; font-weight: 700; }
+.b-red    { background: var(--red-bg);   color: var(--red);   border: 1px solid var(--red-border); }
+.b-amber  { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+.b-blue   { background: var(--blue-bg);  color: var(--blue);  border: 1px solid var(--blue-border); }
+.b-green  { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.b-gray   { background: #F1F5F9; color: #64748B; border: 1px solid #E2E8F0; }
+
+/* AVISO ITEM */
+.av-item { padding: 13px 14px; border-bottom: 1px solid var(--border-light); cursor: pointer; transition: background var(--transition); }
+.av-item:hover { background: #FAFAF8; }
+.av-item.sel { background: #FDF8EE; border-left: 3px solid var(--gold); }
+.av-tipo-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.av-tit { font-size: 0.84rem; font-weight: 700; color: var(--text-dark); margin-bottom: 3px; }
+.av-txt { font-size: 0.74rem; color: var(--text-mid); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.av-foot { font-size: 0.68rem; color: var(--text-light); margin-top: 5px; }
+
+/* COLUNA 2 — detalhe */
+.col-detail { flex: 1; display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
+.detail-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; height: 100%; color: var(--text-light); text-align: center; padding: 2rem; background: var(--white); }
+.detail-empty svg { width: 36px; height: 36px; opacity: 0.18; }
+.detail-empty h3 { font-size: 0.92rem; font-weight: 700; color: var(--text-mid); }
+.detail-empty p { font-size: 0.8rem; }
+.d-header { padding: 14px 18px; border-bottom: 1px solid var(--border); background: var(--white); flex-shrink: 0; }
+.d-titulo { font-size: 1rem; font-weight: 800; color: var(--navy); margin-bottom: 6px; line-height: 1.3; }
+.d-badges { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.d-body { flex: 1; overflow-y: auto; padding: 16px 18px; background: var(--white); }
+.orig-msg { background: var(--off-white); border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; border-left: 3px solid var(--navy); }
+.orig-lbl { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-light); margin-bottom: 6px; }
+.orig-txt { font-size: 0.85rem; color: var(--text-dark); line-height: 1.6; }
+.thread { display: flex; flex-direction: column; gap: 10px; }
+.bubble { display: flex; flex-direction: column; gap: 2px; max-width: 82%; }
+.bubble.sind { align-self: flex-end; align-items: flex-end; }
+.bubble.mor  { align-self: flex-start; align-items: flex-start; }
+.bubble .bsender { font-size: 0.67rem; font-weight: 700; color: var(--text-light); padding: 0 4px; }
+.bubble .bcontent { padding: 9px 13px; border-radius: 13px; font-size: 0.83rem; line-height: 1.55; }
+.bubble.sind .bcontent { background: var(--navy); color: #fff; border-radius: 13px 13px 3px 13px; }
+.bubble.mor  .bcontent { background: #EFECE7; color: var(--text-dark); border-radius: 13px 13px 13px 3px; }
+.bubble .btime { font-size: 0.65rem; color: var(--text-light); padding: 0 4px; }
+.d-footer { padding: 11px 14px; border-top: 1px solid var(--border); background: var(--white); flex-shrink: 0; }
+.reply-wrap { background: var(--off-white); border: 1.5px solid var(--border); border-radius: 10px; padding: 8px 10px; transition: border-color var(--transition); }
+.reply-wrap:focus-within { border-color: var(--navy); background: var(--white); }
+.reply-ta { width: 100%; border: none; outline: none; font-family: inherit; font-size: 0.83rem; color: var(--text-dark); background: transparent; resize: none; min-height: 34px; max-height: 100px; line-height: 1.5; }
+.reply-ta::placeholder { color: var(--text-light); }
+.reply-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; gap: 8px; }
+.ssel { height: 30px; padding: 0 9px; border: 1.5px solid var(--border); border-radius: 7px; font-family: inherit; font-size: 0.74rem; color: var(--text-mid); background: var(--white); cursor: pointer; outline: none; }
+.send-btn { display: flex; align-items: center; gap: 5px; padding: 6px 13px; background: var(--navy); color: #fff; border: none; border-radius: 7px; font-family: inherit; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: background var(--transition); }
+.send-btn:hover { background: var(--navy-light); }
+.send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.send-btn svg { width: 13px; height: 13px; }
+.closed-note { padding: 10px 14px; text-align: center; font-size: 0.78rem; color: var(--text-light); background: var(--off-white); border-top: 1px solid var(--border); }
+
+/* AVISO DETALHE */
+.av-detail-tipo { display: flex; align-items: center; gap: 10px; padding: 16px 18px; border-bottom: 1px solid var(--border); background: var(--off-white); flex-shrink: 0; }
+.av-detail-emoji { font-size: 28px; }
+.av-detail-body { flex: 1; overflow-y: auto; padding: 20px 18px; background: var(--white); }
+.av-detail-titulo { font-size: 1.05rem; font-weight: 800; color: var(--navy); margin-bottom: 12px; line-height: 1.3; }
+.av-detail-texto { font-size: 0.9rem; color: var(--text-dark); line-height: 1.7; white-space: pre-wrap; }
+.av-detail-meta { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border); font-size: 0.75rem; color: var(--text-light); display: flex; gap: 16px; flex-wrap: wrap; }
+.av-detail-meta span { display: flex; align-items: center; gap: 4px; }
+
+/* COLUNA 3 — painel direito */
+.col-side { width: 280px; flex-shrink: 0; display: flex; flex-direction: column; overflow: hidden; background: var(--white); }
+.kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.kpi-c { background: var(--white); padding: 13px 14px; }
+.kpi-lbl { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-light); margin-bottom: 3px; }
+.kpi-v { font-size: 1.45rem; font-weight: 800; line-height: 1; }
+.kpi-s { font-size: 0.66rem; color: var(--text-light); margin-top: 2px; }
+.qa-block { padding: 12px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.qa-lbl { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-light); margin-bottom: 8px; }
+.qa-row { display: flex; align-items: center; gap: 9px; width: 100%; padding: 9px 10px; background: var(--off-white); border: 1.5px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.78rem; font-weight: 600; color: var(--text-dark); cursor: pointer; transition: all var(--transition); text-align: left; margin-bottom: 5px; }
+.qa-row:hover { background: var(--white); border-color: var(--navy); color: var(--navy); }
+.qa-ic { width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+.qa-texts { display: flex; flex-direction: column; }
+.qa-texts span { font-size: 0.68rem; color: var(--text-light); font-weight: 400; }
+.recent-block { flex: 1; overflow-y: auto; padding: 12px 14px; }
+.rb-lbl { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-light); margin-bottom: 8px; }
+.rec-row { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border-light); }
+.rec-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.rec-t { font-size: 0.75rem; color: var(--text-mid); line-height: 1.4; flex: 1; }
+.rec-d { font-size: 0.66rem; color: var(--text-light); white-space: nowrap; }
+
+/* MODAIS */
+.modal-ov { position: fixed; inset: 0; background: rgba(11,31,58,.48); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity var(--transition); }
+.modal-ov.open { opacity: 1; pointer-events: all; }
+.modal { background: var(--white); border-radius: 16px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; transform: translateY(16px); transition: transform var(--transition); box-shadow: 0 20px 60px rgba(0,0,0,.15); }
+.modal-ov.open .modal { transform: translateY(0); }
+.mh { display: flex; align-items: center; gap: 10px; padding: 1.1rem 1.4rem; border-bottom: 1px solid var(--border); }
+.mh-ic { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+.mh-title { font-size: 0.92rem; font-weight: 800; color: var(--navy); flex: 1; }
+.mc { background: none; border: none; cursor: pointer; padding: 4px; color: var(--text-light); border-radius: 6px; transition: all var(--transition); }
+.mc:hover { background: var(--off-white); color: var(--navy); }
+.mc svg { width: 17px; height: 17px; }
+.mb { padding: 1.25rem 1.4rem; }
+.mf { display: flex; gap: 8px; justify-content: flex-end; padding: 0.9rem 1.4rem; border-top: 1px solid var(--border); }
+.field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 0.9rem; }
+.field label { font-size: 0.75rem; font-weight: 700; color: var(--navy); }
+.field input, .field select, .field textarea { padding: 9px 11px; border: 1.5px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.84rem; color: var(--text-dark); background: var(--white); outline: none; transition: border-color var(--transition); }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--navy); }
+.field textarea { resize: vertical; min-height: 90px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tipo-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; }
+.tipo-opt { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 6px; border: 1.5px solid var(--border); border-radius: 9px; cursor: pointer; transition: all var(--transition); text-align: center; }
+.tipo-opt.sel { border-color: var(--navy); background: #EFF3FA; }
+.tipo-opt .ti { font-size: 18px; }
+.tipo-opt .tl { font-size: 0.68rem; font-weight: 700; color: var(--text-mid); }
+.tipo-opt.sel .tl { color: var(--navy); }
+.dest-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 9px; border: 1.5px solid var(--border); border-radius: 99px; font-size: 0.72rem; font-weight: 600; cursor: pointer; transition: all var(--transition); color: var(--text-mid); background: var(--white); }
+.chip.sel { background: var(--navy); color: #fff; border-color: var(--navy); }
+.fhint { font-size: 0.68rem; color: var(--text-light); margin-top: 3px; }
+.empty-s { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 2.5rem 1.5rem; text-align: center; color: var(--text-light); }
+.empty-s svg { width: 28px; height: 28px; opacity: 0.25; }
+.empty-s p { font-size: 0.8rem; }
+.spinner { width: 13px; height: 13px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; display: inline-block; }
+.spinner-dark { border-color: rgba(0,0,0,.1); border-top-color: var(--navy); }
+@keyframes spin { to { transform: rotate(360deg); } }
+.toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--navy); color: #fff; padding: 11px 16px; border-radius: 10px; font-size: 0.82rem; font-weight: 600; z-index: 300; transform: translateY(80px); opacity: 0; transition: all .3s; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.15); }
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { background: var(--green); }
+.toast.error { background: var(--red); }
+::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
 </style>
 </head>
 <body>
+
 <aside class="sidebar">
   <a href="/sindico/dashboard.html" class="sidebar-logo">
     <span class="logo-name">Condo<span>Gestor</span></span>
@@ -131,7 +234,7 @@
     <div class="sidebar-section-label">Principal</div>
     <a href="/sindico/dashboard.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
     <a href="/sindico/moradores.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Moradores</a>
-    <a href="/sindico/chamados.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Chamados</a>
+    <a href="/sindico/chamados.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Comunicação</a>
     <a href="/sindico/documentos.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documentos</a>
   </div>
   <div class="sidebar-section">
@@ -153,203 +256,417 @@
 
 <div class="main">
   <header class="topbar">
-    <div><h1>Chamados</h1><p id="subtitulo">Carregando...</p></div>
+    <div><h1>Central de Comunicação</h1><p id="subtitulo">Chamados e comunicados do condomínio</p></div>
     <div class="topbar-right">
-      <button class="btn-sm btn-primary-sm" onclick="abrirNovoModal()">
+      <button class="btn btn-ghost" onclick="abrirModalChamado()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Novo Chamado
       </button>
+      <button class="btn btn-gold" onclick="abrirModalAviso()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17H2a3 3 0 000 6h20a3 3 0 000-6z"/><path d="M13.73 1a2 2 0 00-3.46 0L2 16h20z"/></svg>
+        Publicar Aviso
+      </button>
     </div>
   </header>
-  <div class="content">
-    <div class="kpis" id="kpis">
-      <div class="kpi"><div class="kpi-accent" style="background:var(--amber)"></div><div class="kpi-label">Total de Chamados</div><div class="kpi-val" id="kpi-total">—</div><div class="kpi-sub">registrados</div></div>
-      <div class="kpi"><div class="kpi-accent" style="background:var(--red)"></div><div class="kpi-label">Abertos</div><div class="kpi-val" id="kpi-abertos" style="color:var(--red)">—</div><div class="kpi-sub">aguardando resposta</div></div>
-      <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-label">Em Andamento</div><div class="kpi-val" id="kpi-andamento" style="color:var(--blue)">—</div><div class="kpi-sub">sendo tratados</div></div>
-      <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-label">Resolvidos</div><div class="kpi-val" id="kpi-resolvidos" style="color:var(--green)">—</div><div class="kpi-sub">concluídos</div></div>
-    </div>
-    <div class="filters">
-      <div class="search-box">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="busca" placeholder="Buscar chamado..." oninput="filtrar()">
+
+  <div class="comm-wrap">
+
+    <!-- COLUNA 1: LISTA -->
+    <div class="col-list">
+      <div class="tabs">
+        <button class="tab-btn active" id="tbtn-ch" onclick="setTab('ch')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          Chamados <span class="tbadge tbadge-red" id="tbadge-ch">0</span>
+        </button>
+        <button class="tab-btn" id="tbtn-av" onclick="setTab('av')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17H2a3 3 0 000 6h20a3 3 0 000-6z"/><path d="M13.73 1a2 2 0 00-3.46 0L2 16h20z"/></svg>
+          Avisos <span class="tbadge tbadge-gold" id="tbadge-av">0</span>
+        </button>
       </div>
-      <select class="filter-select" id="filtro-status" onchange="filtrar()">
-        <option value="todos">Todos os status</option>
-        <option value="aberto">Abertos</option>
-        <option value="em_andamento">Em andamento</option>
-        <option value="resolvido">Resolvidos</option>
-      </select>
-      <select class="filter-select" id="filtro-prioridade" onchange="filtrar()">
-        <option value="todos">Todas as prioridades</option>
-        <option value="urgente">Urgente</option>
-        <option value="normal">Normal</option>
-        <option value="baixa">Baixa</option>
-      </select>
-      <span class="results-count" id="results-count"></span>
+
+      <!-- Lista chamados -->
+      <div id="pch" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+        <div class="list-filters">
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Buscar chamado..." id="bch" oninput="filtrarCh()">
+          </div>
+          <select class="fsel" id="fst" onchange="filtrarCh()">
+            <option value="">Todos</option>
+            <option value="aberto">Abertos</option>
+            <option value="em_andamento">Andamento</option>
+            <option value="resolvido">Resolvidos</option>
+          </select>
+        </div>
+        <div class="list-scroll" id="lista-ch">
+          <div class="empty-s"><div class="spinner spinner-dark"></div><p>Carregando...</p></div>
+        </div>
+      </div>
+
+      <!-- Lista avisos -->
+      <div id="pav" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+        <div class="list-filters">
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Buscar aviso..." id="bav" oninput="filtrarAv()">
+          </div>
+          <select class="fsel" id="ftp" onchange="filtrarAv()">
+            <option value="">Todos</option>
+            <option value="aviso">Aviso</option>
+            <option value="manutencao">Manutenção</option>
+            <option value="assembleia">Assembleia</option>
+            <option value="cobranca">Cobrança</option>
+            <option value="emergencia">Emergência</option>
+          </select>
+        </div>
+        <div class="list-scroll" id="lista-av">
+          <div class="empty-s"><p>Nenhum comunicado</p></div>
+        </div>
+      </div>
     </div>
-    <div class="chamados-list" id="lista-chamados">
-      <div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><h3>Carregando...</h3></div>
+
+    <!-- COLUNA 2: DETALHE -->
+    <div class="col-detail" id="col-detail">
+      <div class="detail-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        <h3>Selecione um item</h3>
+        <p>Clique em um chamado ou aviso para ver os detalhes</p>
+      </div>
     </div>
+
+    <!-- COLUNA 3: PAINEL LATERAL -->
+    <div class="col-side">
+      <div class="kpi-grid">
+        <div class="kpi-c"><div class="kpi-lbl">Abertos</div><div class="kpi-v" id="kv-ab" style="color:var(--red)">—</div><div class="kpi-s">aguardando</div></div>
+        <div class="kpi-c"><div class="kpi-lbl">Andamento</div><div class="kpi-v" id="kv-an" style="color:var(--blue)">—</div><div class="kpi-s">em tratamento</div></div>
+        <div class="kpi-c"><div class="kpi-lbl">Resolvidos</div><div class="kpi-v" id="kv-re" style="color:var(--green)">—</div><div class="kpi-s">este mês</div></div>
+        <div class="kpi-c"><div class="kpi-lbl">Comunicados</div><div class="kpi-v" id="kv-av" style="color:var(--amber)">—</div><div class="kpi-s">publicados</div></div>
+      </div>
+      <div class="qa-block">
+        <div class="qa-lbl">Ações Rápidas</div>
+        <button class="qa-row" onclick="abrirModalAviso('aviso')"><div class="qa-ic" style="background:#FEF3C7">📢</div><div class="qa-texts">Aviso Geral<span>Comunicar todos os moradores</span></div></button>
+        <button class="qa-row" onclick="abrirModalAviso('manutencao')"><div class="qa-ic" style="background:#EFF6FF">🔧</div><div class="qa-texts">Aviso de Manutenção<span>Informar obras ou serviços</span></div></button>
+        <button class="qa-row" onclick="abrirModalAviso('assembleia')"><div class="qa-ic" style="background:#F5F3FF">📋</div><div class="qa-texts">Convocar Assembleia<span>Reunião de moradores</span></div></button>
+        <button class="qa-row" onclick="abrirModalAviso('emergencia')"><div class="qa-ic" style="background:#FEE2E2">🚨</div><div class="qa-texts">Comunicado Urgente<span>Situação de atenção imediata</span></div></button>
+      </div>
+      <div class="recent-block">
+        <div class="rb-lbl">Atividade Recente</div>
+        <div id="recentes"></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
-<!-- Modal responder -->
-<div class="modal-overlay" id="modal-overlay" onclick="fecharModalFora(event)">
+<!-- MODAL NOVO CHAMADO -->
+<div class="modal-ov" id="m-chamado" onclick="mfora(event,'m-chamado')">
   <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title" id="modal-titulo">Responder chamado</span>
-      <button class="modal-close" onclick="fecharModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <div class="modal-body">
-      <div id="modal-info" style="background:var(--off-white);border-radius:8px;padding:12px;margin-bottom:1rem;font-size:0.83rem;color:var(--text-mid)"></div>
-      <div class="field">
-        <label>Resposta / atualização *</label>
-        <textarea id="f-resposta" placeholder="Descreva a ação tomada ou resposta ao morador..."></textarea>
+    <div class="mh"><div class="mh-ic" style="background:var(--blue-bg)">💬</div><span class="mh-title">Novo Chamado</span><button class="mc" onclick="mclose('m-chamado')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="mb">
+      <div class="field"><label>Título *</label><input type="text" id="ch-t" placeholder="Ex: Vazamento no corredor do 3º andar"></div>
+      <div class="grid2">
+        <div class="field"><label>Categoria</label><select id="ch-c"><option>Manutenção / Reparo</option><option>Limpeza</option><option>Segurança</option><option>Barulho / Vizinhança</option><option>Área comum</option><option>Financeiro</option><option>Outro</option></select></div>
+        <div class="field"><label>Prioridade</label><select id="ch-p"><option value="baixa">Baixa</option><option value="normal" selected>Normal</option><option value="urgente">Urgente</option></select></div>
       </div>
+      <div class="field"><label>Descrição *</label><textarea id="ch-d" placeholder="Descreva o problema com detalhes..."></textarea></div>
+    </div>
+    <div class="mf"><button class="btn btn-ghost" onclick="mclose('m-chamado')">Cancelar</button><button class="btn btn-navy" id="bsc" onclick="salvarChamado()">Abrir chamado</button></div>
+  </div>
+</div>
+
+<!-- MODAL PUBLICAR AVISO -->
+<div class="modal-ov" id="m-aviso" onclick="mfora(event,'m-aviso')">
+  <div class="modal">
+    <div class="mh"><div class="mh-ic" style="background:var(--amber-bg)">📢</div><span class="mh-title">Publicar Comunicado</span><button class="mc" onclick="mclose('m-aviso')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="mb">
       <div class="field">
-        <label>Novo status</label>
-        <select id="f-status">
-          <option value="aberto">Aberto</option>
-          <option value="em_andamento">Em andamento</option>
-          <option value="resolvido">Resolvido</option>
-          <option value="cancelado">Cancelado</option>
-        </select>
+        <label>Tipo</label>
+        <div class="tipo-grid" id="tg">
+          <div class="tipo-opt sel" data-tipo="aviso" onclick="sTipo(this)"><span class="ti">📢</span><span class="tl">Aviso Geral</span></div>
+          <div class="tipo-opt" data-tipo="manutencao" onclick="sTipo(this)"><span class="ti">🔧</span><span class="tl">Manutenção</span></div>
+          <div class="tipo-opt" data-tipo="assembleia" onclick="sTipo(this)"><span class="ti">📋</span><span class="tl">Assembleia</span></div>
+          <div class="tipo-opt" data-tipo="cobranca" onclick="sTipo(this)"><span class="ti">💰</span><span class="tl">Cobrança</span></div>
+          <div class="tipo-opt" data-tipo="emergencia" onclick="sTipo(this)"><span class="ti">🚨</span><span class="tl">Emergência</span></div>
+          <div class="tipo-opt" data-tipo="informativo" onclick="sTipo(this)"><span class="ti">ℹ️</span><span class="tl">Informativo</span></div>
+        </div>
+      </div>
+      <div class="field"><label>Título *</label><input type="text" id="av-t" placeholder="Ex: Manutenção da bomba d'água — 12/06"></div>
+      <div class="field"><label>Mensagem *</label><textarea id="av-x" placeholder="Conteúdo do comunicado para os moradores..." style="min-height:100px"></textarea></div>
+      <div class="field">
+        <label>Destinatários</label>
+        <div class="dest-chips">
+          <div class="chip sel" data-dest="todos" onclick="tChip(this)">👥 Todos</div>
+          <div class="chip" data-dest="proprietarios" onclick="tChip(this)">🏠 Proprietários</div>
+          <div class="chip" data-dest="inquilinos" onclick="tChip(this)">🔑 Inquilinos</div>
+        </div>
+        <div class="fhint">Selecione quem deve receber este comunicado</div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-sm btn-ghost-sm" onclick="fecharModal()">Cancelar</button>
-      <button class="btn-sm btn-primary-sm" id="btn-salvar" onclick="salvarResposta()">Salvar resposta</button>
-    </div>
+    <div class="mf"><button class="btn btn-ghost" onclick="mclose('m-aviso')">Cancelar</button><button class="btn btn-gold" id="bsa" onclick="salvarAviso()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Publicar</button></div>
   </div>
 </div>
 
 <div class="toast" id="toast"><span id="toast-msg"></span></div>
 
 <script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-  const supabase = createClient(
-    'https://siczyohqmlrmirqgzlxb.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw'
-  )
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) { window.location.href = 'login.html'; throw new Error() }
-  const { data: perfil } = await supabase.from('usuarios').select('nome, role, condominio_id').eq('id', session.user.id).single()
-  if (!perfil || perfil.role !== 'sindico') { window.location.href = 'login.html'; throw new Error() }
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+const SB = createClient('https://siczyohqmlrmirqgzlxb.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw')
 
-  document.getElementById('user-name').textContent = perfil.nome || session.user.email
-  document.getElementById('avatar-initials').textContent = (perfil.nome||session.user.email).split(' ').slice(0,2).map(p=>p[0].toUpperCase()).join('')
-  window.fazerLogout = async () => { await supabase.auth.signOut(); window.location.href = 'login.html' }
+const {data:{session}} = await SB.auth.getSession()
+if(!session){window.location.href='login.html';throw new Error()}
+const {data:perfil} = await SB.from('usuarios').select('nome,role,condominio_id').eq('id',session.user.id).single()
+if(!perfil||perfil.role!=='sindico'){window.location.href='login.html';throw new Error()}
 
-  let chamados = [], chamadoAtualId = null
-  const statusLabel = { aberto: 'Aberto', em_andamento: 'Em andamento', resolvido: 'Resolvido', cancelado: 'Cancelado' }
-  const statusBadge = { aberto: 'badge-amber', em_andamento: 'badge-blue', resolvido: 'badge-green', cancelado: 'badge-gray' }
-  const priorBadge  = { urgente: 'badge-red', normal: 'badge-amber', baixa: 'badge-green' }
+const nome = perfil.nome||session.user.email
+document.getElementById('user-name').textContent = nome
+document.getElementById('avatar-initials').textContent = nome.split(' ').slice(0,2).map(p=>p[0].toUpperCase()).join('')
+window.fazerLogout = async()=>{await SB.auth.signOut();window.location.href='login.html'}
 
-  // Popula nome do condomínio
-  try {
-    const { data: condo } = await supabase.from('condominios').select('nome').eq('id', perfil.condominio_id).single()
-    if (condo) document.getElementById('select-condo').textContent = condo.nome
-  } catch(e) {}
+try{const{data:co}=await SB.from('condominios').select('nome').eq('id',perfil.condominio_id).single();if(co)document.getElementById('select-condo').textContent=co.nome}catch(e){}
 
-  async function carregar() {
-    const { data } = await supabase.from('chamados').select('*').eq('condominio_id', perfil.condominio_id).order('criado_em', { ascending: false })
-    chamados = data || []
-    const abertos    = chamados.filter(c => c.status === 'aberto').length
-    const andamento  = chamados.filter(c => c.status === 'em_andamento').length
-    const resolvidos = chamados.filter(c => c.status === 'resolvido').length
-    document.getElementById('subtitulo').textContent = `${chamados.length} chamado${chamados.length!==1?'s':''} · ${abertos} aberto${abertos!==1?'s':''}`
-    document.getElementById('kpi-total').textContent     = chamados.length
-    document.getElementById('kpi-abertos').textContent   = abertos
-    document.getElementById('kpi-andamento').textContent = andamento
-    document.getElementById('kpi-resolvidos').textContent= resolvidos
-    renderizar(chamados)
-  }
+let chamados=[],avisos=[],curCh=null,curAv=null,tipoSel='aviso'
+const COND=perfil.condominio_id
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+const fmt=d=>d?new Date(d).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}):'—'
+const fmtLong=d=>d?new Date(d).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}):'—'
+const fmtTime=d=>d?new Date(d).toLocaleString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):''
 
-  function renderizar(lista) {
-    document.getElementById('results-count').textContent = lista.length === chamados.length ? `${lista.length} chamado${lista.length!==1?'s':''}` : `${lista.length} de ${chamados.length}`
-    const el = document.getElementById('lista-chamados')
-    if (lista.length === 0) {
-      el.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><h3>Nenhum chamado encontrado</h3><p>Tudo tranquilo por aqui!</p></div>`
-      return
-    }
-    el.innerHTML = lista.map(c => `
-      <div class="chamado-card ${c.prioridade}">
-        <div class="chamado-header">
-          <div>
-            <div class="chamado-titulo">${c.titulo}</div>
-            <div class="chamado-meta">${c.categoria || 'Geral'}</div>
-          </div>
-          <div class="chamado-badges">
-            <span class="badge ${priorBadge[c.prioridade]||'badge-amber'}">${c.prioridade}</span>
-            <span class="badge ${statusBadge[c.status]||'badge-gray'}">${statusLabel[c.status]||c.status}</span>
-          </div>
-        </div>
-        ${c.descricao ? `<div class="chamado-descricao">${c.descricao}</div>` : ''}
-        ${c.resposta ? `<div class="resposta-box"><strong>Resposta do síndico</strong>${c.resposta}</div>` : ''}
-        <div class="chamado-footer">
-          <span class="chamado-time">${new Date(c.criado_em).toLocaleDateString('pt-BR', {day:'numeric',month:'short',year:'numeric'})}</span>
-          <div style="display:flex;gap:6px">
-            ${c.status !== 'resolvido' && c.status !== 'cancelado' ? `<button class="btn-sm btn-primary-sm" onclick="abrirModal('${c.id}')">Responder</button>` : ''}
-            ${c.status === 'resolvido' ? `<button class="btn-sm btn-ghost-sm" onclick="abrirModal('${c.id}')">Ver detalhes</button>` : ''}
-          </div>
-        </div>
-      </div>`).join('')
-  }
+const stLbl={aberto:'Aberto',em_andamento:'Em andamento',resolvido:'Resolvido',cancelado:'Cancelado'}
+const stBg ={aberto:'b-amber',em_andamento:'b-blue',resolvido:'b-green',cancelado:'b-gray'}
+const prBg ={urgente:'b-red',normal:'b-amber',baixa:'b-green'}
+const tpEm ={aviso:'📢',manutencao:'🔧',assembleia:'📋',cobranca:'💰',emergencia:'🚨',informativo:'ℹ️'}
+const tpLbl={aviso:'Aviso Geral',manutencao:'Manutenção',assembleia:'Assembleia',cobranca:'Cobrança',emergencia:'Emergência',informativo:'Informativo'}
+const tpBg ={aviso:'b-amber',manutencao:'b-blue',assembleia:'b-gray',cobranca:'b-green',emergencia:'b-red',informativo:'b-gray'}
 
-  window.filtrar = function() {
-    const busca = document.getElementById('busca').value.toLowerCase()
-    const status = document.getElementById('filtro-status').value
-    const prior  = document.getElementById('filtro-prioridade').value
-    renderizar(chamados.filter(c =>
-      (c.titulo||'').toLowerCase().includes(busca) &&
-      (status === 'todos' || c.status === status) &&
-      (prior  === 'todos' || c.prioridade === prior)
-    ))
-  }
+async function carregar(){
+  const[{data:ch},{data:av}]=await Promise.all([
+    SB.from('chamados').select('*').eq('condominio_id',COND).order('criado_em',{ascending:false}),
+    SB.from('comunicados').select('*').eq('condominio_id',COND).order('criado_em',{ascending:false}).limit(50)
+  ])
+  chamados=ch||[];avisos=av||[]
+  atualizarKPIs();renderCh(chamados);renderAv(avisos);renderRecentes()
+}
 
-  window.abrirModal = function(id) {
-    chamadoAtualId = id
-    const c = chamados.find(x => x.id === id)
-    document.getElementById('modal-titulo').textContent = c.status === 'resolvido' ? 'Detalhes do chamado' : 'Responder chamado'
-    document.getElementById('modal-info').innerHTML = `<strong style="color:var(--navy)">${c.titulo}</strong><br>${c.descricao||''}`
-    document.getElementById('f-resposta').value = c.resposta || ''
-    document.getElementById('f-status').value   = c.status
-    document.getElementById('modal-overlay').classList.add('open')
-  }
-  window.fecharModal     = () => { document.getElementById('modal-overlay').classList.remove('open'); chamadoAtualId = null }
-  window.fecharModalFora = (e) => { if (e.target === document.getElementById('modal-overlay')) fecharModal() }
+function atualizarKPIs(){
+  const mes=new Date().getMonth()
+  const ab=chamados.filter(c=>c.status==='aberto').length
+  const an=chamados.filter(c=>c.status==='em_andamento').length
+  const re=chamados.filter(c=>c.status==='resolvido'&&new Date(c.atualizado_em||c.criado_em).getMonth()===mes).length
+  document.getElementById('kv-ab').textContent=ab
+  document.getElementById('kv-an').textContent=an
+  document.getElementById('kv-re').textContent=re
+  document.getElementById('kv-av').textContent=avisos.length
+  document.getElementById('tbadge-ch').textContent=ab
+  document.getElementById('tbadge-av').textContent=avisos.length
+  document.getElementById('subtitulo').textContent=`${chamados.length} chamado${chamados.length!==1?'s':''} · ${ab} aberto${ab!==1?'s':''} · ${avisos.length} comunicado${avisos.length!==1?'s':''}`
+}
 
-  window.salvarResposta = async function() {
-    const resposta = document.getElementById('f-resposta').value.trim()
-    const status   = document.getElementById('f-status').value
-    if (!resposta) { mostrarToast('Digite uma resposta', 'error'); return }
-    const btn = document.getElementById('btn-salvar')
-    btn.disabled = true; btn.innerHTML = '<div class="spinner"></div>'
-    const { error } = await supabase.from('chamados').update({ resposta, status, atualizado_em: new Date().toISOString() }).eq('id', chamadoAtualId)
-    btn.disabled = false; btn.textContent = 'Salvar resposta'
-    if (error) { mostrarToast('Erro: ' + error.message, 'error'); return }
-    mostrarToast('Chamado atualizado!', 'success')
-    fecharModal(); await carregar()
-  }
+function renderCh(lista){
+  const el=document.getElementById('lista-ch')
+  if(!lista.length){el.innerHTML=`<div class="empty-s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><p>Nenhum chamado encontrado</p></div>`;return}
+  el.innerHTML=lista.map(c=>`
+    <div class="ch-item${curCh?.id===c.id?' sel':''}" onclick="abrirCh('${c.id}')">
+      <div class="pbar ${c.prioridade||'normal'}"></div>
+      <div class="ch-tit">${esc(c.titulo||'—')}</div>
+      <div class="ch-sub">${esc(c.categoria||'Geral')}</div>
+      ${c.descricao?`<div class="ch-prev">${esc(c.descricao)}</div>`:''}
+      <div class="ch-foot">
+        <span class="badge ${prBg[c.prioridade]||'b-amber'}">${c.prioridade||'normal'}</span>
+        <span class="badge ${stBg[c.status]||'b-gray'}">${stLbl[c.status]||c.status}</span>
+        <span class="ch-time-lbl">${fmt(c.criado_em)}</span>
+      </div>
+    </div>`).join('')
+}
 
-  function mostrarToast(msg, tipo='success') {
-    const t = document.getElementById('toast')
-    document.getElementById('toast-msg').textContent = msg
-    t.className = `toast ${tipo} show`
-    setTimeout(() => t.classList.remove('show'), 3000)
-  }
+window.abrirCh=function(id){
+  curCh=chamados.find(c=>c.id===id);curAv=null
+  renderCh(filtrarListaCh())
+  const c=curCh
+  const msgs=c.mensagens||[]
+  const podeR=c.status!=='cancelado'&&c.status!=='resolvido'
 
+  const thread=msgs.map(m=>`
+    <div class="bubble ${m.de==='sindico'?'sind':'mor'}">
+      <span class="bsender">${m.de==='sindico'?'👤 Síndico':'🏠 Morador'}</span>
+      <div class="bcontent">${esc(m.texto)}</div>
+      <span class="btime">${fmtTime(m.em)}</span>
+    </div>`).join('')
+
+  document.getElementById('col-detail').innerHTML=`
+    <div class="d-header">
+      <div class="d-titulo">${esc(c.titulo||'—')}</div>
+      <div class="d-badges">
+        <span class="badge ${prBg[c.prioridade]||'b-amber'}">${c.prioridade||'normal'}</span>
+        <span class="badge ${stBg[c.status]||'b-gray'}">${stLbl[c.status]||c.status}</span>
+        <span class="badge b-gray">${esc(c.categoria||'Geral')}</span>
+        <span style="font-size:0.68rem;color:var(--text-light);margin-left:auto">${fmtLong(c.criado_em)}</span>
+      </div>
+    </div>
+    <div class="d-body" id="dbody">
+      <div class="orig-msg">
+        <div class="orig-lbl">🏠 Mensagem do morador</div>
+        <div class="orig-txt">${esc(c.descricao||'Sem descrição.')}</div>
+      </div>
+      ${msgs.length?`<div class="thread">${thread}</div>`:`<div style="text-align:center;font-size:0.78rem;color:var(--text-light);padding:1rem 0">Nenhuma troca de mensagens ainda</div>`}
+    </div>
+    ${podeR?`
+    <div class="d-footer">
+      <div class="reply-wrap">
+        <textarea class="reply-ta" id="rtxt" placeholder="Digite sua resposta para o morador..." rows="2"></textarea>
+      </div>
+      <div class="reply-actions">
+        <select class="ssel" id="rst">
+          <option value="aberto"${c.status==='aberto'?' selected':''}>Manter: Aberto</option>
+          <option value="em_andamento"${c.status==='em_andamento'?' selected':''}>Em andamento</option>
+          <option value="resolvido">Marcar como Resolvido ✓</option>
+          <option value="cancelado">Cancelar chamado</option>
+        </select>
+        <button class="send-btn" id="sbtn" onclick="enviarResp()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Responder
+        </button>
+      </div>
+    </div>`:`<div class="closed-note">Chamado ${stLbl[c.status]||c.status} — não é possível responder</div>`}
+  `
+  setTimeout(()=>{const b=document.getElementById('dbody');if(b)b.scrollTop=b.scrollHeight},50)
+}
+
+window.enviarResp=async function(){
+  const txt=(document.getElementById('rtxt')?.value||'').trim()
+  const status=document.getElementById('rst')?.value||curCh.status
+  if(!txt){toast('Digite uma resposta','error');return}
+  const btn=document.getElementById('sbtn')
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>'
+  const msgs=[...(curCh.mensagens||[]),{de:'sindico',texto:txt,em:new Date().toISOString()}]
+  const{error}=await SB.from('chamados').update({resposta:txt,status,mensagens:msgs,atualizado_em:new Date().toISOString()}).eq('id',curCh.id)
+  if(error){toast('Erro: '+error.message,'error');btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Responder';return}
+  toast('Resposta enviada!','success')
+  const savedId=curCh.id
   await carregar()
+  abrirCh(savedId)
+}
 
-  window.abrirNovoModal = function() {
-    chamadoAtualId = null
-    document.getElementById('modal-titulo').textContent = 'Novo Chamado'
-    document.getElementById('modal-info').innerHTML = '<span style="color:var(--text-light);font-size:0.82rem">Preencha os dados do novo chamado.</span>'
-    document.getElementById('f-resposta').value = ''
-    document.getElementById('f-status').value   = 'aberto'
-    document.getElementById('btn-salvar').textContent = 'Abrir chamado'
-    document.getElementById('modal-overlay').classList.add('open')
-  }
+function renderAv(lista){
+  const el=document.getElementById('lista-av')
+  if(!lista.length){el.innerHTML=`<div class="empty-s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 17H2a3 3 0 000 6h20a3 3 0 000-6z"/><path d="M13.73 1a2 2 0 00-3.46 0L2 16h20z"/></svg><p>Nenhum comunicado publicado</p></div>`;return}
+  el.innerHTML=lista.map(a=>`
+    <div class="av-item${curAv?.id===a.id?' sel':''}" onclick="abrirAv('${a.id}')">
+      <div class="av-tipo-row">
+        <span style="font-size:14px">${tpEm[a.tipo]||'📢'}</span>
+        <span class="badge ${tpBg[a.tipo]||'b-amber'}">${tpLbl[a.tipo]||a.tipo}</span>
+        ${a.destinatarios?`<span class="badge b-gray" style="font-size:0.62rem">${esc(a.destinatarios)}</span>`:''}
+      </div>
+      <div class="av-tit">${esc(a.titulo||'—')}</div>
+      <div class="av-txt">${esc(a.texto||'')}</div>
+      <div class="av-foot">📅 ${fmtLong(a.criado_em)}</div>
+    </div>`).join('')
+}
+
+window.abrirAv=function(id){
+  curAv=avisos.find(a=>a.id===id);curCh=null
+  renderAv(filtrarListaAv())
+  const a=curAv
+  document.getElementById('col-detail').innerHTML=`
+    <div class="av-detail-tipo" style="padding:14px 18px;border-bottom:1px solid var(--border);background:var(--off-white);flex-shrink:0;display:flex;align-items:center;gap:12px">
+      <span style="font-size:28px">${tpEm[a.tipo]||'📢'}</span>
+      <div>
+        <span class="badge ${tpBg[a.tipo]||'b-amber'}" style="margin-bottom:4px">${tpLbl[a.tipo]||a.tipo}</span>
+        ${a.destinatarios?`<div style="font-size:0.72rem;color:var(--text-light);margin-top:2px">Para: ${esc(a.destinatarios)}</div>`:''}
+      </div>
+      <span style="margin-left:auto;font-size:0.72rem;color:var(--text-light)">${fmtLong(a.criado_em)}</span>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:20px 18px;background:var(--white)">
+      <div style="font-size:1.05rem;font-weight:800;color:var(--navy);margin-bottom:14px;line-height:1.3">${esc(a.titulo||'—')}</div>
+      <div style="font-size:0.88rem;color:var(--text-dark);line-height:1.75;white-space:pre-wrap">${esc(a.texto||'')}</div>
+      ${a.autor?`<div style="margin-top:20px;padding-top:12px;border-top:1px solid var(--border);font-size:0.75rem;color:var(--text-light)">Publicado por <strong>${esc(a.autor)}</strong></div>`:''}
+    </div>
+  `
+}
+
+function renderRecentes(){
+  const el=document.getElementById('recentes')
+  const todos=[
+    ...chamados.slice(0,4).map(c=>({tipo:'ch',txt:`Chamado: ${c.titulo}`,st:c.status,em:c.criado_em})),
+    ...avisos.slice(0,3).map(a=>({tipo:'av',txt:`Aviso: ${a.titulo}`,em:a.criado_em}))
+  ].sort((a,b)=>new Date(b.em)-new Date(a.em)).slice(0,7)
+  const cor={aberto:'var(--red)',em_andamento:'var(--blue)',resolvido:'var(--green)',cancelado:'#94a3b8',av:'var(--amber)'}
+  el.innerHTML=todos.map(t=>`
+    <div class="rec-row">
+      <div class="rec-dot" style="background:${t.tipo==='av'?cor.av:(cor[t.st]||'var(--amber)')}"></div>
+      <div class="rec-t">${esc(t.txt)}</div>
+      <div class="rec-d">${fmt(t.em)}</div>
+    </div>`).join('')||'<p style="font-size:0.78rem;color:var(--text-light)">Sem atividade recente</p>'
+}
+
+function filtrarListaCh(){
+  const b=(document.getElementById('bch')?.value||'').toLowerCase()
+  const s=document.getElementById('fst')?.value||''
+  return chamados.filter(c=>(c.titulo||'').toLowerCase().includes(b)&&(!s||c.status===s))
+}
+function filtrarListaAv(){
+  const b=(document.getElementById('bav')?.value||'').toLowerCase()
+  const t=document.getElementById('ftp')?.value||''
+  return avisos.filter(a=>((a.titulo||'')+(a.texto||'')).toLowerCase().includes(b)&&(!t||a.tipo===t))
+}
+window.filtrarCh=()=>renderCh(filtrarListaCh())
+window.filtrarAv=()=>renderAv(filtrarListaAv())
+
+window.setTab=function(tab){
+  document.getElementById('tbtn-ch').className='tab-btn'+(tab==='ch'?' active':'')
+  document.getElementById('tbtn-av').className='tab-btn'+(tab==='av'?' active':'')
+  const pch=document.getElementById('pch');const pav=document.getElementById('pav')
+  pch.style.display=tab==='ch'?'flex':'none';pav.style.display=tab==='av'?'flex':'none'
+}
+
+window.abrirModalChamado=function(){
+  document.getElementById('ch-t').value='';document.getElementById('ch-d').value=''
+  document.getElementById('m-chamado').classList.add('open')
+}
+window.salvarChamado=async function(){
+  const t=document.getElementById('ch-t').value.trim()
+  const d=document.getElementById('ch-d').value.trim()
+  const c=document.getElementById('ch-c').value
+  const p=document.getElementById('ch-p').value
+  if(!t||!d){toast('Preencha título e descrição','error');return}
+  const btn=document.getElementById('bsc')
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Salvando...'
+  const{error}=await SB.from('chamados').insert({titulo:t,descricao:d,categoria:c,prioridade:p,status:'aberto',condominio_id:COND,criado_em:new Date().toISOString()})
+  btn.disabled=false;btn.textContent='Abrir chamado'
+  if(error){toast('Erro: '+error.message,'error');return}
+  toast('Chamado criado!','success');mclose('m-chamado');await carregar()
+}
+
+window.abrirModalAviso=function(tp){
+  document.getElementById('av-t').value='';document.getElementById('av-x').value=''
+  if(tp){const el=document.querySelector(`[data-tipo="${tp}"]`);if(el)sTipo(el)}
+  document.getElementById('m-aviso').classList.add('open')
+}
+window.sTipo=function(el){
+  document.querySelectorAll('#tg .tipo-opt').forEach(e=>e.classList.remove('sel'))
+  el.classList.add('sel');tipoSel=el.dataset.tipo
+}
+window.tChip=function(el){
+  if(el.dataset.dest==='todos'){document.querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel')}
+  else{document.querySelector('[data-dest="todos"]').classList.remove('sel');el.classList.toggle('sel')}
+}
+window.salvarAviso=async function(){
+  const t=document.getElementById('av-t').value.trim()
+  const x=document.getElementById('av-x').value.trim()
+  if(!t||!x){toast('Preencha título e mensagem','error');return}
+  const dest=[...document.querySelectorAll('.chip.sel')].map(c=>c.dataset.dest).join(', ')||'todos'
+  const btn=document.getElementById('bsa')
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Publicando...'
+  const{error}=await SB.from('comunicados').insert({titulo:t,texto:x,tipo:tipoSel,destinatarios:dest,autor:nome,condominio_id:COND,criado_em:new Date().toISOString()})
+  btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Publicar'
+  if(error){toast('Erro: '+error.message,'error');return}
+  toast('Comunicado publicado!','success');mclose('m-aviso');await carregar();setTab('av')
+}
+
+window.mclose=id=>document.getElementById(id).classList.remove('open')
+window.mfora=(e,id)=>{if(e.target===document.getElementById(id))mclose(id)}
+function toast(msg,tipo='success'){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;t.className=`toast ${tipo} show`;setTimeout(()=>t.classList.remove('show'),3000)}
+
+await carregar()
 </script>
 </body>
 </html>
