@@ -201,39 +201,6 @@ input[type=file]#fFoto{display:none}
 .acesso-box-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
 .acesso-box-title.amber{color:#d97706}
 .acesso-box-title.purple{color:#7c3aed}
-
-  /* ── APROVAÇÃO PENDENTE ── */
-  .aprovacao-banner{background:#fff;border:1.5px solid #FCD34D;border-radius:12px;padding:0;margin-bottom:20px;overflow:hidden}
-  .aprovacao-header{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:#FFFBEB;border-bottom:1px solid #FDE68A;cursor:pointer}
-  .aprovacao-header-left{display:flex;align-items:center;gap:8px}
-  .aprovacao-title{font-size:13px;font-weight:700;color:#92400E}
-  .aprovacao-count{background:#FCD34D;color:#78350F;font-size:11px;font-weight:800;padding:2px 7px;border-radius:99px}
-  .aprovacao-toggle{font-size:11px;color:#B45309;font-weight:600}
-  .aprovacao-list{padding:10px 14px;display:flex;flex-direction:column;gap:7px}
-  .pend-card{display:flex;align-items:center;gap:10px;background:#FAFAF8;border:1px solid #E2E0DA;border-radius:9px;padding:10px 12px;transition:all .15s}
-  .pend-card:hover{border-color:#F59E0B;background:#FFFBEB}
-  .pend-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#FCD34D,#F59E0B);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#78350F;flex-shrink:0}
-  .pend-info{flex:1;min-width:0}
-  .pend-nome{font-size:13px;font-weight:700;color:#1a1d27;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .pend-sub{font-size:11px;color:#64748b;margin-top:1px}
-  .pend-data{font-size:10px;color:#94a3b8;margin-top:2px}
-  .pend-actions{display:flex;gap:5px;flex-shrink:0}
-  .btn-aprovar{display:flex;align-items:center;gap:4px;padding:6px 11px;background:#16A34A;color:#fff;border:none;border-radius:7px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:background .15s}
-  .btn-aprovar:hover{background:#15803D}
-  .btn-rejeitar{display:flex;align-items:center;gap:4px;padding:6px 11px;background:#fff;color:#DC2626;border:1.5px solid #FCA5A5;border-radius:7px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s}
-  .btn-rejeitar:hover{background:#FEE2E2;border-color:#DC2626}
-  .btn-ver-pend{padding:5px 9px;background:transparent;color:#B45309;border:1.5px solid #FCD34D;border-radius:7px;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s}
-  .stat-val.pending{color:#B45309}
-  .modal-rejeitar-ov{position:fixed;inset:0;background:rgba(11,31,58,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .2s}
-  .modal-rejeitar-ov.open{opacity:1;pointer-events:all}
-  .modal-rejeitar{background:#fff;border-radius:14px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.15);transform:translateY(14px);transition:transform .2s}
-  .modal-rejeitar-ov.open .modal-rejeitar{transform:translateY(0)}
-  .mr-header{display:flex;align-items:center;gap:10px;padding:1rem 1.25rem;border-bottom:1px solid #E2E0DA}
-  .mr-body{padding:1.25rem}
-  .mr-footer{display:flex;gap:8px;justify-content:flex-end;padding:.9rem 1.25rem;border-top:1px solid #E2E0DA}
-  .mr-label{font-size:12px;font-weight:700;color:#1a1d27;margin-bottom:5px}
-  .mr-textarea{width:100%;border:1.5px solid #E2E0DA;border-radius:8px;padding:9px 11px;font-family:inherit;font-size:13px;color:#1a1d27;resize:vertical;min-height:80px;outline:none}
-  .mr-textarea:focus{border-color:#DC2626}
 </style>
 </head>
 <body>
@@ -336,19 +303,6 @@ input[type=file]#fFoto{display:none}
       <button class="btn-new" onclick="abrirModal()">+ Cadastrar Morador</button>
     </div>
 
-    <!-- APROVAÇÕES PENDENTES -->
-    <div class="aprovacao-banner" id="aprovacaoBanner" style="display:none">
-      <div class="aprovacao-header" onclick="toggleAprovacao()">
-        <div class="aprovacao-header-left">
-          <span style="font-size:16px">⏳</span>
-          <span class="aprovacao-title">Cadastros aguardando aprovação</span>
-          <span class="aprovacao-count" id="aprovacaoCount">0</span>
-        </div>
-        <span class="aprovacao-toggle" id="aprovacaoToggle">▼ Ver todos</span>
-      </div>
-      <div id="aprovacaoList" class="aprovacao-list" style="display:none"></div>
-    </div>
-
     <!-- STATS -->
     <div class="stats">
       <div class="stat">
@@ -367,9 +321,9 @@ input[type=file]#fFoto{display:none}
         <div class="stat-label">Inquilinos</div>
         <div class="stat-val purple" id="statInquilinos">—</div>
       </div>
-      <div class="stat" style="cursor:pointer" onclick="document.getElementById('aprovacaoBanner').scrollIntoView({behavior:'smooth'});if(document.getElementById('aprovacaoList').style.display==='none')toggleAprovacao()">
-        <div class="stat-label">Pendentes</div>
-        <div class="stat-val pending" id="statPendentes">—</div>
+      <div class="stat" style="display:none;border-color:#fecdd3;background:#fff1f2">
+        <div class="stat-label" style="color:#be123c">⏳ Pendentes</div>
+        <div class="stat-val" style="color:#be123c" id="statPendentes">0</div>
       </div>
     </div>
 
@@ -383,7 +337,7 @@ input[type=file]#fFoto{display:none}
       <button class="filter-chip" onclick="setFiltro('inativo',this)">🔴 Inativos</button>
       <button class="filter-chip" onclick="setFiltro('proprietario',this)">🏠 Proprietários</button>
       <button class="filter-chip" onclick="setFiltro('inquilino',this)">🔑 Inquilinos</button>
-      <button class="filter-chip" id="chipPendente" onclick="setFiltro('pendente',this)" style="border-color:#FCD34D;color:#B45309">⏳ Pendentes</button>
+      <button class="filter-chip" onclick="setFiltro('pendente',this)" style="border-color:#fecdd3;color:#be123c">⏳ Pendentes</button>
       <select class="filter-select" id="filtroApto" onchange="renderCards()">
         <option value="">Todos os aptos</option>
       </select>
@@ -688,129 +642,6 @@ function mascaraTel(el){
   el.value = v;
 }
 
-// ── APROVAÇÃO PENDENTE ────────────────────────────────────
-let _pendRejeitarId = null;
-
-function renderPendentes(){
-  const pendentes = _moradores.filter(m => !m.ativo && m.status === 'pendente');
-  const banner = document.getElementById('aprovacaoBanner');
-  const countEl= document.getElementById('aprovacaoCount');
-  const listEl = document.getElementById('aprovacaoList');
-  const statEl = document.getElementById('statPendentes');
-
-  if(statEl) statEl.textContent = pendentes.length;
-  countEl.textContent = pendentes.length;
-  banner.style.display = pendentes.length > 0 ? 'block' : 'none';
-
-  if(!pendentes.length){
-    listEl.innerHTML = '<div style="text-align:center;font-size:13px;color:#94a3b8;padding:14px">Nenhum cadastro pendente</div>';
-    return;
-  }
-
-  listEl.innerHTML = pendentes.map(m => {
-    const ini = (m.nome||'?').split(' ').slice(0,2).map(p=>p[0]).join('').toUpperCase();
-    const apto = m.unidade ? `Apto ${m.unidade}${m.bloco?' — Bloco '+m.bloco:''}` : 'Unidade não informada';
-    const roleLbl = {proprietario:'Proprietário', inquilino:'Inquilino', morador:'Morador', sindico:'Síndico'}[m.role] || m.role || '—';
-    const data = m.data_solicitacao ? new Date(m.data_solicitacao).toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'}) : 'Data não registrada';
-    return `<div class="pend-card" id="pend-${m.id}">
-      <div class="pend-avatar">${ini}</div>
-      <div class="pend-info">
-        <div class="pend-nome" title="${(m.nome||'').replace(/"/g,'')}">${m.nome||'—'}</div>
-        <div class="pend-sub">📍 ${apto} · ${roleLbl} · ${m.email||''}</div>
-        <div class="pend-data">📅 Solicitado em ${data}</div>
-      </div>
-      <div class="pend-actions">
-        <button class="btn-ver-pend" onclick="abrirModal(${m.id})">Ver</button>
-        <button class="btn-rejeitar" onclick="abrirModalRejeitar(${m.id})">✕ Rejeitar</button>
-        <button class="btn-aprovar" onclick="aprovarMorador(${m.id})">✓ Aprovar</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function toggleAprovacao(){
-  const list = document.getElementById('aprovacaoList');
-  const tog  = document.getElementById('aprovacaoToggle');
-  const open = list.style.display !== 'none';
-  list.style.display = open ? 'none' : 'flex';
-  tog.textContent = open ? '▼ Ver todos' : '▲ Ocultar';
-}
-
-async function aprovarMorador(id){
-  const m = _moradores.find(x=>x.id===id);
-  if(!m) return;
-  if(!confirm(`Aprovar o cadastro de ${m.nome}?\n\nO morador terá acesso ao portal imediatamente.`)) return;
-
-  const card = document.getElementById('pend-'+id);
-  if(card){ card.style.opacity='0.5'; card.style.pointerEvents='none'; }
-
-  const res = await fetch(
-    `${SUPA_URL}/rest/v1/usuarios?id=eq.${id}`,
-    { method:'PATCH', headers:{...hdrs(),'Prefer':'return=minimal'},
-      body: JSON.stringify({ ativo: true, status: 'aprovado', data_aprovacao: new Date().toISOString() })
-    }
-  );
-
-  if(res.ok){
-    showToast(`✅ ${m.nome} aprovado com sucesso! Acesso liberado.`, 'success');
-    await loadMoradores();
-  } else {
-    showToast('Erro ao aprovar. Tente novamente.', 'error');
-    if(card){ card.style.opacity='1'; card.style.pointerEvents=''; }
-  }
-}
-
-function abrirModalRejeitar(id){
-  _pendRejeitarId = id;
-  const m = _moradores.find(x=>x.id===id);
-  document.getElementById('mr-nome').textContent = m?.nome || '—';
-  document.getElementById('mr-motivo').value = '';
-  document.getElementById('modalRejeitar').classList.add('open');
-}
-
-async function confirmarRejeitar(){
-  const id = _pendRejeitarId;
-  if(!id) return;
-  const m = _moradores.find(x=>x.id===id);
-  const motivo = document.getElementById('mr-motivo').value.trim();
-
-  const btn = document.getElementById('btn-confirmar-rej');
-  btn.disabled = true; btn.textContent = 'Rejeitando...';
-
-  const res = await fetch(
-    `${SUPA_URL}/rest/v1/usuarios?id=eq.${id}`,
-    { method:'PATCH', headers:{...hdrs(),'Prefer':'return=minimal'},
-      body: JSON.stringify({ ativo: false, status: 'rejeitado', motivo_rejeicao: motivo || null, data_aprovacao: new Date().toISOString() })
-    }
-  );
-
-  btn.disabled = false; btn.textContent = 'Rejeitar cadastro';
-  fecharModalRejeitar();
-
-  if(res.ok){
-    showToast(`❌ Cadastro de ${m?.nome||''} rejeitado.`, 'error');
-    await loadMoradores();
-  } else {
-    showToast('Erro ao rejeitar. Tente novamente.', 'error');
-  }
-}
-
-function fecharModalRejeitar(){ document.getElementById('modalRejeitar').classList.remove('open'); _pendRejeitarId=null; }
-
-function showToast(msg, tipo='success'){
-  let t = document.getElementById('globalToast');
-  if(!t){
-    t = document.createElement('div');
-    t.id='globalToast';
-    t.style.cssText='position:fixed;bottom:1.5rem;right:1.5rem;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;color:#fff;z-index:999;transform:translateY(80px);opacity:0;transition:all .3s;box-shadow:0 8px 24px rgba(0,0,0,.15)';
-    document.body.appendChild(t);
-  }
-  t.textContent = msg;
-  t.style.background = tipo==='success'?'#16A34A':'#DC2626';
-  t.style.transform='translateY(0)';t.style.opacity='1';
-  setTimeout(()=>{t.style.transform='translateY(80px)';t.style.opacity='0';},3500);
-}
-
 // ── LOAD ─────────────────────────────────────────────────
 async function loadMoradores(){
   const res = await fetch(
@@ -820,28 +651,24 @@ async function loadMoradores(){
   _moradores = res.ok ? await res.json() : [];
   renderStats();
   renderFiltroApto();
-  renderPendentes();
   renderCards();
 }
 
 function renderStats(){
-  const ativos = _moradores.filter(m => m.ativo);
-  const pendentes = _moradores.filter(m => !m.ativo && m.status === 'pendente');
-  const aptos = [...new Set(_moradores.filter(m => m.ativo).map(m => m.unidade).filter(Boolean))].length;
-
-  const elAptos = document.getElementById('statAptos');
-  const elAtivos = document.getElementById('statAtivos');
-  const elProp = document.getElementById('statProprietarios');
-  const elInq = document.getElementById('statInquilinos');
-  const elPend = document.getElementById('statPendentes');
-
-  if(elAptos) elAptos.textContent = aptos;
-  if(elAtivos) elAtivos.textContent = ativos.length;
-  if(elProp) elProp.textContent = ativos.filter(m => (m.role||(m.tipo_ocupacao||m.role)) === 'sindico' || (m.role||(m.tipo_ocupacao||m.role)) === 'proprietario').length;
-  if(elInq) elInq.textContent = ativos.filter(m => (m.role||(m.tipo_ocupacao||m.role)) === 'morador' || (m.role||(m.tipo_ocupacao||m.role)) === 'inquilino').length;
-  if(elPend) elPend.textContent = pendentes.length;
+  const ativos    = _moradores.filter(m=>m.ativo);
+  const pendentes = _moradores.filter(m=>!m.ativo);
+  const aptos     = [...new Set(ativos.map(m=>m.unidade))].length;
+  document.getElementById('statAptos').textContent        = aptos;
+  document.getElementById('statAtivos').textContent       = ativos.length;
+  document.getElementById('statProprietarios').textContent= ativos.filter(m=>m.role==='sindico'||m.role==='proprietario').length;
+  document.getElementById('statInquilinos').textContent   = ativos.filter(m=>m.role==='morador'||m.role==='inquilino').length;
+  // Pendentes
+  const pendEl = document.getElementById('statPendentes');
+  if(pendEl){
+    pendEl.textContent = pendentes.length;
+    pendEl.parentElement.style.display = pendentes.length > 0 ? 'block' : 'none';
+  }
 }
-
 
 function renderFiltroApto(){
   const aptos = [...new Set(_moradores.map(m=>m.unidade).filter(Boolean))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
@@ -864,13 +691,12 @@ function renderCards(){
   let lista = _moradores.filter(m=>{
     if(_filtro==='ativo'        && !m.ativo) return false;
     if(_filtro==='inativo'      && m.ativo)  return false;
-    if(_filtro==='proprietario' && (m.tipo_ocupacao||m.role)!=='proprietario') return false;
-    if(_filtro==='inquilino'    && (m.tipo_ocupacao||m.role)!=='inquilino') return false;
-    if(_filtro==='pendente'     && !(m.status==='pendente' && !m.ativo)) return false;
-    if(filtApto && m.unidade!==filtApto) return false;
+    if(_filtro==='proprietario' && m.tipo_ocupacao!=='proprietario') return false;
+    if(_filtro==='inquilino'    && m.tipo_ocupacao!=='inquilino') return false;
+    if(filtApto && m.apartamento!==filtApto) return false;
     if(busca && !(
       m.nome?.toLowerCase().includes(busca) ||
-      m.unidade?.toLowerCase().includes(busca) ||
+      m.apartamento?.toLowerCase().includes(busca) ||
       m.cpf?.includes(busca) ||
       m.email?.toLowerCase().includes(busca)
     )) return false;
@@ -886,14 +712,12 @@ function renderCards(){
   grid.innerHTML = lista.map(m=>{
     const residentes = m.residentes || [];
     const pets       = m.pets || [];
-    const tipoLabel  = (m.tipo_ocupacao||m.role)==='proprietario' ? 'Proprietário' : 'Inquilino';
-    const aptoLabel  = m.bloco ? `Apto ${m.unidade} — Bloco ${m.bloco}` : `Apto ${m.unidade}`;
-    const avatarBg   = (m.tipo_ocupacao||m.role)==='proprietario'
+    const tipoLabel  = m.tipo_ocupacao==='proprietario' ? 'Proprietário' : 'Inquilino';
+    const aptoLabel  = m.bloco ? `Apto ${m.apartamento} — Bloco ${m.bloco}` : `Apto ${m.apartamento}`;
+    const avatarBg   = m.tipo_ocupacao==='proprietario'
       ? 'linear-gradient(135deg,#f5a623,#e09210)'
       : 'linear-gradient(135deg,#3b82f6,#1d4ed8)';
 
-    const badgePendente = (!m.ativo && m.status === "pendente") ? '<span class="badge" style="background:#FEF3C7;color:#B45309;border:1px solid #FCD34D">&#9203; Pendente</span>' : "";
-    const badgeRejeitado = (!m.ativo && m.status === "rejeitado") ? '<span class="badge" style="background:#FEE2E2;color:#B91C1C;border:1px solid #FCA5A5">&#10060; Rejeitado</span>' : "";
     return `<div class="morador-card" onclick="abrirModal(${m.id})">
       <div class="card-top">
         <div class="avatar" style="background:${avatarBg}">
@@ -904,10 +728,8 @@ function renderCards(){
           <div class="card-apto">📍 ${aptoLabel}</div>
           <div class="card-tipo">${tipoLabel}${m.vaga_garagem ? ` • Vaga ${m.vaga_garagem}` : ''}</div>
           <div class="card-status">
-            
-            ${badgeRejeitado}
-            <span class="badge ${m.ativo?'ativo':'inativo'}">${m.ativo?'✓ Ativo':'Inativo'}</span>
-            <span class="badge ${(m.tipo_ocupacao||m.role)}">${tipoLabel}</span>
+            <span class="badge ${m.ativo?'ativo':'inativo'}">${m.ativo?'✓ Ativo':m.email?'⏳ Pendente':'Inativo'}</span>
+            <span class="badge ${m.tipo_ocupacao}">${tipoLabel}</span>
             ${residentes.length>0?`<span class="badge" style="background:#f1f5f9;color:#64748b">👥 +${residentes.length}</span>`:''}
             ${pets.length>0?`<span class="badge pet">🐾 ${pets.length} pet${pets.length>1?'s':''}</span>`:''}
             ${m.veiculo_placa?`<span class="badge veiculo">🚗 ${m.veiculo_placa}</span>`:''}
@@ -1107,20 +929,21 @@ async function verificarEmailAuth(num){
   if(!status || !chk) return;
   if(!email || !email.includes('@')){ status.style.display='none'; return; }
   try{
+    // Verificar se email já existe no Auth via tabela usuarios
     const r = await fetch(
-      `${SUPA_URL}/rest/v1/usuarios_portal?email=eq.${encodeURIComponent(email)}&select=email,perfil`,
+      `${SUPA_URL}/rest/v1/usuarios?email=eq.${encodeURIComponent(email)}&condominio_id=eq.${CONDO_ID}&select=email,role`,
       { headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY} }
     );
     if(r.ok){
       const d = await r.json();
       if(d.length>0){
-        status.innerHTML = '✅ E-mail já possui acesso (<strong>'+(d[0].perfil||'condômino')+'</strong>)';
+        status.innerHTML = '✅ E-mail já cadastrado como <strong>'+(d[0].role||'morador')+'</strong>';
         status.style.cssText='display:block;color:#16a34a;font-size:11px;margin-top:4px';
         chk.checked=false; toggleCampoSenha(num); chk.disabled=true;
         return;
       }
     }
-    status.innerHTML = '○ Sem acesso ao portal ainda';
+    status.innerHTML = '○ E-mail ainda sem acesso ao portal';
     status.style.cssText='display:block;color:#94a3b8;font-size:11px;margin-top:4px';
     chk.disabled=false;
   } catch(e){ status.style.display='none'; }
@@ -1133,23 +956,32 @@ async function criarAcessoPortal(email, nome, apto, sfxNum){
     showAlert('A senha deve ter no mínimo 6 caracteres.','error');
     return false;
   }
-  const rAuth = await fetch(`${SUPA_URL}/auth/v1/admin/users`,{
+  // Criar conta no Supabase Auth (signup público)
+  const rAuth = await fetch(`${SUPA_URL}/auth/v1/signup`,{
     method:'POST',
-    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
-    body: JSON.stringify({email, password: senha, email_confirm: true, user_metadata:{ full_name: nome }})
+    headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},
+    body: JSON.stringify({email, password: senha, data:{ full_name: nome }})
   });
+  const dAuth = await rAuth.json().catch(()=>({}));
   if(!rAuth.ok){
-    const err = await rAuth.json().catch(()=>({}));
-    const msg = err.message||err.msg||'';
-    if(rAuth.status !== 422 && !msg.toLowerCase().includes('already')){
-      showAlert('❌ Erro ao criar acesso no Auth: '+msg,'error');
+    const msg = dAuth.message||dAuth.msg||'';
+    if(!msg.toLowerCase().includes('already registered')){
+      showAlert('❌ Erro ao criar acesso: '+msg,'error');
       return false;
     }
+    // Email já existe no Auth — ok, continua
   }
-  await fetch(`${SUPA_URL}/rest/v1/usuarios_portal`,{
+  // Garantir registro na tabela usuarios com ativo=true
+  await fetch(`${SUPA_URL}/rest/v1/usuarios`,{
     method:'POST',
-    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},
-    body: JSON.stringify({email, nome, empresa: EMPRESA, unidade: apto, perfil: 'condômino', adimplente: true})
+    headers:{...hdrs(),'Prefer':'resolution=merge-duplicates'},
+    body: JSON.stringify({
+      condominio_id: CONDO_ID,
+      nome, email,
+      unidade: apto,
+      role: 'morador',
+      ativo: true,
+    })
   });
   return true;
 }
@@ -1206,6 +1038,21 @@ async function salvar(){
     showAlert('❌ Erro ao salvar: '+e.message,'error');
   }
   btn.disabled=false; btn.textContent='💾 Salvar Morador';
+}
+
+// ── APROVAR MORADOR ──────────────────────────────────────────────────────────
+async function aprovarMorador(id, nome){
+  if(!confirm(`Aprovar o cadastro de "${nome}"?\nEle receberá acesso ao portal.`)) return;
+  const res = await fetch(
+    `${SUPA_URL}/rest/v1/usuarios?id=eq.${id}&condominio_id=eq.${CONDO_ID}`,
+    {method:'PATCH', headers:hdrs(), body:JSON.stringify({ativo:true})}
+  );
+  if(res.ok){
+    showAlert(`✅ ${nome} aprovado com sucesso!`);
+    await loadMoradores();
+  } else {
+    showAlert('Erro ao aprovar morador.','error');
+  }
 }
 
 // ── DELETAR ───────────────────────────────────────────────
