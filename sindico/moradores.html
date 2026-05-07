@@ -447,10 +447,8 @@ input[type=file]#fFoto{display:none}
           <label>Tipo de Ocupação</label>
           <select id="fTipoOcup">
             <option value="morador">Morador</option>
-            <option value="proprietario">Proprietário</option>
-            <option value="inquilino">Inquilino</option>
             <option value="sindico">Síndico</option>
-            <option value="funcionario">Funcionário</option>
+            <option value="administradora">Administradora</option>
           </select>
         </div>
       </div>
@@ -631,8 +629,8 @@ function renderStats(){
   const aptos     = [...new Set(ativos.map(m=>m.unidade))].length;
   document.getElementById('statAptos').textContent        = aptos;
   document.getElementById('statAtivos').textContent       = ativos.length;
-  document.getElementById('statProprietarios').textContent= ativos.filter(m=>m.role==='sindico'||m.role==='proprietario').length;
-  document.getElementById('statInquilinos').textContent   = ativos.filter(m=>m.role==='morador'||m.role==='inquilino').length;
+  document.getElementById('statProprietarios').textContent= ativos.filter(m=>m.role==='sindico'||m.role==='administradora').length;
+  document.getElementById('statInquilinos').textContent   = ativos.filter(m=>m.role==='morador').length;
   // Pendentes
   const pendEl = document.getElementById('statPendentes');
   if(pendEl){
@@ -963,7 +961,7 @@ async function salvar(){
   btn.disabled=true; btn.textContent='Salvando...';
 
   const emailVal   = document.getElementById('fEmail').value.trim();
-  const roleVal    = document.getElementById('fTipoOcup').value || 'morador';
+  const roleVal    = document.getElementById('fTipoOcup').value || 'morador'; // valores: morador, sindico, administradora
 
   // Gerar UUID para o id (tabela não tem default)
   function gerarUUID(){
