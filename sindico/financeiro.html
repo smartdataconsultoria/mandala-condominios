@@ -465,10 +465,6 @@ async function carregar(){
             </div>`;
           }).join('')}
         </div>
-        ${ultimoMes<11&&!mesFiltrado?`<div style="margin-top:16px;padding:12px 16px;background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:10px;font-size:13px;display:flex;justify-content:space-between;align-items:center">
-          <span style="color:var(--amber);font-weight:700">📈 Projeção ${MESES_FULL[ultimoMes+1]} – Dez</span>
-          <span style="color:var(--amber);font-weight:800">~ ${brl(mediaDes)}/mês</span>
-        </div>`:''}
       </div>
 
       <!-- COMPARATIVO CATEGORIA + SUBCATEGORIA POR MÊS -->
@@ -502,11 +498,10 @@ async function carregar(){
         <div style="overflow-x:auto" id="comp-table-wrap"></div>
       </div>
 
-      <!-- PIZZA CATEGORIAS + ÚLTIMOS LANÇAMENTOS -->
-      <div class="g2">
-        <div class="card">
-          <div class="ct">Despesas por Categoria — ${labelPeriodo}</div>
-          ${(()=>{
+      <!-- PIZZA CATEGORIAS -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="ct" style="margin-bottom:16px">Despesas por Categoria — ${labelPeriodo}</div>
+        ${(()=>{
             // Montar dados das categorias do período selecionado
             const catPizzaMap = {};
             const transPeriodo = mesesFiltro
@@ -540,7 +535,7 @@ async function carregar(){
 
             const svgFatias = fatias.map((f,ci)=>`
               <path d="${f.path}" fill="${f.cor}" stroke="white" stroke-width="2" style="cursor:pointer;transition:opacity .2s" 
-                onmouseover="this.style.opacity='.75';document.getElementById('pizza-tip').textContent='${f.nome.replace(/'/g,"\\'")}'" 
+                onmouseover="this.style.opacity='.75';document.getElementById('pizza-tip').textContent='${f.nome.replace(/'/g,"\'")}'" 
                 onmouseout="this.style.opacity='1';document.getElementById('pizza-tip').textContent=''">
                 <title>${f.nome}: ${brl(f.val)} (${Math.round(f.pct*100)}%)</title>
               </path>`).join('');
@@ -553,7 +548,7 @@ async function carregar(){
                 <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--off-white);border:1px solid var(--border);color:var(--text-mid);min-width:40px;text-align:center">${Math.round(f.pct*100)}%</span>
               </div>`).join('');
 
-            return `<div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap">
+            return `<div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap">
               <div style="flex-shrink:0;position:relative">
                 <svg width="240" height="240" viewBox="0 0 240 240">
                   ${svgFatias}
@@ -562,31 +557,9 @@ async function carregar(){
                 </svg>
                 <div id="pizza-tip" style="position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:11px;font-weight:700;color:var(--text-mid);min-height:16px"></div>
               </div>
-              <div style="flex:1;min-width:180px">${legenda}</div>
+              <div style="flex:1;min-width:220px">${legenda}</div>
             </div>`;
           })()}
-        </div>
-
-        <div class="card">
-          <div class="ct">Últimos Lançamentos — ${MESES_FULL[mesRef]}</div>
-          ${porMes[mesRef].trans.slice(0,8).map(t=>{
-            const cat=catMap[t.categoria_id];
-            const rec=t.tipo==='receita';
-            const dp=t.data?t.data.split('-').reverse().slice(0,2).join('/'):'-';
-            return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-light)">
-              <div style="width:30px;height:30px;border-radius:8px;background:${rec?'var(--green-bg)':'var(--red-bg)'};border:1px solid ${rec?'var(--green-border)':'var(--red-border)'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:${rec?'var(--green)':'var(--red)'};flex-shrink:0">${rec?'↑':'↓'}</div>
-              <div style="flex:1;min-width:0">
-                <div style="font-size:13px;color:var(--text-dark);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.descricao||'—')}</div>
-                <div style="font-size:11px;color:var(--text-light);margin-top:2px;display:flex;align-items:center;gap:5px">
-                  <span>${dp}</span>
-                  ${cat?`<span style="width:3px;height:3px;border-radius:50%;background:var(--border);display:inline-block"></span><span>${esc(cat.categoria||cat.nome||'')}</span>`:''}
-                </div>
-              </div>
-              <div style="font-size:14px;font-weight:800;color:${rec?'var(--green)':'var(--red)'};white-space:nowrap">${rec?'+':'-'}${brl(t.valor)}</div>
-            </div>`;
-          }).join('')}
-          ${!porMes[mesRef].trans.length?'<div style="color:var(--text-light);font-size:13px;text-align:center;padding:30px">Sem lançamentos</div>':''}
-        </div>
       </div>
     `;
     // Renderizar tabela comparativa APÓS o HTML estar no DOM
