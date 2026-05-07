@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Moradores — CondoGestor</title>
+  <meta charsetUTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moradores — CondoGestor</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',sans-serif;background:#f0ede8;color:#1a1d27;min-height:100vh;display:flex}
@@ -825,7 +825,8 @@ async function loadMoradores(){
 }
 
 
-function renderStats(){
+
+unction renderStats(){
   const ativos = _moradores.filter(m => m.ativo);
   const pendentes = _moradores.filter(m => !m.ativo && m.status === 'pendente');
 
@@ -835,12 +836,13 @@ function renderStats(){
 
   document.getElementById('statAptos').textContent = aptos;
   document.getElementById('statAtivos').textContent = ativos.length;
-  document.getElementById('statProprietarios').textContent = 
+  document.getElementById('statProprietarios').textContent =
     ativos.filter(m => m.role === 'sindico' || m.role === 'proprietario').length;
-  document.getElementById('statInquilinos').textContent = 
+  document.getElementById('statInquilinos').textContent =
     ativos.filter(m => m.role === 'morador' || m.role === 'inquilino').length;
   document.getElementById('statPendentes').textContent = pendentes.length;
 }
+
 
 
 function renderFiltroApto(){
