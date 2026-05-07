@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charsetUTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Moradores — CondoGestor</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Moradores — CondoGestor</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',sans-serif;background:#f0ede8;color:#1a1d27;min-height:100vh;display:flex}
@@ -824,25 +824,23 @@ async function loadMoradores(){
   renderCards();
 }
 
-
-
-unction renderStats(){
+function renderStats(){
   const ativos = _moradores.filter(m => m.ativo);
   const pendentes = _moradores.filter(m => !m.ativo && m.status === 'pendente');
+  const aptos = [...new Set(_moradores.filter(m => m.ativo).map(m => m.unidade).filter(Boolean))].length;
 
-  const aptos = [...new Set(
-    _moradores.filter(m => m.ativo).map(m => m.unidade)
-  )].length;
+  const elAptos = document.getElementById('statAptos');
+  const elAtivos = document.getElementById('statAtivos');
+  const elProp = document.getElementById('statProprietarios');
+  const elInq = document.getElementById('statInquilinos');
+  const elPend = document.getElementById('statPendentes');
 
-  document.getElementById('statAptos').textContent = aptos;
-  document.getElementById('statAtivos').textContent = ativos.length;
-  document.getElementById('statProprietarios').textContent =
-    ativos.filter(m => m.role === 'sindico' || m.role === 'proprietario').length;
-  document.getElementById('statInquilinos').textContent =
-    ativos.filter(m => m.role === 'morador' || m.role === 'inquilino').length;
-  document.getElementById('statPendentes').textContent = pendentes.length;
+  if(elAptos) elAptos.textContent = aptos;
+  if(elAtivos) elAtivos.textContent = ativos.length;
+  if(elProp) elProp.textContent = ativos.filter(m => (m.role||(m.tipo_ocupacao||m.role)) === 'sindico' || (m.role||(m.tipo_ocupacao||m.role)) === 'proprietario').length;
+  if(elInq) elInq.textContent = ativos.filter(m => (m.role||(m.tipo_ocupacao||m.role)) === 'morador' || (m.role||(m.tipo_ocupacao||m.role)) === 'inquilino').length;
+  if(elPend) elPend.textContent = pendentes.length;
 }
-
 
 
 function renderFiltroApto(){
@@ -866,13 +864,13 @@ function renderCards(){
   let lista = _moradores.filter(m=>{
     if(_filtro==='ativo'        && !m.ativo) return false;
     if(_filtro==='inativo'      && m.ativo)  return false;
-    if(_filtro==='proprietario' && m.tipo_ocupacao!=='proprietario') return false;
-    if(_filtro==='inquilino'    && m.tipo_ocupacao!=='inquilino') return false;
+    if(_filtro==='proprietario' && (m.tipo_ocupacao||m.role)!=='proprietario') return false;
+    if(_filtro==='inquilino'    && (m.tipo_ocupacao||m.role)!=='inquilino') return false;
     if(_filtro==='pendente'     && !(m.status==='pendente' && !m.ativo)) return false;
-    if(filtApto && m.apartamento!==filtApto) return false;
+    if(filtApto && m.unidade!==filtApto) return false;
     if(busca && !(
       m.nome?.toLowerCase().includes(busca) ||
-      m.apartamento?.toLowerCase().includes(busca) ||
+      m.unidade?.toLowerCase().includes(busca) ||
       m.cpf?.includes(busca) ||
       m.email?.toLowerCase().includes(busca)
     )) return false;
@@ -888,9 +886,9 @@ function renderCards(){
   grid.innerHTML = lista.map(m=>{
     const residentes = m.residentes || [];
     const pets       = m.pets || [];
-    const tipoLabel  = m.tipo_ocupacao==='proprietario' ? 'Proprietário' : 'Inquilino';
-    const aptoLabel  = m.bloco ? `Apto ${m.apartamento} — Bloco ${m.bloco}` : `Apto ${m.apartamento}`;
-    const avatarBg   = m.tipo_ocupacao==='proprietario'
+    const tipoLabel  = (m.tipo_ocupacao||m.role)==='proprietario' ? 'Proprietário' : 'Inquilino';
+    const aptoLabel  = m.bloco ? `Apto ${m.unidade} — Bloco ${m.bloco}` : `Apto ${m.unidade}`;
+    const avatarBg   = (m.tipo_ocupacao||m.role)==='proprietario'
       ? 'linear-gradient(135deg,#f5a623,#e09210)'
       : 'linear-gradient(135deg,#3b82f6,#1d4ed8)';
 
@@ -909,7 +907,7 @@ function renderCards(){
             
             ${badgeRejeitado}
             <span class="badge ${m.ativo?'ativo':'inativo'}">${m.ativo?'✓ Ativo':'Inativo'}</span>
-            <span class="badge ${m.tipo_ocupacao}">${tipoLabel}</span>
+            <span class="badge ${(m.tipo_ocupacao||m.role)}">${tipoLabel}</span>
             ${residentes.length>0?`<span class="badge" style="background:#f1f5f9;color:#64748b">👥 +${residentes.length}</span>`:''}
             ${pets.length>0?`<span class="badge pet">🐾 ${pets.length} pet${pets.length>1?'s':''}</span>`:''}
             ${m.veiculo_placa?`<span class="badge veiculo">🚗 ${m.veiculo_placa}</span>`:''}
