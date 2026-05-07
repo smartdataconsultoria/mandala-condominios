@@ -711,7 +711,7 @@ function renderCards(){
         <div class="card-contato">${m.telefone||m.email||'Sem contato'}</div>
         <div class="card-actions" onclick="event.stopPropagation()">
           <button class="btn-icon" onclick="abrirModal(${m.id})" title="Editar">✏</button>
-          <button class="btn-icon del" onclick="deletar(${m.id},'${m.nome.replace(/'/g,"\\'")}')">🗑</button>
+          <button class="btn-icon del" onclick="deletar(${m.id},'${m.nome.replace(/'/g,"'")}')">🗑</button>
         </div>
       </div>
     </div>`;
