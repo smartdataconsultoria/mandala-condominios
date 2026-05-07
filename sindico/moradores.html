@@ -826,7 +826,7 @@ async function loadMoradores(){
 
 function renderStats(){
   const ativos   = _moradores.filter(m=>m.ativo);
-  const pendentes= _moradores.filter(m=>!m.ativo && m.status==='pendente');
+            ${badgePendente}
   const aptos    = [...new Set(_moradores.filter(m=>m.ativo).map(m=>m.unidade))].length;
   document.getElementById('statAptos').textContent        = aptos;
   document.getElementById('statAtivos').textContent       = ativos.length;
@@ -884,6 +884,8 @@ function renderCards(){
       ? 'linear-gradient(135deg,#f5a623,#e09210)'
       : 'linear-gradient(135deg,#3b82f6,#1d4ed8)';
 
+    const badgePendente = (!m.ativo && m.status === "pendente") ? '<span class="badge" style="background:#FEF3C7;color:#B45309;border:1px solid #FCD34D">&#9203; Pendente</span>' : "";
+    const badgeRejeitado = (!m.ativo && m.status === "rejeitado") ? '<span class="badge" style="background:#FEE2E2;color:#B91C1C;border:1px solid #FCA5A5">&#10060; Rejeitado</span>' : "";
     return `<div class="morador-card" onclick="abrirModal(${m.id})">
       <div class="card-top">
         <div class="avatar" style="background:${avatarBg}">
@@ -894,8 +896,8 @@ function renderCards(){
           <div class="card-apto">📍 ${aptoLabel}</div>
           <div class="card-tipo">${tipoLabel}${m.vaga_garagem ? ` • Vaga ${m.vaga_garagem}` : ''}</div>
           <div class="card-status">
-            ${!m.ativo && m.status==='pendente' ? "<span class='badge' style='background:#FEF3C7;color:#B45309;border:1px solid #FCD34D'>⏳ Pendente</span>" : ''}
-            ${!m.ativo && m.status==='rejeitado' ? "<span class='badge' style='background:#FEE2E2;color:#B91C1C;border:1px solid #FCA5A5'>❌ Rejeitado</span>" : ''}
+            ${badgePendente}
+            ${badgeRejeitado}
             <span class="badge ${m.ativo?'ativo':'inativo'}">${m.ativo?'✓ Ativo':'Inativo'}</span>
             <span class="badge ${m.tipo_ocupacao}">${tipoLabel}</span>
             ${residentes.length>0?`<span class="badge" style="background:#f1f5f9;color:#64748b">👥 +${residentes.length}</span>`:''}
