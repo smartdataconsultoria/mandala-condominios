@@ -561,6 +561,7 @@ input[type=file]#fFoto{display:none}
 // ── CONFIG ───────────────────────────────────────────────
 const SUPA_URL      = 'https://siczyohqmlrmirqgzlxb.supabase.co';
 const SUPA_KEY      = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw';
+const SERVICE_KEY   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzY2MTQwOSwiZXhwIjoyMDkzMjM3NDA5fQ.nSsFRGVG6pJBpYU_iCmonNAXk9Hd86cOd43XgusqOD0';
 const CONDO_ID      = 'eefc41c0-519b-419b-847f-eb4724455baa';
 const CONDO_NOME    = 'Edifício Mandala';
 
@@ -1019,26 +1020,67 @@ async function salvar(){
       btn.disabled=false; btn.textContent='💾 Salvar Morador'; return;
     }
 
-    // 1. Criar no Supabase Auth para obter o UUID
+    // 1. Criar no Supabase Auth via Admin API (sem limite de email, sem confirmação)
     btn.textContent='Criando conta...';
-    const rAuth = await fetch(`${SUPA_URL}/auth/v1/signup`,{
+    const rAuth = await fetch(`${SUPA_URL}/auth/v1/admin/users`,{
       method:'POST',
-      headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},
-      body: JSON.stringify({email: emailVal, password: senha, data:{full_name: nome}})
+      headers:{
+        'apikey': SERVICE_KEY,
+        'Authorization': `Bearer ${SERVICE_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email:          emailVal,
+        password:       senha,
+        email_confirm:  true,   // confirma automaticamente sem enviar email
+        user_metadata:  { full_name: nome }
+      })
     });
     const dAuth = await rAuth.json();
 
     if(!rAuth.ok){
-      const msg = dAuth.message||dAuth.msg||'Erro ao criar conta.';
-      if(msg.toLowerCase().includes('already registered')){
-        showAlert('❌ Este e-mail já possui conta. Use a opção de editar para atualizar o cadastro.','error');
+      const msg = dAuth.message||dAuth.msg||dAuth.error_description||'Erro ao criar conta.';
+      if(msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already been registered')){
+        // Email já existe — buscar o UUID existente
+        btn.textContent='Buscando conta existente...';
+        const rList = await fetch(`${SUPA_URL}/auth/v1/admin/users?email=${encodeURIComponent(emailVal)}`,{
+          headers:{'apikey':SERVICE_KEY,'Authorization':`Bearer ${SERVICE_KEY}`}
+        });
+        const dList = await rList.json();
+        const existingUser = dList?.users?.[0];
+        if(existingUser?.id){
+          // Continua com o UUID existente
+          const payload = {
+            id:            existingUser.id,
+            condominio_id: CONDO_ID,
+            nome,
+            email:         emailVal,
+            telefone:      document.getElementById('fTel').value.trim()||null,
+            unidade:       apto||null,
+            bloco:         document.getElementById('fBloco').value.trim()||null,
+            role:          roleVal,
+            ativo,
+            status:        ativo ? 'aprovado' : 'pendente',
+          };
+          const res2 = await fetch(`${SUPA_URL}/rest/v1/usuarios`,{
+            method:'POST', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)
+          });
+          if(res2.ok || res2.status===409){
+            showAlert('✅ Morador cadastrado! (conta já existia no sistema)');
+            fecharModal(); await loadMoradores();
+          } else {
+            showAlert('❌ E-mail já cadastrado neste condomínio.','error');
+          }
+          btn.disabled=false; btn.textContent='💾 Salvar Morador'; return;
+        }
+        showAlert('❌ E-mail já cadastrado. Verifique se este morador já existe.','error');
       } else {
         showAlert('❌ Erro ao criar conta: '+msg,'error');
       }
       btn.disabled=false; btn.textContent='💾 Salvar Morador'; return;
     }
 
-    const authId = dAuth?.user?.id;
+    const authId = dAuth?.id || dAuth?.user?.id;
     if(!authId){
       showAlert('❌ Não foi possível obter o ID do usuário criado.','error');
       btn.disabled=false; btn.textContent='💾 Salvar Morador'; return;
