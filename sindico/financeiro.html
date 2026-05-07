@@ -473,9 +473,31 @@ async function carregar(){
 
       <!-- COMPARATIVO CATEGORIA + SUBCATEGORIA POR MÊS -->
       <div class="card" style="margin-bottom:16px">
-        <div style="margin-bottom:16px">
-          <div class="ct" style="margin-bottom:4px">Despesas por Categoria e Subcategoria — ${ano}</div>
-          <div style="font-size:12px;color:var(--text-light)">Clique em uma categoria para expandir as subcategorias · ▲ aumento · ▼ redução em relação ao mês anterior</div>
+        <div style="margin-bottom:16px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <div>
+            <div class="ct" style="margin-bottom:4px">Despesas por Categoria e Subcategoria — ${ano}</div>
+            <div style="font-size:12px;color:var(--text-light)">Clique em uma categoria para expandir as subcategorias · ▲ aumento · ▼ redução em relação ao mês anterior</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:6px">
+              <label style="font-size:11px;font-weight:700;color:var(--text-light);white-space:nowrap;text-transform:uppercase;letter-spacing:.06em">Categoria</label>
+              <select id="filtCat" onchange="popularSubcatsFiltro();renderCompTable()" style="font-family:inherit;font-size:12px;font-weight:600;color:var(--text-dark);background:var(--off-white);border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;outline:none;min-width:150px">
+                <option value="">Todas</option>
+              </select>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <label style="font-size:11px;font-weight:700;color:var(--text-light);white-space:nowrap;text-transform:uppercase;letter-spacing:.06em">Subcategoria</label>
+              <select id="filtSub" onchange="renderCompTable()" style="font-family:inherit;font-size:12px;font-weight:600;color:var(--text-dark);background:var(--off-white);border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;outline:none;min-width:170px">
+                <option value="">Todas</option>
+              </select>
+            </div>
+            <button onclick="document.getElementById('filtCat').value='';popularSubcatsFiltro();renderCompTable()" 
+              style="font-family:inherit;font-size:11px;font-weight:700;color:var(--text-light);background:var(--off-white);border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;white-space:nowrap;transition:all .15s"
+              onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--amber)'"
+              onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-light)'">
+              ✕ Limpar
+            </button>
+          </div>
         </div>
         <div style="overflow-x:auto" id="comp-table-wrap"></div>
       </div>
@@ -568,6 +590,7 @@ async function carregar(){
       </div>
     `;
     // Renderizar tabela comparativa APÓS o HTML estar no DOM
+    popularSubcatsFiltro();
     renderCompTable();
   }catch(e){
     document.getElementById('conteudo').innerHTML=`<div style="color:#ef4444;padding:20px">Erro ao carregar: ${e.message}</div>`;
@@ -580,6 +603,15 @@ function popularSubcatsFiltro(){
   const filtCat = document.getElementById('filtCat');
   const filtSub = document.getElementById('filtSub');
   if(!filtCat||!filtSub) return;
+
+  // Popular categorias (apenas na primeira chamada ou reset)
+  if(filtCat.options.length <= 1){
+    const cats = [...new Set(d.cats.map(c=>c.categoria).filter(Boolean))].sort();
+    filtCat.innerHTML = '<option value="">Todas</option>' +
+      cats.map(cat=>`<option value="${cat.replace(/"/g,'&quot;')}">${cat}</option>`).join('');
+  }
+
+  // Popular subcategorias baseado na categoria selecionada
   const catSel = filtCat.value;
   const subs = [...new Set(d.cats
     .filter(c=>!catSel||c.categoria===catSel)
@@ -594,8 +626,10 @@ function renderCompTable(){
   const wrap = document.getElementById('comp-table-wrap');
   if(!d||!wrap) return;
   const { trans, catMap, porMes, ano } = d;
-  const filtCat = '';
-  const filtSub = '';
+  const filtCatEl = document.getElementById('filtCat');
+  const filtSubEl = document.getElementById('filtSub');
+  const filtCat = filtCatEl ? filtCatEl.value : '';
+  const filtSub = filtSubEl ? filtSubEl.value : '';
 
   // Meses com dados
   const mesesComDados = [];
