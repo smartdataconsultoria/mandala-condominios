@@ -1,22 +1,31 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CondoGestor — Entrar</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- ✅ CSS separado, com caminhos ABSOLUTOS (evita branco) -->
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/login.css">
 
-  <!-- ✅ TODO seu <style> permanece aqui (inalterado) -->
+  <!-- Fonte -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
-<!-- ✅ TODO o HTML visual permanece IGUAL ao que já existia -->
-<!-- Sidebar esquerda + formulário de login -->
+<div class="left-panel">
+  <h1>CondoGestor</h1>
+  <p>Bem-vindo de volta ao seu condomínio</p>
+</div>
 
-<!-- IMPORTANTE: NÃO tem JS aqui dentro -->
+<div class="right-panel">
+  <div class="form-box">
+    <h2>Entrar</h2>
+    <p class="subtitle">Acesse sua conta para continuar</p>
 
-<script type="module" src="login.js"></script>
-</body>
-</html>
+    <div class="role-tabs">
+      <button class="role-tab active" data-role="administradora" onclick="selecionarRole(this)">Administradora</button>
+      <button class="role-tab" data-role="sindico" onclick="selecionarRole(this)">Síndico</button>
+      <button class="role-tab" data-role="morador" onclick="selecionarRole(this)">Morador</button>
