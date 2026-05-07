@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CondoGestor — Entrar</title>
 
-  <!-- ✅ CSS separado, com caminhos ABSOLUTOS (evita branco) -->
+  <!-- ✅ CSS CARREGADO CORRETAMENTE -->
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/login.css">
 
@@ -29,3 +29,36 @@
       <button class="role-tab active" data-role="administradora" onclick="selecionarRole(this)">Administradora</button>
       <button class="role-tab" data-role="sindico" onclick="selecionarRole(this)">Síndico</button>
       <button class="role-tab" data-role="morador" onclick="selecionarRole(this)">Morador</button>
+    </div>
+
+    <div class="role-badge">
+      <span id="role-label">Entrando como Administradora</span>
+    </div>
+
+    <div class="error-msg" id="erro">
+      <span id="erro-texto"></span>
+    </div>
+
+    <form id="form-login" onsubmit="fazerLogin(event)">
+      <div class="field">
+        <label>E-mail</label>
+        <input type="email" id="email" required />
+      </div>
+
+      <div class="field">
+        <label>Senha</label>
+        <input type="password" id="senha" required />
+      </div>
+
+      <button id="btn-login" class="btn-login" type="submit">
+        <span class="btn-text">Entrar</span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ✅ JS separado -->
+<script type="module" src="/js/login.js"></script>
+
+</body>
+</html>
