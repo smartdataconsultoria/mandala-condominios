@@ -627,7 +627,7 @@ async function loadMoradores(){
 
 function renderStats(){
   const ativos    = _moradores.filter(m=>m.ativo);
-  const pendentes = _moradores.filter(m=>!m.ativo);
+  const pendentes = _moradores.filter(m=>!m.ativo || m.status==='pendente');
   const aptos     = [...new Set(ativos.map(m=>m.unidade))].length;
   document.getElementById('statAptos').textContent        = aptos;
   document.getElementById('statAtivos').textContent       = ativos.length;
@@ -699,7 +699,7 @@ function renderCards(){
           <div class="card-apto">📍 ${aptoLabel}</div>
           <div class="card-tipo">${tipoLabel}${m.vaga_garagem ? ` • Vaga ${m.vaga_garagem}` : ''}</div>
           <div class="card-status">
-            <span class="badge ${m.ativo?'ativo':'inativo'}">${m.ativo?'✓ Ativo':m.email?'⏳ Pendente':'Inativo'}</span>
+            <span class="badge ${m.ativo?'ativo':'inativo'}">${m.ativo?'✓ Ativo':m.status==='pendente'?'⏳ Aguardando':'Inativo'}</span>
             <span class="badge ${m.tipo_ocupacao}">${tipoLabel}</span>
             ${residentes.length>0?`<span class="badge" style="background:#f1f5f9;color:#64748b">👥 +${residentes.length}</span>`:''}
             ${pets.length>0?`<span class="badge pet">🐾 ${pets.length} pet${pets.length>1?'s':''}</span>`:''}
@@ -943,16 +943,11 @@ async function criarAcessoPortal(email, nome, apto, sfxNum){
     // Email já existe no Auth — ok, continua
   }
   // Garantir registro na tabela usuarios com ativo=true
-  await fetch(`${SUPA_URL}/rest/v1/usuarios`,{
-    method:'POST',
-    headers:{...hdrs(),'Prefer':'resolution=merge-duplicates'},
-    body: JSON.stringify({
-      condominio_id: CONDO_ID,
-      nome, email,
-      unidade: apto,
-      role: 'morador',
-      ativo: true,
-    })
+  // Atualizar registro existente com ativo=true (não duplicar)
+  await fetch(`${SUPA_URL}/rest/v1/usuarios?email=eq.${encodeURIComponent(email)}&condominio_id=eq.${CONDO_ID}`,{
+    method:'PATCH',
+    headers:hdrs(),
+    body: JSON.stringify({ ativo: true, status: 'aprovado' })
   });
   return true;
 }
@@ -967,15 +962,18 @@ async function salvar(){
   const btn = document.getElementById('btnSalvar');
   btn.disabled=true; btn.textContent='Salvando...';
 
+  const emailVal   = document.getElementById('fEmail').value.trim();
+  const roleVal    = document.getElementById('fTipoOcup').value || 'morador';
   const payload = {
-    condominio_id: CONDO_ID,
+    condominio_id:    CONDO_ID,
     nome,
-    email:    document.getElementById('fEmail').value.trim()||null,
-    telefone: document.getElementById('fTel').value.trim()||null,
-    unidade:  apto,
-    bloco:    document.getElementById('fBloco').value.trim()||null,
-    role:     document.getElementById('fTipoOcup').value,
-    ativo:    document.getElementById('fAtivo').checked,
+    email:            emailVal || `sem-email-${Date.now()}@condogestor.local`,
+    telefone:         document.getElementById('fTel').value.trim()||null,
+    unidade:          apto||null,
+    bloco:            document.getElementById('fBloco').value.trim()||null,
+    role:             roleVal,
+    ativo:            document.getElementById('fAtivo').checked,
+    status:           document.getElementById('fAtivo').checked ? 'aprovado' : 'pendente',
   };
 
   const h = hdrs();
