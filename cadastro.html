@@ -511,7 +511,9 @@ async function finalizar(){
         unidade:   apto,
         bloco:     bloco || null,
         role:      tipo,
-        ativo:     false,  // aguardando aprovação do síndico
+        ativo:     false,   // aguardando aprovação do síndico
+        status:    'pendente', // pendente | aprovado | rejeitado
+        data_solicitacao: new Date().toISOString(),
       })
     });
 
@@ -521,22 +523,27 @@ async function finalizar(){
       // Não bloquear — conta Auth foi criada, admin pode completar
     }
 
-    // ── 3. Criar aviso para o síndico ──────────────────────────────────────
-    await fetch(`${SUPA_URL}/rest/v1/avisos`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPA_KEY,
-        'Authorization': `Bearer ${SUPA_KEY}`,
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({
-        condominio_id: CONDO_ID,
-        titulo:   `🆕 Novo cadastro aguardando aprovação: ${nome}`,
-        conteudo: `O morador ${nome} (${email}) solicitou acesso ao portal.\n\nApartamento: ${apto}${bloco ? ' — Bloco '+bloco : ''}\nTipo: ${tipo}\nTelefone: ${tel}\n\nAcesse o painel de Moradores para aprovar ou rejeitar o cadastro.`,
-        urgente: false,
-      })
-    });
+    // ── 3. Criar notificação de aprovação pendente ────────────────────────
+    // Tenta salvar em comunicados (ignora erro se tabela não existir)
+    try {
+      await fetch(`${SUPA_URL}/rest/v1/comunicados`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPA_KEY,
+          'Authorization': `Bearer ${SUPA_KEY}`,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          condominio_id: CONDO_ID,
+          titulo:  `🆕 Aprovação pendente: ${nome}`,
+          texto:   `Novo morador aguardando aprovação.\nApartamento: ${apto}${bloco?' — Bloco '+bloco:''}\nTipo: ${tipo}\nTelefone: ${tel}\nE-mail: ${email}`,
+          tipo:    'informativo',
+          autor:   'Sistema',
+          criado_em: new Date().toISOString(),
+        })
+      });
+    } catch(e){ console.log('Notificação ignorada:', e); }
 
     // ── 4. Mostrar tela de sucesso ────────────────────────────────────────────
     document.getElementById('etapa3').classList.remove('active');
