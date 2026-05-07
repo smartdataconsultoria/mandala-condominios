@@ -964,7 +964,17 @@ async function salvar(){
 
   const emailVal   = document.getElementById('fEmail').value.trim();
   const roleVal    = document.getElementById('fTipoOcup').value || 'morador';
+
+  // Gerar UUID para o id (tabela não tem default)
+  function gerarUUID(){
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c=>{
+      const r = Math.random()*16|0;
+      return (c==='x'?r:(r&0x3|0x8)).toString(16);
+    });
+  }
+
   const payload = {
+    id:               _editId || gerarUUID(),
     condominio_id:    CONDO_ID,
     nome,
     email:            emailVal || `sem-email-${Date.now()}@condogestor.local`,
@@ -980,8 +990,9 @@ async function salvar(){
   try {
     let res, json;
     if(_editId){
+      const {id, ...patchData} = payload; // remover id do PATCH
       res  = await fetch(`${SUPA_URL}/rest/v1/usuarios?id=eq.${_editId}`,{
-        method:'PATCH', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)
+        method:'PATCH', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(patchData)
       });
     } else {
       res  = await fetch(`${SUPA_URL}/rest/v1/usuarios`,{
