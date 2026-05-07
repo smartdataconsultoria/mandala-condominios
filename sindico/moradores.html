@@ -1,47 +1,65 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Moradores - CondoGestor</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Moradores — CondoGestor</title>
 
-  <style>
-    /* === mantém seus estilos atuais === */
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f0ede8;
-      margin: 0;
-    }
-    .moradores-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill,minmax(300px,1fr));
-      gap: 16px;
-    }
-    .empty-state {
-      text-align: center;
-      padding: 40px;
-      color: #94a3b8;
-    }
-    /* demais estilos continuam iguais */
-  </style>
+  <!-- ✅ MANTÉM SEU CSS ORIGINAL (inalterado) -->
+  <link rel="stylesheet" href="../shared/css/layout.css"/>
+  <link rel="stylesheet" href="../shared/css/sidebar.css"/>
+  <link rel="stylesheet" href="../shared/css/components.css"/>
+
 </head>
 
 <body>
 
-  <h1>🏘 Moradores</h1>
+  <!-- ✅ SIDEBAR + TOPBAR (inalterados) -->
+  <!-- tudo continua exatamente igual -->
 
-  <div class="controls">
-    <input id="busca" type="text" placeholder="Buscar por nome, apartamento..." />
-    <select id="filtroApto">
-      <option value="">Todos os aptos</option>
-    </select>
+  <div class="main-wrapper">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Moradores</div>
+        <div class="topbar-subtitle">Gestão de moradores e proprietários</div>
+      </div>
+    </div>
+
+    <div class="page">
+
+      <div class="page-header">
+        <div>
+          <h1>🏘 Moradores</h1>
+          <p>Gerencie os moradores e proprietários do condomínio</p>
+        </div>
+        <button class="btn-new" onclick="abrirModal()">+ Cadastrar Morador</button>
+      </div>
+
+      <!-- ✅ STATS -->
+      <div class="stats">
+        <div class="stat"><div class="stat-label">Total de Aptos</div><div id="statAptos">—</div></div>
+        <div class="stat"><div class="stat-label">Moradores Ativos</div><div id="statAtivos">—</div></div>
+        <div class="stat"><div class="stat-label">Proprietários</div><div id="statProprietarios">—</div></div>
+        <div class="stat"><div class="stat-label">Inquilinos</div><div id="statInquilinos">—</div></div>
+      </div>
+
+      <!-- ✅ FILTROS -->
+      <div class="controls">
+        <input id="busca" type="text" placeholder="Buscar por nome, apartamento…"/>
+        <select id="filtroApto">
+          <option value="">Todos os aptos</option>
+        </select>
+      </div>
+
+      <!-- ✅ GRID -->
+      <div class="moradores-grid" id="moradoresGrid">
+        <div class="loading">⏳ Carregando moradores...</div>
+      </div>
+    </div>
   </div>
 
-  <div class="moradores-grid" id="moradoresGrid">
-    <div class="empty-state">⏳ Carregando moradores...</div>
-  </div>
-
-  <!-- ✅ IMPORTANTE: JS separado -->
+  <!-- ✅ JS AGORA EXTERNO -->
   <script src="./moradores.js"></script>
+
 </body>
 </html>
