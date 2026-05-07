@@ -960,66 +960,121 @@ async function salvar(){
   const btn = document.getElementById('btnSalvar');
   btn.disabled=true; btn.textContent='Salvando...';
 
-  const emailVal   = document.getElementById('fEmail').value.trim();
-  const roleVal    = document.getElementById('fTipoOcup').value || 'morador'; // valores: morador, sindico, administradora
-
-  // Gerar UUID para o id (tabela não tem default)
-  function gerarUUID(){
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c=>{
-      const r = Math.random()*16|0;
-      return (c==='x'?r:(r&0x3|0x8)).toString(16);
-    });
-  }
-
-  const payload = {
-    id:               _editId || gerarUUID(),
-    condominio_id:    CONDO_ID,
-    nome,
-    email:            emailVal || `sem-email-${Date.now()}@condogestor.local`,
-    telefone:         document.getElementById('fTel').value.trim()||null,
-    unidade:          apto||null,
-    bloco:            document.getElementById('fBloco').value.trim()||null,
-    role:             roleVal,
-    ativo:            document.getElementById('fAtivo').checked,
-    status:           document.getElementById('fAtivo').checked ? 'aprovado' : 'pendente',
-  };
-
+  const emailVal = document.getElementById('fEmail').value.trim();
+  const roleVal  = document.getElementById('fTipoOcup').value || 'morador';
+  const ativo    = document.getElementById('fAtivo').checked;
   const h = hdrs();
+
   try {
-    let res, json;
+    // ── EDIÇÃO: só atualiza campos permitidos ─────────────────────────────────
     if(_editId){
-      const {id, ...patchData} = payload; // remover id do PATCH
-      res  = await fetch(`${SUPA_URL}/rest/v1/usuarios?id=eq.${_editId}`,{
+      const patchData = {
+        nome,
+        telefone: document.getElementById('fTel').value.trim()||null,
+        unidade:  apto||null,
+        bloco:    document.getElementById('fBloco').value.trim()||null,
+        role:     roleVal,
+        ativo,
+        status:   ativo ? 'aprovado' : 'pendente',
+      };
+      if(emailVal) patchData.email = emailVal;
+
+      const res  = await fetch(`${SUPA_URL}/rest/v1/usuarios?id=eq.${_editId}`,{
         method:'PATCH', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(patchData)
       });
-    } else {
-      res  = await fetch(`${SUPA_URL}/rest/v1/usuarios`,{
-        method:'POST', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)
-      });
-    }
-    json = await res.json();
+      const json = await res.json();
+      if(!res.ok){
+        const msg = (Array.isArray(json)?json[0]:json)?.message || JSON.stringify(json);
+        showAlert(`❌ Erro ao atualizar: ${msg}`, 'error');
+        btn.disabled=false; btn.textContent='💾 Salvar Morador'; return;
+      }
 
-    if(!res.ok){
-      const errData = Array.isArray(json) ? json[0] : json;
-      const msg  = errData?.message || errData?.hint || errData?.details || JSON.stringify(json);
-      const code = errData?.code || '';
-      let dica = '';
-      if(res.status===401) dica = ' — Sessão expirada. Faça logout e login novamente.';
-      if(res.status===403) dica = ' — Sem permissão. Rode no Supabase: ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;';
-      if(res.status===409) dica = ' — E-mail já cadastrado neste condomínio.';
-      if(code==='23502')   dica = ' — Campo obrigatório vazio.';
-      if(code==='23503')   dica = ' — Referência inválida (condominio_id).';
-      console.error('Supabase error:', JSON.stringify(json));
-      showAlert(`❌ Erro ${res.status} [${code}]: ${msg}${dica}`, 'error');
+      // Criar acesso se solicitado
+      const criarAcesso = document.getElementById('fCriarAcesso')?.checked;
+      if(criarAcesso && emailVal){
+        btn.textContent='Criando acesso...';
+        await criarAcessoPortal(emailVal, nome, apto, '');
+      }
+
+      showAlert('✅ Morador atualizado!');
+      fecharModal();
+      await loadMoradores();
       btn.disabled=false; btn.textContent='💾 Salvar Morador';
       return;
     }
 
-    showAlert(_editId ? '✅ Morador atualizado!' : '✅ Morador cadastrado com sucesso!');
+    // ── NOVO CADASTRO: precisa criar no Auth primeiro ─────────────────────────
+    if(!emailVal){
+      showAlert('Informe o e-mail para criar o cadastro.','error');
+      setTab(0,document.querySelectorAll('.modal-tab')[0]);
+      btn.disabled=false; btn.textContent='💾 Salvar Morador'; return;
+    }
+
+    const criarAcesso = document.getElementById('fCriarAcesso')?.checked;
+    const senha = document.getElementById('fSenha')?.value.trim();
+
+    if(!criarAcesso || !senha || senha.length < 6){
+      showAlert('Para cadastrar um novo morador, marque "Criar senha de acesso" e defina uma senha de pelo menos 6 caracteres.','error');
+      setTab(0,document.querySelectorAll('.modal-tab')[0]);
+      btn.disabled=false; btn.textContent='💾 Salvar Morador'; return;
+    }
+
+    // 1. Criar no Supabase Auth para obter o UUID
+    btn.textContent='Criando conta...';
+    const rAuth = await fetch(`${SUPA_URL}/auth/v1/signup`,{
+      method:'POST',
+      headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},
+      body: JSON.stringify({email: emailVal, password: senha, data:{full_name: nome}})
+    });
+    const dAuth = await rAuth.json();
+
+    if(!rAuth.ok){
+      const msg = dAuth.message||dAuth.msg||'Erro ao criar conta.';
+      if(msg.toLowerCase().includes('already registered')){
+        showAlert('❌ Este e-mail já possui conta. Use a opção de editar para atualizar o cadastro.','error');
+      } else {
+        showAlert('❌ Erro ao criar conta: '+msg,'error');
+      }
+      btn.disabled=false; btn.textContent='💾 Salvar Morador'; return;
+    }
+
+    const authId = dAuth?.user?.id;
+    if(!authId){
+      showAlert('❌ Não foi possível obter o ID do usuário criado.','error');
+      btn.disabled=false; btn.textContent='💾 Salvar Morador'; return;
+    }
+
+    // 2. Inserir em usuarios com o ID do Auth
+    btn.textContent='Salvando cadastro...';
+    const payload = {
+      id:            authId,
+      condominio_id: CONDO_ID,
+      nome,
+      email:         emailVal,
+      telefone:      document.getElementById('fTel').value.trim()||null,
+      unidade:       apto||null,
+      bloco:         document.getElementById('fBloco').value.trim()||null,
+      role:          roleVal,
+      ativo,
+      status:        ativo ? 'aprovado' : 'pendente',
+    };
+
+    const res  = await fetch(`${SUPA_URL}/rest/v1/usuarios`,{
+      method:'POST', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)
+    });
+    const json = await res.json();
+
+    if(!res.ok){
+      const msg = (Array.isArray(json)?json[0]:json)?.message || JSON.stringify(json);
+      showAlert(`❌ Conta criada mas erro ao salvar dados: ${msg}`, 'error');
+      btn.disabled=false; btn.textContent='💾 Salvar Morador'; return;
+    }
+
+    showAlert('✅ Morador cadastrado com acesso ao portal!');
     fecharModal();
     await loadMoradores();
   } catch(e){
-    showAlert('❌ Erro ao salvar: '+e.message,'error');
+    showAlert('❌ Erro: '+e.message,'error');
   }
   btn.disabled=false; btn.textContent='💾 Salvar Morador';
 }
