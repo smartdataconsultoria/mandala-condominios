@@ -899,7 +899,16 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
               <option value="6">6 meses</option>
               <option value="12">12 meses</option>
               <option value="24">24 meses</option>
+              <option value="custom">Personalizado...</option>
             </select>
+            <div id="fRepetirCustomBox" style="display:none;margin-top:8px">
+              <input type="number" id="fRepetirCustom" min="1" max="360" placeholder="Ex: 18"
+                style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.88rem;color:var(--text-dark);outline:none;transition:border var(--transition);"
+                oninput="atualizarFixoResumo()"
+                onfocus="this.style.borderColor='var(--gold)'"
+                onblur="this.style.borderColor='var(--border)'"/>
+              <div style="font-size:11px;color:var(--text-light);margin-top:4px">Informe a quantidade de meses desejada</div>
+            </div>
           </div>
           <div class="field" style="margin-bottom:0">
             <label>Dia do vencimento</label>
@@ -1695,8 +1704,25 @@ function toggleFixo(){
 function atualizarFixoResumo(){
   const el = document.getElementById('fixoResumo');
   if(!el) return;
-  const n = parseInt(document.getElementById('fRepetir').value)||12;
-  el.textContent = `${n === 0 ? 12 : n} lançamentos`;
+  const sel = document.getElementById('fRepetir');
+  const customBox = document.getElementById('fRepetirCustomBox');
+  if(sel.value === 'custom'){
+    customBox.style.display = 'block';
+    const customVal = parseInt(document.getElementById('fRepetirCustom').value)||0;
+    el.textContent = customVal > 0 ? `${customVal} lançamentos` : '? lançamentos';
+  } else {
+    customBox.style.display = 'none';
+    const n = parseInt(sel.value)||12;
+    el.textContent = `${n === 0 ? 12 : n} lançamentos`;
+  }
+}
+
+function getRepetirMeses(){
+  const sel = document.getElementById('fRepetir');
+  if(sel.value === 'custom'){
+    return parseInt(document.getElementById('fRepetirCustom').value)||12;
+  }
+  return parseInt(sel.value)||0;
 }
 
 // -- SEÇÃO MAIS DETALHES ----------------------------------
@@ -1777,7 +1803,7 @@ async function salvarLancamento(){
     const eraFixoAntes = atual.recorrente === true;
 
     const marcouFixo = document.getElementById('togFixo').checked;
-    const repetirSel = parseInt(document.getElementById('fRepetir').value) || 12;
+    const repetirSel = getRepetirMeses();
     const nMeses = repetirSel > 0 ? repetirSel : 12;
     const diaVencNum = parseInt(document.getElementById('fDiaVenc').value) || (new Date(data+'T12:00:00')).getDate();
 
@@ -1899,7 +1925,7 @@ async function salvarLancamento(){
   const fixo       = document.getElementById('togFixo').checked;
   const nParcelas  = parseInt(document.getElementById('fParcelas').value)||2;
   const intervalo  = document.getElementById('fIntervalo').value;
-  const repetir    = parseInt(document.getElementById('fRepetir').value)||0;
+  const repetir    = getRepetirMeses();
   const diaVenc    = parseInt(document.getElementById('fDiaVenc').value)||null;
 
   const basePayload = {
