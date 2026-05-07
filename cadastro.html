@@ -158,7 +158,7 @@
     <p>Preencha o cadastro em poucos minutos e aguarde a aprovação do síndico para acessar o portal.</p>
     <div style="margin-top:1.5rem;background:rgba(232,163,32,0.1);border:1px solid rgba(232,163,32,0.2);border-radius:10px;padding:12px 16px">
       <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.4);margin-bottom:4px">Condomínio</div>
-      <div id="lblCondoLeft" style="font-size:14px;font-weight:700;color:var(--gold)">Carregando...</div>
+      <div id="lblCondoLeft" style="font-size:14px;font-weight:700;color:var(--gold)">Edifício Mandala</div>
     </div>
     <div class="steps">
       <div class="step">
@@ -190,7 +190,7 @@
   <h2>Criar conta</h2>
   <p class="form-subtitle">
     Cadastro de morador —
-    <strong id="lblCondo" style="color:var(--navy)">Carregando...</strong>
+    <strong id="lblCondo" style="color:var(--navy)">Edifício Mandala</strong>
     <span id="lblLocal" style="display:none;font-size:11px;color:var(--text-light);margin-left:6px"></span>
   </p>
   <div id="alertCondo" style="display:none;background:var(--danger-bg);border:1px solid #FECACA;border-radius:10px;padding:14px 16px;font-size:13px;color:var(--danger);margin-bottom:1.5rem;line-height:1.6"></div>
@@ -355,8 +355,8 @@
 const SUPA_URL = 'https://siczyohqmlrmirqgzlxb.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw';
 
-let CONDO_ID   = null;
-let CONDO_NOME = '';
+let CONDO_ID   = 'eefc41c0-519b-419b-847f-eb4724455baa'; // padrão: Edifício Mandala
+let CONDO_NOME = 'Edifício Mandala';
 let _etapaAtual = 1;
 
 // ── UTILS ────────────────────────────────────────────────
@@ -448,10 +448,7 @@ function irEtapa3(){
 
 // ── FINALIZAR CADASTRO ────────────────────────────────────
 async function finalizar(){
-  if(!CONDO_ID){
-    showAlert('Condomínio não identificado. Verifique o link de cadastro.');
-    return;
-  }
+  // CONDO_ID sempre disponível (carregado no init)
   if(!document.getElementById('fTermos').checked){
     showAlert('Você precisa aceitar os termos para continuar.');
     return;
@@ -561,61 +558,70 @@ async function finalizar(){
 
 // ── INIT ─────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async ()=>{
-  // Pegar condo da URL: ?condo=UUID
+
+  // Verificar se há ?condo= na URL (link direto do síndico — opcional)
   const params  = new URLSearchParams(window.location.search);
-  const condoId = params.get('condo');
+  const condoParam = params.get('condo');
 
-  if(!condoId){
-    mostrarErroCondo('Link inválido. O link de cadastro deve ser fornecido pelo síndico ou administradora do seu condomínio.');
-    return;
-  }
-
-  // Validar formato UUID básico
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  if(!uuidRegex.test(condoId)){
-    mostrarErroCondo('ID de condomínio inválido no link.');
-    return;
-  }
-
-  // Buscar dados do condomínio no banco
   try{
+    // Buscar todos os condomínios ativos
     const res = await fetch(
-      `${SUPA_URL}/rest/v1/condominios?id=eq.${condoId}&select=id,nome,cidade,estado,ativo&limit=1`,
+      `${SUPA_URL}/rest/v1/condominios?ativo=eq.true&select=id,nome,cidade,estado&order=nome`,
       {headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`}}
     );
-    const data = await res.json();
+    const condos = await res.json();
 
-    if(!data || data.length === 0){
-      mostrarErroCondo('Condomínio não encontrado. Verifique o link com o síndico.');
+    if(!condos || condos.length === 0){
+      mostrarErroCondo('Nenhum condomínio disponível no momento. Tente novamente em breve.');
       return;
     }
 
-    const condo = data[0];
+    // Se veio ?condo= na URL, pré-selecionar aquele condomínio
+    const condoPresel = condoParam
+      ? condos.find(c => c.id === condoParam)
+      : null;
 
-    if(!condo.ativo){
-      mostrarErroCondo('Este condomínio está inativo no sistema. Entre em contato com a administradora.');
-      return;
-    }
+    const condoAtual = condoPresel || condos[0];
 
-    // Configurar variáveis globais
-    CONDO_ID   = condo.id;
-    CONDO_NOME = condo.nome;
+    // Configurar variáveis com o primeiro (ou pré-selecionado)
+    CONDO_ID   = condoAtual.id;
+    CONDO_NOME = condoAtual.nome;
 
-    // Atualizar interface
-    document.getElementById('lblCondo').textContent = condo.nome;
-    document.getElementById('lblCondoLeft').textContent = condo.nome;
-    document.title = `CondoGestor — Cadastro · ${condo.nome}`;
-
-    // Mostrar localização se disponível
-    if(condo.cidade && condo.estado){
-      document.getElementById('lblLocal').textContent = `${condo.cidade} — ${condo.estado}`;
-      document.getElementById('lblLocal').style.display = 'inline';
+    // Se há apenas 1 condomínio, mostrar fixo. Se há mais, mostrar select.
+    if(condos.length === 1){
+      // Apenas um condomínio — mostrar nome fixo
+      document.getElementById('lblCondo').textContent     = condoAtual.nome;
+      document.getElementById('lblCondoLeft').textContent = condoAtual.nome;
+      document.title = `CondoGestor — Cadastro · ${condoAtual.nome}`;
+      if(condoAtual.cidade && condoAtual.estado){
+        document.getElementById('lblLocal').textContent = `${condoAtual.cidade} — ${condoAtual.estado}`;
+        document.getElementById('lblLocal').style.display = 'inline';
+      }
+    } else {
+      // Múltiplos condomínios — mostrar select
+      const selectHtml = `<select id="selCondo" onchange="trocarCondo(this.value)"
+        style="border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px;color:var(--navy);background:#fff;cursor:pointer;outline:none;margin-left:4px">
+        ${condos.map(c=>`<option value="${c.id}"${c.id===condoAtual.id?' selected':''}>${c.nome}</option>`).join('')}
+      </select>`;
+      document.getElementById('lblCondo').outerHTML = selectHtml;
+      document.getElementById('lblCondoLeft').textContent = condoAtual.nome;
+      document.title = `CondoGestor — Cadastro`;
     }
 
   } catch(e){
-    mostrarErroCondo('Erro de conexão. Tente novamente em instantes.');
+    console.warn('Erro ao carregar condomínios:', e);
+    // Se falhar, usa o padrão já definido nas variáveis (Mandala)
+    document.getElementById('lblCondo').textContent     = CONDO_NOME;
+    document.getElementById('lblCondoLeft').textContent = CONDO_NOME;
   }
 });
+
+function trocarCondo(id){
+  const sel = document.getElementById('selCondo');
+  CONDO_ID   = id;
+  CONDO_NOME = sel.options[sel.selectedIndex].text;
+  document.getElementById('lblCondoLeft').textContent = CONDO_NOME;
+}
 
 function mostrarErroCondo(msg){
   // Esconder formulário e mostrar erro
