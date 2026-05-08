@@ -1,25 +1,214 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CondoGestor — Entrar</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CondoGestor — Entrar</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #0B1F3A; --navy-light: #142D52; --gold: #E8A320;
+    --white: #FFFFFF; --off-white: #F7F6F2; --border: #E2E8F0;
+    --text-dark: #0B1F3A; --text-mid: #445571; --text-light: #8899B4;
+    --red: #DC2626; --red-bg: #FEF2F2; --green: #16A34A;
+    --radius: 12px; --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+  }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    min-height: 100vh; display: flex;
+    background: var(--off-white); color: var(--text-dark);
+  }
 
-  <!-- ✅ CSS CARREGADO CORRETAMENTE -->
-  <link rel="stylesheet" href="/css/base.css">
-  <link rel="stylesheet" href="/css/login.css">
+  /* PAINEL ESQUERDO */
+  .left-panel {
+    width: 45%; background: var(--navy);
+    display: flex; flex-direction: column;
+    justify-content: center; padding: 3rem 4rem;
+    position: relative; overflow: hidden;
+  }
+  .left-panel::before {
+    content: ''; position: absolute;
+    width: 400px; height: 400px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,163,32,0.12) 0%, transparent 70%);
+    top: -80px; right: -80px; pointer-events: none;
+  }
+  .left-panel::after {
+    content: ''; position: absolute;
+    width: 300px; height: 300px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,163,32,0.08) 0%, transparent 70%);
+    bottom: -60px; left: -60px; pointer-events: none;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 3rem; }
+  .brand-icon {
+    width: 44px; height: 44px; background: var(--gold);
+    border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  }
+  .brand-icon svg { width: 22px; height: 22px; }
+  .brand-name { font-size: 1.4rem; font-weight: 800; color: var(--white); }
+  .brand-name span { color: var(--gold); }
+  .left-hero h1 {
+    font-size: 2.2rem; font-weight: 800; color: var(--white);
+    line-height: 1.25; letter-spacing: -0.5px; margin-bottom: 1rem;
+  }
+  .left-hero h1 em { color: var(--gold); font-style: normal; }
+  .left-hero p { font-size: 0.95rem; color: rgba(255,255,255,0.5); line-height: 1.7; margin-bottom: 2rem; }
+  .features { display: flex; flex-direction: column; gap: 10px; }
+  .feature { display: flex; align-items: center; gap: 10px; }
+  .feature-dot {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: rgba(232,163,32,0.2); display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .feature-dot svg { width: 10px; height: 10px; }
+  .feature span { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
 
-  <!-- Fonte -->
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  /* PAINEL DIREITO */
+  .right-panel {
+    flex: 1; display: flex; align-items: center;
+    justify-content: center; padding: 2rem;
+  }
+  .form-box { width: 100%; max-width: 400px; }
+  .form-box h2 {
+    font-size: 1.75rem; font-weight: 800; color: var(--navy);
+    letter-spacing: -0.5px; margin-bottom: 6px;
+  }
+  .subtitle { font-size: 0.88rem; color: var(--text-light); margin-bottom: 2rem; }
+
+  /* TABS DE ROLE */
+  .role-tabs {
+    display: flex; gap: 6px; background: var(--border);
+    padding: 4px; border-radius: 10px; margin-bottom: 1.25rem;
+  }
+  .role-tab {
+    flex: 1; padding: 8px; border: none; border-radius: 7px;
+    font-family: inherit; font-size: 0.82rem; font-weight: 600;
+    cursor: pointer; transition: all var(--transition);
+    background: transparent; color: var(--text-light);
+  }
+  .role-tab.active {
+    background: var(--white); color: var(--navy);
+    box-shadow: 0 1px 4px rgba(11,31,58,0.12);
+  }
+  .role-tab:hover:not(.active) { color: var(--text-mid); }
+
+  /* BADGE */
+  .role-badge {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 1.5rem;
+  }
+  .role-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+  .role-badge span { font-size: 0.82rem; font-weight: 600; color: var(--text-mid); }
+
+  /* FORMULÁRIO */
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1rem; }
+  .field label { font-size: 0.8rem; font-weight: 600; color: var(--navy); }
+  .field input {
+    height: 46px; padding: 0 14px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    font-family: inherit; font-size: 0.9rem; color: var(--text-dark);
+    background: var(--white); outline: none;
+    transition: border-color var(--transition);
+  }
+  .field input:focus { border-color: var(--navy); }
+  .field input::placeholder { color: var(--text-light); }
+
+  /* ESQUECI SENHA */
+  .field-header { display: flex; align-items: center; justify-content: space-between; }
+  .forgot-link {
+    font-size: 0.78rem; color: var(--text-light); text-decoration: none;
+    transition: color var(--transition);
+  }
+  .forgot-link:hover { color: var(--navy); }
+
+  /* BOTÃO */
+  .btn-login {
+    width: 100%; height: 50px; margin-top: 0.5rem;
+    background: var(--navy); border: none; border-radius: 10px;
+    font-family: inherit; font-size: 0.95rem; font-weight: 700;
+    color: var(--white); cursor: pointer;
+    transition: all var(--transition);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-login:hover { background: var(--navy-light); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(11,31,58,0.25); }
+  .btn-login:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* ERRO */
+  .error-msg {
+    background: var(--red-bg); border: 1px solid #FECACA;
+    border-radius: 8px; padding: 10px 14px;
+    font-size: 0.83rem; color: var(--red);
+    margin-bottom: 1rem; display: none;
+  }
+  .error-msg.show { display: block; }
+
+  /* DIVISOR */
+  .divider { display: flex; align-items: center; gap: 12px; margin: 1.25rem 0; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .divider span { font-size: 0.78rem; color: var(--text-light); }
+
+  /* CADASTRO */
+  .signup-link { text-align: center; font-size: 0.85rem; color: var(--text-light); }
+  .signup-link a { color: var(--navy); font-weight: 700; text-decoration: none; }
+  .signup-link a:hover { text-decoration: underline; }
+
+  /* SPINNER */
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white; border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 768px) {
+    body { flex-direction: column; }
+    .left-panel { width: 100%; padding: 2rem; min-height: auto; }
+    .left-hero h1 { font-size: 1.5rem; }
+    .features { display: none; }
+    .right-panel { padding: 2rem 1.25rem; }
+  }
+</style>
 </head>
-
 <body>
 
+<!-- PAINEL ESQUERDO -->
 <div class="left-panel">
-  <h1>CondoGestor</h1>
-  <p>Bem-vindo de volta ao seu condomínio</p>
+  <div class="brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="#0B1F3A" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M9 22V12h6v10" stroke="#0B1F3A" stroke-width="2.5"/>
+      </svg>
+    </div>
+    <span class="brand-name">Condo<span>Gestor</span></span>
+  </div>
+
+  <div class="left-hero">
+    <h1>Bem-vindo de <em>volta</em> ao seu condomínio</h1>
+    <p>Gerencie finanças, chamados, moradores e muito mais em um único lugar.</p>
+    <div class="features">
+      <div class="feature">
+        <div class="feature-dot"><svg viewBox="0 0 24 24" fill="none" stroke="#E8A320" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <span>Controle financeiro completo</span>
+      </div>
+      <div class="feature">
+        <div class="feature-dot"><svg viewBox="0 0 24 24" fill="none" stroke="#E8A320" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <span>Chamados e comunicação em tempo real</span>
+      </div>
+      <div class="feature">
+        <div class="feature-dot"><svg viewBox="0 0 24 24" fill="none" stroke="#E8A320" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <span>Relatórios e dashboards Power BI</span>
+      </div>
+      <div class="feature">
+        <div class="feature-dot"><svg viewBox="0 0 24 24" fill="none" stroke="#E8A320" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <span>Multi-condomínio para administradoras</span>
+      </div>
+    </div>
+  </div>
 </div>
 
+<!-- PAINEL DIREITO -->
 <div class="right-panel">
   <div class="form-box">
     <h2>Entrar</h2>
@@ -32,6 +221,7 @@
     </div>
 
     <div class="role-badge">
+      <div class="role-dot"></div>
       <span id="role-label">Entrando como Administradora</span>
     </div>
 
@@ -42,23 +232,96 @@
     <form id="form-login" onsubmit="fazerLogin(event)">
       <div class="field">
         <label>E-mail</label>
-        <input type="email" id="email" required />
+        <input type="email" id="email" placeholder="seu@email.com" required autocomplete="email">
       </div>
-
       <div class="field">
-        <label>Senha</label>
-        <input type="password" id="senha" required />
+        <div class="field-header">
+          <label>Senha</label>
+          <a href="#" class="forgot-link" onclick="esqueceuSenha(event)">Esqueci minha senha</a>
+        </div>
+        <input type="password" id="senha" placeholder="••••••••" required autocomplete="current-password">
       </div>
-
       <button id="btn-login" class="btn-login" type="submit">
         <span class="btn-text">Entrar</span>
       </button>
     </form>
+
+    <div class="divider"><span>ou</span></div>
+    <div class="signup-link">Ainda não tem conta? <a href="#">Cadastre-se grátis</a></div>
   </div>
 </div>
 
-<!-- ✅ JS separado -->
-<script type="module" src="/js/login.js"></script>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+  const supabase = createClient(
+    'https://siczyohqmlrmirqgzlxb.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw'
+  )
 
+  // Verificar se já está logado
+  const { data: { session } } = await supabase.auth.getSession()
+  if (session) {
+    const { data: perfil } = await supabase.from('usuarios').select('role').eq('id', session.user.id).single()
+    const destinos = { administradora: '/admin/index.html', sindico: '/sindico/dashboard.html', morador: '/morador/index.html' }
+    if (perfil?.role && destinos[perfil.role]) { window.location.href = destinos[perfil.role]; }
+  }
+
+  const roleLabels = {
+    administradora: 'Entrando como Administradora',
+    sindico: 'Entrando como Síndico',
+    morador: 'Entrando como Morador'
+  }
+
+  window.selecionarRole = function(btn) {
+    document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'))
+    btn.classList.add('active')
+    document.getElementById('role-label').textContent = roleLabels[btn.dataset.role]
+  }
+
+  window.fazerLogin = async function(e) {
+    e.preventDefault()
+    const email = document.getElementById('email').value.trim()
+    const senha = document.getElementById('senha').value
+    const btn   = document.getElementById('btn-login')
+    const erroEl= document.getElementById('erro')
+
+    erroEl.classList.remove('show')
+    btn.disabled = true
+    btn.innerHTML = '<div class="spinner"></div>'
+
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha })
+
+    if (error) {
+      btn.disabled = false
+      btn.innerHTML = '<span class="btn-text">Entrar</span>'
+      document.getElementById('erro-texto').textContent =
+        error.message.includes('Invalid login') ? 'E-mail ou senha incorretos.' :
+        error.message.includes('Email not confirmed') ? 'Confirme seu e-mail antes de entrar.' :
+        'Erro ao entrar. Tente novamente.'
+      erroEl.classList.add('show')
+      return
+    }
+
+    // Busca o perfil
+    const { data: perfil } = await supabase.from('usuarios').select('role').eq('id', data.user.id).single()
+    const destinos = {
+      administradora: '/admin/index.html',
+      sindico:        '/sindico/dashboard.html',
+      morador:        '/morador/index.html'
+    }
+    window.location.href = destinos[perfil?.role] || '/login.html'
+  }
+
+  window.esqueceuSenha = async function(e) {
+    e.preventDefault()
+    const email = document.getElementById('email').value.trim()
+    if (!email) { alert('Digite seu e-mail primeiro.'); return }
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://condogestor.com/auth/callback.html'
+    })
+    if (error) { alert('Erro ao enviar e-mail: ' + error.message); return }
+    alert('E-mail de redefinição enviado! Verifique sua caixa de entrada.')
+  }
+</script>
 </body>
 </html>
