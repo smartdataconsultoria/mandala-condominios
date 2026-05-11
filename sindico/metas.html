@@ -6,218 +6,236 @@
 <title>CondoGestor — Metas & Projetos</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy: #0B1F3A; --navy-light: #142D52; --gold: #E8A320; --gold-light: #F5C35A;
+  --white: #FFFFFF; --off-white: #F7F6F2; --border: #E2E8F0;
+  --text-dark: #0B1F3A; --text-mid: #445571; --text-light: #8899B4;
+  --green: #16A34A; --green-bg: #DCFCE7; --red: #DC2626; --red-bg: #FEF2F2;
+  --amber: #D97706; --amber-bg: #FEF3C7; --blue: #2563EB; --blue-bg: #EFF6FF;
+  --purple: #7c3aed; --purple-bg: #ede9fe;
+  --sidebar-w: 240px; --radius: 12px; --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--off-white); color: var(--text-dark); display: flex; min-height: 100vh; }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --navy: #0B1F3A; --navy-light: #142D52; --gold: #E8A320; --gold-light: #F5C35A;
-    --white: #FFFFFF; --off-white: #F7F6F2; --border: #E2E8F0;
-    --text-dark: #0B1F3A; --text-mid: #445571; --text-light: #8899B4;
-    --green: #16A34A; --green-bg: #DCFCE7; --red: #DC2626; --red-bg: #FEF2F2;
-    --amber: #D97706; --amber-bg: #FEF3C7; --blue: #2563EB; --blue-bg: #EFF6FF;
-    --sidebar-w: 240px; --radius: 12px; --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
-  }
-  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--off-white); color: var(--text-dark); display: flex; min-height: 100vh; }
-  .sidebar { width: var(--sidebar-w); background: var(--navy); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; overflow-y: auto; }
-  .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 1.5rem 1.25rem 1.25rem; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 0.5rem; }
-  .logo-icon { width: 34px; height: 34px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-  .logo-icon svg { width: 18px; height: 18px; }
-  .logo-name { font-size: 1.05rem; font-weight: 800; color: var(--white); }
-  .logo-name span { color: var(--gold); }
-  .condo-selector { margin: 0 0.75rem 0.5rem; background: rgba(255,255,255,0.06); border-radius: 8px; padding: 8px 10px; }
-  .condo-selector label { font-size: 0.68rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,0.3); display: block; margin-bottom: 4px; }
-  .condo-selector select { width: 100%; background: transparent; border: none; outline: none; color: var(--white); font-family: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
-  .condo-selector select option { background: var(--navy); }
-  .sidebar-section { padding: 0 0.75rem; margin-bottom: 0.25rem; }
-  .sidebar-section-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0.75rem 0.5rem 0.4rem; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.6); transition: all var(--transition); margin-bottom: 2px; }
-  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
-  .nav-item:hover { background: rgba(255,255,255,0.07); color: var(--white); }
-  .nav-item.active { background: rgba(232,163,32,0.15); color: #F5C35A; }
-  .nav-item.active svg { opacity: 1; }
-  .sidebar-bottom { margin-top: auto; padding: 1rem 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); }
-  .user-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,0.06); }
-  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--navy); flex-shrink: 0; }
-  .user-name { font-size: 0.82rem; font-weight: 600; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
-  .user-role-lbl { font-size: 0.7rem; color: rgba(255,255,255,0.4); }
-  .logout-btn { margin-left: auto; background: none; border: none; cursor: pointer; padding: 4px; color: rgba(255,255,255,0.4); }
-  .logout-btn:hover { color: var(--white); }
-  .logout-btn svg { width: 15px; height: 15px; }
-  .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
-  .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 40; }
-  .topbar h1 { font-size: 1rem; font-weight: 700; color: var(--navy); }
-  .topbar p { font-size: 0.75rem; color: var(--text-light); }
-  .topbar-right { display: flex; gap: 10px; }
-  .btn-sm { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; font-family: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all var(--transition); text-decoration: none; border: none; }
-  .btn-primary-sm { background: var(--navy); color: var(--white); }
-  .btn-primary-sm:hover { background: var(--navy-light); }
-  .btn-ghost-sm { background: var(--off-white); color: var(--text-mid); border: 1px solid var(--border); }
-  .btn-ghost-sm:hover { background: var(--border); }
-  .content { padding: 1.75rem 2rem; flex: 1; }
+/* ── SIDEBAR ── */
+.sidebar { width: var(--sidebar-w); background: var(--navy); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; overflow-y: auto; }
+.sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 1.5rem 1.25rem 1.25rem; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 0.5rem; }
+.logo-icon { width: 34px; height: 34px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.logo-icon svg { width: 18px; height: 18px; }
+.logo-name { font-size: 1.05rem; font-weight: 800; color: var(--white); }
+.logo-name span { color: var(--gold); }
+.condo-selector { margin: 0 0.75rem 0.5rem; background: rgba(255,255,255,0.06); border-radius: 8px; padding: 8px 10px; }
+.condo-selector label { font-size: 0.68rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,0.3); display: block; margin-bottom: 4px; }
+.condo-selector select { width: 100%; background: transparent; border: none; outline: none; color: var(--white); font-family: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+.condo-selector select option { background: var(--navy); }
+.sidebar-section { padding: 0 0.75rem; margin-bottom: 0.25rem; }
+.sidebar-section-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0.75rem 0.5rem 0.4rem; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.6); transition: all var(--transition); margin-bottom: 2px; }
+.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
+.nav-item:hover { background: rgba(255,255,255,0.07); color: var(--white); }
+.nav-item.active { background: rgba(232,163,32,0.15); color: #F5C35A; }
+.nav-item.active svg { opacity: 1; }
+.sidebar-bottom { margin-top: auto; padding: 1rem 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); }
+.user-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,0.06); }
+.user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--navy); flex-shrink: 0; }
+.user-name { font-size: 0.82rem; font-weight: 600; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+.user-role-lbl { font-size: 0.7rem; color: rgba(255,255,255,0.4); }
+.logout-btn { margin-left: auto; background: none; border: none; cursor: pointer; padding: 4px; color: rgba(255,255,255,0.4); }
+.logout-btn:hover { color: var(--white); }
+.logout-btn svg { width: 15px; height: 15px; }
 
+/* ── MAIN ── */
+.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+.topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 40; }
+.topbar h1 { font-size: 1rem; font-weight: 700; color: var(--navy); }
+.topbar p { font-size: 0.75rem; color: var(--text-light); }
+.content { padding: 1.75rem 2rem; flex: 1; }
 
-*{box-sizing:border-box;margin:0;padding:0}
+/* ── PAGE ── */
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; gap: 16px; }
+.page-title { font-size: 24px; font-weight: 700; }
+.page-sub { font-size: 14px; color: var(--text-mid); margin-top: 4px; }
+.btn-novo { background: var(--gold); color: #fff; border: none; border-radius: 8px; padding: 10px 20px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: .2s; font-family: inherit; }
+.btn-novo:hover { background: #e09515; }
+.tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--white); border-radius: 10px; padding: 4px; width: fit-content; }
+.tab { padding: 8px 20px; border-radius: 7px; border: none; background: none; color: var(--text-mid); font-size: 14px; font-weight: 600; cursor: pointer; transition: .2s; font-family: inherit; }
+.tab.active { background: var(--gold); color: #fff; }
+.tab:hover:not(.active) { color: var(--text-dark); background: var(--border); }
+.cards-grid { display: flex; flex-direction: column; gap: 16px; }
 
+/* ── CARDS ── */
+.pcard { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: .2s; }
+.pcard:hover { border-color: #c0c8d8; }
+.pcard-top { padding: 20px 24px; display: flex; align-items: flex-start; gap: 16px; cursor: pointer; }
+.pcard-icon { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+.pcard-info { flex: 1; min-width: 0; }
+.pcard-title { font-size: 17px; font-weight: 700; margin-bottom: 3px; }
+.pcard-desc { font-size: 13px; color: var(--text-mid); }
+.pcard-badges { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+.badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.b-aguardando { background: #fef3c720; color: var(--amber); border: 1px solid #fef3c760; }
+.b-votacao { background: #eff6ff; color: var(--blue); border: 1px solid #bfdbfe; }
+.b-aprovado { background: #f5f3ff; color: var(--purple); border: 1px solid #ddd6fe; }
+.b-execucao { background: #ecfeff; color: #0891b2; border: 1px solid #a5f3fc; }
+.b-concluido { background: var(--green-bg); color: var(--green); border: 1px solid #bbf7d0; }
+.b-pausado { background: var(--red-bg); color: var(--red); border: 1px solid #fecaca; }
+.aprovacoes { display: flex; gap: 6px; flex-wrap: wrap; }
+.aprov-chip { display: flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+.aprov-sim { background: #dcfce7; color: var(--green); border: 1px solid #bbf7d0; }
+.aprov-nao { background: var(--border); color: var(--text-mid); border: 1px solid #d1d5db; }
+.prazo-chip { display: flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+.prazo-ok { background: #fef3c7; color: var(--amber); border: 1px solid #fde68a; }
+.prazo-venc { background: var(--red-bg); color: var(--red); border: 1px solid #fecaca; }
 
-.nav-brand{display:flex;align-items:center;gap:10px;margin-right:40px;text-decoration:none}
-.nav-logo{width:36px;height:36px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
-.nav-brand-text{font-size:13px;font-weight:700;color:var(--text-dark);line-height:1.2}
-.nav-brand-text span{display:block;font-size:10px;color:var(--text-light);font-weight:400}
-.nav-links{display:flex;gap:4px}
-.nav-links a{color:var(--text-light);text-decoration:none;padding:8px 16px;border-radius:6px;font-size:14px;transition:.2s}
-.nav-links a:hover{background:var(--border);color:var(--text-dark)}
-.nav-right{margin-left:auto;display:flex;align-items:center;gap:16px}
-.nav-user{font-size:13px;color:var(--text-mid)}
-.nav-role{background:var(--gold)20;border:1px solid var(--gold)40;color:var(--gold);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
-main{max-width:1100px;margin:0 auto;padding:28px 24px}
-.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;gap:16px}
-.page-title{font-size:24px;font-weight:700}
-.page-sub{font-size:14px;color:var(--text-mid);margin-top:4px}
-.btn-novo{background:var(--gold);color:var(--off-white);border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.2s}
-.btn-novo:hover{background:#e09515}
-.tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--white);border-radius:10px;padding:4px;width:fit-content}
-.tab{padding:8px 20px;border-radius:7px;border:none;background:none;color:var(--text-mid);font-size:14px;font-weight:600;cursor:pointer;transition:.2s}
-.tab.active{background:var(--gold);color:var(--off-white)}
-.tab:hover:not(.active){color:var(--text-dark);background:var(--border)}
-.cards-grid{display:flex;flex-direction:column;gap:16px}
-.pcard{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:.2s}
-.pcard:hover{border-color:#3a3d4e}
-.pcard-top{padding:20px 24px;display:flex;align-items:flex-start;gap:16px;cursor:pointer}
-.pcard-icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
-.pcard-info{flex:1;min-width:0}
-.pcard-title{font-size:17px;font-weight:700;margin-bottom:3px}
-.pcard-desc{font-size:13px;color:var(--text-mid)}
-.pcard-badges{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
-.badge{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap}
-.b-aguardando{background:var(--gold)20;color:var(--gold);border:1px solid var(--gold)40}
-.b-votacao{background:#3b82f620;color:#3b82f6;border:1px solid #3b82f640}
-.b-aprovado{background:#a855f720;color:#a855f7;border:1px solid #a855f740}
-.b-execucao{background:#06b6d420;color:#06b6d4;border:1px solid #06b6d440}
-.b-concluido{background:#22c55e20;color:#22c55e;border:1px solid #22c55e40}
-.b-pausado{background:#ef444420;color:#ef4444;border:1px solid #ef444440}
-.aprovacoes{display:flex;gap:6px;flex-wrap:wrap}
-.aprov-chip{display:flex;align-items:center;gap:4px;padding:3px 8px;border-radius:99px;font-size:11px;font-weight:700}
-.aprov-sim{background:#22c55e20;color:#22c55e;border:1px solid #22c55e30}
-.aprov-nao{background:var(--border);color:var(--text-mid);border:1px solid #3a3d4e}
-.pcard-
-.pcard-body.open{display:block}
-.prop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;margin-bottom:20px}
-.prop-card{background:var(--off-white);border:1px solid var(--border);border-radius:10px;padding:16px;position:relative;transition:.2s}
-.prop-card.aprovada{border-color:#22c55e40;background:#22c55e06}
-.prop-card.aprovada::before{content:'✓ Selecionada';position:absolute;top:-10px;left:12px;background:#22c55e;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px}
-.prop-num{font-size:11px;font-weight:700;color:var(--gold);margin-bottom:6px}
-.prop-forn{font-size:14px;font-weight:700;margin-bottom:8px;color:var(--text-dark)}
-.prop-valor{font-size:20px;font-weight:800;margin-bottom:10px}
-.prop-det{font-size:12px;color:var(--text-mid);margin-bottom:3px}
-.prop-det strong{color:var(--text-light)}
-.rateio-box{background:var(--gold)08;border:1px solid var(--gold)20;border-radius:7px;padding:10px 12px;margin-top:10px}
-.rateio-title{font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px}
-.rateio-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px}
-.rateio-tipo{color:var(--text-light)}
-.rateio-val{font-weight:700;color:var(--text-dark)}
-.rateio-total{border-top:1px solid #f5a62215;margin-top:6px;padding-top:5px;font-size:11px;color:var(--text-mid)}
-.btn-sel-prop{background:#a855f715;border:1px solid #a855f730;color:#a855f7;border-radius:7px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;width:100%;margin-top:10px;transition:.2s}
-.btn-sel-prop:hover{background:#a855f725}
-.btn-prop-ok{background:#22c55e15;border:1px solid #22c55e30;color:#22c55e;border-radius:7px;padding:7px;font-size:12px;font-weight:700;width:100%;margin-top:10px;text-align:center}
-.prop-anexo{display:inline-flex;align-items:center;gap:5px;background:var(--border);border-radius:6px;padding:5px 9px;font-size:11px;color:var(--text-light);text-decoration:none;margin-top:6px;transition:.2s}
-.prop-anexo:hover{color:var(--gold)}
-.aprov-section{background:#1e2130;border-radius:10px;padding:14px 16px;margin-bottom:16px}
-.aprov-section-title{font-size:11px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
-.aprov-btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.btn-aprov{border:none;border-radius:7px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;transition:.2s}
-.btn-aprov-ok{background:#22c55e20;border:1px solid #22c55e40;color:#22c55e}
-.btn-aprov-ok:hover{background:#22c55e30}
-.btn-aprov-done{background:var(--border);color:var(--text-mid);cursor:default;font-size:12px;padding:7px 12px}
-.btn-aprov-rev{background:none;border:1px solid #ef444430;color:#ef4444;font-size:11px;padding:6px 10px}
-.btn-aprov-rev:hover{background:#ef444415}
-.obs-box{background:var(--border)25;border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--text-light);line-height:1.5}
-.obs-label{font-size:10px;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
-.etapas-wrap{margin-bottom:14px}
-.etapas-hdr{font-size:12px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
-.etapa{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)15}
-.etapa:last-child{border:none}
-.et-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
-.et-pend{background:var(--border);color:var(--text-mid)}
-.et-and{background:#3b82f615;color:#3b82f6;border:2px solid #3b82f6}
-.et-conc{background:#22c55e;color:#fff}
-.et-info{flex:1}
-.et-nome{font-size:13px;font-weight:600;margin-bottom:2px}
-.et-meta{display:flex;gap:12px;font-size:11px;color:var(--text-mid);flex-wrap:wrap}
-.et-obs{font-size:11px;color:var(--text-light);margin-top:3px;font-style:italic}
-.estat{font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap}
-.es-pend{background:var(--border);color:var(--text-mid)}
-.es-and{background:#3b82f615;color:#3b82f6}
-.es-conc{background:#22c55e15;color:#22c55e}
-.card-actions{display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
-.btn-edit{background:var(--border);border:none;color:var(--text-light);border-radius:7px;padding:7px 14px;font-size:13px;cursor:pointer;transition:.2s}
-.btn-edit:hover{background:#3a3d4e;color:var(--text-dark)}
-.btn-del{background:none;border:1px solid #ef444325;color:#ef4444;border-radius:7px;padding:7px 14px;font-size:13px;cursor:pointer;transition:.2s}
-.btn-del:hover{background:#ef444410}
-.mcard{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:.2s}
-.mcard:hover{border-color:#3a3d4e}
-.mcard-top{padding:20px 24px;display:flex;align-items:flex-start;gap:16px;cursor:pointer}
-.mcard-
-.mcard-body.open{display:block}
-.meta-prog{padding:0 24px 18px}
-.prog-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px}
-.prog-bar{height:7px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:5px}
-.prog-fill{height:100%;border-radius:99px;transition:width .6s}
-.prog-falta{font-size:11px;color:var(--text-mid);text-align:right}
-.empty{text-align:center;padding:60px 20px;color:var(--text-mid)}
-.empty-icon{font-size:48px;margin-bottom:12px;opacity:.4}
-/* MODAIS */
-.modal-bg{display:none;position:fixed;inset:0;background:#00000092;z-index:1000;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
-.modal-bg.open{display:flex}
-.modal{background:var(--white);border:1px solid var(--border);border-radius:16px;width:100%;max-width:760px;margin:auto;animation:fu .25s ease}
-@keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-.modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--white);z-index:2;border-radius:16px 16px 0 0}
-.modal-head h2{font-size:16px;font-weight:700}
-.modal-close{background:none;border:none;color:var(--text-mid);font-size:20px;cursor:pointer;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center}
-.modal-close:hover{background:var(--border);color:var(--text-dark)}
-.modal-
-.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
-.fsec{margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border)15}
-.fsec:last-child{border:none;margin:0;padding:0}
-.fsec-title{font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px}
-.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.frow.full{grid-template-columns:1fr}
-.frow.tri{grid-template-columns:1fr 1fr 1fr}
-.fg{display:flex;flex-direction:column;gap:5px}
-label{font-size:11px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.04em}
-input,select,textarea{background:var(--off-white);border:1px solid var(--border);color:var(--text-dark);border-radius:8px;padding:9px 11px;font-size:14px;font-family:inherit;transition:.2s;width:100%}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
-textarea{resize:vertical;min-height:70px}
-select option{background:var(--white)}
-.pf-item{background:var(--off-white);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px}
-.pf-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.pf-num{font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.05em}
-.btn-rm{background:none;border:none;color:#ef4444;cursor:pointer;font-size:14px;padding:2px 5px}
-.rpreview{background:var(--gold)08;border:1px solid #f5a62220;border-radius:7px;padding:10px 12px;margin-top:10px}
-.rpreview-title{font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px}
-.rp-line{display:flex;justify-content:space-between;font-size:12px;color:var(--text-light);margin-bottom:3px}
-.rp-line strong{color:var(--text-dark)}
-.file-area{background:var(--off-white);border:1px dashed var(--border);border-radius:7px;padding:11px;text-align:center;cursor:pointer;font-size:12px;color:var(--text-mid);transition:.2s}
-.file-area:hover{border-color:var(--gold);color:var(--gold)}
-.file-ok{font-size:11px;color:#22c55e;margin-top:4px;display:none}
-.ef-item{background:var(--off-white);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
-.ef-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.ef-num{font-size:11px;font-weight:700;color:var(--gold)}
-.btn-add{background:var(--border);border:1px dashed #3a3d4e;color:var(--text-light);border-radius:8px;padding:9px;font-size:13px;cursor:pointer;width:100%;transition:.2s;margin-top:4px}
-.btn-add:hover{border-color:var(--gold);color:var(--gold)}
-.cor-grid{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
-.cor-opt{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:.2s}
-.cor-opt:hover,.cor-opt.sel{border-color:#fff;transform:scale(1.15)}
-.btn-cancel{background:var(--border);border:none;color:var(--text-light);border-radius:8px;padding:9px 18px;font-size:14px;font-weight:600;cursor:pointer}
-.btn-cancel:hover{background:#3a3d4e}
-.btn-save{background:var(--gold);border:none;color:var(--off-white);border-radius:8px;padding:9px 22px;font-size:14px;font-weight:700;cursor:pointer}
-.btn-save:disabled{opacity:.5;cursor:not-allowed}
-.confirm-bg{display:none;position:fixed;inset:0;background:#00000092;z-index:2000;align-items:center;justify-content:center}
-.confirm-bg.open{display:flex}
-.confirm-box{background:#1e2130;border:1px solid var(--border);border-radius:14px;padding:26px;max-width:380px;width:90%;text-align:center}
-.confirm-box h3{font-size:16px;font-weight:700;margin-bottom:8px}
-.confirm-box p{font-size:13px;color:var(--text-light);margin-bottom:18px;line-height:1.5;white-space:pre-line}
-.confirm-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.loader{text-align:center;padding:48px;color:var(--text-mid);font-size:14px}
+/* ── CARD BODY ── */
+.pcard-body { display: none; padding: 0 24px 20px; border-top: 1px solid var(--border); }
+.pcard-body.open { display: block; }
+.prop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 14px; margin: 16px 0; }
+.prop-card { background: var(--off-white); border: 1px solid var(--border); border-radius: 10px; padding: 16px; position: relative; transition: .2s; }
+.prop-card.aprovada { border-color: #86efac; background: #f0fdf4; }
+.prop-card.aprovada::before { content: '✓ Selecionada'; position: absolute; top: -10px; left: 12px; background: var(--green); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+.prop-num { font-size: 11px; font-weight: 700; color: var(--gold); margin-bottom: 6px; }
+.prop-forn { font-size: 14px; font-weight: 700; margin-bottom: 8px; color: var(--text-dark); }
+.prop-valor { font-size: 20px; font-weight: 800; margin-bottom: 10px; color: var(--text-dark); }
+.prop-det { font-size: 12px; color: var(--text-mid); margin-bottom: 3px; }
+.prop-det strong { color: var(--text-light); font-weight: 600; }
+.rateio-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 7px; padding: 10px 12px; margin-top: 10px; }
+.rateio-title { font-size: 10px; font-weight: 700; color: var(--amber); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 7px; }
+.rateio-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 3px; }
+.rateio-tipo { color: var(--text-light); }
+.rateio-val { font-weight: 700; color: var(--text-dark); }
+.rateio-total { border-top: 1px solid #fde68a; margin-top: 6px; padding-top: 5px; font-size: 11px; color: var(--text-mid); }
+.btn-sel-prop { background: #f5f3ff; border: 1px solid #ddd6fe; color: var(--purple); border-radius: 7px; padding: 7px; font-size: 12px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; transition: .2s; font-family: inherit; }
+.btn-sel-prop:hover { background: #ede9fe; }
+.btn-prop-ok { background: #dcfce7; border: 1px solid #bbf7d0; color: var(--green); border-radius: 7px; padding: 7px; font-size: 12px; font-weight: 700; width: 100%; margin-top: 10px; text-align: center; }
+.prop-anexo { display: inline-flex; align-items: center; gap: 5px; background: var(--border); border-radius: 6px; padding: 5px 9px; font-size: 11px; color: var(--text-mid); text-decoration: none; margin-top: 6px; transition: .2s; }
+.prop-anexo:hover { color: var(--gold); background: #fef3c7; }
+.aprov-section { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin: 12px 0; }
+.aprov-section-title { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 10px; }
+.aprov-btns { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.btn-aprov { border: none; border-radius: 7px; padding: 8px 14px; font-size: 13px; font-weight: 700; cursor: pointer; transition: .2s; font-family: inherit; }
+.btn-aprov-ok { background: #dcfce7; border: 1px solid #86efac; color: var(--green); }
+.btn-aprov-ok:hover { background: #bbf7d0; }
+.btn-aprov-done { background: var(--border); color: var(--text-mid); cursor: default; font-size: 12px; padding: 7px 12px; }
+.btn-aprov-rev { background: none; border: 1px solid #fecaca; color: var(--red); font-size: 11px; padding: 6px 10px; border-radius: 7px; cursor: pointer; font-family: inherit; }
+.btn-aprov-rev:hover { background: var(--red-bg); }
+.prazo-aprov-info { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-mid); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+.obs-box { background: #f8fafc; border-left: 3px solid var(--gold); border-radius: 0 8px 8px 0; padding: 12px 14px; margin: 12px 0; font-size: 13px; color: var(--text-mid); line-height: 1.5; }
+.obs-label { font-size: 10px; font-weight: 700; color: var(--amber); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; }
 
+/* ── CRONOGRAMA ── */
+.cronograma-section { margin: 12px 0; }
+.cronograma-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.cronograma-title { font-size: 12px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: .05em; }
+.cronograma-prog { font-size: 12px; color: var(--text-mid); }
+.prog-bar-wrap { margin-bottom: 12px; }
+.prog-bar { height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 99px; transition: width .6s; }
+.etapa-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; background: #f8fafc; border: 1px solid var(--border); margin-bottom: 6px; }
+.etapa-row:last-child { margin-bottom: 0; }
+.et-num { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.et-pend { background: var(--border); color: var(--text-mid); }
+.et-and { background: #eff6ff; color: var(--blue); border: 2px solid #93c5fd; }
+.et-conc { background: var(--green); color: #fff; }
+.et-info { flex: 1; }
+.et-nome { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.et-meta { display: flex; gap: 12px; font-size: 11px; color: var(--text-mid); flex-wrap: wrap; }
+.et-obs { font-size: 11px; color: var(--text-light); margin-top: 3px; font-style: italic; }
+.estat { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 99px; white-space: nowrap; }
+.es-pend { background: var(--border); color: var(--text-mid); }
+.es-and { background: #eff6ff; color: var(--blue); }
+.es-conc { background: #dcfce7; color: var(--green); }
+
+.card-actions { display: flex; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+.btn-edit { background: var(--off-white); border: 1px solid var(--border); color: var(--text-mid); border-radius: 7px; padding: 7px 14px; font-size: 13px; cursor: pointer; transition: .2s; font-family: inherit; }
+.btn-edit:hover { background: var(--border); }
+.btn-del { background: none; border: 1px solid #fecaca; color: var(--red); border-radius: 7px; padding: 7px 14px; font-size: 13px; cursor: pointer; transition: .2s; font-family: inherit; }
+.btn-del:hover { background: var(--red-bg); }
+.btn-notif { background: none; border: 1px solid #ddd6fe; color: var(--purple); border-radius: 7px; padding: 7px 14px; font-size: 13px; cursor: pointer; transition: .2s; font-family: inherit; }
+.btn-notif:hover { background: var(--purple-bg); }
+
+/* ── METAS ── */
+.mcard { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: .2s; }
+.mcard:hover { border-color: #c0c8d8; }
+.mcard-top { padding: 20px 24px; display: flex; align-items: flex-start; gap: 16px; cursor: pointer; }
+.mcard-body { display: none; padding: 0 24px 20px; border-top: 1px solid var(--border); }
+.mcard-body.open { display: block; }
+.meta-prog { padding: 12px 0; }
+.prog-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 7px; }
+.prog-falta { font-size: 11px; color: var(--text-mid); text-align: right; margin-top: 5px; }
+
+.empty { text-align: center; padding: 60px 20px; color: var(--text-mid); }
+.empty-icon { font-size: 48px; margin-bottom: 12px; opacity: .4; }
+.loader { text-align: center; padding: 48px; color: var(--text-mid); font-size: 14px; }
+
+/* ── MODAIS ── */
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 1000; align-items: flex-start; justify-content: center; padding: 20px; overflow-y: auto; }
+.modal-bg.open { display: flex; }
+.modal { background: var(--white); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 800px; margin: auto; animation: fu .25s ease; }
+@keyframes fu { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.modal-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--white); z-index: 2; border-radius: 16px 16px 0 0; }
+.modal-head h2 { font-size: 16px; font-weight: 700; }
+.modal-close { background: none; border: none; color: var(--text-mid); font-size: 20px; cursor: pointer; width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+.modal-close:hover { background: var(--border); }
+.modal-body { padding: 22px 24px; max-height: 75vh; overflow-y: auto; }
+.modal-footer { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; background: #f8fafc; border-radius: 0 0 16px 16px; }
+.fsec { margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid var(--border); }
+.fsec:last-child { border: none; margin: 0; padding: 0; }
+.fsec-title { font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+.fsec-badge { background: var(--gold); color: #fff; font-size: 10px; padding: 1px 7px; border-radius: 99px; }
+.frow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.frow.full { grid-template-columns: 1fr; }
+.frow.tri { grid-template-columns: 1fr 1fr 1fr; }
+.fg { display: flex; flex-direction: column; gap: 5px; }
+label { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: .04em; }
+input, select, textarea { background: var(--off-white); border: 1px solid var(--border); color: var(--text-dark); border-radius: 8px; padding: 9px 11px; font-size: 14px; font-family: inherit; transition: .2s; width: 100%; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--gold); background: #fff; }
+textarea { resize: vertical; min-height: 70px; }
+select option { background: var(--white); }
+.pf-item { background: var(--off-white); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+.pf-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.pf-num { font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: .05em; }
+.btn-rm { background: none; border: none; color: var(--red); cursor: pointer; font-size: 14px; padding: 2px 5px; }
+.rpreview { background: #fffbeb; border: 1px solid #fde68a; border-radius: 7px; padding: 10px 12px; margin-top: 10px; }
+.rpreview-title { font-size: 10px; font-weight: 700; color: var(--amber); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 7px; }
+.rp-line { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-light); margin-bottom: 3px; }
+.rp-line strong { color: var(--text-dark); }
+.file-area { background: var(--off-white); border: 1px dashed var(--border); border-radius: 7px; padding: 11px; text-align: center; cursor: pointer; font-size: 12px; color: var(--text-mid); transition: .2s; }
+.file-area:hover { border-color: var(--gold); color: var(--gold); background: #fffbeb; }
+.file-ok { font-size: 11px; color: var(--green); margin-top: 4px; display: none; }
+.ef-item { background: var(--off-white); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+.ef-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.ef-num { font-size: 11px; font-weight: 700; color: var(--blue); }
+.btn-add { background: var(--off-white); border: 1px dashed var(--border); color: var(--text-light); border-radius: 8px; padding: 9px; font-size: 13px; cursor: pointer; width: 100%; transition: .2s; margin-top: 4px; font-family: inherit; }
+.btn-add:hover { border-color: var(--gold); color: var(--gold); background: #fffbeb; }
+.cor-grid { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 5px; }
+.cor-opt { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: .2s; }
+.cor-opt:hover, .cor-opt.sel { border-color: #334155; transform: scale(1.15); }
+.btn-cancel { background: var(--off-white); border: 1px solid var(--border); color: var(--text-mid); border-radius: 8px; padding: 9px 18px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-cancel:hover { background: var(--border); }
+.btn-save { background: var(--gold); border: none; color: #fff; border-radius: 8px; padding: 9px 22px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.btn-save:disabled { opacity: .5; cursor: not-allowed; }
+.btn-save:not(:disabled):hover { background: #e09515; }
+.confirm-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 2000; align-items: center; justify-content: center; }
+.confirm-bg.open { display: flex; }
+.confirm-box { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 26px; max-width: 380px; width: 90%; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,.15); }
+.confirm-box h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.confirm-box p { font-size: 13px; color: var(--text-mid); margin-bottom: 18px; line-height: 1.5; white-space: pre-line; }
+.confirm-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+/* ALERTA DE NOTIFICAÇÃO */
+.toast { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; align-items: center; gap: 10px; background: var(--navy); color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,.2); transform: translateY(80px); opacity: 0; transition: all .35s cubic-bezier(.4,0,.2,1); max-width: 360px; }
+.toast.show { transform: none; opacity: 1; }
+.toast-icon { font-size: 18px; flex-shrink: 0; }
+.toast-success { border-left: 4px solid var(--green); }
+.toast-error { border-left: 4px solid var(--red); }
+.toast-info { border-left: 4px solid var(--blue); }
+
+/* PRAZO DE APROVAÇÃO DESTAQUE */
+.prazo-aprov-banner { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 14px; margin: 12px 0; display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.prazo-aprov-banner.vencido { background: var(--red-bg); border-color: #fecaca; }
+.conselho-notif-box { background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 8px; padding: 10px 14px; margin: 12px 0; font-size: 12px; color: var(--purple); display: flex; align-items: center; gap: 8px; }
 </style>
 </head>
 <body>
@@ -232,18 +250,18 @@ select option{background:var(--white)}
   </div>
   <div class="sidebar-section">
     <div class="sidebar-section-label">Principal</div>
-    <a href="/sindico/dashboard.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
-    <a href="/sindico/moradores.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Moradores</a>
-    <a href="/sindico/chamados.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Chamados</a>
-    <a href="/sindico/documentos.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documentos</a>
+    <a href="/sindico/dashboard.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
+    <a href="/sindico/moradores.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Moradores</a>
+    <a href="/sindico/chamados.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Chamados</a>
+    <a href="/sindico/documentos.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documentos</a>
   </div>
   <div class="sidebar-section">
     <div class="sidebar-section-label">Financeiro</div>
-    <a href="/sindico/financeiro.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Financeiro</a>
-    <a href="/sindico/transacoes.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Transações</a>
-    <a href="/sindico/categorias.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Categorias</a>
+    <a href="/sindico/financeiro.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Financeiro</a>
+    <a href="/sindico/transacoes.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>Transações</a>
+    <a href="/sindico/categorias.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Categorias</a>
     <a href="/sindico/metas.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Metas & Projetos</a>
-    <a href="/sindico/orcamento.html" class="nav-item "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Orçamento</a>
+    <a href="/sindico/orcamento.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Orçamento</a>
   </div>
   <div class="sidebar-bottom">
     <div class="user-card">
@@ -253,29 +271,32 @@ select option{background:var(--white)}
     </div>
   </div>
 </aside>
+
 <div class="main">
   <header class="topbar">
-    <div><h1>Metas & Projetos</h1><p>Acompanhamento de objetivos</p></div>
-    <div class="topbar-right" id="topbar-right"></div>
+    <div><h1>Metas & Projetos</h1><p>Acompanhamento e aprovação de projetos do condomínio</p></div>
+    <div id="topbar-right"></div>
   </header>
   <div class="content">
-<main>
-  <div class="page-header">
-    <div>
-      <div class="page-title">Metas & Projetos</div>
-      <div class="page-sub">Acompanhe o progresso das melhorias do Edifício Mandala.</div>
+    <div style="max-width:1100px;margin:0 auto;">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Metas & Projetos</div>
+          <div class="page-sub">Gerencie projetos com propostas, cronograma e aprovação do conselho fiscal.</div>
+        </div>
+        <button class="btn-novo" id="btnNovo" style="display:none" onclick="abrirModal()">+ Novo Projeto</button>
+      </div>
+      <div class="tabs">
+        <button class="tab active" onclick="setTab('projetos',this)">🏗 Projetos</button>
+        <button class="tab" onclick="setTab('metas',this)">🎯 Metas de Arrecadação</button>
+      </div>
+      <div id="painelProjetos" class="cards-grid"><div class="loader">Carregando...</div></div>
+      <div id="painelMetas" class="cards-grid" style="display:none"><div class="loader">Carregando...</div></div>
     </div>
-    <button class="btn-novo" id="btnNovo" style="display:none" onclick="abrirModal()">+ Novo Projeto</button>
   </div>
-  <div class="tabs">
-    <button class="tab active" onclick="setTab('projetos',this)">🏗 Projetos</button>
-    <button class="tab" onclick="setTab('metas',this)">🎯 Metas de Arrecadação</button>
-  </div>
-  <div id="painelProjetos" class="cards-grid"><div class="loader">Carregando...</div></div>
-  <div id="painelMetas" class="cards-grid" style="display:none"><div class="loader">Carregando...</div></div>
-</main>
+</div>
 
-<!-- MODAL PROJETO -->
+<!-- ═══ MODAL PROJETO ═══ -->
 <div class="modal-bg" id="modalBg">
   <div class="modal">
     <div class="modal-head">
@@ -283,46 +304,75 @@ select option{background:var(--white)}
       <button class="modal-close" onclick="fecharModal()">✕</button>
     </div>
     <div class="modal-body">
+
+      <!-- Identificação -->
       <div class="fsec">
-        <div class="fsec-title">Identificação</div>
+        <div class="fsec-title">📋 Identificação do Projeto</div>
+        <div class="frow full"><div class="fg"><label>Nome do Projeto *</label><input id="fNome" type="text" placeholder="Ex: Reforma da Fachada"/></div></div>
+        <div class="frow full"><div class="fg"><label>Descrição</label><input id="fDesc" type="text" placeholder="Breve descrição do objetivo"/></div></div>
         <div class="frow">
           <div class="fg">
-            <label>Cor</label><div class="cor-grid" id="corGrid"></div>
-            <div style="margin-top:10px"><label>Status</label>
-              <select id="fStatus" style="margin-top:5px" onchange="toggleEtapas()">
-                <option value="aguardando">Aguardando Aprovação</option>
-                <option value="votacao">Em Votação</option>
-                <option value="aprovado">Aprovado</option>
-                <option value="execucao">Em Execução</option>
-                <option value="concluido">Concluído</option>
-                <option value="pausado">Pausado</option>
-              </select>
-            </div>
+            <label>Status</label>
+            <select id="fStatus" onchange="toggleEtapas()">
+              <option value="aguardando">Aguardando Aprovação</option>
+              <option value="votacao">Em Votação</option>
+              <option value="aprovado">Aprovado</option>
+              <option value="execucao">Em Execução</option>
+              <option value="concluido">Concluído</option>
+              <option value="pausado">Pausado</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Cor de identificação</label>
+            <div class="cor-grid" id="corGrid"></div>
           </div>
         </div>
-        <div class="frow full"><div class="fg"><label>Nome do Projeto *</label><input id="fNome" type="text" placeholder="Ex: Remoção de Pedras da Fachada"/></div></div>
-        <div class="frow full"><div class="fg"><label>Descrição</label><input id="fDesc" type="text" placeholder="Descrição resumida"/></div></div>
-        <div class="frow full" style="margin:0"><div class="fg"><label>Observações da Síndica</label><textarea id="fObs" placeholder="Informações para condôminos e conselho..."></textarea></div></div>
+        <div class="frow">
+          <div class="fg">
+            <label>📅 Prazo limite para aprovação do conselho *</label>
+            <input id="fPrazoAprov" type="date"/>
+            <span style="font-size:11px;color:var(--text-light);margin-top:2px;">O conselho fiscal será notificado e terá até esta data para votar.</span>
+          </div>
+          <div class="fg">
+            <label>📅 Prazo de execução previsto</label>
+            <input id="fPrazoExec" type="date"/>
+          </div>
+        </div>
+        <div class="frow full"><div class="fg"><label>Observações da Síndica</label><textarea id="fObs" placeholder="Informações adicionais para o conselho e condôminos..."></textarea></div></div>
       </div>
+
+      <!-- Propostas -->
       <div class="fsec">
-        <div class="fsec-title">Propostas (até 3)</div>
+        <div class="fsec-title">
+          📎 Propostas de Fornecedores
+          <span class="fsec-badge">até 3</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-mid);margin-bottom:14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:7px;padding:8px 12px;">
+          ℹ️ Cadastre até 3 propostas com seus respectivos PDFs. O conselho fiscal selecionará a proposta preferida durante a votação.
+        </div>
         <div id="propostasWrap"></div>
         <button class="btn-add" id="btnAddProp" onclick="addPF()">+ Adicionar Proposta</button>
       </div>
+
+      <!-- Cronograma (aparece só quando aprovado/execução/concluído) -->
       <div class="fsec" id="secEtapas" style="display:none">
-        <div class="fsec-title">Cronograma de Atividades</div>
+        <div class="fsec-title">📆 Cronograma de Atividades</div>
+        <div style="font-size:12px;color:var(--text-mid);margin-bottom:14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:7px;padding:8px 12px;">
+          ✅ Cadastre as etapas do projeto com prazos e custos estimados para acompanhar o progresso.
+        </div>
         <div id="etapasWrap"></div>
         <button class="btn-add" onclick="addEF()">+ Adicionar Etapa</button>
       </div>
+
     </div>
     <div class="modal-footer">
       <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
-      <button class="btn-save" id="btnSalvar" onclick="salvar()">Salvar Projeto</button>
+      <button class="btn-save" id="btnSalvar" onclick="salvar()">Salvar e Notificar Conselho</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL META -->
+<!-- ═══ MODAL META ═══ -->
 <div class="modal-bg" id="modalMetaBg">
   <div class="modal" style="max-width:580px">
     <div class="modal-head">
@@ -357,12 +407,12 @@ select option{background:var(--white)}
   </div>
 </div>
 
-<!-- MODAL ATUALIZAR ARRECADADO -->
+<!-- ═══ MODAL ATUALIZAR ARRECADADO ═══ -->
 <div class="modal-bg" id="modalArrBg">
   <div class="modal" style="max-width:400px">
     <div class="modal-head"><h2>Atualizar Arrecadação</h2><button class="modal-close" onclick="fecharModalArr()">✕</button></div>
     <div class="modal-body">
-      <p style="font-size:13px;color:#94a3b8;margin-bottom:14px">Meta: <strong id="arrMetaNome" style="color:#f1f5f9"></strong></p>
+      <p style="font-size:13px;color:var(--text-mid);margin-bottom:14px">Meta: <strong id="arrMetaNome" style="color:var(--text-dark)"></strong></p>
       <div class="fg"><label>Novo valor arrecadado (R$)</label><input id="fArrValor" type="text" inputmode="decimal" placeholder="0,00"/></div>
     </div>
     <div class="modal-footer">
@@ -372,7 +422,7 @@ select option{background:var(--white)}
   </div>
 </div>
 
-<!-- CONFIRM -->
+<!-- ═══ CONFIRM ═══ -->
 <div class="confirm-bg" id="confirmBg">
   <div class="confirm-box">
     <h3 id="confirmTitle">Confirmar</h3>
@@ -383,319 +433,694 @@ select option{background:var(--white)}
     </div>
   </div>
 </div>
-  </div>
-</div>
+
+<!-- TOAST -->
+<div class="toast" id="toastMsg"><span class="toast-icon" id="toastIcon">✓</span><span id="toastText"></span></div>
+
 <script>
-const SUPA_URL='https://siczyohqmlrmirqgzlxb.supabase.co';
-const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw';
-const EMPRESA='mandala';
-const ADMINS=['admrafaelcavalcanti@gmail.com','tecnologia@smartdataconsultoria.com'];
-const UA=16,FA=0.027,UB=16,FB=0.0355;
-const CORES=['var(--gold)','#ef4444','#3b82f6','#22c55e','#a855f7','#f97316','#06b6d4','#ec4899','#84cc16','#14b8a6'];
-const SL={aguardando:'Aguardando Aprovação',votacao:'Em Votação',aprovado:'Aprovado',execucao:'Em Execução',concluido:'Concluído',pausado:'Pausado'};
-const SC={aguardando:'b-aguardando',votacao:'b-votacao',aprovado:'b-aprovado',execucao:'b-execucao',concluido:'b-concluido',pausado:'b-pausado'};
+// ── CONFIG ────────────────────────────────────────────────────
+const SUPA_URL = 'https://siczyohqmlrmirqgzlxb.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw';
+const EMPRESA = 'mandala';
+const ADMINS = ['admrafaelcavalcanti@gmail.com','tecnologia@smartdataconsultoria.com'];
+const UA = 16, FA = 0.027, UB = 16, FB = 0.0355;
+const CORES = ['var(--gold)','#ef4444','#3b82f6','#22c55e','#7c3aed','#f97316','#06b6d4','#ec4899','#84cc16','#14b8a6'];
 
-let _tab='projetos',_proj=[],_metas=[],_sind=false,_editId=null;
-let _cSel={p:'var(--gold)',m:'#22c55e'};
-let _pfCnt=0,_efCnt=0,_pfAnexos={},_confirmCb=null,_arrId=null;
+const SL = {aguardando:'Aguardando Aprovação',votacao:'Em Votação',aprovado:'Aprovado',execucao:'Em Execução',concluido:'Concluído',pausado:'Pausado'};
+const SC = {aguardando:'b-aguardando',votacao:'b-votacao',aprovado:'b-aprovado',execucao:'b-execucao',concluido:'b-concluido',pausado:'b-pausado'};
 
-const fmt=v=>'R$ '+parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-const brl=s=>parseFloat((s||'0').replace(/R\$\s*/g,'').replace(/\./g,'').replace(',','.'))||0;
-const fd=s=>{if(!s)return'';const[y,m,d]=s.split('-');return`${d}/${m}/${y}`;};
-const rt=v=>({a:v*FA,b:v*FB});
-function getToken(){
-  const k=Object.keys(localStorage).find(k=>k.includes('auth-token'));
-  if(!k)return null;
-  try{
-    const s=JSON.parse(localStorage.getItem(k));
-    const tk=s?.access_token, exp=s?.expires_at;
-    if(!tk)return null;
-    if(exp && Date.now()/1000 > exp)return null; // expirado
-    return tk;
-  }catch{return null;}
+// Membros do conselho fiscal — adicione os e-mails aqui
+const CONSELHO_EMAILS = [
+  // 'conselho1@email.com',
+  // 'conselho2@email.com',
+  // 'conselho3@email.com'
+];
+
+let _tab = 'projetos', _proj = [], _metas = [], _sind = false, _editId = null;
+let _cSel = {p:'var(--gold)', m:'#22c55e'};
+let _pfCnt = 0, _efCnt = 0, _pfAnexos = {}, _confirmCb = null, _arrId = null;
+
+// ── UTILITÁRIOS ──────────────────────────────────────────────
+const fmt = v => 'R$ ' + parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const brl = s => parseFloat((s||'0').replace(/R\$\s*/g,'').replace(/\./g,'').replace(',','.'))||0;
+const fd  = s => { if(!s) return ''; const [y,m,d] = s.split('-'); return `${d}/${m}/${y}`; };
+const rt  = v => ({a: v*FA, b: v*FB});
+
+function diasParaPrazo(dataStr) {
+  if (!dataStr) return null;
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const prazo = new Date(dataStr + 'T00:00:00');
+  return Math.ceil((prazo - hoje) / 86400000);
 }
-function hdrs(){
-  const tk=getToken();
-  return{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${tk||SUPA_KEY}`};
+
+function getToken() {
+  const k = Object.keys(localStorage).find(k => k.includes('auth-token'));
+  if (!k) return null;
+  try { const s = JSON.parse(localStorage.getItem(k)); return s?.access_token || null; } catch { return null; }
 }
 
-document.addEventListener('DOMContentLoaded',async()=>{
-  try{
-    const sr=localStorage.getItem('mandala_session');
-    if(sr){const s=JSON.parse(sr);const em=s?.email||s?.user?.email||'';const pf=localStorage.getItem('mandala_perfil')||'';document.getElementById('navUser').textContent=em;_sind=ADMINS.includes(em)||pf==='sindico';}
-    else{const k=Object.keys(localStorage).find(k=>k.includes('auth-token'));if(k){const s=JSON.parse(localStorage.getItem(k));const em=s?.user?.email||'';document.getElementById('navUser').textContent=em;_sind=ADMINS.includes(em);}}
-  }catch(e){}
-  if(_sind){document.getElementById('btnNovo').style.display='flex';document.getElementById('navRole').style.display='inline-flex';}
-  rCG('corGrid','p');rCG('corGridMeta','m');
-  await Promise.all([loadP(),loadM()]);
+function hdrs() {
+  const tk = getToken();
+  return {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${tk||SUPA_KEY}`};
+}
+
+function toast(msg, tipo='info', icon='ℹ️') {
+  const el = document.getElementById('toastMsg');
+  el.className = `toast toast-${tipo}`;
+  document.getElementById('toastIcon').textContent = icon;
+  document.getElementById('toastText').textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+function fazerLogout() {
+  Object.keys(localStorage).filter(k => k.includes('mandala') || k.includes('auth-token')).forEach(k => localStorage.removeItem(k));
+  window.location.href = '/';
+}
+
+function trocarCondo() {}
+
+// ── INICIALIZAÇÃO ────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  // Auth
+  try {
+    const sr = localStorage.getItem('mandala_session');
+    let email = '';
+    if (sr) {
+      const s = JSON.parse(sr);
+      email = s?.email || s?.user?.email || '';
+      const pf = localStorage.getItem('mandala_perfil') || '';
+      _sind = ADMINS.includes(email) || pf === 'sindico';
+    } else {
+      const k = Object.keys(localStorage).find(k => k.includes('auth-token'));
+      if (k) { const s = JSON.parse(localStorage.getItem(k)); email = s?.user?.email || ''; _sind = ADMINS.includes(email); }
+    }
+    if (email) {
+      document.getElementById('user-name').textContent = email;
+      document.getElementById('avatar-initials').textContent = email.substring(0,2).toUpperCase();
+    }
+  } catch(e) {}
+
+  if (_sind) document.getElementById('btnNovo').style.display = 'flex';
+  rCG('corGrid','p'); rCG('corGridMeta','m');
+  await Promise.all([loadP(), loadM()]);
 });
 
-function setTab(tab,el){
-  _tab=tab;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
-  document.getElementById('painelProjetos').style.cssText=tab==='projetos'?'display:flex;flex-direction:column':'display:none';
-  document.getElementById('painelMetas').style.cssText=tab==='metas'?'display:flex;flex-direction:column':'display:none';
-  document.getElementById('btnNovo').textContent=tab==='projetos'?'+ Novo Projeto':'+ Nova Meta';
+// ── TABS ─────────────────────────────────────────────────────
+function setTab(tab, el) {
+  _tab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('painelProjetos').style.cssText = tab==='projetos' ? 'display:flex;flex-direction:column' : 'display:none';
+  document.getElementById('painelMetas').style.cssText = tab==='metas' ? 'display:flex;flex-direction:column' : 'display:none';
+  document.getElementById('btnNovo').textContent = tab==='projetos' ? '+ Novo Projeto' : '+ Nova Meta';
 }
 
-async function loadP(){const r=await fetch(`${SUPA_URL}/rest/v1/condo_projetos?empresa=eq.${EMPRESA}&order=created_at.desc`,{headers:hdrs()});_proj=r.ok?await r.json():[];renderP();}
-async function loadM(){const r=await fetch(`${SUPA_URL}/rest/v1/condo_metas?empresa=eq.${EMPRESA}&order=created_at.desc`,{headers:hdrs()});_metas=r.ok?await r.json():[];renderM();}
-
-function renderP(){
-  const el=document.getElementById('painelProjetos');
-  if(!_proj.length){el.innerHTML='<div class="empty"><div class="empty-icon">🏗</div><div>Nenhum projeto cadastrado ainda.</div></div>';return;}
-  el.innerHTML=_proj.map((p,i)=>cardP(p,i)).join('');
+// ── CARGA DE DADOS ────────────────────────────────────────────
+async function loadP() {
+  const r = await fetch(`${SUPA_URL}/rest/v1/condo_projetos?empresa=eq.${EMPRESA}&order=created_at.desc`, {headers:hdrs()});
+  _proj = r.ok ? await r.json() : [];
+  renderP();
+}
+async function loadM() {
+  const r = await fetch(`${SUPA_URL}/rest/v1/condo_metas?empresa=eq.${EMPRESA}&order=created_at.desc`, {headers:hdrs()});
+  _metas = r.ok ? await r.json() : [];
+  renderM();
 }
 
-function cardP(p,pi){
-  const props=p.propostas||[],ets=p.etapas||[];
-  const conc=ets.filter(e=>e.status==='concluida').length;
-  const apS=p.aprovado_sindica,apC=p.aprovado_conselho;
-  const chips=`<span class="aprov-chip ${apS?'aprov-sim':'aprov-nao'}">${apS?'✓':'○'} Síndica</span><span class="aprov-chip ${apC?'aprov-sim':'aprov-nao'}">${apC?'✓':'○'} Conselho</span>`;
+// ── RENDER PROJETOS ──────────────────────────────────────────
+function renderP() {
+  const el = document.getElementById('painelProjetos');
+  if (!_proj.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">🏗</div><div>Nenhum projeto cadastrado ainda.</div></div>';
+    return;
+  }
+  el.innerHTML = _proj.map(p => cardP(p)).join('');
+}
 
-  const propsHTML=props.length?`<div class="prop-grid">${props.map((pr,idx)=>{
-    const r=rt(pr.valor||0),isAp=p.proposta_aprovada===idx;
-    return`<div class="prop-card ${isAp?'aprovada':''}">
+function cardP(p) {
+  const props = p.propostas || [], ets = p.etapas || [];
+  const conc = ets.filter(e => e.status === 'concluida').length;
+  const apS = p.aprovado_sindica, apC = p.aprovado_conselho;
+  const pctEt = ets.length ? Math.round(conc/ets.length*100) : 0;
+
+  // Prazo de aprovação
+  let prazoHtml = '';
+  if (p.prazo_aprovacao) {
+    const dias = diasParaPrazo(p.prazo_aprovacao);
+    const venc = dias !== null && dias < 0;
+    const urgente = dias !== null && dias >= 0 && dias <= 3;
+    prazoHtml = `<span class="prazo-chip ${venc?'prazo-venc':'prazo-ok'}">
+      ${venc ? '⚠️ Prazo vencido' : urgente ? `⚡ ${dias}d restante(s)` : `📅 Aprovação: ${fd(p.prazo_aprovacao)}`}
+    </span>`;
+  }
+
+  const chips = `
+    <span class="aprov-chip ${apS?'aprov-sim':'aprov-nao'}">${apS?'✓':'○'} Síndica</span>
+    <span class="aprov-chip ${apC?'aprov-sim':'aprov-nao'}">${apC?'✓':'○'} Conselho</span>
+  `;
+
+  // Propostas
+  const propsHTML = props.length ? `<div class="prop-grid">${props.map((pr,idx) => {
+    const r = rt(pr.valor||0), isAp = p.proposta_aprovada === idx;
+    return `<div class="prop-card ${isAp?'aprovada':''}">
       <div class="prop-num">Proposta ${idx+1}${pr.fornecedor?' — '+pr.fornecedor:''}</div>
       <div class="prop-valor">${fmt(pr.valor||0)}</div>
       ${pr.condicao_pagamento?`<div class="prop-det"><strong>Pagamento:</strong> ${pr.condicao_pagamento}</div>`:''}
       ${pr.prazo_inicio?`<div class="prop-det"><strong>Início:</strong> ${fd(pr.prazo_inicio)}</div>`:''}
       ${pr.prazo_fim?`<div class="prop-det"><strong>Conclusão:</strong> ${fd(pr.prazo_fim)}</div>`:''}
-      ${pr.observacao?`<div class="prop-det" style="margin-top:4px;font-style:italic;color:#64748b">${pr.observacao}</div>`:''}
+      ${pr.observacao?`<div class="prop-det" style="margin-top:4px;font-style:italic">${pr.observacao}</div>`:''}
       ${pr.anexo_url?`<a class="prop-anexo" href="${pr.anexo_url}" target="_blank">📄 Ver Proposta</a>`:''}
       <div class="rateio-box">
         <div class="rateio-title">🏠 Rateio por Unidade</div>
-        <div class="rateio-row"><span class="rateio-tipo">Tipo A (0,0270) × ${UA} unid.</span><span class="rateio-val">${fmt(r.a)}/unid.</span></div>
-        <div class="rateio-row"><span class="rateio-tipo">Tipo B (0,0355) × ${UB} unid.</span><span class="rateio-val">${fmt(r.b)}/unid.</span></div>
+        <div class="rateio-row"><span class="rateio-tipo">Tipo A (0,0270) × ${UA}</span><span class="rateio-val">${fmt(r.a)}/unid.</span></div>
+        <div class="rateio-row"><span class="rateio-tipo">Tipo B (0,0355) × ${UB}</span><span class="rateio-val">${fmt(r.b)}/unid.</span></div>
         <div class="rateio-total">Total A: <strong>${fmt(r.a*UA)}</strong> &nbsp;|&nbsp; Total B: <strong>${fmt(r.b*UB)}</strong></div>
       </div>
-      ${isAp?`<div class="btn-prop-ok">✓ Proposta Selecionada</div>`
-        :(_sind&&p.proposta_aprovada==null?`<button class="btn-sel-prop" onclick="event.stopPropagation();selecionarProp(${p.id},${idx})">Selecionar esta Proposta</button>`:'')
-      }
+      ${isAp ? `<div class="btn-prop-ok">✓ Proposta Selecionada</div>`
+        : (_sind && p.proposta_aprovada == null ? `<button class="btn-sel-prop" onclick="event.stopPropagation();selecionarProp(${p.id},${idx})">Selecionar esta Proposta</button>` : '')}
     </div>`;
-  }).join('')}</div>`:'';
+  }).join('')}</div>` : '<div style="text-align:center;padding:16px;font-size:13px;color:var(--text-light)">Nenhuma proposta cadastrada ainda.</div>';
 
-  const aprovSec=(_sind&&p.proposta_aprovada!=null)?`<div class="aprov-section">
-    <div class="aprov-section-title">Aprovação Formal</div>
-    <div class="aprov-btns">
-      ${!apS?`<button class="btn-aprov btn-aprov-ok" onclick="event.stopPropagation();regAprov(${p.id},'sindica')">✓ Aprovar como Síndica</button>`:`<span class="btn-aprov btn-aprov-done">✓ Síndica aprovada</span>`}
-      ${!apC?`<button class="btn-aprov btn-aprov-ok" onclick="event.stopPropagation();regAprov(${p.id},'conselho')">✓ Conselho Fiscal aprovou</button>`:`<span class="btn-aprov btn-aprov-done">✓ Conselho aprovado</span>`}
-      ${(apS||apC)?`<button class="btn-aprov btn-aprov-rev" onclick="event.stopPropagation();revogar(${p.id})">Revogar</button>`:''}
+  // Seção de aprovação
+  const aprovSec = (_sind && p.proposta_aprovada != null) ? `
+    <div class="aprov-section">
+      <div class="aprov-section-title">✅ Aprovação Formal do Conselho</div>
+      <div class="aprov-btns">
+        ${!apS ? `<button class="btn-aprov btn-aprov-ok" onclick="event.stopPropagation();regAprov(${p.id},'sindica')">✓ Aprovar como Síndica</button>`
+                : `<span class="btn-aprov btn-aprov-done">✓ Síndica aprovou</span>`}
+        ${!apC ? `<button class="btn-aprov btn-aprov-ok" onclick="event.stopPropagation();regAprov(${p.id},'conselho')">✓ Conselho Fiscal aprovou</button>`
+                : `<span class="btn-aprov btn-aprov-done">✓ Conselho aprovou</span>`}
+        ${(apS||apC) ? `<button class="btn-aprov btn-aprov-rev" onclick="event.stopPropagation();revogar(${p.id})">Revogar</button>` : ''}
+      </div>
+      ${p.prazo_aprovacao ? `<div class="prazo-aprov-info">📅 Prazo de aprovação: <strong>${fd(p.prazo_aprovacao)}</strong></div>` : ''}
+    </div>` : '';
+
+  // Cronograma
+  const etHTML = ets.length ? `
+    <div class="cronograma-section">
+      <div class="cronograma-header">
+        <div class="cronograma-title">📆 Cronograma de Atividades</div>
+        <div class="cronograma-prog">${conc}/${ets.length} etapas — ${pctEt}%</div>
+      </div>
+      <div class="prog-bar-wrap">
+        <div class="prog-bar"><div class="prog-fill" style="width:${pctEt}%;background:var(--green)"></div></div>
+      </div>
+      ${ets.map((e,i) => {
+        const nb = {pendente:'et-pend',andamento:'et-and',concluida:'et-conc'}[e.status||'pendente'];
+        const sl = {pendente:'Pendente',andamento:'Em andamento',concluida:'Concluída'}[e.status||'pendente'];
+        const sc = {pendente:'es-pend',andamento:'es-and',concluida:'es-conc'}[e.status||'pendente'];
+        return `<div class="etapa-row">
+          <div class="et-num ${nb}">${e.status==='concluida'?'✓':(i+1)}</div>
+          <div class="et-info">
+            <div class="et-nome">${e.nome}</div>
+            <div class="et-meta">
+              ${e.prazo?`<span>📅 ${fd(e.prazo)}</span>`:''}
+              ${e.valor?`<span>💰 ${fmt(e.valor)}</span>`:''}
+            </div>
+            ${e.obs?`<div class="et-obs">${e.obs}</div>`:''}
+          </div>
+          <span class="estat ${sc}">${sl}</span>
+        </div>`;
+      }).join('')}
+    </div>` : '';
+
+  const obsHTML = p.observacao ? `<div class="obs-box"><div class="obs-label">📌 Nota da Síndica</div>${p.observacao}</div>` : '';
+  const acoes = _sind ? `<div class="card-actions">
+    <button class="btn-edit" onclick="event.stopPropagation();editarP(${p.id})">✏ Editar</button>
+    <button class="btn-notif" onclick="event.stopPropagation();reenviarNotif(${p.id})">🔔 Renotificar Conselho</button>
+    <button class="btn-del" onclick="event.stopPropagation();delP(${p.id})">🗑 Excluir</button>
+  </div>` : '';
+
+  return `<div class="pcard">
+    <div class="pcard-top" onclick="tog('pb-${p.id}')">
+      <div class="pcard-icon" style="background:${p.cor||'var(--gold)'}20">🔨</div>
+      <div class="pcard-info">
+        <div class="pcard-title">${p.nome}</div>
+        <div class="pcard-desc">${p.descricao||''}</div>
+      </div>
+      <div class="pcard-badges">
+        <span class="badge ${SC[p.status]||'b-aguardando'}">${SL[p.status]||'Aguardando'}</span>
+        <div class="aprovacoes">${chips}${prazoHtml}</div>
+      </div>
     </div>
-  </div>`:'';
-
-  const etHTML=ets.length?`<div class="etapas-wrap"><div class="etapas-hdr">Cronograma (${conc}/${ets.length})</div>${ets.map((e,i)=>{
-    const nb={pendente:'et-pend',andamento:'et-and',concluida:'et-conc'}[e.status||'pendente'];
-    const sl={pendente:'Pendente',andamento:'Em andamento',concluida:'Concluída'}[e.status||'pendente'];
-    const sc={pendente:'es-pend',andamento:'es-and',concluida:'es-conc'}[e.status||'pendente'];
-    return`<div class="etapa"><div class="et-num ${nb}">${e.status==='concluida'?'✓':(i+1)}</div><div class="et-info"><div class="et-nome">${e.nome}</div><div class="et-meta">${e.prazo?`<span>📅 ${fd(e.prazo)}</span>`:''} ${e.valor?`<span>💰 ${fmt(e.valor)}</span>`:''}</div>${e.obs?`<div class="et-obs">${e.obs}</div>`:''}</div><span class="estat ${sc}">${sl}</span></div>`;
-  }).join('')}</div>`:'';
-
-  const obsHTML=p.observacao?`<div class="obs-box"><div class="obs-label">📌 Nota da Síndica</div>${p.observacao}</div>`:'';
-  const acoes=_sind?`<div class="card-actions"><button class="btn-edit" onclick="event.stopPropagation();editarP(${p.id})">✏ Editar</button><button class="btn-del" onclick="event.stopPropagation();delP(${p.id})">🗑 Excluir</button></div>`:'';
-
-  return`<div class="pcard"><div class="pcard-top" onclick="tog('pb-${p.id}')"><div class="pcard-icon" style="background:${p.cor||'var(--gold)'}20">🔨</div><div class="pcard-info"><div class="pcard-title">${p.nome}</div><div class="pcard-desc">${p.descricao||''}</div></div><div class="pcard-badges"><span class="badge ${SC[p.status]||'b-aguardando'}">${SL[p.status]||'Aguardando'}</span><div class="aprovacoes">${chips}</div></div></div><div class="pcard-body" id="pb-${p.id}">${obsHTML}${propsHTML}${aprovSec}${etHTML}${p.prazo?`<div style="font-size:12px;color:#64748b;margin-bottom:10px">📅 Prazo: ${fd(p.prazo)}</div>`:''} ${acoes}</div></div>`;
+    <div class="pcard-body" id="pb-${p.id}">
+      ${obsHTML}
+      ${p.prazo_aprovacao ? `<div class="prazo-aprov-banner ${diasParaPrazo(p.prazo_aprovacao)<0?'vencido':''}">
+        ⏰ <strong>Prazo de aprovação:</strong> ${fd(p.prazo_aprovacao)}
+        ${diasParaPrazo(p.prazo_aprovacao) < 0 ? ' — <span style="color:var(--red);font-weight:700">VENCIDO</span>' : diasParaPrazo(p.prazo_aprovacao)<=3 ? ` — <span style="color:var(--red);font-weight:700">${diasParaPrazo(p.prazo_aprovacao)} dia(s) restante(s)</span>` : ''}
+      </div>` : ''}
+      ${p.notificou_conselho ? `<div class="conselho-notif-box">🔔 Conselho notificado em ${p.notificou_conselho ? fd(p.notificou_conselho.substring(0,10)) : ''}.</div>` : ''}
+      ${propsHTML}
+      ${aprovSec}
+      ${etHTML}
+      ${p.prazo_execucao ? `<div style="font-size:12px;color:var(--text-mid);margin-bottom:10px">🏁 Prazo de execução: <strong>${fd(p.prazo_execucao)}</strong></div>` : ''}
+      ${acoes}
+    </div>
+  </div>`;
 }
 
-function renderM(){
-  const el=document.getElementById('painelMetas');
-  if(!_metas.length){el.innerHTML='<div class="empty"><div class="empty-icon">🎯</div><div>Nenhuma meta cadastrada ainda.</div></div>';return;}
-  const stM={andamento:'badge b-votacao',concluido:'badge b-concluido',pausado:'badge b-pausado'};
-  const stL={andamento:'Em Andamento',concluido:'✓ Concluída',pausado:'Pausada'};
-  el.innerHTML=_metas.map(m=>{
-    const meta=parseFloat(m.valor_meta||0),arr=parseFloat(m.valor_arrecadado||0);
-    const pct=meta>0?Math.min(100,Math.round(arr/meta*100)):0;
-    const cor=m.status==='concluido'?'#22c55e':(m.cor||'#22c55e');
-    const obsH=m.observacao?`<div class="obs-box"><div class="obs-label">📌 Nota</div>${m.observacao}</div>`:'';
-    const acoes=_sind?`<div class="card-actions"><button class="btn-edit" onclick="event.stopPropagation();updArr(${m.id})">💰 Atualizar</button><button class="btn-edit" onclick="event.stopPropagation();editarM(${m.id})">✏ Editar</button><button class="btn-del" onclick="event.stopPropagation();delM(${m.id})">🗑 Excluir</button></div>`:'';
-    return`<div class="mcard"><div class="mcard-top" onclick="tog('mb-${m.id}')"><div class="pcard-icon" style="background:${m.cor||'#22c55e'}20">💰</div><div class="pcard-info"><div class="pcard-title">${m.nome}</div><div class="pcard-desc">${m.descricao||''}</div></div><span class="${stM[m.status]||'badge b-votacao'}">${stL[m.status]||'Em Andamento'}</span></div><div class="meta-prog"><div class="prog-row"><span>Arrecadado: <strong>${fmt(arr)}</strong></span><span style="color:#64748b">Meta: <strong style="color:#f1f5f9">${fmt(meta)}</strong></span></div><div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${cor}"></div></div><div class="prog-falta">${m.status==='concluido'?'Meta atingida! ✓':`Faltam ${fmt(Math.max(0,meta-arr))} — ${pct}% atingido`}</div></div><div class="mcard-body" id="mb-${m.id}">${obsH}${m.prazo?`<div style="font-size:12px;color:#64748b;margin-bottom:10px">📅 Prazo: ${fd(m.prazo)}</div>`:''} ${acoes}</div></div>`;
+// ── RENDER METAS ──────────────────────────────────────────────
+function renderM() {
+  const el = document.getElementById('painelMetas');
+  if (!_metas.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">🎯</div><div>Nenhuma meta cadastrada ainda.</div></div>'; return; }
+  const stM = {andamento:'badge b-votacao', concluido:'badge b-concluido', pausado:'badge b-pausado'};
+  const stL = {andamento:'Em Andamento', concluido:'✓ Concluída', pausado:'Pausada'};
+  el.innerHTML = _metas.map(m => {
+    const meta = parseFloat(m.valor_meta||0), arr = parseFloat(m.valor_arrecadado||0);
+    const pct = meta > 0 ? Math.min(100, Math.round(arr/meta*100)) : 0;
+    const cor = m.status==='concluido' ? 'var(--green)' : (m.cor||'var(--green)');
+    const obsH = m.observacao ? `<div class="obs-box"><div class="obs-label">📌 Nota</div>${m.observacao}</div>` : '';
+    const acoes = _sind ? `<div class="card-actions">
+      <button class="btn-edit" onclick="event.stopPropagation();updArr(${m.id})">💰 Atualizar</button>
+      <button class="btn-edit" onclick="event.stopPropagation();editarM(${m.id})">✏ Editar</button>
+      <button class="btn-del" onclick="event.stopPropagation();delM(${m.id})">🗑 Excluir</button>
+    </div>` : '';
+    return `<div class="mcard">
+      <div class="mcard-top" onclick="tog('mb-${m.id}')">
+        <div class="pcard-icon" style="background:${m.cor||'var(--green)'}20">💰</div>
+        <div class="pcard-info"><div class="pcard-title">${m.nome}</div><div class="pcard-desc">${m.descricao||''}</div></div>
+        <span class="${stM[m.status]||'badge b-votacao'}">${stL[m.status]||'Em Andamento'}</span>
+      </div>
+      <div class="meta-prog" style="padding:0 24px 8px">
+        <div class="prog-row"><span>Arrecadado: <strong>${fmt(arr)}</strong></span><span style="color:var(--text-mid)">Meta: <strong>${fmt(meta)}</strong></span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${cor}"></div></div>
+        <div class="prog-falta">${m.status==='concluido'?'Meta atingida! ✓':`Faltam ${fmt(Math.max(0,meta-arr))} — ${pct}% atingido`}</div>
+      </div>
+      <div class="mcard-body" id="mb-${m.id}">
+        ${obsH}
+        ${m.prazo ? `<div style="font-size:12px;color:var(--text-mid);margin-bottom:10px">📅 Prazo: ${fd(m.prazo)}</div>` : ''}
+        ${acoes}
+      </div>
+    </div>`;
   }).join('');
 }
 
-function tog(id){document.getElementById(id)?.classList.toggle('open');}
+function tog(id) { document.getElementById(id)?.classList.toggle('open'); }
 
-// ícones fixos: 🔨 projetos | 💰 metas
-function rCG(cid,key){document.getElementById(cid).innerHTML=CORES.map(c=>`<div class="cor-opt ${_cSel[key]===c?'sel':''}" style="background:${c}" onclick="sC('${c}','${key}','${cid}')"></div>`).join('');}
-function sC(c,key,cid){_cSel[key]=c;rCG(cid,key);}
+// ── SELEÇÃO DE COR ────────────────────────────────────────────
+function rCG(cid, key) {
+  document.getElementById(cid).innerHTML = CORES.map(c =>
+    `<div class="cor-opt ${_cSel[key]===c?'sel':''}" style="background:${c}" onclick="sC('${c}','${key}','${cid}')"></div>`
+  ).join('');
+}
+function sC(c, key, cid) { _cSel[key] = c; rCG(cid, key); }
 
-function toggleEtapas(){
-  const v=document.getElementById('fStatus').value;
-  document.getElementById('secEtapas').style.display=['aprovado','execucao','concluido'].includes(v)?'block':'none';
+function toggleEtapas() {
+  const v = document.getElementById('fStatus').value;
+  document.getElementById('secEtapas').style.display = ['aprovado','execucao','concluido'].includes(v) ? 'block' : 'none';
 }
 
-// ── FORM PROPOSTAS ────────────────────────────────────────
-function addPF(pr={}){
-  if(_pfCnt>=3){alert('Máximo 3 propostas.');return;}
-  const idx=_pfCnt++;
-  const r=rt(pr.valor||0);
-  const wrap=document.getElementById('propostasWrap');
-  const div=document.createElement('div');div.className='pf-item';div.id=`pf${idx}`;
-  div.innerHTML=`<div class="pf-head"><span class="pf-num">Proposta ${idx+1}</span>${idx>0?`<button class="btn-rm" onclick="rmPF(${idx})">✕</button>`:''}</div>
-    <div class="frow full"><div class="fg"><label>Fornecedor / Empresa</label><input type="text" id="pfF${idx}" value="${pr.fornecedor||''}" placeholder="Nome da empresa"/></div></div>
-    <div class="frow"><div class="fg"><label>Valor Total (R$) *</label><input type="text" inputmode="decimal" id="pfV${idx}" value="${pr.valor?brl(''+pr.valor).toLocaleString('pt-BR',{minimumFractionDigits:2}):''}" placeholder="0,00" oninput="updRP(${idx})"/></div>
-    <div class="fg"><label>Condições de Pagamento</label><input type="text" id="pfC${idx}" value="${pr.condicao_pagamento||''}" placeholder="Ex: 3x sem juros"/></div></div>
-    <div class="frow"><div class="fg"><label>Prazo Início</label><input type="date" id="pfI${idx}" value="${pr.prazo_inicio||''}"/></div>
-    <div class="fg"><label>Prazo Conclusão</label><input type="date" id="pfFm${idx}" value="${pr.prazo_fim||''}"/></div></div>
-    <div class="frow full"><div class="fg"><label>Observação</label><textarea id="pfO${idx}" placeholder="Detalhes da proposta...">${pr.observacao||''}</textarea></div></div>
-    <div class="fg"><label>Anexo PDF</label><div class="file-area" onclick="document.getElementById('pfFl${idx}').click()">📎 Clique para anexar</div>
-    <input type="file" id="pfFl${idx}" accept=".pdf" style="display:none" onchange="regAnx(${idx},this)"/>
-    <div class="file-ok" id="pfFok${idx}"></div>
-    ${pr.anexo_url?`<a href="${pr.anexo_url}" target="_blank" style="font-size:11px;color:#22c55e;margin-top:3px;display:inline-block">📄 Proposta atual</a>`:''}
-    <input type="hidden" id="pfAUrl${idx}" value="${pr.anexo_url||''}"/></div>
-    <div class="rpreview" id="pfRP${idx}"><div class="rpreview-title">🏠 Rateio por Unidade</div>
-    <div class="rp-line"><span>Tipo A (0,0270) × 16</span><strong id="pfRA${idx}">${fmt(r.a)}/unid.</strong></div>
-    <div class="rp-line"><span>Tipo B (0,0355) × 16</span><strong id="pfRB${idx}">${fmt(r.b)}/unid.</strong></div>
-    <div style="border-top:1px solid #f5a62215;margin-top:5px;padding-top:5px;font-size:11px;color:#64748b">Total A: <strong id="pfTA${idx}" style="color:#f1f5f9">${fmt(r.a*16)}</strong> &nbsp;|&nbsp; Total B: <strong id="pfTB${idx}" style="color:#f1f5f9">${fmt(r.b*16)}</strong></div></div>`;
+// ── FORM PROPOSTAS ────────────────────────────────────────────
+function addPF(pr={}) {
+  if (_pfCnt >= 3) { toast('Máximo 3 propostas por projeto.','error','⚠️'); return; }
+  const idx = _pfCnt++;
+  const r = rt(pr.valor||0);
+  const wrap = document.getElementById('propostasWrap');
+  const div = document.createElement('div'); div.className = 'pf-item'; div.id = `pf${idx}`;
+  div.innerHTML = `
+    <div class="pf-head">
+      <span class="pf-num">Proposta ${idx+1}</span>
+      ${idx>0 ? `<button class="btn-rm" onclick="rmPF(${idx})">✕ Remover</button>` : ''}
+    </div>
+    <div class="frow full"><div class="fg"><label>Fornecedor / Empresa *</label><input type="text" id="pfF${idx}" value="${pr.fornecedor||''}" placeholder="Nome da empresa ou profissional"/></div></div>
+    <div class="frow">
+      <div class="fg"><label>Valor Total (R$) *</label><input type="text" inputmode="decimal" id="pfV${idx}" value="${pr.valor?brl(''+pr.valor).toLocaleString('pt-BR',{minimumFractionDigits:2}):''}" placeholder="0,00" oninput="updRP(${idx})"/></div>
+      <div class="fg"><label>Condições de Pagamento</label><input type="text" id="pfC${idx}" value="${pr.condicao_pagamento||''}" placeholder="Ex: 3x sem juros"/></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>📅 Prazo de Início</label><input type="date" id="pfI${idx}" value="${pr.prazo_inicio||''}"/></div>
+      <div class="fg"><label>📅 Prazo de Conclusão</label><input type="date" id="pfFm${idx}" value="${pr.prazo_fim||''}"/></div>
+    </div>
+    <div class="frow full"><div class="fg"><label>Detalhes / Observação</label><textarea id="pfO${idx}" placeholder="Escopo do serviço, garantias, materiais incluídos...">${pr.observacao||''}</textarea></div></div>
+    <div class="fg">
+      <label>📎 Anexo da Proposta (PDF)</label>
+      <div class="file-area" onclick="document.getElementById('pfFl${idx}').click()">📎 Clique para anexar o PDF da proposta</div>
+      <input type="file" id="pfFl${idx}" accept=".pdf,.doc,.docx" style="display:none" onchange="regAnx(${idx},this)"/>
+      <div class="file-ok" id="pfFok${idx}"></div>
+      ${pr.anexo_url ? `<a href="${pr.anexo_url}" target="_blank" style="font-size:11px;color:var(--green);margin-top:3px;display:inline-block">📄 Proposta atual</a>` : ''}
+      <input type="hidden" id="pfAUrl${idx}" value="${pr.anexo_url||''}"/>
+    </div>
+    <div class="rpreview" id="pfRP${idx}" style="margin-top:12px">
+      <div class="rpreview-title">🏠 Rateio por Unidade (prévia)</div>
+      <div class="rp-line"><span>Tipo A (0,0270) × 16</span><strong id="pfRA${idx}">${fmt(r.a)}/unid.</strong></div>
+      <div class="rp-line"><span>Tipo B (0,0355) × 16</span><strong id="pfRB${idx}">${fmt(r.b)}/unid.</strong></div>
+      <div style="border-top:1px solid #fde68a;margin-top:5px;padding-top:5px;font-size:11px;color:var(--text-mid)">Total A: <strong id="pfTA${idx}">${fmt(r.a*16)}</strong> &nbsp;|&nbsp; Total B: <strong id="pfTB${idx}">${fmt(r.b*16)}</strong></div>
+    </div>`;
   wrap.appendChild(div);
-  if(_pfCnt>=3)document.getElementById('btnAddProp').style.display='none';
+  if (_pfCnt >= 3) document.getElementById('btnAddProp').style.display = 'none';
 }
 
-function updRP(idx){
-  const v=brl(document.getElementById(`pfV${idx}`)?.value||'0'),r=rt(v);
-  const g=id=>document.getElementById(id);
-  if(g(`pfRA${idx}`))g(`pfRA${idx}`).textContent=fmt(r.a)+'/unid.';
-  if(g(`pfRB${idx}`))g(`pfRB${idx}`).textContent=fmt(r.b)+'/unid.';
-  if(g(`pfTA${idx}`))g(`pfTA${idx}`).textContent=fmt(r.a*16);
-  if(g(`pfTB${idx}`))g(`pfTB${idx}`).textContent=fmt(r.b*16);
+function updRP(idx) {
+  const v = brl(document.getElementById(`pfV${idx}`)?.value||'0'), r = rt(v);
+  const g = id => document.getElementById(id);
+  if(g(`pfRA${idx}`)) g(`pfRA${idx}`).textContent = fmt(r.a)+'/unid.';
+  if(g(`pfRB${idx}`)) g(`pfRB${idx}`).textContent = fmt(r.b)+'/unid.';
+  if(g(`pfTA${idx}`)) g(`pfTA${idx}`).textContent = fmt(r.a*16);
+  if(g(`pfTB${idx}`)) g(`pfTB${idx}`).textContent = fmt(r.b*16);
 }
-function rmPF(idx){document.getElementById(`pf${idx}`)?.remove();_pfCnt--;document.getElementById('btnAddProp').style.display='';}
-function regAnx(idx,inp){const f=inp.files[0];if(!f)return;_pfAnexos[idx]=f;const ok=document.getElementById(`pfFok${idx}`);ok.textContent='✓ '+f.name;ok.style.display='block';}
+function rmPF(idx) { document.getElementById(`pf${idx}`)?.remove(); _pfCnt--; document.getElementById('btnAddProp').style.display = ''; }
+function regAnx(idx, inp) { const f = inp.files[0]; if(!f) return; _pfAnexos[idx] = f; const ok = document.getElementById(`pfFok${idx}`); ok.textContent = '✓ '+f.name; ok.style.display = 'block'; }
 
-async function upAnx(idx){
-  const f=_pfAnexos[idx],urlEx=document.getElementById(`pfAUrl${idx}`)?.value;
-  if(!f)return urlEx||null;
-  const path=`propostas/${EMPRESA}/${Date.now()}_${f.name}`;
-  const tk=getToken();
-  const r=await fetch(`${SUPA_URL}/storage/v1/object/contratos/${path}`,{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${tk||SUPA_KEY}`,'Content-Type':f.type},body:f});
-  return r.ok?`${SUPA_URL}/storage/v1/object/public/contratos/${path}`:(urlEx||null);
-}
-
-function coletarPF(){
-  return Array.from(document.querySelectorAll('.pf-item')).map((_,i)=>({
-    fornecedor:document.getElementById(`pfF${i}`)?.value.trim()||'',
-    valor:brl(document.getElementById(`pfV${i}`)?.value)||0,
-    condicao_pagamento:document.getElementById(`pfC${i}`)?.value.trim()||'',
-    prazo_inicio:document.getElementById(`pfI${i}`)?.value||null,
-    prazo_fim:document.getElementById(`pfFm${i}`)?.value||null,
-    observacao:document.getElementById(`pfO${i}`)?.value.trim()||'',
-    anexo_url:document.getElementById(`pfAUrl${i}`)?.value||null,
-  })).filter(p=>p.valor>0||p.fornecedor);
+async function upAnx(idx) {
+  const f = _pfAnexos[idx], urlEx = document.getElementById(`pfAUrl${idx}`)?.value;
+  if (!f) return urlEx||null;
+  const path = `propostas/${EMPRESA}/${Date.now()}_${f.name}`;
+  const tk = getToken();
+  const r = await fetch(`${SUPA_URL}/storage/v1/object/contratos/${path}`, {method:'POST', headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${tk||SUPA_KEY}`,'Content-Type':f.type}, body:f});
+  return r.ok ? `${SUPA_URL}/storage/v1/object/public/contratos/${path}` : (urlEx||null);
 }
 
-function addEF(et={}){
-  const idx=_efCnt++;
-  const wrap=document.getElementById('etapasWrap');
-  const div=document.createElement('div');div.className='ef-item';div.id=`ef${idx}`;
-  div.innerHTML=`<div class="ef-head"><span class="ef-num">Etapa ${idx+1}</span><button class="btn-rm" onclick="rmEF(${idx})">✕</button></div>
-    <div class="frow full"><div class="fg"><label>Nome *</label><input type="text" id="efN${idx}" value="${et.nome||''}" placeholder="Ex: Preparação e limpeza"/></div></div>
-    <div class="frow"><div class="fg"><label>Prazo</label><input type="date" id="efP${idx}" value="${et.prazo||''}"/></div>
-    <div class="fg"><label>Valor Estimado (R$)</label><input type="text" inputmode="decimal" id="efV${idx}" value="${et.valor?brl(''+et.valor).toLocaleString('pt-BR',{minimumFractionDigits:2}):''}" placeholder="0,00"/></div></div>
-    <div class="frow"><div class="fg"><label>Status</label><select id="efS${idx}"><option value="pendente" ${(et.status||'pendente')==='pendente'?'selected':''}>Pendente</option><option value="andamento" ${et.status==='andamento'?'selected':''}>Em Andamento</option><option value="concluida" ${et.status==='concluida'?'selected':''}>Concluída</option></select></div>
-    <div class="fg"><label>Observação</label><input type="text" id="efO${idx}" value="${et.obs||''}" placeholder="Opcional"/></div></div>`;
+function coletarPF() {
+  return Array.from(document.querySelectorAll('.pf-item')).map((_,i) => ({
+    fornecedor: document.getElementById(`pfF${i}`)?.value.trim()||'',
+    valor: brl(document.getElementById(`pfV${i}`)?.value)||0,
+    condicao_pagamento: document.getElementById(`pfC${i}`)?.value.trim()||'',
+    prazo_inicio: document.getElementById(`pfI${i}`)?.value||null,
+    prazo_fim: document.getElementById(`pfFm${i}`)?.value||null,
+    observacao: document.getElementById(`pfO${i}`)?.value.trim()||'',
+    anexo_url: document.getElementById(`pfAUrl${i}`)?.value||null,
+  })).filter(p => p.valor > 0 || p.fornecedor);
+}
+
+// ── FORM ETAPAS ────────────────────────────────────────────────
+function addEF(et={}) {
+  const idx = _efCnt++;
+  const wrap = document.getElementById('etapasWrap');
+  const div = document.createElement('div'); div.className = 'ef-item'; div.id = `ef${idx}`;
+  div.innerHTML = `
+    <div class="ef-head">
+      <span class="ef-num">Etapa ${idx+1}</span>
+      <button class="btn-rm" onclick="rmEF(${idx})">✕ Remover</button>
+    </div>
+    <div class="frow full"><div class="fg"><label>Nome da Etapa *</label><input type="text" id="efN${idx}" value="${et.nome||''}" placeholder="Ex: Preparação e limpeza do local"/></div></div>
+    <div class="frow">
+      <div class="fg"><label>📅 Prazo previsto</label><input type="date" id="efP${idx}" value="${et.prazo||''}"/></div>
+      <div class="fg"><label>💰 Custo Estimado (R$)</label><input type="text" inputmode="decimal" id="efV${idx}" value="${et.valor?brl(''+et.valor).toLocaleString('pt-BR',{minimumFractionDigits:2}):''}" placeholder="0,00"/></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Status</label>
+        <select id="efS${idx}">
+          <option value="pendente" ${(et.status||'pendente')==='pendente'?'selected':''}>Pendente</option>
+          <option value="andamento" ${et.status==='andamento'?'selected':''}>Em Andamento</option>
+          <option value="concluida" ${et.status==='concluida'?'selected':''}>Concluída</option>
+        </select>
+      </div>
+      <div class="fg"><label>Responsável / Observação</label><input type="text" id="efO${idx}" value="${et.obs||''}" placeholder="Opcional"/></div>
+    </div>`;
   wrap.appendChild(div);
 }
-function rmEF(idx){document.getElementById(`ef${idx}`)?.remove();}
-function coletarEF(){return Array.from(document.querySelectorAll('.ef-item')).map((_,i)=>({nome:document.getElementById(`efN${i}`)?.value.trim()||'',prazo:document.getElementById(`efP${i}`)?.value||null,valor:brl(document.getElementById(`efV${i}`)?.value)||null,status:document.getElementById(`efS${i}`)?.value||'pendente',obs:document.getElementById(`efO${i}`)?.value.trim()||''})).filter(e=>e.nome);}
-
-// ── MODAL PROJETO ─────────────────────────────────────────
-function abrirModal(){if(_tab==='metas'){abrirModalMeta();return;}resetModalP();document.getElementById('modalBg').classList.add('open');}
-function resetModalP(){
-  _editId=null;_pfCnt=0;_efCnt=0;_pfAnexos={};
-  document.getElementById('propostasWrap').innerHTML='';
-  document.getElementById('etapasWrap').innerHTML='';
-  document.getElementById('btnAddProp').style.display='';
-  document.getElementById('secEtapas').style.display='none';
-  document.getElementById('fNome').value='';
-  document.getElementById('fDesc').value='';
-  document.getElementById('fObs').value='';
-  document.getElementById('fStatus').value='aguardando';
-  _cSel.p='var(--gold)';
-  rCG('corGrid','p');
-  document.getElementById('modalTitulo').textContent='Novo Projeto';
-  document.getElementById('btnSalvar').textContent='Salvar Projeto';
-  addPF();
+function rmEF(idx) { document.getElementById(`ef${idx}`)?.remove(); }
+function coletarEF() {
+  return Array.from(document.querySelectorAll('.ef-item')).map((_,i) => ({
+    nome: document.getElementById(`efN${i}`)?.value.trim()||'',
+    prazo: document.getElementById(`efP${i}`)?.value||null,
+    valor: brl(document.getElementById(`efV${i}`)?.value)||null,
+    status: document.getElementById(`efS${i}`)?.value||'pendente',
+    obs: document.getElementById(`efO${i}`)?.value.trim()||'',
+  })).filter(e => e.nome);
 }
-function fecharModal(){document.getElementById('modalBg').classList.remove('open');_editId=null;}
 
-function editarP(id){
-  const p=_proj.find(x=>x.id===id);if(!p)return;
-  resetModalP();_editId=id;_pfCnt=0;
-  document.getElementById('propostasWrap').innerHTML='';
-  (p.propostas||[]).forEach(pr=>addPF(pr));
-  if(!_pfCnt)addPF();
-  document.getElementById('fNome').value=p.nome||'';
-  document.getElementById('fDesc').value=p.descricao||'';
-  document.getElementById('fObs').value=p.observacao||'';
-  document.getElementById('fStatus').value=p.status||'aguardando';
-  _cSel.p=p.cor||'var(--gold)';
-  rCG('corGrid','p');
-  const comEt=['aprovado','execucao','concluido'].includes(p.status||'');
-  document.getElementById('secEtapas').style.display=comEt?'block':'none';
-  document.getElementById('etapasWrap').innerHTML='';_efCnt=0;
-  if(comEt)(p.etapas||[]).forEach(e=>addEF(e));
-  document.getElementById('modalTitulo').textContent='Editar Projeto';
-  document.getElementById('btnSalvar').textContent='Atualizar Projeto';
+// ── MODAL PROJETO ─────────────────────────────────────────────
+function abrirModal() {
+  if (_tab === 'metas') { abrirModalMeta(); return; }
+  resetModalP();
   document.getElementById('modalBg').classList.add('open');
 }
 
-async function salvar(){
-  const nome=document.getElementById('fNome').value.trim();
-  if(!nome){alert('Informe o nome.');return;}
-  const btn=document.getElementById('btnSalvar');btn.disabled=true;btn.textContent='Salvando...';
-  const props=coletarPF();
-  for(let i=0;i<props.length;i++){const u=await upAnx(i);if(u)props[i].anexo_url=u;}
-  const payload={empresa:EMPRESA,nome,descricao:document.getElementById('fDesc').value.trim()||null,observacao:document.getElementById('fObs').value.trim()||null,status:document.getElementById('fStatus').value,icone:'🔨',cor:_cSel.p,propostas:props,etapas:coletarEF()};
-  const url=_editId?`${SUPA_URL}/rest/v1/condo_projetos?id=eq.${_editId}&empresa=eq.${EMPRESA}`:`${SUPA_URL}/rest/v1/condo_projetos`;
-  const r=await fetch(url,{method:_editId?'PATCH':'POST',headers:{...hdrs(),'Prefer':'return=representation'},body:JSON.stringify(payload)});
-  if(r.ok||r.status===204){fecharModal();await loadP();}else alert('Erro: '+await r.text());
-  btn.disabled=false;btn.textContent=_editId?'Atualizar Projeto':'Salvar Projeto';
+function resetModalP() {
+  _editId = null; _pfCnt = 0; _efCnt = 0; _pfAnexos = {};
+  document.getElementById('propostasWrap').innerHTML = '';
+  document.getElementById('etapasWrap').innerHTML = '';
+  document.getElementById('btnAddProp').style.display = '';
+  document.getElementById('secEtapas').style.display = 'none';
+  ['fNome','fDesc','fObs','fPrazoAprov','fPrazoExec'].forEach(id => { const e = document.getElementById(id); if(e) e.value = ''; });
+  document.getElementById('fStatus').value = 'aguardando';
+  _cSel.p = 'var(--gold)'; rCG('corGrid','p');
+  document.getElementById('modalTitulo').textContent = 'Novo Projeto';
+  document.getElementById('btnSalvar').textContent = 'Salvar e Notificar Conselho';
+  addPF();
 }
 
-// ── APROVAÇÕES ────────────────────────────────────────────
-function selecionarProp(pid,idx){
-  const p=_proj.find(x=>x.id===pid);if(!p)return;
-  const pr=p.propostas[idx],r=rt(pr.valor||0);
-  confirmar(`Selecionar Proposta ${idx+1}`,`Fornecedor: ${pr.fornecedor||'—'}\nValor: ${fmt(pr.valor)}\n\nRateio → Tipo A: ${fmt(r.a)}/unid. | Tipo B: ${fmt(r.b)}/unid.`,async()=>{
-    await fetch(`${SUPA_URL}/rest/v1/condo_projetos?id=eq.${pid}&empresa=eq.${EMPRESA}`,{method:'PATCH',headers:{...hdrs(),'Prefer':'return=representation'},body:JSON.stringify({proposta_aprovada:idx,status:'votacao'})});
+function fecharModal() { document.getElementById('modalBg').classList.remove('open'); _editId = null; }
+
+function editarP(id) {
+  const p = _proj.find(x => x.id === id); if(!p) return;
+  resetModalP(); _editId = id; _pfCnt = 0;
+  document.getElementById('propostasWrap').innerHTML = '';
+  (p.propostas||[]).forEach(pr => addPF(pr));
+  if (!_pfCnt) addPF();
+  document.getElementById('fNome').value = p.nome||'';
+  document.getElementById('fDesc').value = p.descricao||'';
+  document.getElementById('fObs').value = p.observacao||'';
+  document.getElementById('fStatus').value = p.status||'aguardando';
+  document.getElementById('fPrazoAprov').value = p.prazo_aprovacao||'';
+  document.getElementById('fPrazoExec').value = p.prazo_execucao||'';
+  _cSel.p = p.cor||'var(--gold)'; rCG('corGrid','p');
+  const comEt = ['aprovado','execucao','concluido'].includes(p.status||'');
+  document.getElementById('secEtapas').style.display = comEt ? 'block' : 'none';
+  document.getElementById('etapasWrap').innerHTML = ''; _efCnt = 0;
+  if (comEt) (p.etapas||[]).forEach(e => addEF(e));
+  document.getElementById('modalTitulo').textContent = 'Editar Projeto';
+  document.getElementById('btnSalvar').textContent = 'Atualizar Projeto';
+  document.getElementById('modalBg').classList.add('open');
+}
+
+// ── SALVAR PROJETO ────────────────────────────────────────────
+async function salvar() {
+  const nome = document.getElementById('fNome').value.trim();
+  if (!nome) { toast('Informe o nome do projeto.','error','⚠️'); return; }
+  const prazoAprov = document.getElementById('fPrazoAprov').value;
+  if (!prazoAprov) { toast('Informe o prazo de aprovação do conselho.','error','⚠️'); return; }
+
+  const btn = document.getElementById('btnSalvar');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+
+  const props = coletarPF();
+  for (let i = 0; i < props.length; i++) { const u = await upAnx(i); if(u) props[i].anexo_url = u; }
+
+  const isNovo = !_editId;
+  const payload = {
+    empresa: EMPRESA,
+    nome,
+    descricao: document.getElementById('fDesc').value.trim()||null,
+    observacao: document.getElementById('fObs').value.trim()||null,
+    status: document.getElementById('fStatus').value,
+    icone: '🔨',
+    cor: _cSel.p,
+    propostas: props,
+    etapas: coletarEF(),
+    prazo_aprovacao: prazoAprov||null,
+    prazo_execucao: document.getElementById('fPrazoExec').value||null,
+    notificou_conselho: isNovo ? new Date().toISOString() : undefined,
+  };
+  if (!isNovo) delete payload.notificou_conselho;
+
+  const url = _editId
+    ? `${SUPA_URL}/rest/v1/condo_projetos?id=eq.${_editId}&empresa=eq.${EMPRESA}`
+    : `${SUPA_URL}/rest/v1/condo_projetos`;
+  const r = await fetch(url, {method:_editId?'PATCH':'POST', headers:{...hdrs(),'Prefer':'return=representation'}, body:JSON.stringify(payload)});
+
+  if (r.ok || r.status === 204) {
+    fecharModal();
     await loadP();
-  },'Selecionar','#a855f7');
+    if (isNovo) {
+      await notificarConselho(nome, prazoAprov, props);
+      toast(`Projeto "${nome}" salvo! Conselho notificado por e-mail.`,'success','✅');
+    } else {
+      toast('Projeto atualizado com sucesso.','success','✅');
+    }
+  } else {
+    toast('Erro ao salvar: '+await r.text(),'error','❌');
+  }
+  btn.disabled = false;
+  btn.textContent = _editId ? 'Atualizar Projeto' : 'Salvar e Notificar Conselho';
 }
 
-async function regAprov(pid,tipo){
-  const p=_proj.find(x=>x.id===pid),campo=tipo==='sindica'?'aprovado_sindica':'aprovado_conselho';
-  const patch={[campo]:true};
-  const outro=tipo==='sindica'?p?.aprovado_conselho:p?.aprovado_sindica;
-  if(outro)patch.status='aprovado';
-  await fetch(`${SUPA_URL}/rest/v1/condo_projetos?id=eq.${pid}&empresa=eq.${EMPRESA}`,{method:'PATCH',headers:{...hdrs(),'Prefer':'return=representation'},body:JSON.stringify(patch)});
+// ── NOTIFICAÇÃO DO CONSELHO ────────────────────────────────────
+async function notificarConselho(nomeProj, prazoAprov, propostas) {
+  if (!CONSELHO_EMAILS.length) {
+    // Sem e-mails configurados — registra apenas localmente
+    console.info('Conselho notificado (simulado). Configure CONSELHO_EMAILS para envio real.');
+    return;
+  }
+  try {
+    const propostasText = propostas.length
+      ? propostas.map((p,i) => `• Proposta ${i+1}: ${p.fornecedor||'—'} — ${fmt(p.valor)}`).join('\n')
+      : 'Nenhuma proposta anexada ainda.';
+
+    for (const email of CONSELHO_EMAILS) {
+      await fetch(`${SUPA_URL}/functions/v1/enviar-email`, {
+        method: 'POST',
+        headers: {...hdrs()},
+        body: JSON.stringify({
+          to: email,
+          subject: `🏗 Novo projeto para aprovação: ${nomeProj}`,
+          html: `
+            <h2 style="color:#0B1F3A">Novo Projeto Cadastrado</h2>
+            <p>O projeto <strong>${nomeProj}</strong> foi cadastrado e aguarda sua aprovação como membro do Conselho Fiscal.</p>
+            <p><strong>Prazo para aprovação:</strong> ${fd(prazoAprov)}</p>
+            <h3>Propostas recebidas:</h3>
+            <pre>${propostasText}</pre>
+            <p>Acesse o CondoGestor para visualizar as propostas e registrar sua aprovação.</p>
+            <a href="https://condogestor.com/sindico/metas" style="background:#E8A320;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700;display:inline-block;margin-top:10px">
+              Ver Projeto
+            </a>
+          `
+        })
+      });
+    }
+  } catch(e) {
+    console.warn('Erro ao notificar conselho:', e);
+  }
+}
+
+async function reenviarNotif(pid) {
+  const p = _proj.find(x => x.id === pid); if(!p) return;
+  confirmar(
+    'Renotificar Conselho?',
+    `Enviar novo e-mail aos membros do Conselho Fiscal sobre o projeto "${p.nome}"?`,
+    async () => {
+      await notificarConselho(p.nome, p.prazo_aprovacao, p.propostas||[]);
+      await fetch(`${SUPA_URL}/rest/v1/condo_projetos?id=eq.${pid}&empresa=eq.${EMPRESA}`,
+        {method:'PATCH', headers:{...hdrs(),'Prefer':'return=representation'}, body:JSON.stringify({notificou_conselho:new Date().toISOString()})});
+      await loadP();
+      toast('Conselho notificado com sucesso!','success','🔔');
+    },
+    'Enviar', 'var(--purple)'
+  );
+}
+
+// ── APROVAÇÕES ────────────────────────────────────────────────
+function selecionarProp(pid, idx) {
+  const p = _proj.find(x => x.id === pid); if(!p) return;
+  const pr = p.propostas[idx], r = rt(pr.valor||0);
+  confirmar(
+    `Selecionar Proposta ${idx+1}`,
+    `Fornecedor: ${pr.fornecedor||'—'}\nValor: ${fmt(pr.valor)}\n\nRateio → Tipo A: ${fmt(r.a)}/unid. | Tipo B: ${fmt(r.b)}/unid.`,
+    async () => {
+      await fetch(`${SUPA_URL}/rest/v1/condo_projetos?id=eq.${pid}&empresa=eq.${EMPRESA}`,
+        {method:'PATCH', headers:{...hdrs(),'Prefer':'return=representation'}, body:JSON.stringify({proposta_aprovada:idx, status:'votacao'})});
+      await loadP();
+    }, 'Selecionar', 'var(--purple)'
+  );
+}
+
+async function regAprov(pid, tipo) {
+  const p = _proj.find(x => x.id === pid);
+  const campo = tipo==='sindica' ? 'aprovado_sindica' : 'aprovado_conselho';
+  const patch = {[campo]:true};
+  const outro = tipo==='sindica' ? p?.aprovado_conselho : p?.aprovado_sindica;
+  if (outro) patch.status = 'aprovado';
+  await fetch(`${SUPA_URL}/rest/v1/condo_projetos?id=eq.${pid}&empresa=eq.${EMPRESA}`,
+    {method:'PATCH', headers:{...hdrs(),'Prefer':'return=representation'}, body:JSON.stringify(patch)});
   await loadP();
+  toast(tipo==='sindica' ? 'Aprovação da síndica registrada!' : 'Aprovação do conselho registrada!', 'success', '✅');
 }
 
-function revogar(pid){
-  confirmar('Revogar Aprovações','Remove as aprovações da Síndica e do Conselho Fiscal.',async()=>{
-    await fetch(`${SUPA_URL}/rest/v1/condo_projetos?id=eq.${pid}&empresa=eq.${EMPRESA}`,{method:'PATCH',headers:{...hdrs(),'Prefer':'return=representation'},body:JSON.stringify({aprovado_sindica:false,aprovado_conselho:false,status:'votacao'})});
+function revogar(pid) {
+  confirmar('Revogar Aprovações', 'Remove as aprovações da Síndica e do Conselho Fiscal. Esta ação pode ser refeita.', async () => {
+    await fetch(`${SUPA_URL}/rest/v1/condo_projetos?id=eq.${pid}&empresa=eq.${EMPRESA}`,
+      {method:'PATCH', headers:{...hdrs(),'Prefer':'return=representation'}, body:JSON.stringify({aprovado_sindica:false, aprovado_conselho:false, status:'votacao'})});
     await loadP();
-  },'Revogar','#ef4444');
+    toast('Aprovações revogadas.','info','↩️');
+  }, 'Revogar', 'var(--red)');
 }
 
-function delP(id){const p=_proj.find(x=>x.id===id);confirmar('Excluir Projeto?',`Excluir "${p?.nome}"? Não pode ser desfeito.`,async()=>{await fetch(`${SUPA_URL}/rest/v1/condo_projetos?id=eq.${id}&empresa=eq.${EMPRESA}`,{method:'DELETE',headers:hdrs()});await loadP();},'Excluir','#ef4444');}
+function delP(id) {
+  const p = _proj.find(x => x.id === id);
+  confirmar('Excluir Projeto?', `Excluir "${p?.nome}"?\nEsta ação não pode ser desfeita.`, async () => {
+    await fetch(`${SUPA_URL}/rest/v1/condo_projetos?id=eq.${id}&empresa=eq.${EMPRESA}`, {method:'DELETE', headers:hdrs()});
+    await loadP();
+    toast('Projeto excluído.','info','🗑');
+  }, 'Excluir', 'var(--red)');
+}
 
-// ── MODAL META ────────────────────────────────────────────
-function abrirModalMeta(){_editId=null;['fMetaNome','fMetaDesc','fMetaValor','fMetaArrecadado','fMetaObs'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});document.getElementById('fMetaPrazo').value='';document.getElementById('fMetaStatus').value='andamento';_cSel.m='#22c55e';rCG('corGridMeta','m');document.getElementById('modalMetaTitulo').textContent='Nova Meta de Arrecadação';document.getElementById('modalMetaBg').classList.add('open');}
-function fecharModalMeta(){document.getElementById('modalMetaBg').classList.remove('open');_editId=null;}
-function editarM(id){const m=_metas.find(x=>x.id===id);if(!m)return;document.getElementById('fMetaNome').value=m.nome||'';document.getElementById('fMetaDesc').value=m.descricao||'';document.getElementById('fMetaValor').value=m.valor_meta?brl(''+m.valor_meta).toLocaleString('pt-BR',{minimumFractionDigits:2}):'';document.getElementById('fMetaArrecadado').value=m.valor_arrecadado?brl(''+m.valor_arrecadado).toLocaleString('pt-BR',{minimumFractionDigits:2}):'';document.getElementById('fMetaPrazo').value=m.prazo||'';document.getElementById('fMetaObs').value=m.observacao||'';document.getElementById('fMetaStatus').value=m.status||'andamento';_cSel.m=m.cor||'#22c55e';rCG('corGridMeta','m');document.getElementById('modalMetaTitulo').textContent='Editar Meta';_editId=id;document.getElementById('modalMetaBg').classList.add('open');}
-async function salvarMeta(){const nome=document.getElementById('fMetaNome').value.trim();if(!nome){alert('Informe o nome.');return;}const btn=document.getElementById('btnSalvarMeta');btn.disabled=true;btn.textContent='Salvando...';const payload={empresa:EMPRESA,nome,descricao:document.getElementById('fMetaDesc').value.trim()||null,valor_meta:brl(document.getElementById('fMetaValor').value)||0,valor_arrecadado:brl(document.getElementById('fMetaArrecadado').value)||0,prazo:document.getElementById('fMetaPrazo').value||null,observacao:document.getElementById('fMetaObs').value.trim()||null,status:document.getElementById('fMetaStatus').value,icone:'💰',cor:_cSel.m};const url=_editId?`${SUPA_URL}/rest/v1/condo_metas?id=eq.${_editId}&empresa=eq.${EMPRESA}`:`${SUPA_URL}/rest/v1/condo_metas`;const r=await fetch(url,{method:_editId?'PATCH':'POST',headers:{...hdrs(),'Prefer':'return=representation'},body:JSON.stringify(payload)});if(r.ok||r.status===204){fecharModalMeta();await loadM();}else alert('Erro: '+await r.text());btn.disabled=false;btn.textContent='Salvar Meta';}
-function delM(id){const m=_metas.find(x=>x.id===id);confirmar('Excluir Meta?',`Excluir "${m?.nome}"?`,async()=>{await fetch(`${SUPA_URL}/rest/v1/condo_metas?id=eq.${id}&empresa=eq.${EMPRESA}`,{method:'DELETE',headers:hdrs()});await loadM();},'Excluir','#ef4444');}
+// ── MODAL META ────────────────────────────────────────────────
+function abrirModalMeta() {
+  _editId = null;
+  ['fMetaNome','fMetaDesc','fMetaValor','fMetaArrecadado','fMetaObs','fMetaPrazo'].forEach(id => { const e = document.getElementById(id); if(e) e.value=''; });
+  document.getElementById('fMetaStatus').value = 'andamento';
+  _cSel.m = '#22c55e'; rCG('corGridMeta','m');
+  document.getElementById('modalMetaTitulo').textContent = 'Nova Meta de Arrecadação';
+  document.getElementById('modalMetaBg').classList.add('open');
+}
+function fecharModalMeta() { document.getElementById('modalMetaBg').classList.remove('open'); _editId = null; }
+function editarM(id) {
+  const m = _metas.find(x => x.id === id); if(!m) return;
+  document.getElementById('fMetaNome').value = m.nome||'';
+  document.getElementById('fMetaDesc').value = m.descricao||'';
+  document.getElementById('fMetaValor').value = m.valor_meta ? brl(''+m.valor_meta).toLocaleString('pt-BR',{minimumFractionDigits:2}) : '';
+  document.getElementById('fMetaArrecadado').value = m.valor_arrecadado ? brl(''+m.valor_arrecadado).toLocaleString('pt-BR',{minimumFractionDigits:2}) : '';
+  document.getElementById('fMetaPrazo').value = m.prazo||'';
+  document.getElementById('fMetaObs').value = m.observacao||'';
+  document.getElementById('fMetaStatus').value = m.status||'andamento';
+  _cSel.m = m.cor||'#22c55e'; rCG('corGridMeta','m');
+  document.getElementById('modalMetaTitulo').textContent = 'Editar Meta';
+  _editId = id;
+  document.getElementById('modalMetaBg').classList.add('open');
+}
+async function salvarMeta() {
+  const nome = document.getElementById('fMetaNome').value.trim();
+  if (!nome) { toast('Informe o nome da meta.','error','⚠️'); return; }
+  const btn = document.getElementById('btnSalvarMeta'); btn.disabled=true; btn.textContent='Salvando...';
+  const payload = {
+    empresa: EMPRESA, nome,
+    descricao: document.getElementById('fMetaDesc').value.trim()||null,
+    valor_meta: brl(document.getElementById('fMetaValor').value)||0,
+    valor_arrecadado: brl(document.getElementById('fMetaArrecadado').value)||0,
+    prazo: document.getElementById('fMetaPrazo').value||null,
+    observacao: document.getElementById('fMetaObs').value.trim()||null,
+    status: document.getElementById('fMetaStatus').value,
+    icone: '💰', cor: _cSel.m
+  };
+  const url = _editId ? `${SUPA_URL}/rest/v1/condo_metas?id=eq.${_editId}&empresa=eq.${EMPRESA}` : `${SUPA_URL}/rest/v1/condo_metas`;
+  const r = await fetch(url, {method:_editId?'PATCH':'POST', headers:{...hdrs(),'Prefer':'return=representation'}, body:JSON.stringify(payload)});
+  if (r.ok||r.status===204) { fecharModalMeta(); await loadM(); toast('Meta salva!','success','✅'); }
+  else toast('Erro: '+await r.text(),'error','❌');
+  btn.disabled=false; btn.textContent='Salvar Meta';
+}
+function delM(id) {
+  const m = _metas.find(x => x.id===id);
+  confirmar('Excluir Meta?', `Excluir "${m?.nome}"?`, async () => {
+    await fetch(`${SUPA_URL}/rest/v1/condo_metas?id=eq.${id}&empresa=eq.${EMPRESA}`, {method:'DELETE', headers:hdrs()});
+    await loadM(); toast('Meta excluída.','info','🗑');
+  }, 'Excluir','var(--red)');
+}
+function updArr(id) {
+  const m = _metas.find(x => x.id===id); if(!m) return;
+  _arrId = id;
+  document.getElementById('arrMetaNome').textContent = m.nome;
+  document.getElementById('fArrValor').value = m.valor_arrecadado ? brl(''+m.valor_arrecadado).toLocaleString('pt-BR',{minimumFractionDigits:2}) : '';
+  document.getElementById('modalArrBg').classList.add('open');
+}
+function fecharModalArr() { document.getElementById('modalArrBg').classList.remove('open'); _arrId = null; }
+async function confirmarArr() {
+  if (!_arrId) return;
+  const val = brl(document.getElementById('fArrValor').value);
+  const r = await fetch(`${SUPA_URL}/rest/v1/condo_metas?id=eq.${_arrId}&empresa=eq.${EMPRESA}`,
+    {method:'PATCH', headers:{...hdrs(),'Prefer':'return=representation'}, body:JSON.stringify({valor_arrecadado:val})});
+  if (r.ok||r.status===204) { fecharModalArr(); await loadM(); toast('Arrecadação atualizada!','success','✅'); }
+  else toast('Erro.','error','❌');
+}
 
-function updArr(id){const m=_metas.find(x=>x.id===id);if(!m)return;_arrId=id;document.getElementById('arrMetaNome').textContent=m.nome;document.getElementById('fArrValor').value=m.valor_arrecadado?brl(''+m.valor_arrecadado).toLocaleString('pt-BR',{minimumFractionDigits:2}):'';document.getElementById('modalArrBg').classList.add('open');}
-function fecharModalArr(){document.getElementById('modalArrBg').classList.remove('open');_arrId=null;}
-async function confirmarArr(){if(!_arrId)return;const val=brl(document.getElementById('fArrValor').value);const r=await fetch(`${SUPA_URL}/rest/v1/condo_metas?id=eq.${_arrId}&empresa=eq.${EMPRESA}`,{method:'PATCH',headers:{...hdrs(),'Prefer':'return=representation'},body:JSON.stringify({valor_arrecadado:val})});if(r.ok||r.status===204){fecharModalArr();await loadM();}else alert('Erro.');}
+// ── CONFIRM DIALOG ────────────────────────────────────────────
+function confirmar(titulo, desc, cb, btnLabel='Confirmar', btnCor='var(--red)') {
+  document.getElementById('confirmTitle').textContent = titulo;
+  document.getElementById('confirmDesc').textContent = desc;
+  const btn = document.getElementById('confirmBtn'); btn.textContent = btnLabel; btn.style.background = btnCor;
+  _confirmCb = cb;
+  document.getElementById('confirmBg').classList.add('open');
+}
+function fecharConfirm() { document.getElementById('confirmBg').classList.remove('open'); _confirmCb = null; }
+async function executarConfirm() { if(_confirmCb) await _confirmCb(); fecharConfirm(); }
 
-function confirmar(titulo,desc,cb,btnLabel='Confirmar',btnCor='#ef4444'){document.getElementById('confirmTitle').textContent=titulo;document.getElementById('confirmDesc').textContent=desc;const btn=document.getElementById('confirmBtn');btn.textContent=btnLabel;btn.style.background=btnCor;_confirmCb=cb;document.getElementById('confirmBg').classList.add('open');}
-function fecharConfirm(){document.getElementById('confirmBg').classList.remove('open');_confirmCb=null;}
-async function executarConfirm(){if(_confirmCb)await _confirmCb();fecharConfirm();}
-
-['modalBg','modalMetaBg','modalArrBg'].forEach(id=>{document.getElementById(id)?.addEventListener('click',e=>{if(e.target===document.getElementById(id))document.getElementById(id).classList.remove('open');});});
+// Fechar modais ao clicar fora
+['modalBg','modalMetaBg','modalArrBg'].forEach(id => {
+  document.getElementById(id)?.addEventListener('click', e => {
+    if (e.target === document.getElementById(id)) document.getElementById(id).classList.remove('open');
+  });
+});
 </script>
-
 </body>
 </html>
