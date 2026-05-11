@@ -261,7 +261,8 @@
   // Verificar se já está logado
   const { data: { session } } = await supabase.auth.getSession()
   if (session) {
-    const { data: perfil } = await supabase.from('usuarios').select('role').eq('id', session.user.id).single()
+    const { data: rows } = await supabase.from('usuarios').select('role').eq('id', session.user.id).limit(1)
+    const perfil = rows?.[0]
     const destinos = { administradora: '/admin/index.html', sindico: '/sindico/dashboard.html', morador: '/morador/index.html' }
     if (perfil?.role && destinos[perfil.role]) { window.location.href = destinos[perfil.role]; }
   }
@@ -303,13 +304,28 @@
     }
 
     // Busca o perfil
-    const { data: perfil } = await supabase.from('usuarios').select('role').eq('id', data.user.id).single()
+    const { data: rows, error: perfilError } = await supabase
+      .from('usuarios').select('role').eq('id', data.user.id).limit(1)
+
+    const perfil = rows?.[0]
+
+    if (!perfil) {
+      // Usuário existe no Auth mas não tem cadastro na tabela usuarios
+      await supabase.auth.signOut()
+      btn.disabled = false
+      btn.innerHTML = '<span class="btn-text">Entrar</span>'
+      document.getElementById('erro-texto').textContent =
+        'Usuário não encontrado no sistema. Entre em contato com o administrador.'
+      erroEl.classList.add('show')
+      return
+    }
+
     const destinos = {
       administradora: '/admin/index.html',
       sindico:        '/sindico/dashboard.html',
       morador:        '/morador/index.html'
     }
-    window.location.href = destinos[perfil?.role] || '/login.html'
+    window.location.href = destinos[perfil.role] || '/login.html'
   }
 
   window.esqueceuSenha = async function(e) {
