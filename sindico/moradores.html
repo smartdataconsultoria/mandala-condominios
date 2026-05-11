@@ -671,8 +671,9 @@ function renderCards(){
   const filtApto = document.getElementById('filtroApto').value;
 
   let lista = _moradores.filter(m=>{
-    if(_filtro==='ativo'        && !m.ativo) return false;
-    if(_filtro==='inativo'      && m.ativo)  return false;
+    if(_filtro==='ativo'        && (!m.ativo || m.status==='pendente')) return false;
+    if(_filtro==='inativo'      && (m.ativo && m.status!=='pendente'))  return false;
+    if(_filtro==='pendente'     && !(m.status==='pendente' || (!m.ativo && m.status!=='aprovado'))) return false;
     if(_filtro==='proprietario' && m.tipo_ocupacao!=='proprietario') return false;
     if(_filtro==='inquilino'    && m.tipo_ocupacao!=='inquilino') return false;
     if(filtApto && m.unidade!==filtApto) return false;
@@ -722,8 +723,13 @@ function renderCards(){
       <div class="card-bottom">
         <div class="card-contato">${m.telefone||m.email||'Sem contato'}</div>
         <div class="card-actions" onclick="event.stopPropagation()">
-          <button class="btn-icon" onclick="abrirModal('${m.id}')" title="Editar">✏</button>
-          <button class="btn-icon del" onclick="deletar('${m.id}','${m.nome.replace(/'/g,"\\'")}')">🗑</button>
+          ${(m.status==='pendente'||(!m.ativo&&m.status!=='aprovado'))?`
+            <button class="btn-icon" style="background:#dcfce7;color:#16a34a" onclick="aprovarMorador('${m.id}','${m.nome.replace(/'/g,"\\'")}')" title="Aprovar">✓</button>
+            <button class="btn-icon del" onclick="rejeitarMorador('${m.id}','${m.nome.replace(/'/g,"\\'")}')" title="Rejeitar">✕</button>
+          `:`
+            <button class="btn-icon" onclick="abrirModal('${m.id}')" title="Editar">✏</button>
+            <button class="btn-icon del" onclick="deletar('${m.id}','${m.nome.replace(/'/g,"\\'")}')">🗑</button>
+          `}
         </div>
       </div>
     </div>`;
@@ -1213,11 +1219,31 @@ async function salvar(){
 }
 
 // ── APROVAR MORADOR ──────────────────────────────────────────────────────────
+async function rejeitarMorador(id, nome){
+  const motivo = prompt(`Motivo da rejeição do cadastro de "${nome}" (opcional):`);
+  if(motivo === null) return; // cancelou
+  if(!confirm(`Rejeitar o cadastro de "${nome}"?\nEsta ação não poderá ser desfeita.`)) return;
+  const res = await fetch(
+    `${SUPA_URL}/rest/v1/usuarios?id=eq.${id}&condominio_id=eq.${CONDO_ID}`,
+    {method:'PATCH', headers:hdrs(), body:JSON.stringify({
+      ativo: false,
+      status: 'rejeitado',
+      motivo_rejeicao: motivo || null
+    })}
+  );
+  if(res.ok){
+    showAlert(`🚫 Cadastro de ${nome} rejeitado.`, 'error');
+    await loadMoradores();
+  } else {
+    showAlert('Erro ao rejeitar cadastro.','error');
+  }
+}
+
 async function aprovarMorador(id, nome){
   if(!confirm(`Aprovar o cadastro de "${nome}"?\nEle receberá acesso ao portal.`)) return;
   const res = await fetch(
     `${SUPA_URL}/rest/v1/usuarios?id=eq.${id}&condominio_id=eq.${CONDO_ID}`,
-    {method:'PATCH', headers:hdrs(), body:JSON.stringify({ativo:true})}
+    {method:'PATCH', headers:hdrs(), body:JSON.stringify({ativo:true, status:'aprovado', data_aprovacao: new Date().toISOString()})}
   );
   if(res.ok){
     showAlert(`✅ ${nome} aprovado com sucesso!`);
