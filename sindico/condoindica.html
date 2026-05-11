@@ -39,45 +39,52 @@ body{font-family:'Segoe UI',sans-serif;background:#f0ede8;color:#1a1d27;min-heig
 .topbar{background:#fff;border-bottom:1px solid #e2e0da;padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .topbar-title{font-size:16px;font-weight:700;color:#1a1d27}
 .topbar-subtitle{font-size:12px;color:#94a3b8;margin-top:1px}
-.page{padding:28px 28px 40px;flex:1}
+.page{padding:20px 24px 32px;flex:1}
 
 /* ALERT */
 .alert{padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:20px;display:none;border:1px solid}
 .alert.success{background:#f0fdf4;border-color:#bbf7d0;color:#15803d;display:block}
 .alert.error{background:#fff1f2;border-color:#fecdd3;color:#be123c;display:block}
 
-/* HERO BANNER */
-.hero-banner{background:linear-gradient(135deg,#1a1d27 0%,#2a2d3e 100%);border-radius:16px;padding:28px 32px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:20px}
-.hero-text h2{font-size:22px;font-weight:800;color:#fff;margin-bottom:6px}
+/* HERO BANNER — compacto */
+.hero-banner{background:linear-gradient(135deg,#1a1d27 0%,#2a2d3e 100%);border-radius:14px;padding:18px 24px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.hero-text h2{font-size:17px;font-weight:800;color:#fff;margin-bottom:2px}
 .hero-text h2 span{color:#f5a623}
-.hero-text p{font-size:13px;color:rgba(255,255,255,0.55);max-width:420px;line-height:1.6}
-.hero-badges{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
-.hero-badge{background:rgba(245,166,35,0.15);border:1px solid rgba(245,166,35,0.3);color:#f5a623;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700}
-.hero-actions{display:flex;gap:10px;flex-shrink:0}
-.btn-primary{background:#f5a623;color:#1a1d27;border:none;padding:11px 22px;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer;transition:.2s;white-space:nowrap}
+.hero-text p{font-size:12px;color:rgba(255,255,255,0.5);line-height:1.5;max-width:480px}
+.hero-badges{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.hero-badge{background:rgba(245,166,35,0.15);border:1px solid rgba(245,166,35,0.3);color:#f5a623;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700}
+.hero-actions{display:flex;gap:8px;flex-shrink:0}
+.btn-primary{background:#f5a623;color:#1a1d27;border:none;padding:9px 18px;border-radius:9px;font-size:12px;font-weight:800;cursor:pointer;transition:.2s;white-space:nowrap}
 .btn-primary:hover{background:#e09210;transform:translateY(-1px)}
-.btn-outline{background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.2);padding:11px 22px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;white-space:nowrap}
+.btn-outline{background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.2);padding:9px 18px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;transition:.2s;white-space:nowrap}
 .btn-outline:hover{border-color:rgba(255,255,255,0.5);background:rgba(255,255,255,0.05)}
 
-/* STATS */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
-.stat{background:#fff;border:1px solid #e2e0da;border-radius:12px;padding:18px 20px}
-.stat-label{font-size:10px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
-.stat-val{font-size:26px;font-weight:800;color:#1a1d27}
+/* AVISO RESPONSABILIDADE */
+.aviso-legal{background:#fffbeb;border:1px solid #fcd34d;border-left:4px solid #f5a623;border-radius:10px;padding:10px 16px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px}
+.aviso-legal-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.aviso-legal-text{font-size:12px;color:#92400e;line-height:1.5}
+.aviso-legal-text strong{font-weight:700;display:block;margin-bottom:2px}
+
+/* STATS — linha compacta */
+.stats{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.stat{background:#fff;border:1px solid #e2e0da;border-radius:10px;padding:12px 18px;display:flex;align-items:center;gap:12px;flex:1;min-width:140px}
+.stat-label{font-size:10px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.stat-val{font-size:22px;font-weight:800;color:#1a1d27;line-height:1}
 .stat-val.green{color:#22c55e}
 .stat-val.amber{color:#f5a623}
 .stat-val.blue{color:#3b82f6}
 .stat-val.purple{color:#a855f7}
+.stat-icon{font-size:22px;opacity:.6}
 
 /* CATEGORIAS */
-.categorias-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:20px;scrollbar-width:none}
+.categorias-scroll{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none}
 .categorias-scroll::-webkit-scrollbar{display:none}
 .cat-chip{background:#fff;border:1px solid #e2e0da;border-radius:20px;padding:8px 16px;font-size:12px;font-weight:600;color:#64748b;cursor:pointer;transition:.2s;white-space:nowrap;display:flex;align-items:center;gap:6px;flex-shrink:0}
 .cat-chip:hover{border-color:#1a1d27;color:#1a1d27}
 .cat-chip.active{background:#1a1d27;border-color:#1a1d27;color:#f5a623}
 
 /* CONTROLS */
-.controls{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.controls{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
 .search-box{flex:1;min-width:240px;position:relative}
 .search-box input{width:100%;background:#fff;border:1px solid #e2e0da;border-radius:10px;padding:10px 14px 10px 38px;color:#1a1d27;font-size:13px;outline:none;transition:.2s}
 .search-box input:focus{border-color:#1a1d27;box-shadow:0 0 0 3px #1a1d2710}
@@ -291,41 +298,50 @@ body{font-family:'Segoe UI',sans-serif;background:#f0ede8;color:#1a1d27;min-heig
   <div class="page">
     <div class="alert" id="alert"></div>
 
-    <!-- HERO -->
+    <!-- HERO compacto -->
     <div class="hero-banner">
       <div class="hero-text">
         <h2>Clube da Obra <span>CondoIndica</span></h2>
-        <p>Encontre profissionais verificados, avalie serviços realizados e compartilhe indicações com outros síndicos. Uma rede de confiança para o seu condomínio.</p>
+        <p>Rede de fornecedores verificados e avaliados por síndicos. Encontre profissionais confiáveis para o seu condomínio.</p>
         <div class="hero-badges">
           <span class="hero-badge">✅ Verificados</span>
           <span class="hero-badge">⭐ Avaliados</span>
           <span class="hero-badge">🔒 Confiáveis</span>
-          <span class="hero-badge">🚨 Atendimento 24h</span>
+          <span class="hero-badge">🚨 24h</span>
         </div>
       </div>
       <div class="hero-actions">
         <button class="btn-primary" onclick="abrirModalCadastro()">+ Cadastrar Fornecedor</button>
-        <button class="btn-outline" onclick="setFiltro('em_analise')">⏳ Ver Pendentes <span id="badgePendentes" style="display:none;background:#f5a623;color:#1a1d27;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:800;margin-left:4px"></span></button>
+        <button class="btn-outline" onclick="setFiltro('em_analise')">⏳ Pendentes <span id="badgePendentes" style="display:none;background:#f5a623;color:#1a1d27;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:800;margin-left:4px"></span></button>
       </div>
     </div>
 
-    <!-- STATS -->
+    <!-- AVISO LEGAL -->
+    <div class="aviso-legal">
+      <div class="aviso-legal-icon">⚠️</div>
+      <div class="aviso-legal-text">
+        <strong>Isenção de Responsabilidade — CondoGestor</strong>
+        O CondoGestor atua exclusivamente como um portal de indicações e não se responsabiliza pela qualidade, pontualidade ou resultado dos serviços prestados pelos fornecedores cadastrados. As avaliações são de responsabilidade dos usuários. Recomendamos verificar referências antes de contratar qualquer profissional.
+      </div>
+    </div>
+
+    <!-- STATS compactos -->
     <div class="stats">
       <div class="stat">
-        <div class="stat-label">Total de Fornecedores</div>
-        <div class="stat-val amber" id="statTotal">—</div>
+        <div class="stat-icon">🏗️</div>
+        <div><div class="stat-label">Fornecedores</div><div class="stat-val amber" id="statTotal">—</div></div>
       </div>
       <div class="stat">
-        <div class="stat-label">Ativos</div>
-        <div class="stat-val green" id="statAtivos">—</div>
+        <div class="stat-icon">✅</div>
+        <div><div class="stat-label">Ativos</div><div class="stat-val green" id="statAtivos">—</div></div>
       </div>
       <div class="stat">
-        <div class="stat-label">Avaliações</div>
-        <div class="stat-val blue" id="statAvaliacoes">—</div>
+        <div class="stat-icon">⭐</div>
+        <div><div class="stat-label">Avaliações</div><div class="stat-val blue" id="statAvaliacoes">—</div></div>
       </div>
       <div class="stat">
-        <div class="stat-label">Em Análise</div>
-        <div class="stat-val purple" id="statPendentes">—</div>
+        <div class="stat-icon">⏳</div>
+        <div><div class="stat-label">Em Análise</div><div class="stat-val purple" id="statPendentes">—</div></div>
       </div>
     </div>
 
