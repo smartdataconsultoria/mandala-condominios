@@ -555,21 +555,34 @@ async function loadCategorias(){
   try{
     const r = await fetch(`${SUPA_URL}/rest/v1/ci_categorias?ativo=eq.true&order=ordem`,{headers:hdrs(true)});
     _categorias = await r.json();
-    // Chips
-    const scroll = document.getElementById('categoriasScroll');
+
+    // Select do modal — todas as categorias
+    const sel = document.getElementById('fCategoria');
     _categorias.forEach(c=>{
+      sel.innerHTML += `<option value="${c.id}">${c.icone||''} ${c.nome}</option>`;
+    });
+  } catch(e){ console.error('loadCategorias',e); }
+}
+
+// Atualiza chips de categoria com base nos fornecedores carregados
+function renderCategoriasChips(){
+  const scroll = document.getElementById('categoriasScroll');
+  // Manter só o chip "Todos"
+  scroll.innerHTML = '<button class="cat-chip active" onclick="filtrarCategoria(\'\',this)">🛠️ Todos</button>';
+
+  // IDs de categorias que têm fornecedores
+  const idsComFornecedor = [...new Set(_fornecedores.map(f=>f.categoria_id).filter(Boolean))];
+  if(idsComFornecedor.length === 0) return;
+
+  _categorias
+    .filter(c => idsComFornecedor.includes(c.id))
+    .forEach(c=>{
       const btn = document.createElement('button');
       btn.className = 'cat-chip';
       btn.innerHTML = `${c.icone||'🔧'} ${c.nome}`;
       btn.onclick = ()=>filtrarCategoria(c.id, btn);
       scroll.appendChild(btn);
     });
-    // Select do modal
-    const sel = document.getElementById('fCategoria');
-    _categorias.forEach(c=>{
-      sel.innerHTML += `<option value="${c.id}">${c.icone||''} ${c.nome}</option>`;
-    });
-  } catch(e){ console.error('loadCategorias',e); }
 }
 
 async function loadSubcategorias(){
@@ -593,6 +606,7 @@ async function loadFornecedores(){
       {headers:hdrs(true)}
     );
     _fornecedores = await r.json();
+    renderCategoriasChips();
     renderStats();
     renderCards();
   } catch(e){
