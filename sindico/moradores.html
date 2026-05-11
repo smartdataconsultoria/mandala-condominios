@@ -788,13 +788,53 @@ function limparModal(){
 
 function preencherModal(m){
   const set = (id,v) => { const el=document.getElementById(id); if(el&&v!=null) el.value=v; };
-  set('fNome',m.nome);
-  set('fEmail',m.email);
-  set('fTel',m.telefone||'');
-  set('fApto',m.unidade||'');
-  set('fBloco',m.bloco);
-  set('fTipoOcup',m.role||'morador');
+
+  // Aba 0 — Dados Pessoais
+  set('fNome',  m.nome);
+  set('fEmail', m.email);
+  set('fTel',   m.telefone||'');
+  set('fCpf',   m.cpf||'');
+  set('fRg',    m.rg||'');
+  set('fNasc',  m.data_nascimento||'');
+
+  // Aba 1 — Apartamento
+  set('fApto',  m.unidade||'');
+  set('fBloco', m.bloco||'');
+  set('fTipoOcup', m.role||'morador');
+  set('fEntrada', m.data_entrada||'');
+  set('fSaida',   m.data_saida||'');
   if(m.ativo!=null) document.getElementById('fAtivo').checked = m.ativo;
+
+  // Aba 3 — Veículo & Pets
+  set('fPlaca',   m.veiculo_placa||'');
+  set('fModelo',  m.veiculo_modelo||'');
+  set('fCorVei',  m.veiculo_cor||'');
+  set('fVaga',    m.vaga_garagem||'');
+
+  // Pets
+  const pets = m.pets || [];
+  document.getElementById('listaPets').innerHTML = '';
+  if(pets.length>0){
+    document.getElementById('fTemPet').checked = true;
+    document.getElementById('petsArea').style.display = 'block';
+    pets.forEach(p => addPet(p));
+  }
+
+  // Aba 2 — Residentes
+  document.getElementById('listaResidentes').innerHTML = '';
+  const residentes = m.residentes || [];
+  residentes.forEach(r => addResidente(r));
+
+  // Aba 4 — Extras
+  set('fEmergNome', m.contato_emergencia_nome||'');
+  set('fEmergTel',  m.contato_emergencia_tel||'');
+  set('fEmergPar',  m.contato_emergencia_par||'');
+  set('fObs',       m.observacoes||'');
+
+  // Foto
+  if(m.foto_url){
+    document.getElementById('fotoPreview').innerHTML = `<img src="${m.foto_url}" alt="foto"/>`;
+  }
 }
 
 // ── FOTO ─────────────────────────────────────────────────
@@ -983,12 +1023,25 @@ async function salvar(){
     if(_editId){
       const patchData = {
         nome,
+        cpf:      document.getElementById('fCpf').value.trim()||null,
+        rg:       document.getElementById('fRg').value.trim()||null,
+        data_nascimento: document.getElementById('fNasc').value||null,
         telefone: document.getElementById('fTel').value.trim()||null,
         unidade:  apto||null,
         bloco:    document.getElementById('fBloco').value.trim()||null,
         role:     roleVal,
         ativo,
         status:   ativo ? 'aprovado' : 'pendente',
+        veiculo_placa:  document.getElementById('fPlaca').value.trim()||null,
+        veiculo_modelo: document.getElementById('fModelo').value.trim()||null,
+        veiculo_cor:    document.getElementById('fCorVei').value.trim()||null,
+        vaga_garagem:   document.getElementById('fVaga').value.trim()||null,
+        residentes:     coletarResidentes(),
+        pets:           coletarPets(),
+        contato_emergencia_nome: document.getElementById('fEmergNome').value.trim()||null,
+        contato_emergencia_tel:  document.getElementById('fEmergTel').value.trim()||null,
+        contato_emergencia_par:  document.getElementById('fEmergPar').value||null,
+        observacoes:    document.getElementById('fObs').value.trim()||null,
       };
       if(emailVal) patchData.email = emailVal;
 
@@ -1067,12 +1120,25 @@ async function salvar(){
             condominio_id: CONDO_ID,
             nome,
             email:         emailVal,
+            cpf:           document.getElementById('fCpf').value.trim()||null,
+            rg:            document.getElementById('fRg').value.trim()||null,
+            data_nascimento: document.getElementById('fNasc').value||null,
             telefone:      document.getElementById('fTel').value.trim()||null,
             unidade:       apto||null,
             bloco:         document.getElementById('fBloco').value.trim()||null,
             role:          roleVal,
             ativo,
             status:        ativo ? 'aprovado' : 'pendente',
+            veiculo_placa:  document.getElementById('fPlaca').value.trim()||null,
+            veiculo_modelo: document.getElementById('fModelo').value.trim()||null,
+            veiculo_cor:    document.getElementById('fCorVei').value.trim()||null,
+            vaga_garagem:   document.getElementById('fVaga').value.trim()||null,
+            residentes:     coletarResidentes(),
+            pets:           coletarPets(),
+            contato_emergencia_nome: document.getElementById('fEmergNome').value.trim()||null,
+            contato_emergencia_tel:  document.getElementById('fEmergTel').value.trim()||null,
+            contato_emergencia_par:  document.getElementById('fEmergPar').value||null,
+            observacoes:    document.getElementById('fObs').value.trim()||null,
           };
           const res2 = await fetch(`${SUPA_URL}/rest/v1/usuarios`,{
             method:'POST', headers:{...h,'Prefer':'return=representation'}, body:JSON.stringify(payload)
@@ -1105,12 +1171,25 @@ async function salvar(){
       condominio_id: CONDO_ID,
       nome,
       email:         emailVal,
+      cpf:           document.getElementById('fCpf').value.trim()||null,
+      rg:            document.getElementById('fRg').value.trim()||null,
+      data_nascimento: document.getElementById('fNasc').value||null,
       telefone:      document.getElementById('fTel').value.trim()||null,
       unidade:       apto||null,
       bloco:         document.getElementById('fBloco').value.trim()||null,
       role:          roleVal,
       ativo,
       status:        ativo ? 'aprovado' : 'pendente',
+      veiculo_placa:  document.getElementById('fPlaca').value.trim()||null,
+      veiculo_modelo: document.getElementById('fModelo').value.trim()||null,
+      veiculo_cor:    document.getElementById('fCorVei').value.trim()||null,
+      vaga_garagem:   document.getElementById('fVaga').value.trim()||null,
+      residentes:     coletarResidentes(),
+      pets:           coletarPets(),
+      contato_emergencia_nome: document.getElementById('fEmergNome').value.trim()||null,
+      contato_emergencia_tel:  document.getElementById('fEmergTel').value.trim()||null,
+      contato_emergencia_par:  document.getElementById('fEmergPar').value||null,
+      observacoes:    document.getElementById('fObs').value.trim()||null,
     };
 
     const res  = await fetch(`${SUPA_URL}/rest/v1/usuarios`,{
