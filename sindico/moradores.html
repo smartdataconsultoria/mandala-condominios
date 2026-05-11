@@ -700,7 +700,7 @@ function renderCards(){
       ? 'linear-gradient(135deg,#f5a623,#e09210)'
       : 'linear-gradient(135deg,#3b82f6,#1d4ed8)';
 
-    return `<div class="morador-card" onclick="abrirModal(${m.id})">
+    return `<div class="morador-card" onclick="abrirModal('${m.id}')">
       <div class="card-top">
         <div class="avatar" style="background:${avatarBg}">
           ${m.foto_url ? `<img src="${m.foto_url}" alt="${m.nome}"/>` : iniciais(m.nome)}
@@ -722,8 +722,8 @@ function renderCards(){
       <div class="card-bottom">
         <div class="card-contato">${m.telefone||m.email||'Sem contato'}</div>
         <div class="card-actions" onclick="event.stopPropagation()">
-          <button class="btn-icon" onclick="abrirModal(${m.id})" title="Editar">✏</button>
-          <button class="btn-icon del" onclick="deletar(${m.id},'${m.nome.replace(/'/g,"\\'")}')">🗑</button>
+          <button class="btn-icon" onclick="abrirModal('${m.id}')" title="Editar">✏</button>
+          <button class="btn-icon del" onclick="deletar('${m.id}','${m.nome.replace(/'/g,"\\'")}')">🗑</button>
         </div>
       </div>
     </div>`;
