@@ -247,7 +247,7 @@
     </form>
 
     <div class="divider"><span>ou</span></div>
-    <div class="signup-link">Ainda não tem conta? <a href="#">Cadastre-se grátis</a></div>
+    <div class="signup-link">Ainda não tem conta? <a href="/cadastro">Cadastre-se grátis</a></div>
   </div>
 </div>
 
@@ -261,10 +261,10 @@
   // Verificar se já está logado
   const { data: { session } } = await supabase.auth.getSession()
   if (session) {
-    const { data: rows } = await supabase.from('usuarios').select('role').eq('id', session.user.id).limit(1)
-    const perfil = rows?.[0]
+    const { data: rows0 } = await supabase.from('usuarios').select('role').eq('id', session.user.id).limit(1)
+    const perfil0 = rows0?.[0]
     const destinos = { administradora: '/admin/index.html', sindico: '/sindico/dashboard.html', morador: '/morador/index.html' }
-    if (perfil?.role && destinos[perfil.role]) { window.location.href = destinos[perfil.role]; }
+    if (perfil0?.role && destinos[perfil0.role]) { window.location.href = destinos[perfil0.role]; }
   }
 
   const roleLabels = {
@@ -304,22 +304,16 @@
     }
 
     // Busca o perfil
-    const { data: rows, error: perfilError } = await supabase
-      .from('usuarios').select('role').eq('id', data.user.id).limit(1)
-
+    const { data: rows } = await supabase.from('usuarios').select('role').eq('id', data.user.id).limit(1)
     const perfil = rows?.[0]
-
     if (!perfil) {
-      // Usuário existe no Auth mas não tem cadastro na tabela usuarios
       await supabase.auth.signOut()
       btn.disabled = false
       btn.innerHTML = '<span class="btn-text">Entrar</span>'
-      document.getElementById('erro-texto').textContent =
-        'Usuário não encontrado no sistema. Entre em contato com o administrador.'
+      document.getElementById('erro-texto').textContent = 'Usuário não encontrado no sistema. Entre em contato com o administrador.'
       erroEl.classList.add('show')
       return
     }
-
     const destinos = {
       administradora: '/admin/index.html',
       sindico:        '/sindico/dashboard.html',
