@@ -751,23 +751,53 @@ async function abrirPerfil(id){
   // Buscar avaliações
   let avalHtml = '<p style="color:#94a3b8;font-size:13px">Nenhuma avaliação ainda.</p>';
   try{
+    // Buscar avaliações sem JOIN para evitar problemas de FK
     const ra = await fetch(
-      `${SUPA_URL}/rest/v1/ci_avaliacoes?fornecedor_id=eq.${id}&status=eq.publicado&order=criado_em.desc&limit=5&select=*,usuarios(nome)`,
+      `${SUPA_URL}/rest/v1/ci_avaliacoes?fornecedor_id=eq.${id}&status=eq.publicado&order=criado_em.desc&limit=5`,
       {headers:hdrs(true)}
     );
     const avals = await ra.json();
+
+    // Buscar nomes dos avaliadores separadamente
     if(avals.length>0){
-      avalHtml = `<div class="avaliacoes-lista">${avals.map(a=>`
-        <div class="avaliacao-item">
+      const avaliadorIds = [...new Set(avals.map(a=>a.avaliador_id).filter(Boolean))];
+      let nomesMap = {};
+      try{
+        const rn = await fetch(
+          `${SUPA_URL}/rest/v1/usuarios?id=in.(${avaliadorIds.join(',')})&select=id,nome`,
+          {headers:hdrs(true)}
+        );
+        const nomes = await rn.json();
+        nomes.forEach(u=>{ nomesMap[u.id] = u.nome; });
+      } catch(e){}
+
+      avalHtml = `<div class="avaliacoes-lista">${avals.map(a=>{
+        const nomeAutor = nomesMap[a.avaliador_id] || 'Morador';
+        const inicialAvaliador = nomeAutor.charAt(0).toUpperCase();
+        return `<div class="avaliacao-item">
           <div class="avaliacao-topo">
-            <span class="avaliacao-autor">👤 ${a.usuarios?.nome||'Morador'}</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:28px;height:28px;border-radius:50%;background:#1a1d27;color:#f5a623;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">${inicialAvaliador}</div>
+              <span class="avaliacao-autor">${nomeAutor}</span>
+            </div>
             <div style="display:flex;align-items:center;gap:8px">
               <div class="avaliacao-stars">${renderStarsHtml(a.nota_geral||0)}</div>
+              <span style="font-size:12px;font-weight:700;color:#1a1d27">${(a.nota_geral||0).toFixed(1)}</span>
               <span class="avaliacao-data">${new Date(a.criado_em).toLocaleDateString('pt-BR')}</span>
             </div>
           </div>
-          ${a.comentario ? `<p class="avaliacao-texto">${a.comentario}</p>` : ''}
-        </div>`).join('')}</div>`;
+          ${a.comentario ? `<p class="avaliacao-texto" style="margin-top:8px">${a.comentario}</p>` : ''}
+          ${(a.nota_qualidade||a.nota_pontualidade||a.nota_limpeza) ? `
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+            ${a.nota_qualidade   ? `<span style="font-size:10px;background:#f8f7f5;border-radius:6px;padding:2px 8px;color:#64748b">⚙️ Qualidade: ${a.nota_qualidade}★</span>` : ''}
+            ${a.nota_pontualidade? `<span style="font-size:10px;background:#f8f7f5;border-radius:6px;padding:2px 8px;color:#64748b">🕐 Pontual: ${a.nota_pontualidade}★</span>` : ''}
+            ${a.nota_limpeza     ? `<span style="font-size:10px;background:#f8f7f5;border-radius:6px;padding:2px 8px;color:#64748b">🧹 Limpeza: ${a.nota_limpeza}★</span>` : ''}
+            ${a.nota_atendimento ? `<span style="font-size:10px;background:#f8f7f5;border-radius:6px;padding:2px 8px;color:#64748b">😊 Atend.: ${a.nota_atendimento}★</span>` : ''}
+            ${a.nota_preco       ? `<span style="font-size:10px;background:#f8f7f5;border-radius:6px;padding:2px 8px;color:#64748b">💰 Preço: ${a.nota_preco}★</span>` : ''}
+            ${a.nota_prazo       ? `<span style="font-size:10px;background:#f8f7f5;border-radius:6px;padding:2px 8px;color:#64748b">📅 Prazo: ${a.nota_prazo}★</span>` : ''}
+          </div>` : ''}
+        </div>`;
+      }).join('')}</div>`;
     }
   } catch(e){}
 
