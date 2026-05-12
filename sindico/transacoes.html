@@ -2267,7 +2267,7 @@ function processarArquivo(file){
     try{
       const wb   = XLSX.read(e.target.result, {type:'array'});
       const ws   = wb.Sheets[wb.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json(ws, {header:1, raw:false});
+      const data = XLSX.utils.sheet_to_json(ws, {header:1, raw:true, dateNF:'yyyy-mm-dd'});
 
       // Encontrar linha de cabeçalho (contém DATA e TIPO)
       let headerRow = -1;
@@ -2308,22 +2308,28 @@ function processarArquivo(file){
 
         const dataStr = (row[iData]||'').toString().trim();
         let dataISO = '';
-        if(dataStr.match(/^\d{2}\/\d{2}\/\d{4}$/)){
-          // Formato DD/MM/YYYY
-          const [d,m,y]=dataStr.split('/'); dataISO=`${y}-${m}-${d}`;
+        if(dataStr.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)){
+          // Formato D/M/YYYY ou DD/MM/YYYY (SheetJS raw:false exporta M/D/YYYY americano)
+          // Detecta se é M/D ou D/M pela posição do valor > 12
+          const parts = dataStr.split('/');
+          let d=parseInt(parts[0]), m=parseInt(parts[1]), y=parseInt(parts[2]);
+          // SheetJS usa M/D/YYYY → partes[0]=mês, partes[1]=dia
+          // Se partes[0] > 12, certamente é dia (DD/MM); senão assume M/D (SheetJS padrão)
+          if(d > 12){ /* DD/MM/YYYY */ } else { const tmp=d; d=m; m=tmp; } // troca: m/d → d/m
+          dataISO=`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
         } else if(dataStr.match(/^\d{4}-\d{2}-\d{2}$/)){
           // Formato ISO YYYY-MM-DD
           dataISO=dataStr;
         } else if(dataStr.match(/^\d{4,5}$/)){
-          // Número serial do Excel (ex: 45689 = 01/02/2026)
+          // Número serial do Excel (fallback)
           const serial = parseInt(dataStr);
           const excelEpoch = new Date(1899,11,30);
-          const ms = excelEpoch.getTime() + serial * 86400000;
-          const dt = new Date(ms);
-          const yy = dt.getFullYear();
-          const mm = String(dt.getMonth()+1).padStart(2,'0');
-          const dd = String(dt.getDate()).padStart(2,'0');
-          dataISO = `${yy}-${mm}-${dd}`;
+          const dt = new Date(excelEpoch.getTime() + serial * 86400000);
+          dataISO=`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+        } else if(dataStr.includes('-') || dataStr.includes('/')){
+          // Tentativa genérica via Date.parse como último recurso
+          const dt = new Date(dataStr);
+          if(!isNaN(dt)) dataISO=`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
         }
 
         const tipo  = (row[iTipo]||'').toString().toLowerCase().trim();
