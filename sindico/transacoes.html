@@ -133,6 +133,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 .val-cell.des{color:#ef4444}
 .sit-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600}
 .sit-badge.pago{background:#22c55e20;color:#22c55e}
+.sit-badge.recebido{background:#22c55e20;color:#22c55e}
 .sit-badge.pendente{background:var(--gold)20;color:var(--gold)}
 .sit-badge.agendado{background:var(--blue)20;color:var(--blue)}
 .row-actions{display:flex;gap:6px;justify-content:flex-end;opacity:0;transition:.15s}
@@ -655,6 +656,8 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
   <div class="filters" style="margin-bottom:16px">
     <button class="filter-chip active" onclick="setFiltro('todos',this)">Todos</button>
     <button class="filter-chip" onclick="setFiltro('pendente',this)">⏳ Pendentes</button>
+    <button class="filter-chip" onclick="setFiltro('recebido',this)">✅ Recebidos</button>
+    <button class="filter-chip" onclick="setFiltro('pago',this)">✔ Pagos</button>
     <button class="filter-chip" onclick="setFiltro('parcelado',this)">📋 Parcelados</button>
     <button class="filter-chip" onclick="setFiltro('fixo',this)">🔄 Fixos</button>
   </div>
@@ -812,7 +815,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
     <div class="field">
       <label>Situação</label>
       <select id="fSit">
-        <option value="pago">Pago / Recebido</option>
+        <option value="pago" id="fSitPagoOpt">Pago / Recebido</option>
         <option value="pendente">Pendente</option>
         <option value="agendado">Agendado</option>
       </select>
@@ -1316,6 +1319,8 @@ function renderTabela(){
     if(_filtro==='pendente' && t.situacao!=='pendente') return false;
     if(_filtro==='parcelado'&& !t.parcela_total) return false;
     if(_filtro==='fixo'     && !t.recorrente) return false;
+    if(_filtro==='recebido' && !(t.tipo==='receita' && t.situacao==='pago')) return false;
+    if(_filtro==='pago'     && !(t.tipo==='despesa' && t.situacao==='pago')) return false;
     
     if (busca) {
       const cat = catMap[t.categoria_id];
@@ -1372,7 +1377,9 @@ function renderTabela(){
     const conta = contaMap[t.conta_id];
     const tp    = t.tipo==='receita' ? 'rec' : 'des';
     const sit   = t.situacao||'pago';
-    const sitLabel = {pago:'Pago',pendente:'Pendente',agendado:'Agendado'}[sit]||sit;
+    const sitLabel = sit === 'pago'
+      ? (t.tipo === 'receita' ? 'Recebido' : 'Pago')
+      : ({pendente:'Pendente',agendado:'Agendado'}[sit]||sit);
     const ehParcelado = t.parcela_total && !t.recorrente;
     const parTag = ehParcelado ? `<span class="parcela-tag">${t.parcela_atual||1}/${t.parcela_total}</span>` : '';
     const fixaTag= t.recorrente ? `<span class="fixa-tag">🔄</span>` : '';
@@ -1393,7 +1400,7 @@ function renderTabela(){
       </div>
       <div style="font-size:13px;color:var(--text-light)">${conta ? conta.nome : '—'}</div>
       <div class="val-cell ${tp}">${t.tipo==='despesa'?'- ':'+ '}${fmt(t.valor)}</div>
-      <div><span class="sit-badge ${sit}">${sitLabel}</span></div>
+      <div><span class="sit-badge ${sit === 'pago' && t.tipo === 'receita' ? 'recebido' : sit}">${sitLabel}</span></div>
       <div class="row-actions">
         <button onclick="event.stopPropagation();window._editarTransacao&&window._editarTransacao(${t.id})" style="background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Editar</button>
       </div>
@@ -1527,6 +1534,10 @@ function setTipo(tipo){
     if(cat) opt.style.display = (tipoDB==='transferencia' || cat.tipo===tipoDB) ? '' : 'none';
   });
   document.getElementById('fCat').value = '';
+
+  // Atualiza label da situação conforme tipo
+  const pagoOpt = document.getElementById('fSitPagoOpt');
+  if(pagoOpt) pagoOpt.textContent = (tipo === 'receita') ? 'Recebido' : 'Pago';
 }
 
 // -- DATA RÁPIDA ------------------------------------------
