@@ -2306,47 +2306,56 @@ function processarArquivo(file){
 
         const linhaNum = i + 1; // linha real no Excel (1-based)
 
-        const dataStr = (row[iData]||'').toString().trim();
+        // Parse de data: raw:true retorna número serial do Excel
+        const rawData = row[iData];
         let dataISO = '';
-        if(dataStr.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)){
-          // Formato D/M/YYYY ou DD/MM/YYYY (SheetJS raw:false exporta M/D/YYYY americano)
-          // Detecta se é M/D ou D/M pela posição do valor > 12
-          const parts = dataStr.split('/');
-          let d=parseInt(parts[0]), m=parseInt(parts[1]), y=parseInt(parts[2]);
-          // SheetJS usa M/D/YYYY → partes[0]=mês, partes[1]=dia
-          // Se partes[0] > 12, certamente é dia (DD/MM); senão assume M/D (SheetJS padrão)
-          if(d > 12){ /* DD/MM/YYYY */ } else { const tmp=d; d=m; m=tmp; } // troca: m/d → d/m
-          dataISO=`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        } else if(dataStr.match(/^\d{4}-\d{2}-\d{2}$/)){
-          // Formato ISO YYYY-MM-DD
-          dataISO=dataStr;
-        } else if(dataStr.match(/^\d{4,5}$/)){
-          // Número serial do Excel (fallback)
-          const serial = parseInt(dataStr);
-          const excelEpoch = new Date(1899,11,30);
-          const dt = new Date(excelEpoch.getTime() + serial * 86400000);
-          dataISO=`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
-        } else if(dataStr.includes('-') || dataStr.includes('/')){
-          // Tentativa genérica via Date.parse como último recurso
-          const dt = new Date(dataStr);
-          if(!isNaN(dt)) dataISO=`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+        if(rawData === null || rawData === undefined || rawData === ''){
+          continue; // sem data, pula
+        } else if(typeof rawData === 'number'){
+          // Número serial do Excel (ex: 45689 = 01/02/2025)
+          const excelEpoch = new Date(Date.UTC(1899,11,30));
+          const dt = new Date(excelEpoch.getTime() + rawData * 86400000);
+          dataISO=`${dt.getUTCFullYear()}-${String(dt.getUTCMonth()+1).padStart(2,'0')}-${String(dt.getUTCDate()).padStart(2,'0')}`;
+        } else {
+          const dataStr = rawData.toString().trim();
+          if(dataStr.match(/^\d{4}-\d{2}-\d{2}$/)){
+            dataISO = dataStr;
+          } else if(dataStr.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)){
+            // SheetJS M/D/YYYY → converte para ISO
+            const [p0,p1,p2] = dataStr.split('/').map(Number);
+            // se p0>12, é DD/MM/YYYY; senão SheetJS usa M/D/YYYY
+            const dd = p0>12 ? p0 : p1, mm = p0>12 ? p1 : p0;
+            dataISO=`${p2}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
+          } else {
+            const dt = new Date(dataStr);
+            if(!isNaN(dt)) dataISO=`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+          }
         }
+        if(!dataISO) continue;
 
         const tipo  = (row[iTipo]||'').toString().toLowerCase().trim();
         const catRaw= (row[iCat]||'').toString().trim();
         const subRaw= (row[iSub]||'').toString().trim();
-        // DESCRICAO opcional: se vazia usa subcategoria como fallback
+        // DESCRIÇÃO opcional: usa subcategoria como fallback se vazia
         const descRaw = (row[iDesc]||'').toString().trim();
         const desc  = descRaw || subRaw || catRaw;
         const cat   = catRaw.toLowerCase().trim();
         const sub   = subRaw.toLowerCase().trim();
         const conta = (row[iConta]||'').toString().toLowerCase().trim();
-        const valorRaw = (row[iValor]||'0').toString().replace(/[R$\s.]/g,'').replace(',','.');
-        const valor = parseFloat(valorRaw)||0;
+        // raw:true → valor já é número puro; aceita também string com R$, ponto e vírgula
+        const rawValor = row[iValor];
+        let valor = 0;
+        if(typeof rawValor === 'number'){
+          valor = Math.abs(rawValor); // número puro do Excel, sem replace
+        } else {
+          // string digitada pelo usuário: remove R$, espaços, pontos de milhar, troca vírgula por ponto
+          const vs = (rawValor||'0').toString().replace(/[R$\s]/g,'').replace(/\./g,'').replace(',','.');
+          valor = parseFloat(vs)||0;
+        }
         const sit   = (row[iSit]||'pago').toString().toLowerCase().trim()||'pago';
         const obs   = (row[iObs]||'').toString().trim();
 
-        if(!dataISO || !tipo || !valor) continue;
+        if(!tipo || !valor) continue;
 
         // ── Validação obrigatória de Categoria + Subcategoria ──
         const chave = cat+'|'+sub;
@@ -2403,7 +2412,11 @@ function processarArquivo(file){
         return;
       }
 
-      st.innerHTML=`<span style="color:#22c55e">✅ ${_dadosImport.length} lançamento(s) válido(s) encontrado(s) para importar.</span>`;
+      // Detecta mês/ano dos dados para aviso
+      const datasImport = _dadosImport.map(r=>r.data).filter(Boolean);
+      const mesesUnicos = [...new Set(datasImport.map(d=>{ const [y,m]=d.split('-'); return `${MESES[parseInt(m)-1]} ${y}`; }))];
+      const avisoMes = mesesUnicos.length > 0 ? ` — Período: <strong>${mesesUnicos.join(', ')}</strong>` : '';
+      st.innerHTML=`<span style="color:#22c55e">✅ ${_dadosImport.length} lançamento(s) válido(s) encontrado(s) para importar${avisoMes}.</span>`;
 
       // Tabela preview
       const prev = document.getElementById('importPreview');
@@ -2455,6 +2468,13 @@ async function confirmarImportacao(){
     if(r.ok||r.status===201||r.status===204) ok++; else erros++;
   }
   fecharImportar();
+  // Navega para o mês/ano dos dados importados
+  if(_dadosImport.length > 0){
+    const primeiraData = _dadosImport[0].data; // YYYY-MM-DD
+    const [yy,mm] = primeiraData.split('-').map(Number);
+    _ano = yy; _mes = mm - 1;
+    document.getElementById('mesAtual').textContent = `${MESES[_mes]} ${_ano}`;
+  }
   await loadTransacoes();
   showAlert(`✅ Importação concluída: ${ok} lançamento(s) inserido(s)${erros>0?' | ⚠ '+erros+' erro(s)':''}`);
   btn.disabled=false;
