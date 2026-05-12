@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CondoGestor — Comunicados</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy: #0B1F3A; --navy-light: #142D52; --gold: #E8A320; --gold-light: #F5C35A;
+  --white: #FFFFFF; --off-white: #F4F2ED; --border: #DDD9D0; --border-light: #EAE7E0;
+  --text-dark: #0D1B2A; --text-mid: #3D526B; --text-light: #7A8FA6;
+  --green: #15803D; --green-bg: #DCFCE7; --green-border: #86EFAC;
+  --red: #B91C1C; --red-bg: #FEE2E2; --red-border: #FCA5A5;
+  --amber: #B45309; --amber-bg: #FEF3C7; --amber-border: #FCD34D;
+  --blue: #1D4ED8; --blue-bg: #EFF6FF; --blue-border: #93C5FD;
+  --sidebar-w: 240px; --radius: 12px; --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--off-white); color: var(--text-dark); display: flex; min-height: 100vh; }
+.sidebar { width: var(--sidebar-w); background: var(--navy); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; overflow-y: auto; }
+.sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 1.4rem 1.25rem 1.2rem; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 0.5rem; }
+.logo-name { font-size: 1.05rem; font-weight: 800; color: #fff; }
+.logo-name span { color: var(--gold); }
+.condo-selector { margin: 0 0.75rem 0.5rem; background: rgba(255,255,255,0.07); border-radius: 8px; padding: 9px 12px; border: 1px solid rgba(255,255,255,0.07); }
+.condo-selector label { font-size: 0.65rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: rgba(255,255,255,0.35); display: block; margin-bottom: 4px; }
+.condo-selector div { color: #fff; font-size: 0.84rem; font-weight: 700; }
+.sidebar-section { padding: 0 0.75rem; margin-bottom: 0.2rem; }
+.sidebar-section-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.28); padding: 0.8rem 0.5rem 0.35rem; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; text-decoration: none; font-size: 0.84rem; font-weight: 500; color: rgba(255,255,255,0.58); transition: all var(--transition); margin-bottom: 1px; }
+.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.65; }
+.nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.9); }
+.nav-item.active { background: rgba(232,163,32,0.18); color: #F5C35A; font-weight: 700; }
+.nav-item.active svg { opacity: 1; }
+.sidebar-bottom { margin-top: auto; padding: 1rem 0.75rem; border-top: 1px solid rgba(255,255,255,0.07); }
+.user-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,0.06); }
+.user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; color: var(--navy); flex-shrink: 0; }
+.user-name { font-size: 0.78rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+.user-role-lbl { font-size: 0.68rem; color: rgba(255,255,255,0.38); }
+.logout-btn { margin-left: auto; background: none; border: none; cursor: pointer; padding: 4px; color: rgba(255,255,255,0.35); transition: color .2s; }
+.logout-btn:hover { color: #FCA5A5; }
+.logout-btn svg { width: 15px; height: 15px; }
+.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+.topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 1.5rem; height: 60px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+.topbar h1 { font-size: 1rem; font-weight: 800; color: var(--navy); }
+.topbar p { font-size: 0.72rem; color: var(--text-light); margin-top: 1px; }
+.topbar-right { display: flex; gap: 8px; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; font-family: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer; border: none; transition: all var(--transition); text-decoration: none; }
+.btn svg { width: 14px; height: 14px; }
+.btn-gold { background: var(--gold); color: var(--navy); }
+.btn-gold:hover { background: var(--gold-light); }
+.btn-ghost { background: transparent; color: var(--text-mid); border: 1.5px solid var(--border); }
+.btn-ghost:hover { background: var(--off-white); }
+.comm-wrap { display: flex; flex: 1; overflow: hidden; }
+/* LISTA */
+.col-list { width: 320px; flex-shrink: 0; border-right: 1px solid var(--border); display: flex; flex-direction: column; background: var(--white); overflow: hidden; }
+.list-filters { display: flex; align-items: center; gap: 6px; padding: 10px 12px; background: var(--off-white); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.search-wrap { display: flex; align-items: center; gap: 6px; background: var(--white); border: 1.5px solid var(--border); border-radius: 7px; padding: 0 9px; height: 32px; flex: 1; }
+.search-wrap:focus-within { border-color: var(--navy); }
+.search-wrap svg { width: 13px; height: 13px; color: var(--text-light); flex-shrink: 0; }
+.search-wrap input { border: none; outline: none; font-family: inherit; font-size: 0.78rem; color: var(--text-dark); background: transparent; width: 100%; }
+.search-wrap input::placeholder { color: var(--text-light); }
+.fsel { height: 32px; padding: 0 8px; border: 1.5px solid var(--border); border-radius: 7px; font-family: inherit; font-size: 0.74rem; color: var(--text-mid); background: var(--white); cursor: pointer; outline: none; }
+.list-scroll { flex: 1; overflow-y: auto; }
+.badge { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 99px; font-size: 0.66rem; font-weight: 700; }
+.b-red    { background: var(--red-bg);   color: var(--red);   border: 1px solid var(--red-border); }
+.b-amber  { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+.b-blue   { background: var(--blue-bg);  color: var(--blue);  border: 1px solid var(--blue-border); }
+.b-green  { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.b-gray   { background: #F1F5F9; color: #64748B; border: 1px solid #E2E8F0; }
+/* Aviso item */
+.av-item { padding: 13px 14px; border-bottom: 1px solid var(--border-light); cursor: pointer; transition: background var(--transition); }
+.av-item:hover { background: #FAFAF8; }
+.av-item.sel { background: #FDF8EE; border-left: 3px solid var(--gold); }
+.av-tipo-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.av-tit { font-size: 0.84rem; font-weight: 700; color: var(--text-dark); margin-bottom: 3px; line-height: 1.3; }
+.av-txt { font-size: 0.74rem; color: var(--text-mid); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.av-foot { font-size: 0.68rem; color: var(--text-light); margin-top: 5px; }
+/* Detalhe */
+.col-detail { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.detail-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; height: 100%; color: var(--text-light); text-align: center; padding: 2rem; background: var(--white); }
+.detail-empty svg { width: 36px; height: 36px; opacity: 0.18; }
+.detail-empty h3 { font-size: 0.92rem; font-weight: 700; color: var(--text-mid); }
+.detail-empty p { font-size: 0.8rem; }
+/* Painel lateral */
+.col-side { width: 260px; flex-shrink: 0; display: flex; flex-direction: column; overflow: hidden; background: var(--white); border-left: 1px solid var(--border); }
+.kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.kpi-c { background: var(--white); padding: 13px 14px; }
+.kpi-lbl { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-light); margin-bottom: 3px; }
+.kpi-v { font-size: 1.45rem; font-weight: 800; line-height: 1; }
+.kpi-s { font-size: 0.66rem; color: var(--text-light); margin-top: 2px; }
+.qa-block { padding: 12px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.qa-lbl { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-light); margin-bottom: 8px; }
+.qa-row { display: flex; align-items: center; gap: 9px; width: 100%; padding: 9px 10px; background: var(--off-white); border: 1.5px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.78rem; font-weight: 600; color: var(--text-dark); cursor: pointer; transition: all var(--transition); text-align: left; margin-bottom: 5px; }
+.qa-row:hover { background: var(--white); border-color: var(--navy); color: var(--navy); }
+.qa-ic { width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+.qa-texts { display: flex; flex-direction: column; }
+.qa-texts span { font-size: 0.68rem; color: var(--text-light); font-weight: 400; }
+.recent-block { flex: 1; overflow-y: auto; padding: 12px 14px; }
+.rb-lbl { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-light); margin-bottom: 8px; }
+.rec-row { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border-light); }
+.rec-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.rec-t { font-size: 0.75rem; color: var(--text-mid); line-height: 1.4; flex: 1; }
+.rec-d { font-size: 0.66rem; color: var(--text-light); white-space: nowrap; }
+.side-link { display: flex; align-items: center; gap: 9px; padding: 10px 12px; margin: 0 14px 12px; background: var(--blue-bg); border: 1.5px solid var(--blue-border); border-radius: 8px; text-decoration: none; font-size: 0.78rem; font-weight: 700; color: var(--blue); transition: all var(--transition); }
+.side-link:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+/* Modais */
+.modal-ov { position: fixed; inset: 0; background: rgba(11,31,58,.48); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity var(--transition); }
+.modal-ov.open { opacity: 1; pointer-events: all; }
+.modal { background: var(--white); border-radius: 16px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; transform: translateY(16px); transition: transform var(--transition); box-shadow: 0 20px 60px rgba(0,0,0,.15); }
+.modal-ov.open .modal { transform: translateY(0); }
+.mh { display: flex; align-items: center; gap: 10px; padding: 1.1rem 1.4rem; border-bottom: 1px solid var(--border); }
+.mh-ic { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+.mh-title { font-size: 0.92rem; font-weight: 800; color: var(--navy); flex: 1; }
+.mc { background: none; border: none; cursor: pointer; padding: 4px; color: var(--text-light); border-radius: 6px; transition: all var(--transition); }
+.mc:hover { background: var(--off-white); color: var(--navy); }
+.mc svg { width: 17px; height: 17px; }
+.mb { padding: 1.25rem 1.4rem; }
+.mf { display: flex; gap: 8px; justify-content: flex-end; padding: 0.9rem 1.4rem; border-top: 1px solid var(--border); }
+.field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 0.9rem; }
+.field label { font-size: 0.75rem; font-weight: 700; color: var(--navy); }
+.field input, .field select, .field textarea { padding: 9px 11px; border: 1.5px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.84rem; color: var(--text-dark); background: var(--white); outline: none; transition: border-color var(--transition); }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--navy); }
+.field textarea { resize: vertical; min-height: 90px; }
+.tipo-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; }
+.tipo-opt { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 6px; border: 1.5px solid var(--border); border-radius: 9px; cursor: pointer; transition: all var(--transition); text-align: center; }
+.tipo-opt.sel { border-color: var(--navy); background: #EFF3FA; }
+.tipo-opt .ti { font-size: 18px; }
+.tipo-opt .tl { font-size: 0.68rem; font-weight: 700; color: var(--text-mid); }
+.tipo-opt.sel .tl { color: var(--navy); }
+.dest-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 9px; border: 1.5px solid var(--border); border-radius: 99px; font-size: 0.72rem; font-weight: 600; cursor: pointer; transition: all var(--transition); color: var(--text-mid); background: var(--white); }
+.chip.sel { background: var(--navy); color: #fff; border-color: var(--navy); }
+.fhint { font-size: 0.68rem; color: var(--text-light); margin-top: 3px; }
+.empty-s { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 2.5rem 1.5rem; text-align: center; color: var(--text-light); }
+.empty-s svg { width: 28px; height: 28px; opacity: 0.25; }
+.empty-s p { font-size: 0.8rem; }
+.spinner { width: 13px; height: 13px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; display: inline-block; }
+.spinner-dark { border-color: rgba(0,0,0,.1); border-top-color: var(--navy); }
+@keyframes spin { to { transform: rotate(360deg); } }
+.toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--navy); color: #fff; padding: 11px 16px; border-radius: 10px; font-size: 0.82rem; font-weight: 600; z-index: 300; transform: translateY(80px); opacity: 0; transition: all .3s; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.15); }
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { background: var(--green); }
+.toast.error { background: var(--red); }
+::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <a href="/sindico/dashboard.html" class="sidebar-logo">
+    <span class="logo-name">Condo<span>Gestor</span></span>
+  </a>
+  <div class="condo-selector">
+    <label>Condomínio</label>
+    <div id="select-condo">Carregando...</div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Principal</div>
+    <a href="/sindico/dashboard.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
+    <a href="/sindico/moradores.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Moradores</a>
+    <a href="/sindico/chamados.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Chamados</a>
+    <a href="/sindico/comunicados.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17H2a3 3 0 000 6h20a3 3 0 000-6z"/><path d="M13.73 1a2 2 0 00-3.46 0L2 16h20z"/></svg>Comunicados</a>
+    <a href="/sindico/documentos.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documentos</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Financeiro</div>
+    <a href="/sindico/financeiro.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Financeiro</a>
+    <a href="/sindico/transacoes.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Transações</a>
+    <a href="/sindico/categorias.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Categorias</a>
+    <a href="/sindico/metas.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Metas & Projetos</a>
+    <a href="/sindico/orcamento.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Orçamento</a>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-avatar" id="avatar-initials">--</div>
+      <div><div class="user-name" id="user-name">Carregando...</div><div class="user-role-lbl">Síndico</div></div>
+      <button class="logout-btn" onclick="fazerLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div>
+      <h1>📢 Comunicados</h1>
+      <p id="subtitulo">Avisos publicados para os moradores</p>
+    </div>
+    <div class="topbar-right">
+      <a href="/sindico/chamados.html" class="btn btn-ghost">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Ver Chamados
+      </a>
+      <button class="btn btn-gold" onclick="abrirModalAviso()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17H2a3 3 0 000 6h20a3 3 0 000-6z"/><path d="M13.73 1a2 2 0 00-3.46 0L2 16h20z"/></svg>
+        Publicar Aviso
+      </button>
+    </div>
+  </header>
+
+  <div class="comm-wrap">
+
+    <!-- LISTA -->
+    <div class="col-list">
+      <div class="list-filters">
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Buscar comunicado..." id="bav" oninput="filtrarAv()">
+        </div>
+        <select class="fsel" id="ftp" onchange="filtrarAv()">
+          <option value="">Todos</option>
+          <option value="aviso">Aviso Geral</option>
+          <option value="manutencao">Manutenção</option>
+          <option value="assembleia">Assembleia</option>
+          <option value="cobranca">Cobrança</option>
+          <option value="emergencia">Emergência</option>
+          <option value="informativo">Informativo</option>
+        </select>
+      </div>
+      <div class="list-scroll" id="lista-av">
+        <div class="empty-s"><div class="spinner spinner-dark"></div><p>Carregando...</p></div>
+      </div>
+    </div>
+
+    <!-- DETALHE -->
+    <div class="col-detail" id="col-detail">
+      <div class="detail-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 17H2a3 3 0 000 6h20a3 3 0 000-6z"/><path d="M13.73 1a2 2 0 00-3.46 0L2 16h20z"/></svg>
+        <h3>Selecione um comunicado</h3>
+        <p>Clique em um aviso para ver o conteúdo completo</p>
+      </div>
+    </div>
+
+    <!-- PAINEL LATERAL -->
+    <div class="col-side">
+      <div class="kpi-grid">
+        <div class="kpi-c"><div class="kpi-lbl">Total</div><div class="kpi-v" id="kv-total" style="color:var(--amber)">—</div><div class="kpi-s">publicados</div></div>
+        <div class="kpi-c"><div class="kpi-lbl">Este mês</div><div class="kpi-v" id="kv-mes" style="color:var(--blue)">—</div><div class="kpi-s">comunicados</div></div>
+      </div>
+      <div class="qa-block">
+        <div class="qa-lbl">Publicar rápido</div>
+        <button class="qa-row" onclick="abrirModalAviso('aviso')"><div class="qa-ic" style="background:#FEF3C7">📢</div><div class="qa-texts">Aviso Geral<span>Comunicar todos os moradores</span></div></button>
+        <button class="qa-row" onclick="abrirModalAviso('manutencao')"><div class="qa-ic" style="background:#EFF6FF">🔧</div><div class="qa-texts">Manutenção<span>Informar obras ou serviços</span></div></button>
+        <button class="qa-row" onclick="abrirModalAviso('assembleia')"><div class="qa-ic" style="background:#F5F3FF">📋</div><div class="qa-texts">Convocar Assembleia<span>Reunião de moradores</span></div></button>
+        <button class="qa-row" onclick="abrirModalAviso('emergencia')"><div class="qa-ic" style="background:#FEE2E2">🚨</div><div class="qa-texts">Urgente<span>Situação de atenção imediata</span></div></button>
+      </div>
+      <div class="recent-block">
+        <a href="/sindico/chamados.html" class="side-link">
+          💬 Ir para Chamados →
+        </a>
+        <div class="rb-lbl">Publicados Recentemente</div>
+        <div id="recentes"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL PUBLICAR AVISO -->
+<div class="modal-ov" id="m-aviso" onclick="mfora(event,'m-aviso')">
+  <div class="modal">
+    <div class="mh"><div class="mh-ic" style="background:var(--amber-bg)">📢</div><span class="mh-title">Publicar Comunicado</span><button class="mc" onclick="mclose('m-aviso')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="mb">
+      <div class="field">
+        <label>Tipo</label>
+        <div class="tipo-grid" id="tg">
+          <div class="tipo-opt sel" data-tipo="aviso" onclick="sTipo(this)"><span class="ti">📢</span><span class="tl">Aviso Geral</span></div>
+          <div class="tipo-opt" data-tipo="manutencao" onclick="sTipo(this)"><span class="ti">🔧</span><span class="tl">Manutenção</span></div>
+          <div class="tipo-opt" data-tipo="assembleia" onclick="sTipo(this)"><span class="ti">📋</span><span class="tl">Assembleia</span></div>
+          <div class="tipo-opt" data-tipo="cobranca" onclick="sTipo(this)"><span class="ti">💰</span><span class="tl">Cobrança</span></div>
+          <div class="tipo-opt" data-tipo="emergencia" onclick="sTipo(this)"><span class="ti">🚨</span><span class="tl">Emergência</span></div>
+          <div class="tipo-opt" data-tipo="informativo" onclick="sTipo(this)"><span class="ti">ℹ️</span><span class="tl">Informativo</span></div>
+        </div>
+      </div>
+      <div class="field"><label>Título *</label><input type="text" id="av-t" placeholder="Ex: Manutenção da bomba d'água — 12/06"></div>
+      <div class="field"><label>Mensagem *</label><textarea id="av-x" placeholder="Conteúdo do comunicado para os moradores..." style="min-height:100px"></textarea></div>
+      <div class="field">
+        <label>Destinatários</label>
+        <div class="dest-chips">
+          <div class="chip sel" data-dest="todos" onclick="tChip(this)">👥 Todos</div>
+          <div class="chip" data-dest="proprietarios" onclick="tChip(this)">🏠 Proprietários</div>
+          <div class="chip" data-dest="inquilinos" onclick="tChip(this)">🔑 Inquilinos</div>
+        </div>
+        <div class="fhint">Selecione quem deve receber este comunicado</div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn btn-ghost" onclick="mclose('m-aviso')">Cancelar</button><button class="btn btn-gold" id="bsa" onclick="salvarAviso()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Publicar</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="toast-msg"></span></div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+const SB = createClient('https://siczyohqmlrmirqgzlxb.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpY3p5b2hxbWxybWlycWd6bHhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjE0MDksImV4cCI6MjA5MzIzNzQwOX0.JOf-VagxjdKNmC9MGU6MP6NvO6b1EBhzXirUdsjWYOw')
+
+const {data:{session}} = await SB.auth.getSession()
+if(!session){window.location.href='login.html';throw new Error()}
+const {data:perfil} = await SB.from('usuarios').select('nome,role,condominio_id').eq('id',session.user.id).single()
+if(!perfil||perfil.role!=='sindico'){window.location.href='login.html';throw new Error()}
+
+const nome = perfil.nome||session.user.email
+document.getElementById('user-name').textContent = nome
+document.getElementById('avatar-initials').textContent = nome.split(' ').slice(0,2).map(p=>p[0].toUpperCase()).join('')
+window.fazerLogout = async()=>{await SB.auth.signOut();window.location.href='login.html'}
+try{const{data:co}=await SB.from('condominios').select('nome').eq('id',perfil.condominio_id).single();if(co)document.getElementById('select-condo').textContent=co.nome}catch(e){}
+
+let avisos=[],curAv=null,tipoSel='aviso'
+const COND=perfil.condominio_id
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+const fmt=d=>d?new Date(d).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}):'—'
+const fmtLong=d=>d?new Date(d).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}):'—'
+const tpEm ={aviso:'📢',manutencao:'🔧',assembleia:'📋',cobranca:'💰',emergencia:'🚨',informativo:'ℹ️'}
+const tpLbl={aviso:'Aviso Geral',manutencao:'Manutenção',assembleia:'Assembleia',cobranca:'Cobrança',emergencia:'Emergência',informativo:'Informativo'}
+const tpBg ={aviso:'b-amber',manutencao:'b-blue',assembleia:'b-gray',cobranca:'b-green',emergencia:'b-red',informativo:'b-gray'}
+
+async function carregar(){
+  const{data:av}=await SB.from('comunicados').select('*').eq('condominio_id',COND).order('criado_em',{ascending:false}).limit(100)
+  avisos=av||[]
+  const mes=new Date().getMonth()
+  const doMes=avisos.filter(a=>new Date(a.criado_em).getMonth()===mes).length
+  document.getElementById('kv-total').textContent=avisos.length
+  document.getElementById('kv-mes').textContent=doMes
+  document.getElementById('subtitulo').textContent=`${avisos.length} comunicado${avisos.length!==1?'s':''} publicado${avisos.length!==1?'s':''}`
+  renderAv(avisos);renderRecentes()
+}
+
+function renderAv(lista){
+  const el=document.getElementById('lista-av')
+  if(!lista.length){el.innerHTML=`<div class="empty-s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 17H2a3 3 0 000 6h20a3 3 0 000-6z"/><path d="M13.73 1a2 2 0 00-3.46 0L2 16h20z"/></svg><p>Nenhum comunicado publicado</p></div>`;return}
+  el.innerHTML=lista.map(a=>`
+    <div class="av-item${curAv?.id===a.id?' sel':''}" onclick="abrirAv('${a.id}')">
+      <div class="av-tipo-row">
+        <span style="font-size:14px">${tpEm[a.tipo]||'📢'}</span>
+        <span class="badge ${tpBg[a.tipo]||'b-amber'}">${tpLbl[a.tipo]||a.tipo}</span>
+        ${a.destinatarios?`<span class="badge b-gray" style="font-size:0.62rem">${esc(a.destinatarios)}</span>`:''}
+      </div>
+      <div class="av-tit">${esc(a.titulo||'—')}</div>
+      <div class="av-txt">${esc(a.texto||'')}</div>
+      <div class="av-foot">📅 ${fmtLong(a.criado_em)}</div>
+    </div>`).join('')
+}
+
+window.abrirAv=function(id){
+  curAv=avisos.find(a=>a.id===id)
+  renderAv(filtrarListaAv())
+  const a=curAv
+  document.getElementById('col-detail').innerHTML=`
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);background:var(--off-white);flex-shrink:0;display:flex;align-items:center;gap:12px">
+      <span style="font-size:28px">${tpEm[a.tipo]||'📢'}</span>
+      <div>
+        <span class="badge ${tpBg[a.tipo]||'b-amber'}" style="margin-bottom:4px">${tpLbl[a.tipo]||a.tipo}</span>
+        ${a.destinatarios?`<div style="font-size:0.72rem;color:var(--text-light);margin-top:2px">Para: ${esc(a.destinatarios)}</div>`:''}
+      </div>
+      <span style="margin-left:auto;font-size:0.72rem;color:var(--text-light)">${fmtLong(a.criado_em)}</span>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:20px 18px;background:var(--white)">
+      <div style="font-size:1.05rem;font-weight:800;color:var(--navy);margin-bottom:14px;line-height:1.3">${esc(a.titulo||'—')}</div>
+      <div style="font-size:0.88rem;color:var(--text-dark);line-height:1.75;white-space:pre-wrap">${esc(a.texto||'')}</div>
+      ${a.autor?`<div style="margin-top:20px;padding-top:12px;border-top:1px solid var(--border);font-size:0.75rem;color:var(--text-light)">Publicado por <strong>${esc(a.autor)}</strong></div>`:''}
+    </div>
+  `
+}
+
+function renderRecentes(){
+  const el=document.getElementById('recentes')
+  el.innerHTML=avisos.slice(0,6).map(a=>`
+    <div class="rec-row">
+      <div class="rec-dot" style="background:var(--amber)"></div>
+      <div class="rec-t">${esc(a.titulo)}</div>
+      <div class="rec-d">${fmt(a.criado_em)}</div>
+    </div>`).join('')||'<p style="font-size:0.78rem;color:var(--text-light)">Sem comunicados</p>'
+}
+
+function filtrarListaAv(){
+  const b=(document.getElementById('bav')?.value||'').toLowerCase()
+  const t=document.getElementById('ftp')?.value||''
+  return avisos.filter(a=>((a.titulo||'')+(a.texto||'')).toLowerCase().includes(b)&&(!t||a.tipo===t))
+}
+window.filtrarAv=()=>renderAv(filtrarListaAv())
+
+window.abrirModalAviso=function(tp){
+  document.getElementById('av-t').value='';document.getElementById('av-x').value=''
+  if(tp){const el=document.querySelector(`[data-tipo="${tp}"]`);if(el)sTipo(el)}
+  document.getElementById('m-aviso').classList.add('open')
+}
+window.sTipo=function(el){
+  document.querySelectorAll('#tg .tipo-opt').forEach(e=>e.classList.remove('sel'))
+  el.classList.add('sel');tipoSel=el.dataset.tipo
+}
+window.tChip=function(el){
+  if(el.dataset.dest==='todos'){document.querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel')}
+  else{document.querySelector('[data-dest="todos"]').classList.remove('sel');el.classList.toggle('sel')}
+}
+window.salvarAviso=async function(){
+  const t=document.getElementById('av-t').value.trim()
+  const x=document.getElementById('av-x').value.trim()
+  if(!t||!x){toast('Preencha título e mensagem','error');return}
+  const dest=[...document.querySelectorAll('.chip.sel')].map(c=>c.dataset.dest).join(', ')||'todos'
+  const btn=document.getElementById('bsa')
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Publicando...'
+  const{error}=await SB.from('comunicados').insert({titulo:t,texto:x,tipo:tipoSel,destinatarios:dest,autor:nome,condominio_id:COND,criado_em:new Date().toISOString()})
+  btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Publicar'
+  if(error){toast('Erro: '+error.message,'error');return}
+  toast('Comunicado publicado!','success');mclose('m-aviso');await carregar()
+}
+
+window.mclose=id=>document.getElementById(id).classList.remove('open')
+window.mfora=(e,id)=>{if(e.target===document.getElementById(id))mclose(id)}
+function toast(msg,tipo='success'){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;t.className=`toast ${tipo} show`;setTimeout(()=>t.classList.remove('show'),3000)}
+
+await carregar()
+</script>
+</body>
+</html>
