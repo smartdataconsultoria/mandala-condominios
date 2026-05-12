@@ -2309,15 +2309,29 @@ function processarArquivo(file){
         const dataStr = (row[iData]||'').toString().trim();
         let dataISO = '';
         if(dataStr.match(/^\d{2}\/\d{2}\/\d{4}$/)){
+          // Formato DD/MM/YYYY
           const [d,m,y]=dataStr.split('/'); dataISO=`${y}-${m}-${d}`;
         } else if(dataStr.match(/^\d{4}-\d{2}-\d{2}$/)){
+          // Formato ISO YYYY-MM-DD
           dataISO=dataStr;
+        } else if(dataStr.match(/^\d{4,5}$/)){
+          // Número serial do Excel (ex: 45689 = 01/02/2026)
+          const serial = parseInt(dataStr);
+          const excelEpoch = new Date(1899,11,30);
+          const ms = excelEpoch.getTime() + serial * 86400000;
+          const dt = new Date(ms);
+          const yy = dt.getFullYear();
+          const mm = String(dt.getMonth()+1).padStart(2,'0');
+          const dd = String(dt.getDate()).padStart(2,'0');
+          dataISO = `${yy}-${mm}-${dd}`;
         }
 
         const tipo  = (row[iTipo]||'').toString().toLowerCase().trim();
-        const desc  = (row[iDesc]||'').toString().trim();
         const catRaw= (row[iCat]||'').toString().trim();
         const subRaw= (row[iSub]||'').toString().trim();
+        // DESCRICAO opcional: se vazia usa subcategoria como fallback
+        const descRaw = (row[iDesc]||'').toString().trim();
+        const desc  = descRaw || subRaw || catRaw;
         const cat   = catRaw.toLowerCase().trim();
         const sub   = subRaw.toLowerCase().trim();
         const conta = (row[iConta]||'').toString().toLowerCase().trim();
@@ -2326,7 +2340,7 @@ function processarArquivo(file){
         const sit   = (row[iSit]||'pago').toString().toLowerCase().trim()||'pago';
         const obs   = (row[iObs]||'').toString().trim();
 
-        if(!dataISO || !tipo || !desc || !valor) continue;
+        if(!dataISO || !tipo || !valor) continue;
 
         // ── Validação obrigatória de Categoria + Subcategoria ──
         const chave = cat+'|'+sub;
