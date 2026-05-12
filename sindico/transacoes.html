@@ -118,8 +118,8 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 
 /* TABELA */
 .table-wrap{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.table-head{display:grid;grid-template-columns:36px 100px 1fr 180px 140px 110px 100px 60px;gap:8px;padding:12px 20px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#4a5568}
-.table-row{display:grid;grid-template-columns:36px 100px 1fr 180px 140px 110px 100px 60px;gap:8px;padding:13px 20px;border-bottom:1px solid var(--border)20;align-items:center;transition:.15s;cursor:pointer}
+.table-head{display:grid;grid-template-columns:36px 100px 1fr 130px 150px 130px 110px 100px 60px;gap:8px;padding:12px 20px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#4a5568}
+.table-row{display:grid;grid-template-columns:36px 100px 1fr 130px 150px 130px 110px 100px 60px;gap:8px;padding:13px 20px;border-bottom:1px solid var(--border)20;align-items:center;transition:.15s;cursor:pointer}
 .table-row:hover{background:var(--border)30}
 .table-row:last-child{border-bottom:none}
 .tipo-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px}
@@ -647,6 +647,19 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
     <div class="search-box">
       <input type="text" id="busca" placeholder="Buscar transação..." oninput="renderTabela()"/>
     </div>
+    <!-- FILTRO CATEGORIA/SUBCATEGORIA -->
+    <div style="position:relative">
+      <button id="btnCatFiltro" onclick="toggleCatMenu()" style="display:flex;align-items:center;gap:7px;background:var(--white);border:1px solid var(--border);border-radius:20px;padding:7px 14px;font-size:13px;font-weight:600;color:var(--text-mid);cursor:pointer;white-space:nowrap;transition:.2s" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor=(_catFiltro||_subCatFiltro)?'var(--gold)':'var(--border)'">
+        🏷️ <span id="catFiltroLabel">Categoria</span> <span style="font-size:10px">▾</span>
+      </button>
+      <div id="catMenu" style="display:none;position:absolute;top:calc(100%+6px);right:0;background:var(--white);border:1px solid var(--border);border-radius:12px;padding:6px;min-width:240px;z-index:200;box-shadow:0 8px 24px #00000030;max-height:380px;overflow-y:auto">
+        <div style="padding:6px 10px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-light)">Filtrar por</div>
+        <div onclick="setCatFiltro('','','Categoria')" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text-mid);transition:.15s" onmouseover="this.style.background='var(--off-white)'" onmouseout="this.style.background='none'">
+          ✕ Todas as categorias
+        </div>
+        <div id="catMenuItens"></div>
+      </div>
+    </div>
   </div>
 
   <!-- CARDS DINÂMICOS -->
@@ -669,6 +682,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
  <div onclick="ordenarPor('data')" style="cursor:pointer">Data<span id="sortIcon-data"></span></div>
  <div onclick="ordenarPor('descricao')" style="cursor:pointer">Descrição<span id="sortIcon-descricao"></span></div>
  <div onclick="ordenarPor('categoria')" style="cursor:pointer">Categoria<span id="sortIcon-categoria"></span></div>
+ <div onclick="ordenarPor('subcategoria')" style="cursor:pointer">Subcategoria<span id="sortIcon-subcategoria"></span></div>
  <div onclick="ordenarPor('conta')" style="cursor:pointer">Conta<span id="sortIcon-conta"></span></div>
  <div onclick="ordenarPor('valor')" style="cursor:pointer;text-align:right">Valor<span id="sortIcon-valor"></span></div>
  <div onclick="ordenarPor('situacao')" style="cursor:pointer">Situação<span id="sortIcon-situacao"></span></div>
@@ -1059,6 +1073,9 @@ let _mes = new Date().getMonth();
 let _ano = new Date().getFullYear();
 let _filtro = 'todos';
 let _tipoFiltro = 'todos'; // todos | despesa | receita | transferencia
+let _catFiltro = '';      // filtra por categoria mãe (ex: 'PESSOAL')
+let _subCatFiltro = '';   // filtra por subcategoria (ex: 'Salários')
+let _catFiltroTipo = '';  // 'cat' | 'sub'
 let _saldoAnterior = 0;   // saldo acumulado dos meses anteriores
 let _transacoes = [];
 let _categorias = [];
@@ -1117,6 +1134,81 @@ function setFiltro(f,el){
   el.classList.add('active');
   renderTabela();
 }
+
+// -- FILTRO CATEGORIA/SUBCATEGORIA ------------------------
+function toggleCatMenu(){
+  const m = document.getElementById('catMenu');
+  m.style.display = m.style.display==='none' ? 'block' : 'none';
+  if(m.style.display==='block') popularCatMenu();
+}
+document.addEventListener('click', e=>{
+  const menu = document.getElementById('catMenu');
+  const btn  = document.getElementById('btnCatFiltro');
+  if(menu && btn && !btn.contains(e.target) && !menu.contains(e.target)){
+    menu.style.display='none';
+  }
+});
+
+function popularCatMenu(){
+  const itens = document.getElementById('catMenuItens');
+  if(!itens) return;
+
+  // Agrupa categorias mãe únicas
+  const cats = [...new Set(_categorias.map(c=>c.categoria).filter(Boolean))].sort();
+  let html = '';
+
+  cats.forEach(cat => {
+    const subs = _categorias.filter(c=>c.categoria===cat);
+    html += `
+      <div style="padding:4px 0">
+        <div onclick="setCatFiltro('cat','${cat.replace(/'/g,"\\'")}','${cat.replace(/'/g,"\\'")}')"
+          style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-mid);transition:.15s"
+          onmouseover="this.style.background='var(--off-white)'" onmouseout="this.style.background='none'">
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--gold);display:inline-block;flex-shrink:0"></span>
+          ${cat}
+        </div>
+        ${subs.map(s=>`
+          <div onclick="setCatFiltro('sub','${(s.nome||'').replace(/'/g,"\\'")}','${(s.nome||'').replace(/'/g,"\\'")}')"
+            style="display:flex;align-items:center;gap:8px;padding:6px 10px 6px 26px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--text-dark);transition:.15s"
+            onmouseover="this.style.background='var(--off-white)'" onmouseout="this.style.background='none'">
+            <span style="font-size:14px">${s.icone||'•'}</span> ${s.nome}
+          </div>`).join('')}
+      </div>
+      <div style="height:1px;background:var(--border);margin:2px 8px"></div>`;
+  });
+
+  // Subcategorias sem categoria mãe
+  const semCat = _categorias.filter(c=>!c.categoria);
+  if(semCat.length){
+    html += `<div style="padding:4px 0">`;
+    semCat.forEach(s=>{
+      html += `<div onclick="setCatFiltro('sub','${(s.nome||'').replace(/'/g,"\\'")}','${(s.nome||'').replace(/'/g,"\\'")}')"
+        style="display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--text-dark);transition:.15s"
+        onmouseover="this.style.background='var(--off-white)'" onmouseout="this.style.background='none'">
+        <span style="font-size:14px">${s.icone||'•'}</span> ${s.nome}</div>`;
+    });
+    html += `</div>`;
+  }
+
+  itens.innerHTML = html;
+}
+
+function setCatFiltro(tipo, valor, label){
+  _catFiltro = valor;
+  _catFiltroTipo = tipo;
+  const btn = document.getElementById('btnCatFiltro');
+  const lbl = document.getElementById('catFiltroLabel');
+  if(lbl) lbl.textContent = valor ? label : 'Categoria';
+  if(btn){
+    btn.style.background = valor ? 'var(--gold)20' : 'var(--white)';
+    btn.style.borderColor = valor ? 'var(--gold)' : 'var(--border)';
+    btn.style.color = valor ? 'var(--gold)' : 'var(--text-mid)';
+  }
+  document.getElementById('catMenu').style.display='none';
+  renderTabela();
+}
+window.setCatFiltro = setCatFiltro;
+window.toggleCatMenu = toggleCatMenu;
 
 // -- LOAD DADOS -------------------------------------------
 async function loadAll(){
@@ -1296,7 +1388,7 @@ let _ordemCampo = 'data';
 let _ordemDir = 'desc';
 
 function atualizarIconesOrdenacao(){
-  const campos = ['data','descricao','categoria','conta','valor','situacao'];
+  const campos = ['data','descricao','categoria','subcategoria','conta','valor','situacao'];
   campos.forEach(c => {
     const el = document.getElementById('sortIcon-' + c);
     if(!el) return;
@@ -1321,6 +1413,12 @@ function renderTabela(){
     if(_filtro==='fixo'     && !t.recorrente) return false;
     if(_filtro==='recebido' && !(t.tipo==='receita' && t.situacao==='pago')) return false;
     if(_filtro==='pago'     && !(t.tipo==='despesa' && t.situacao==='pago')) return false;
+    // Filtro por categoria/subcategoria
+    if(_catFiltro){
+      const cat = catMap[t.categoria_id];
+      if(_catFiltroTipo==='cat' && (!cat || normalizar(cat.categoria)!==normalizar(_catFiltro))) return false;
+      if(_catFiltroTipo==='sub' && (!cat || normalizar(cat.nome)!==normalizar(_catFiltro))) return false;
+    }
     
     if (busca) {
       const cat = catMap[t.categoria_id];
@@ -1346,7 +1444,8 @@ function renderTabela(){
     switch(_ordemCampo){
       case 'data': va = a.data || ''; vb = b.data || ''; break;
       case 'descricao': va = a.descricao || ''; vb = b.descricao || ''; break;
-      case 'categoria': va = (catMap[a.categoria_id]?.nome) || ''; vb = (catMap[b.categoria_id]?.nome) || ''; break;
+      case 'categoria': va = (catMap[a.categoria_id]?.categoria) || ''; vb = (catMap[b.categoria_id]?.categoria) || ''; break;
+      case 'subcategoria': va = (catMap[a.categoria_id]?.nome) || ''; vb = (catMap[b.categoria_id]?.nome) || ''; break;
       case 'conta': va = (contaMap[a.conta_id]?.nome) || ''; vb = (contaMap[b.conta_id]?.nome) || ''; break;
       case 'valor': va = parseFloat(a.valor || 0); vb = parseFloat(b.valor || 0); break;
       case 'situacao': va = a.situacao || ''; vb = b.situacao || ''; break;
@@ -1392,11 +1491,18 @@ function renderTabela(){
         ${t.observacao ? `<div class="desc-sub">${t.observacao.substring(0,50)}</div>` : ''}
       </div>
       <div>
-        ${cat ? `
-          <div style="display:flex;flex-direction:column;gap:3px">
-            ${cat.categoria ? `<span style="font-size:10px;color:var(--text-mid);font-weight:600;text-transform:uppercase;letter-spacing:.04em">${cat.categoria}</span>` : ''}
-            <span class="cat-badge">${cat.icone||''} ${cat.nome}</span>
-          </div>` : '<span style="color:#4a5568">—</span>'}
+        ${cat && cat.categoria
+          ? `<span style="display:inline-flex;align-items:center;background:var(--off-white);border:1px solid var(--border);padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:.04em;cursor:pointer" onclick="event.stopPropagation();setCatFiltro('cat','${(cat.categoria||'').replace(/'/g,"\\'")}','${(cat.categoria||'').replace(/'/g,"\\'")}')">
+              ${cat.categoria}
+            </span>`
+          : '<span style="color:#4a5568">—</span>'}
+      </div>
+      <div>
+        ${cat
+          ? `<span class="cat-badge" style="cursor:pointer" onclick="event.stopPropagation();setCatFiltro('sub','${(cat.nome||'').replace(/'/g,"\\'")}','${(cat.nome||'').replace(/'/g,"\\'")}')">
+              ${cat.icone||''} ${cat.nome}
+            </span>`
+          : '<span style="color:#4a5568">—</span>'}
       </div>
       <div style="font-size:13px;color:var(--text-light)">${conta ? conta.nome : '—'}</div>
       <div class="val-cell ${tp}">${t.tipo==='despesa'?'- ':'+ '}${fmt(t.valor)}</div>
@@ -1410,7 +1516,7 @@ function renderTabela(){
   // -- Rodapé totalizador ----------------------------------
   const rodape = `<div style="
     display:grid;
-    grid-template-columns:36px 100px 1fr 180px 140px 110px 100px 60px;
+    grid-template-columns:36px 100px 1fr 130px 150px 130px 110px 100px 60px;
     gap:8px;padding:14px 20px;
     background:var(--white);
     border-top:2px solid var(--border);
@@ -1422,6 +1528,7 @@ function renderTabela(){
       ${qtd} lançamento${qtd!==1?'s':''}
     </div>
     <div style="font-size:12px;color:var(--text-mid)">Total filtrado</div>
+    <div></div>
     <div></div>
     <div></div>
     <div style="text-align:right">
