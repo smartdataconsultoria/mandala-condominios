@@ -2289,14 +2289,22 @@ function processarArquivo(file){
       const iObs    = headers.findIndex(h=>h.includes('OBSERVA'));
 
       _dadosImport = [];
+
+      // Mapa categoria: "agrupamento|subcategoria" -> id
       const catMap = Object.fromEntries(_categorias.map(c=>[
         ((c.categoria||'').toLowerCase().trim()+'|'+(c.nome||'').toLowerCase().trim()), c.id
       ]));
+      // Lista legível de categorias válidas para mensagem de erro
+      const catValidas = _categorias.map(c=>`"${c.categoria||''}" / "${c.nome||''}"`);
       const contaMap = Object.fromEntries(_contas.map(c=>[(c.nome||'').toLowerCase().trim(), c.id]));
+
+      const errosValidacao = [];
 
       for(let i=headerRow+1;i<data.length;i++){
         const row = data[i];
         if(!row || !row[iData] || !row[iTipo]) continue;
+
+        const linhaNum = i + 1; // linha real no Excel (1-based)
 
         const dataStr = (row[iData]||'').toString().trim();
         let dataISO = '';
@@ -2308,8 +2316,10 @@ function processarArquivo(file){
 
         const tipo  = (row[iTipo]||'').toString().toLowerCase().trim();
         const desc  = (row[iDesc]||'').toString().trim();
-        const cat   = (row[iCat]||'').toString().toLowerCase().trim();
-        const sub   = (row[iSub]||'').toString().toLowerCase().trim();
+        const catRaw= (row[iCat]||'').toString().trim();
+        const subRaw= (row[iSub]||'').toString().trim();
+        const cat   = catRaw.toLowerCase().trim();
+        const sub   = subRaw.toLowerCase().trim();
         const conta = (row[iConta]||'').toString().toLowerCase().trim();
         const valorRaw = (row[iValor]||'0').toString().replace(/[R$\s.]/g,'').replace(',','.');
         const valor = parseFloat(valorRaw)||0;
@@ -2318,21 +2328,62 @@ function processarArquivo(file){
 
         if(!dataISO || !tipo || !desc || !valor) continue;
 
-        const catId   = catMap[cat+'|'+sub] || null;
+        // ── Validação obrigatória de Categoria + Subcategoria ──
+        const chave = cat+'|'+sub;
+        const catId = catMap[chave] || null;
+
+        if(!catId){
+          // Monta mensagem de erro específica
+          if(!catRaw && !subRaw){
+            errosValidacao.push(`Linha ${linhaNum} ("${desc}"): CATEGORIA e SUBCATEGORIA estão em branco.`);
+          } else {
+            // Verifica se o agrupamento ao menos existe
+            const agrupamentoExiste = _categorias.some(c=>(c.categoria||'').toLowerCase().trim()===cat);
+            if(!agrupamentoExiste){
+              errosValidacao.push(`Linha ${linhaNum} ("${desc}"): Agrupamento <strong>"${catRaw}"</strong> não existe no sistema.`);
+            } else {
+              // Agrupamento existe mas subcategoria não bate
+              const subcatsDoGrupo = _categorias
+                .filter(c=>(c.categoria||'').toLowerCase().trim()===cat)
+                .map(c=>`"${c.nome||''}"`).join(', ');
+              errosValidacao.push(`Linha ${linhaNum} ("${desc}"): Subcategoria <strong>"${subRaw}"</strong> não existe em <strong>"${catRaw}"</strong>. Subcategorias válidas: ${subcatsDoGrupo}.`);
+            }
+          }
+          continue; // rejeita a linha
+        }
+
         const contaId = contaMap[conta] || null;
 
         _dadosImport.push({data:dataISO, tipo, descricao:desc, categoria_id:catId, conta_id:contaId, valor, situacao:sit, observacao:obs||null, condominio_id:CONDO_ID, empresa:CONDO_ID});
       }
 
-      // Preview
       const st = document.getElementById('importStatus');
       st.style.display='block';
+
+      // Se há erros de validação, bloqueia importação e exibe detalhes
+      if(errosValidacao.length>0){
+        const listaValidas = catValidas.length>0
+          ? `<details style="margin-top:10px"><summary style="cursor:pointer;color:#94a3b8;font-size:12px">Ver todas as categorias válidas (${catValidas.length})</summary><ul style="margin:6px 0 0 0;padding-left:18px;font-size:11px;color:#94a3b8;line-height:1.8">${catValidas.map(c=>`<li>${c}</li>`).join('')}</ul></details>`
+          : '';
+        st.innerHTML=`
+          <div style="background:#ef444415;border:1px solid #ef444440;border-radius:8px;padding:14px">
+            <div style="color:#ef4444;font-weight:700;margin-bottom:8px">❌ ${errosValidacao.length} linha(s) com CATEGORIA/SUBCATEGORIA inválida(s) — importação bloqueada</div>
+            <ul style="margin:0;padding-left:18px;font-size:12px;color:#fca5a5;line-height:2">${errosValidacao.map(e=>`<li>${e}</li>`).join('')}</ul>
+            <div style="margin-top:10px;font-size:12px;color:#94a3b8">⚠ Corrija a planilha e tente novamente. Use exatamente os nomes do sistema (respeitando maiúsculas/minúsculas).</div>
+            ${listaValidas}
+          </div>`;
+        document.getElementById('btnConfirmarImport').style.display='none';
+        document.getElementById('importPreview').style.display='none';
+        return;
+      }
+
       if(_dadosImport.length===0){
         st.innerHTML='<span style="color:#ef4444">⚠ Nenhuma linha válida encontrada. Verifique o formato do arquivo.</span>';
         document.getElementById('btnConfirmarImport').style.display='none';
         return;
       }
-      st.innerHTML=`<span style="color:#22c55e">✅ ${_dadosImport.length} lançamento(s) encontrado(s) para importar.</span>`;
+
+      st.innerHTML=`<span style="color:#22c55e">✅ ${_dadosImport.length} lançamento(s) válido(s) encontrado(s) para importar.</span>`;
 
       // Tabela preview
       const prev = document.getElementById('importPreview');
@@ -2340,16 +2391,21 @@ function processarArquivo(file){
       prev.innerHTML=`<div style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;font-size:12px">
         <table style="width:100%;border-collapse:collapse">
           <thead><tr style="background:var(--white);position:sticky;top:0">
-            ${['Data','Tipo','Descrição','Valor','Situação'].map(h=>`<th style="padding:7px 10px;text-align:left;color:var(--text-light);font-weight:700;font-size:10px;text-transform:uppercase">${h}</th>`).join('')}
+            ${['Data','Tipo','Descrição','Categoria / Subcategoria','Valor','Situação'].map(h=>`<th style="padding:7px 10px;text-align:left;color:var(--text-light);font-weight:700;font-size:10px;text-transform:uppercase">${h}</th>`).join('')}
           </tr></thead>
           <tbody>
-            ${_dadosImport.map((r,i)=>`<tr style="border-top:1px solid var(--border)20;background:${i%2?'var(--off-white)':'transparent'}">
-              <td style="padding:6px 10px;color:var(--text-light)">${r.data.split('-').reverse().join('/')}</td>
-              <td style="padding:6px 10px;color:${r.tipo==='receita'?'#22c55e':'#ef4444'};font-weight:600">${r.tipo}</td>
-              <td style="padding:6px 10px;color:var(--text-dark)">${r.descricao}</td>
-              <td style="padding:6px 10px;color:${r.tipo==='receita'?'#22c55e':'#ef4444'};font-weight:700">R$ ${parseFloat(r.valor).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-              <td style="padding:6px 10px;color:var(--text-mid)">${r.situacao}</td>
-            </tr>`).join('')}
+            ${_dadosImport.map((r,i)=>{
+              const catObj = _categorias.find(c=>c.id===r.categoria_id);
+              const catLabel = catObj ? `${catObj.categoria} / ${catObj.nome}` : '—';
+              return `<tr style="border-top:1px solid var(--border)20;background:${i%2?'var(--off-white)':'transparent'}">
+                <td style="padding:6px 10px;color:var(--text-light)">${r.data.split('-').reverse().join('/')}</td>
+                <td style="padding:6px 10px;color:${r.tipo==='receita'?'#22c55e':'#ef4444'};font-weight:600">${r.tipo}</td>
+                <td style="padding:6px 10px;color:var(--text-dark)">${r.descricao}</td>
+                <td style="padding:6px 10px;color:var(--text-mid);font-size:11px">${catLabel}</td>
+                <td style="padding:6px 10px;color:${r.tipo==='receita'?'#22c55e':'#ef4444'};font-weight:700">R$ ${parseFloat(r.valor).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                <td style="padding:6px 10px;color:var(--text-mid)">${r.situacao}</td>
+              </tr>`;
+            }).join('')}
           </tbody>
         </table>
       </div>`;
@@ -2362,6 +2418,7 @@ function processarArquivo(file){
   };
   reader.readAsArrayBuffer(file);
 }
+window.processarArquivo=processarArquivo;
 
 async function confirmarImportacao(){
   if(!_dadosImport.length) return;
