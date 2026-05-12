@@ -118,8 +118,8 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 
 /* TABELA */
 .table-wrap{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.table-head{display:grid;grid-template-columns:36px 100px 1fr 130px 150px 130px 110px 100px 60px;gap:8px;padding:12px 20px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#4a5568}
-.table-row{display:grid;grid-template-columns:36px 100px 1fr 130px 150px 130px 110px 100px 60px;gap:8px;padding:13px 20px;border-bottom:1px solid var(--border)20;align-items:center;transition:.15s;cursor:pointer}
+.table-head{display:grid;grid-template-columns:36px 95px 1fr 120px 140px 140px 110px 95px 60px;gap:8px;padding:12px 20px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#4a5568}
+.table-row{display:grid;grid-template-columns:36px 95px 1fr 120px 140px 140px 110px 95px 60px;gap:8px;padding:13px 20px;border-bottom:1px solid var(--border)20;align-items:center;transition:.15s;cursor:pointer}
 .table-row:hover{background:var(--border)30}
 .table-row:last-child{border-bottom:none}
 .tipo-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px}
@@ -127,7 +127,7 @@ main{max-width:1100px;margin:0 auto;padding:28px 24px}
 .tipo-icon.des{background:#ef444420;color:#ef4444}
 .desc-cell .desc-main{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .desc-cell .desc-sub{font-size:11px;color:var(--text-mid);margin-top:1px}
-.cat-badge{display:inline-flex;align-items:center;gap:5px;background:var(--border);padding:3px 10px;border-radius:12px;font-size:12px;color:var(--text-light);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cat-badge{display:inline-flex;align-items:center;gap:5px;background:var(--border);padding:3px 10px;border-radius:12px;font-size:12px;color:var(--text-light);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .val-cell{font-size:14px;font-weight:700;text-align:right}
 .val-cell.rec{color:#22c55e}
 .val-cell.des{color:#ef4444}
@@ -1492,7 +1492,7 @@ function renderTabela(){
       </div>
       <div>
         ${cat && cat.categoria
-          ? `<span style="display:inline-flex;align-items:center;background:var(--off-white);border:1px solid var(--border);padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:.04em;cursor:pointer" onclick="event.stopPropagation();setCatFiltro('cat','${(cat.categoria||'').replace(/'/g,"\\'")}','${(cat.categoria||'').replace(/'/g,"\\'")}')">
+          ? `<span style="display:inline-flex;align-items:center;background:var(--off-white);border:1px solid var(--border);padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:.04em;cursor:pointer;max-width:115px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" onclick="event.stopPropagation();setCatFiltro('cat','${(cat.categoria||'').replace(/'/g,"\\'")}','${(cat.categoria||'').replace(/'/g,"\\'")}')">
               ${cat.categoria}
             </span>`
           : '<span style="color:#4a5568">—</span>'}
@@ -1516,7 +1516,7 @@ function renderTabela(){
   // -- Rodapé totalizador ----------------------------------
   const rodape = `<div style="
     display:grid;
-    grid-template-columns:36px 100px 1fr 130px 150px 130px 110px 100px 60px;
+    grid-template-columns:36px 95px 1fr 120px 140px 140px 110px 95px 60px;
     gap:8px;padding:14px 20px;
     background:var(--white);
     border-top:2px solid var(--border);
