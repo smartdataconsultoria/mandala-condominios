@@ -177,13 +177,12 @@ main { max-width: 1280px; margin: 0 auto; }
       <div class="page-sub">Análise detalhada de gastos, categorias e projeções — dados reais.</div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <!-- Filtro tipo -->
-      <div style="display:flex;align-items:center;gap:6px;background:#1e2130;border:1px solid #2a2d3e;border-radius:8px;padding:4px 6px">
-        <button id="bt-receita" class="btn-tipo" onclick="toggleTipo('receita')"
+      <div style="display:flex;align-items:center;gap:4px;background:#1e2130;border:1px solid #2a2d3e;border-radius:8px;padding:4px 6px">
+        <button id="bt-receita" onclick="toggleTipo('receita')"
           style="padding:4px 12px;border-radius:6px;border:none;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;background:transparent;color:rgba(241,245,249,.5);transition:.2s">
           💰 Receita
         </button>
-        <button id="bt-despesa" class="btn-tipo" onclick="toggleTipo('despesa')"
+        <button id="bt-despesa" onclick="toggleTipo('despesa')"
           style="padding:4px 12px;border-radius:6px;border:none;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;background:transparent;color:rgba(241,245,249,.5);transition:.2s">
           💸 Despesa
         </button>
@@ -192,10 +191,6 @@ main { max-width: 1280px; margin: 0 auto; }
       </select>
     </div>
   </div>
-<style>
-.btn-tipo.ativo { background:rgba(232,163,32,.25) !important; color:#F5C35A !important; }
-.btn-tipo:hover:not(.ativo) { background:rgba(255,255,255,.08) !important; color:rgba(241,245,249,.85) !important; }
-</style>
 
   <!-- Botões de mês -->
   <div class="filtros-wrap" id="filtrosWrap">
@@ -299,9 +294,15 @@ function atualizarBotoes(){
 }
 function recarregar(){ _mesesSel=[]; atualizarBotoes(); carregar(); }
 function toggleTipo(tipo){
-  _tipoFiltro = _tipoFiltro===tipo ? 'ambos' : tipo;
-  document.querySelectorAll('.btn-tipo').forEach(b=>b.classList.remove('ativo'));
-  if(_tipoFiltro!=='ambos') document.getElementById('bt-'+_tipoFiltro)?.classList.add('ativo');
+  _tipoFiltro = _tipoFiltro === tipo ? 'ambos' : tipo;
+  var btR = document.getElementById('bt-receita');
+  var btD = document.getElementById('bt-despesa');
+  var activeStyle = 'rgba(232,163,32,.25)';
+  var activeColor = '#F5C35A';
+  var inactiveStyle = 'transparent';
+  var inactiveColor = 'rgba(241,245,249,.5)';
+  if(btR){ btR.style.background = _tipoFiltro==='receita'?activeStyle:inactiveStyle; btR.style.color = _tipoFiltro==='receita'?activeColor:inactiveColor; }
+  if(btD){ btD.style.background = _tipoFiltro==='despesa'?activeStyle:inactiveStyle; btD.style.color = _tipoFiltro==='despesa'?activeColor:inactiveColor; }
   carregar();
 }
 
@@ -311,16 +312,16 @@ async function carregar(){
   const ano    = parseInt(document.getElementById('finAno').value);
   const anoAnt = ano - 1;
   const h      = hdrs();
-  const primDia= `${ano}-01-01`;
-  const ultDia = `${ano}-12-31`;
-  const primDiaAnt= `${anoAnt}-01-01`;
-  const ultDiaAnt = `${anoAnt}-12-31`;
+  const primDia    = ano+'-01-01';
+  const ultDia     = ano+'-12-31';
+  const primDiaAnt = anoAnt+'-01-01';
+  const ultDiaAnt  = anoAnt+'-12-31';
 
   try{
     const [rTrans,rCats,rTransAnt] = await Promise.all([
-      fetch(`${SB_URL}/rest/v1/condo_transacoes?condominio_id=eq.${CONDO_ID}&data=gte.${primDia}&data=lte.${ultDia}&order=data.desc&limit=2000`,{headers:h}),
-      fetch(`${SB_URL}/rest/v1/condo_categorias?condominio_id=eq.${CONDO_ID}`,{headers:h}),
-      fetch(`${SB_URL}/rest/v1/condo_transacoes?condominio_id=eq.${CONDO_ID}&data=gte.${primDiaAnt}&data=lte.${ultDiaAnt}&order=data.desc&limit=2000`,{headers:h}),
+      fetch(SB_URL+'/rest/v1/condo_transacoes?condominio_id=eq.'+CONDO_ID+'&data=gte.'+primDia+'&data=lte.'+ultDia+'&order=data.desc&limit=2000',{headers:h}),
+      fetch(SB_URL+'/rest/v1/condo_categorias?condominio_id=eq.'+CONDO_ID,{headers:h}),
+      fetch(SB_URL+'/rest/v1/condo_transacoes?condominio_id=eq.'+CONDO_ID+'&data=gte.'+primDiaAnt+'&data=lte.'+ultDiaAnt+'&order=data.desc&limit=2000',{headers:h}),
     ]);
     const trans    = rTrans.ok    ? await rTrans.json()    : [];
     const cats     = rCats.ok     ? await rCats.json()     : [];
@@ -329,7 +330,7 @@ async function carregar(){
 
     // Agrupar ano anterior por mês
     const porMesAnt = Array.from({length:12},()=>({rec:0,des:0,trans:[]}));
-    transAnt.forEach(t=>{
+    transAnt.forEach(function(t){
       const m=parseInt((t.data||'').split('-')[1])-1;
       if(m<0||m>11) return;
       const v=parseFloat(t.valor||0);
@@ -378,11 +379,11 @@ async function carregar(){
     const totalDes = (_tipoFiltro==='receita') ? 0 : totalDesBruto;
     const saldo    = totalRecBruto - totalDesBruto;
 
-    // Totais ano anterior (mesmos meses)
+    // Variação vs ano anterior (mesmos meses)
     const totalRecAnt = mesesTotais.reduce((s,m)=>s+porMesAnt[m].rec,0);
     const totalDesAnt = mesesTotais.reduce((s,m)=>s+porMesAnt[m].des,0);
-    const varRec = totalRecAnt>0 ? ((totalRecBruto-totalRecAnt)/totalRecAnt*100) : null;
-    const varDes = totalDesAnt>0 ? ((totalDesBruto-totalDesAnt)/totalDesAnt*100) : null;
+    const varRec = totalRecAnt>0 ? Math.round((totalRecBruto-totalRecAnt)/totalRecAnt*100) : null;
+    const varDes = totalDesAnt>0 ? Math.round((totalDesBruto-totalDesAnt)/totalDesAnt*100) : null;
 
     // Projeção — média últimos 3 meses com dados
     const mesesComDados=[];
@@ -390,12 +391,10 @@ async function carregar(){
     const mediaDes = mesesComDados.length ? mesesComDados.reduce((s,v)=>s+v,0)/mesesComDados.length : 0;
     const mediaRec = (() => { const mr=[]; for(let m=ultimoMes;m>=0&&mr.length<3;m--) if(porMes[m].rec>0) mr.push(porMes[m].rec); return mr.length?mr.reduce((s,v)=>s+v,0)/mr.length:0; })();
 
-    // Projeção vs ano anterior (mesmo próximo mês)
+    // Próximo mês projetado vs mesmo mês do ano anterior
     const proxMes = (ultimoMes+1)%12;
-    const proxMesRecAnt = porMesAnt[proxMes].rec;
-    const proxMesDesAnt = porMesAnt[proxMes].des;
-    const varProjRec = proxMesRecAnt>0 ? ((mediaRec-proxMesRecAnt)/proxMesRecAnt*100) : null;
-    const varProjDes = proxMesDesAnt>0 ? ((mediaDes-proxMesDesAnt)/proxMesDesAnt*100) : null;
+    const varProjRec = porMesAnt[proxMes].rec>0 ? Math.round((mediaRec-porMesAnt[proxMes].rec)/porMesAnt[proxMes].rec*100) : null;
+    const varProjDes = porMesAnt[proxMes].des>0 ? Math.round((mediaDes-porMesAnt[proxMes].des)/porMesAnt[proxMes].des*100) : null;
 
     // Categorias
     const catMesMap={};
@@ -430,72 +429,171 @@ async function carregar(){
     const maxCat = catsMes.length ? catsMes[0][1].val : 1;
 
     // ── RENDER ────────────────────────────────────────────
-    // Helper: badge variação vs ano anterior
-    const pctBadge = (v, positiveIsGood=true) => {
-      if(v===null) return '';
-      const isPos = v>0;
-      const isGood = positiveIsGood ? isPos : !isPos;
-      const bg = isGood?'var(--green-bg)':'var(--red-bg)';
-      const clr = isGood?'var(--green)':'var(--red)';
-      return \`<span style="display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:800;padding:2px 6px;border-radius:20px;background:\${bg};color:\${clr}">\${isPos?'▲':'▼'}\${Math.abs(Math.round(v))}% vs \${anoAnt}</span>\`;
-    };
 
-    document.getElementById('conteudo').innerHTML = \`
+    // Helper: badge variação %
+    function pctBadge(v, positiveIsGood, refAno){
+      if(v===null) return '';
+      var isPos = v>0;
+      var isGood = positiveIsGood ? isPos : !isPos;
+      var bg = isGood?'var(--green-bg)':'var(--red-bg)';
+      var clr = isGood?'var(--green)':'var(--red)';
+      var seta = isPos?'▲':'▼';
+      return '<span style="display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:800;padding:2px 6px;border-radius:20px;background:'+bg+';color:'+clr+'">'+seta+Math.abs(v)+'% vs '+refAno+'</span>';
+    }
+
+    // Gráfico comparativo de 1 mês (anoAnt vs ano)
+    function buildGraficoComparativo(){
+      var m = _mesesSel[0];
+      var mA = porMesAnt[m]; var mAt = porMes[m];
+      var maxV = Math.max(mA.rec, mA.des, mAt.rec, mAt.des, 1);
+      var fmtV = function(v){ return v>=1000?(v/1000).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'k':String(Math.round(v)); };
+      var bH = function(v){ return Math.max(6, Math.round(v/maxV*180)); };
+      var vR = mA.rec>0 ? Math.round((mAt.rec-mA.rec)/mA.rec*100) : null;
+      var vD = mA.des>0 ? Math.round((mAt.des-mA.des)/mA.des*100) : null;
+      var badgeInline = function(v, positiveIsGood){
+        if(v===null) return '';
+        var isGood = positiveIsGood?(v>0):(v<0);
+        var clr = isGood?'#15803D':'#B91C1C'; var seta = v>0?'▲':'▼';
+        return '<div style="font-size:10px;font-weight:800;color:'+clr+';margin-top:4px">'+seta+Math.abs(v)+'%</div>';
+      };
+      return '<div style="display:flex;gap:32px;padding:0 24px;height:280px;align-items:flex-end">'+
+        '<div style="flex:1;display:flex;flex-direction:column;align-items:center">'+
+          '<div style="font-size:11px;font-weight:800;color:var(--text-light);margin-bottom:12px;text-transform:uppercase;letter-spacing:.08em">'+anoAnt+'</div>'+
+          '<div style="display:flex;align-items:flex-end;gap:12px;height:200px;width:100%;justify-content:center">'+
+            '<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">'+
+              (mA.rec>0?'<div style="font-size:12px;font-weight:800;color:#15803D;margin-bottom:6px">'+fmtV(mA.rec)+'</div>':'')+
+              '<div style="width:64px;height:'+bH(mA.rec)+'px;background:#16A34A;opacity:.4;border-radius:6px 6px 0 0"></div>'+
+              '<div style="font-size:11px;font-weight:700;color:var(--text-light);margin-top:8px">Receita</div>'+
+            '</div>'+
+            '<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">'+
+              (mA.des>0?'<div style="font-size:12px;font-weight:800;color:#B91C1C;margin-bottom:6px">'+fmtV(mA.des)+'</div>':'')+
+              '<div style="width:64px;height:'+bH(mA.des)+'px;background:#DC2626;opacity:.4;border-radius:6px 6px 0 0"></div>'+
+              '<div style="font-size:11px;font-weight:700;color:var(--text-light);margin-top:8px">Despesa</div>'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+        '<div style="width:1px;background:var(--border);height:180px;align-self:center"></div>'+
+        '<div style="flex:1;display:flex;flex-direction:column;align-items:center">'+
+          '<div style="font-size:11px;font-weight:800;color:var(--amber);margin-bottom:12px;text-transform:uppercase;letter-spacing:.08em">'+ano+'</div>'+
+          '<div style="display:flex;align-items:flex-end;gap:12px;height:200px;width:100%;justify-content:center">'+
+            '<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">'+
+              (mAt.rec>0?'<div style="font-size:12px;font-weight:800;color:#15803D;margin-bottom:6px">'+fmtV(mAt.rec)+'</div>':'')+
+              '<div style="width:64px;height:'+bH(mAt.rec)+'px;background:#16A34A;border-radius:6px 6px 0 0;box-shadow:0 0 0 2px #15803D40"></div>'+
+              '<div style="font-size:11px;font-weight:700;color:var(--text-light);margin-top:8px">Receita</div>'+
+              badgeInline(vR, true)+
+            '</div>'+
+            '<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">'+
+              (mAt.des>0?'<div style="font-size:12px;font-weight:800;color:#B91C1C;margin-bottom:6px">'+fmtV(mAt.des)+'</div>':'')+
+              '<div style="width:64px;height:'+bH(mAt.des)+'px;background:#DC2626;border-radius:6px 6px 0 0;box-shadow:0 0 0 2px #B91C1C40"></div>'+
+              '<div style="font-size:11px;font-weight:700;color:var(--text-light);margin-top:8px">Despesa</div>'+
+              badgeInline(vD, false)+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    }
+
+    // Gráfico anual (todos os meses)
+    function buildGraficoAnual(){
+      var showRec = _tipoFiltro!=='despesa';
+      var showDes = _tipoFiltro!=='receita';
+      var fmtVal = function(v){
+        if(v>=1000000) return (v/1000000).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'M';
+        if(v>=1000) return (v/1000).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'k';
+        return v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
+      };
+      return '<div style="display:flex;align-items:flex-end;gap:6px;height:240px;padding-top:32px">'+
+        porMes.map(function(m,i){
+          var rH=Math.max(4,Math.round(m.rec/maxBar*180));
+          var dH=Math.max(4,Math.round(m.des/maxBar*180));
+          var futuro=ano===_anoHoje&&i>_mesHoje&&!m.rec&&!m.des;
+          var sel=_mesesSel.includes(i);
+          var isAtual = i===(ano===_anoHoje?_mesHoje:ultimoMes);
+          var op = futuro?'.25':(sel||!_mesesSel.length?'1':'.45');
+          return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;opacity:'+op+';transition:.3s;cursor:pointer;min-width:0" onclick="toggleMes('+i+')">'+
+            '<div style="display:flex;align-items:flex-end;gap:4px;height:210px;width:100%;justify-content:center">'+
+            (showRec?
+              '<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;flex:1;max-width:34px">'+
+              (m.rec>0&&!futuro?'<div style="font-size:10px;font-weight:800;color:#15803D;margin-bottom:4px;white-space:nowrap;text-align:center;line-height:1.2">'+fmtVal(m.rec)+'</div>':'')+
+              '<div style="width:100%;height:'+rH+'px;background:'+(futuro?'#BBF7D0':'#16A34A')+';border-radius:5px 5px 0 0;'+(isAtual?'box-shadow:0 0 0 2px #15803D80':'')+';transition:height .5s" title="Receita '+MESES_ABREV[i]+': '+brl(m.rec)+'"></div>'+
+              '</div>' : '')+
+            (showDes?
+              '<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;flex:1;max-width:34px">'+
+              (m.des>0&&!futuro?'<div style="font-size:10px;font-weight:800;color:#B91C1C;margin-bottom:4px;white-space:nowrap;text-align:center;line-height:1.2">'+fmtVal(m.des)+'</div>':'')+
+              '<div style="width:100%;height:'+dH+'px;background:'+(futuro?'#FECACA':'#DC2626')+';border-radius:5px 5px 0 0;'+(isAtual?'box-shadow:0 0 0 2px #B91C1C80':'')+';transition:height .5s" title="Despesa '+MESES_ABREV[i]+': '+brl(m.des)+'"></div>'+
+              '</div>' : '')+
+            '</div>'+
+            '<div style="font-size:11px;font-weight:'+(isAtual?800:600)+';color:'+(isAtual?'var(--amber)':'var(--text-light)')+';text-transform:uppercase;margin-top:8px;text-align:center">'+MESES_ABREV[i]+'</div>'+
+          '</div>';
+        }).join('')+
+      '</div>';
+    }
+
+    var isMesUnico = _mesesSel.length===1;
+    var tituloGrafico = isMesUnico ? (MESES_FULL[_mesesSel[0]]+' — '+anoAnt+' × '+ano) : ('Receitas × Despesas — '+ano);
+    var legendaGrafico = isMesUnico
+      ? '<span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#16A34A;border-radius:4px;opacity:.4"></span>'+anoAnt+'</span>'+
+        '<span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#16A34A;border-radius:4px"></span>'+ano+' Rec.</span>'+
+        '<span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#DC2626;border-radius:4px"></span>'+ano+' Des.</span>'
+      : '<span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#16A34A;border-radius:4px"></span>Receitas</span>'+
+        '<span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#DC2626;border-radius:4px"></span>Despesas</span>';
+
+    document.getElementById('conteudo').innerHTML = `
       <!-- KPIs -->
       <div class="metrics">
-        <div class="mc mc-rec" style="opacity:\${_tipoFiltro==='despesa'?.4:1};transition:.3s">
+        <div class="mc mc-rec" style="opacity:${_tipoFiltro==='despesa'?.4:1};transition:.3s">
           <div class="mc-accent"></div>
-          <div class="mc-lbl">💰 Receitas — \${labelPeriodo}</div>
-          <div class="mc-val">\${brl(totalRecBruto)}</div>
+          <div class="mc-lbl">💰 Receitas — ${labelPeriodo}</div>
+          <div class="mc-val">${brl(totalRecBruto)}</div>
           <div class="mc-sub" style="gap:6px;flex-wrap:wrap">
-            <span class="mc-badge" style="background:var(--green-bg);color:var(--green)">▲ \${mesFiltrado ? _mesesSel.length+' mês(es)' : mesesComDados.length+' meses'}</span>
-            \${pctBadge(varRec, true)}
+            <span class="mc-badge" style="background:var(--green-bg);color:var(--green)">▲ ${mesFiltrado ? _mesesSel.length+' mês(es)' : mesesComDados.length+' meses'}</span>
+            ${pctBadge(varRec, true, anoAnt)}
           </div>
         </div>
-        <div class="mc mc-des" style="opacity:\${_tipoFiltro==='receita'?.4:1};transition:.3s">
+        <div class="mc mc-des" style="opacity:${_tipoFiltro==='receita'?.4:1};transition:.3s">
           <div class="mc-accent"></div>
-          <div class="mc-lbl">💸 Despesas — \${labelPeriodo}</div>
-          <div class="mc-val">\${brl(totalDesBruto)}</div>
+          <div class="mc-lbl">💸 Despesas — ${labelPeriodo}</div>
+          <div class="mc-val">${brl(totalDesBruto)}</div>
           <div class="mc-sub" style="gap:6px;flex-wrap:wrap">
-            <span class="mc-badge" style="background:var(--red-bg);color:var(--red)">\${catsMes.length} categorias</span>
-            \${pctBadge(varDes, false)}
+            <span class="mc-badge" style="background:var(--red-bg);color:var(--red)">${catsMes.length} categorias</span>
+            ${pctBadge(varDes, false, anoAnt)}
           </div>
         </div>
         <div class="mc mc-sal">
-          <div class="mc-accent" style="background:\${saldo>=0?'var(--blue)':'var(--red-light)'}"></div>
-          <div class="mc-lbl">⚖️ Saldo — \${labelPeriodo}</div>
-          <div class="mc-val" style="color:\${saldo>=0?'var(--blue)':'var(--red)'}">\${brl(saldo)}</div>
+          <div class="mc-accent" style="background:${saldo>=0?'var(--blue)':'var(--red-light)'}"></div>
+          <div class="mc-lbl">⚖️ Saldo — ${labelPeriodo}</div>
+          <div class="mc-val" style="color:${saldo>=0?'var(--blue)':'var(--red)'}">${brl(saldo)}</div>
           <div class="mc-sub">
-            <span class="mc-badge" style="background:\${saldo>=0?'var(--blue-bg)':'var(--red-bg)'};color:\${saldo>=0?'var(--blue)':'var(--red)'}">
-              \${saldo>=0?'✓ Superávit':'✗ Déficit'}
+            <span class="mc-badge" style="background:${saldo>=0?'var(--blue-bg)':'var(--red-bg)'};color:${saldo>=0?'var(--blue)':'var(--red)'}">
+              ${saldo>=0?'✓ Superávit':'✗ Déficit'}
             </span>
           </div>
         </div>
         <div class="mc mc-proj">
           <div class="mc-accent"></div>
-          <div class="mc-lbl" style="color:var(--amber)">📈 Projeção — \${MESES_ABREV[proxMes]}</div>
+          <div class="mc-lbl" style="color:var(--amber)">📈 Projeção — ${MESES_ABREV[proxMes]}</div>
           <div style="display:flex;flex-direction:column;gap:7px;margin-top:6px">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
               <span style="font-size:11px;color:var(--text-light);font-weight:600;padding-top:2px">Receita est.</span>
               <div style="text-align:right">
-                <div style="font-size:14px;font-weight:800;color:var(--green)">\${brl(mediaRec)}</div>
-                \${varProjRec!==null?pctBadge(varProjRec,true):''}
+                <div style="font-size:14px;font-weight:800;color:var(--green)">${brl(mediaRec)}</div>
+                ${pctBadge(varProjRec, true, anoAnt)}
               </div>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
               <span style="font-size:11px;color:var(--text-light);font-weight:600;padding-top:2px">Despesa est.</span>
               <div style="text-align:right">
-                <div style="font-size:14px;font-weight:800;color:var(--red)">\${brl(mediaDes)}</div>
-                \${varProjDes!==null?pctBadge(varProjDes,false):''}
+                <div style="font-size:14px;font-weight:800;color:var(--red)">${brl(mediaDes)}</div>
+                ${pctBadge(varProjDes, false, anoAnt)}
               </div>
             </div>
             <div style="border-top:2px solid var(--amber-border);margin-top:2px;padding-top:8px;display:flex;justify-content:space-between;align-items:center">
               <span style="font-size:11px;font-weight:800;color:var(--amber);text-transform:uppercase;letter-spacing:.05em">Saldo proj.</span>
-              <span style="font-size:18px;font-weight:800;color:\${(mediaRec-mediaDes)>=0?'var(--green)':'var(--red)'}">\${brl(mediaRec-mediaDes)}</span>
+              <span style="font-size:18px;font-weight:800;color:${(mediaRec-mediaDes)>=0?'var(--green)':'var(--red)'}">${brl(mediaRec-mediaDes)}</span>
             </div>
           </div>
           <div class="mc-sub" style="margin-top:8px;font-size:11px">
-            <span class="mc-badge" style="background:var(--amber-bg);color:var(--amber)">média \${mesesComDados.length} meses</span>
+            <span class="mc-badge" style="background:var(--amber-bg);color:var(--amber)">média ${mesesComDados.length} meses</span>
           </div>
         </div>
       </div>
@@ -503,106 +601,12 @@ async function carregar(){
       <!-- GRÁFICO RECEITAS × DESPESAS — LARGURA TOTAL -->
       <div class="card" style="margin-bottom:18px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
-          <div class="ct" style="margin-bottom:0">
-            \${_mesesSel.length===1
-              ? \`\${MESES_FULL[_mesesSel[0]]} — \${anoAnt} × \${ano}\`
-              : \`Receitas × Despesas — \${ano}\`}
-          </div>
+          <div class="ct" style="margin-bottom:0">${tituloGrafico}</div>
           <div style="display:flex;gap:16px;font-size:13px;color:var(--text-mid);flex-wrap:wrap">
-            \${_mesesSel.length===1 ? \`
-              <span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#16A34A;border-radius:4px;opacity:.45"></span>\${anoAnt}</span>
-              <span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#16A34A;border-radius:4px"></span>\${ano} Rec.</span>
-              <span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#DC2626;border-radius:4px"></span>\${ano} Des.</span>
-            \` : \`
-              <span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#16A34A;border-radius:4px"></span>Receitas</span>
-              <span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#DC2626;border-radius:4px"></span>Despesas</span>
-            \`}
+            ${legendaGrafico}
           </div>
         </div>
-        \${_mesesSel.length===1 ? (() => {
-          // Gráfico comparativo: mês selecionado em 2025 vs 2026 — todos os meses lado a lado
-          const m = _mesesSel[0];
-          const mAnt = porMesAnt[m];
-          const mAt  = porMes[m];
-          const maxV = Math.max(mAnt.rec, mAnt.des, mAt.rec, mAt.des, 1);
-          const fmtV = v => v>=1000?(v/1000).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'k':v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
-          const barH = (v) => Math.max(6, Math.round(v/maxV*180));
-          const varR = mAnt.rec>0?((mAt.rec-mAnt.rec)/mAnt.rec*100):null;
-          const varD = mAnt.des>0?((mAt.des-mAnt.des)/mAnt.des*100):null;
-          const varBadgeInline = (v, positiveIsGood) => {
-            if(v===null) return '';
-            const isGood = positiveIsGood?(v>0):(v<0);
-            const clr=isGood?'#15803D':'#B91C1C';
-            return \`<div style="font-size:10px;font-weight:800;color:\${clr};margin-top:4px">\${v>0?'▲':'▼'}\${Math.abs(Math.round(v))}%</div>\`;
-          };
-          return \`<div style="display:flex;gap:32px;padding:0 24px 0;height:260px;align-items:flex-end">
-            <!-- ANO ANTERIOR -->
-            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0">
-              <div style="font-size:11px;font-weight:800;color:var(--text-light);margin-bottom:16px;text-transform:uppercase;letter-spacing:.08em">\${anoAnt}</div>
-              <div style="display:flex;align-items:flex-end;gap:8px;height:200px;width:100%;justify-content:center">
-                <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
-                  \${mAnt.rec>0?\`<div style="font-size:11px;font-weight:800;color:#15803D;margin-bottom:5px">\${fmtV(mAnt.rec)}</div>\`:''}
-                  <div style="width:56px;height:\${barH(mAnt.rec)}px;background:#16A34A;opacity:.45;border-radius:6px 6px 0 0"></div>
-                  <div style="font-size:11px;font-weight:700;color:var(--text-light);margin-top:8px">Rec.</div>
-                </div>
-                <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
-                  \${mAnt.des>0?\`<div style="font-size:11px;font-weight:800;color:#B91C1C;margin-bottom:5px">\${fmtV(mAnt.des)}</div>\`:''}
-                  <div style="width:56px;height:\${barH(mAnt.des)}px;background:#DC2626;opacity:.45;border-radius:6px 6px 0 0"></div>
-                  <div style="font-size:11px;font-weight:700;color:var(--text-light);margin-top:8px">Des.</div>
-                </div>
-              </div>
-            </div>
-            <!-- DIVISOR -->
-            <div style="width:1px;background:var(--border);height:180px;align-self:center"></div>
-            <!-- ANO ATUAL -->
-            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0">
-              <div style="font-size:11px;font-weight:800;color:var(--amber);margin-bottom:16px;text-transform:uppercase;letter-spacing:.08em">\${ano}</div>
-              <div style="display:flex;align-items:flex-end;gap:8px;height:200px;width:100%;justify-content:center">
-                <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
-                  \${mAt.rec>0?\`<div style="font-size:11px;font-weight:800;color:#15803D;margin-bottom:5px">\${fmtV(mAt.rec)}</div>\`:''}
-                  <div style="width:56px;height:\${barH(mAt.rec)}px;background:#16A34A;border-radius:6px 6px 0 0;box-shadow:0 0 0 2px #15803D40"></div>
-                  <div style="font-size:11px;font-weight:700;color:var(--text-light);margin-top:8px">Rec.</div>
-                  \${varBadgeInline(varR, true)}
-                </div>
-                <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
-                  \${mAt.des>0?\`<div style="font-size:11px;font-weight:800;color:#B91C1C;margin-bottom:5px">\${fmtV(mAt.des)}</div>\`:''}
-                  <div style="width:56px;height:\${barH(mAt.des)}px;background:#DC2626;border-radius:6px 6px 0 0;box-shadow:0 0 0 2px #B91C1C40"></div>
-                  <div style="font-size:11px;font-weight:700;color:var(--text-light);margin-top:8px">Des.</div>
-                  \${varBadgeInline(varD, false)}
-                </div>
-              </div>
-            </div>
-          </div>\`;
-        })() : \`
-        <div style="display:flex;align-items:flex-end;gap:6px;height:240px;padding-top:32px">
-          \${porMes.map((m,i)=>{
-            const rH=Math.max(4,Math.round(m.rec/maxBar*180));
-            const dH=Math.max(4,Math.round(m.des/maxBar*180));
-            const futuro=ano===_anoHoje&&i>_mesHoje&&!m.rec&&!m.des;
-            const sel=_mesesSel.includes(i);
-            const isAtual = i === (ano===_anoHoje?_mesHoje:ultimoMes);
-            const fmtVal = v => {
-              if(v>=1000000) return (v/1000000).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'M';
-              if(v>=1000) return (v/1000).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'k';
-              return v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
-            };
-            const showRec = _tipoFiltro!=='despesa';
-            const showDes = _tipoFiltro!=='receita';
-            return \`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0;opacity:\${futuro?.25:sel||!_mesesSel.length?1:.45};transition:.3s;cursor:pointer;min-width:0" onclick="toggleMes(\${i})">
-              <div style="display:flex;align-items:flex-end;gap:4px;height:210px;width:100%;justify-content:center">
-                \${showRec?\`<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;flex:1;max-width:34px">
-                  \${m.rec>0&&!futuro?\`<div style="font-size:10px;font-weight:800;color:#15803D;margin-bottom:4px;white-space:nowrap;text-align:center;line-height:1.2">\${fmtVal(m.rec)}</div>\`:''}
-                  <div style="width:100%;height:\${rH}px;background:\${futuro?'#BBF7D0':'#16A34A'};border-radius:5px 5px 0 0;\${isAtual?'box-shadow:0 0 0 2px #15803D80':''};transition:height .5s" title="Receita \${MESES_ABREV[i]}: \${brl(m.rec)}"></div>
-                </div>\`:''}
-                \${showDes?\`<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;flex:1;max-width:34px">
-                  \${m.des>0&&!futuro?\`<div style="font-size:10px;font-weight:800;color:#B91C1C;margin-bottom:4px;white-space:nowrap;text-align:center;line-height:1.2">\${fmtVal(m.des)}</div>\`:''}
-                  <div style="width:100%;height:\${dH}px;background:\${futuro?'#FECACA':'#DC2626'};border-radius:5px 5px 0 0;\${isAtual?'box-shadow:0 0 0 2px #B91C1C80':''};transition:height .5s" title="Despesa \${MESES_ABREV[i]}: \${brl(m.des)}"></div>
-                </div>\`:''}
-              </div>
-              <div style="font-size:11px;font-weight:\${isAtual?800:600};color:\${isAtual?'var(--amber)':'var(--text-light)'};text-transform:uppercase;margin-top:8px;text-align:center">\${MESES_ABREV[i]}</div>
-            </div>\`;
-          }).join('')}
-        </div>\`}
+        ${isMesUnico ? buildGraficoComparativo() : buildGraficoAnual()}
       </div>
 
       <!-- COMPARATIVO CATEGORIA + SUBCATEGORIA POR MÊS -->
