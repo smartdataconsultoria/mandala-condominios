@@ -187,8 +187,14 @@ main { max-width: 1280px; margin: 0 auto; }
           💸 Despesa
         </button>
       </div>
-      <select id="finAno" onchange="recarregar()" style="background:#1e2130;border:1px solid #2a2d3e;color:#f1f5f9;border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer">
-      </select>
+      <div style="display:flex;align-items:center;gap:4px;background:#1e2130;border:1px solid #2a2d3e;border-radius:8px;padding:4px 6px">
+        <button id="bt-ano-prev" onclick="toggleAno(_anoHoje-1)"
+          style="padding:4px 14px;border-radius:6px;border:none;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;background:transparent;color:rgba(241,245,249,.5);transition:.2s">
+        </button>
+        <button id="bt-ano-cur" onclick="toggleAno(_anoHoje)"
+          style="padding:4px 14px;border-radius:6px;border:none;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;background:rgba(232,163,32,.25);color:#F5C35A;transition:.2s">
+        </button>
+      </div>
     </div>
   </div>
 
@@ -226,6 +232,7 @@ const CORES_CAT   = ['var(--gold)','#3b82f6','#a855f7','#22c55e','#ef4444','#06b
 // ── ESTADO ────────────────────────────────────────────────
 let _mesesSel = []; // [] = todos
 let _tipoFiltro = 'ambos'; // 'ambos' | 'receita' | 'despesa'
+let _anosAtivos = []; // preenchido no init
 let _hoje     = new Date();
 let _mesHoje  = _hoje.getMonth();
 let _anoHoje  = _hoje.getFullYear();
@@ -256,9 +263,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
     }
   }catch(e){}
 
-  // Popular seletor de ano
-  const sel = document.getElementById('finAno');
-  [_anoHoje-1, _anoHoje].forEach(y=>{ const o=document.createElement('option'); o.value=y; o.textContent=y; if(y===_anoHoje) o.selected=true; sel.appendChild(o); });
+  // Inicializar anos ativos (padrão: ano atual)
+  _anosAtivos = [_anoHoje];
+  var btPrev = document.getElementById('bt-ano-prev');
+  var btCur  = document.getElementById('bt-ano-cur');
+  if(btPrev) btPrev.textContent = String(_anoHoje-1);
+  if(btCur)  btCur.textContent  = String(_anoHoje);
+  atualizarBotoesAno();
 
   // Botões de mês
   const wrap = document.getElementById('filtrosWrap');
@@ -293,7 +304,28 @@ function atualizarBotoes(){
   }
 }
 function recarregar(){ _mesesSel=[]; atualizarBotoes(); carregar(); }
-function toggleTipo(tipo){
+function toggleAno(ano){
+  var idx = _anosAtivos.indexOf(ano);
+  if(idx>=0){
+    if(_anosAtivos.length===1) return; // manter ao menos 1 ativo
+    _anosAtivos.splice(idx,1);
+  } else {
+    _anosAtivos.push(ano);
+    _anosAtivos.sort();
+  }
+  _mesesSel=[];
+  atualizarBotoes();
+  atualizarBotoesAno();
+  carregar();
+}
+function atualizarBotoesAno(){
+  var ativo = 'rgba(232,163,32,.25)'; var ativoC = '#F5C35A';
+  var inativo = 'transparent'; var inativoC = 'rgba(241,245,249,.5)';
+  var btP = document.getElementById('bt-ano-prev');
+  var btC = document.getElementById('bt-ano-cur');
+  if(btP){ btP.style.background=_anosAtivos.includes(_anoHoje-1)?ativo:inativo; btP.style.color=_anosAtivos.includes(_anoHoje-1)?ativoC:inativoC; }
+  if(btC){ btC.style.background=_anosAtivos.includes(_anoHoje)?ativo:inativo;   btC.style.color=_anosAtivos.includes(_anoHoje)?ativoC:inativoC; }
+}
   _tipoFiltro = _tipoFiltro === tipo ? 'ambos' : tipo;
   var btR = document.getElementById('bt-receita');
   var btD = document.getElementById('bt-despesa');
@@ -309,14 +341,17 @@ function toggleTipo(tipo){
 // ── CARREGAR ─────────────────────────────────────────────
 async function carregar(){
   document.getElementById('conteudo').innerHTML='<div class="loader">⏳ Carregando dados...</div>';
-  const ano    = parseInt(document.getElementById('finAno').value);
-  const anoAnt = ano - 1;
+  const modoComparativo = _anosAtivos.length === 2;
+  const ano    = modoComparativo ? Math.max(..._anosAtivos) : _anosAtivos[0];
+  const anoAnt = modoComparativo ? Math.min(..._anosAtivos) : ano - 1;
   const h      = hdrs();
   const primDia    = ano+'-01-01';
   const ultDia     = ano+'-12-31';
   const primDiaAnt = anoAnt+'-01-01';
   const ultDiaAnt  = anoAnt+'-12-31';
 
+  // Atualizar botões de mês: no modo comparativo, habilitar todos os meses com dados
+  // (desabilitar somente futuros do ano maior)
   try{
     const [rTrans,rCats,rTransAnt] = await Promise.all([
       fetch(SB_URL+'/rest/v1/condo_transacoes?condominio_id=eq.'+CONDO_ID+'&data=gte.'+primDia+'&data=lte.'+ultDia+'&order=data.desc&limit=2000',{headers:h}),
@@ -339,11 +374,12 @@ async function carregar(){
       porMesAnt[m].trans.push(t);
     });
 
-    // Atualizar botões de mês — desabilitar meses futuros no ano atual
+    // Atualizar botões de mês
     for(let m=0;m<12;m++){
       const btn=document.getElementById('bm'+m); if(!btn) continue;
-      const temDados=trans.some(t=>parseInt((t.data||'').split('-')[1])-1===m);
-      const futuro=ano===_anoHoje && m>_mesHoje;
+      const temDados=trans.some(t=>parseInt((t.data||'').split('-')[1])-1===m)
+                  || transAnt.some(t=>parseInt((t.data||'').split('-')[1])-1===m);
+      const futuro = (ano===_anoHoje && m>_mesHoje) && !modoComparativo;
       btn.disabled = futuro && !temDados;
     }
 
@@ -421,9 +457,11 @@ async function carregar(){
 
     // Label
     const mesFiltrado = _mesesSel.length>0;
-    const labelPeriodo = !mesFiltrado ? String(ano)
-      : _mesesSel.length===1 ? `${MESES_FULL[_mesesSel[0]]} ${ano}`
-      : `${_mesesSel.map(m=>MESES_ABREV[m]).join('+')} ${ano}`;
+    const labelPeriodo = modoComparativo
+      ? (anoAnt+' × '+ano)
+      : (!mesFiltrado ? String(ano)
+        : _mesesSel.length===1 ? `${MESES_FULL[_mesesSel[0]]} ${ano}`
+        : `${_mesesSel.map(m=>MESES_ABREV[m]).join('+')} ${ano}`);
 
     const maxBar = Math.max(...porMes.map(m=>Math.max(m.rec,m.des)),1);
     const maxCat = catsMes.length ? catsMes[0][1].val : 1;
@@ -493,7 +531,7 @@ async function carregar(){
       '</div>';
     }
 
-    // Gráfico anual (todos os meses)
+    // Gráfico anual (todos os meses) — suporta modo comparativo
     function buildGraficoAnual(){
       var showRec = _tipoFiltro!=='despesa';
       var showDes = _tipoFiltro!=='receita';
@@ -502,6 +540,65 @@ async function carregar(){
         if(v>=1000) return (v/1000).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'k';
         return v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
       };
+
+      if(modoComparativo){
+        // Modo comparativo: barras lado a lado por mês (anoAnt vs ano)
+        var maxBarComp = Math.max(
+          ...porMes.map(function(m){ return Math.max(m.rec,m.des); }),
+          ...porMesAnt.map(function(m){ return Math.max(m.rec,m.des); }), 1);
+        var mesesRef = _mesesSel.length>0 ? _mesesSel.slice().sort(function(a,b){return a-b;}) : Array.from({length:12},function(_,i){return i;});
+
+        return '<div style="display:flex;align-items:flex-end;gap:3px;height:260px;padding-top:36px;overflow-x:auto">'+
+          mesesRef.map(function(i){
+            var mA = porMesAnt[i]; var mAt = porMes[i];
+            var maxV = Math.max(mA.rec, mA.des, mAt.rec, mAt.des, 1);
+            var bH = function(v){ return Math.max(3, Math.round(v/maxBarComp*190)); };
+            var vR = mA.rec>0?Math.round((mAt.rec-mA.rec)/mA.rec*100):null;
+            var vD = mA.des>0?Math.round((mAt.des-mA.des)/mA.des*100):null;
+            var sel = _mesesSel.includes(i);
+            var op = (!_mesesSel.length||sel)?'1':'.4';
+            var futuro = i>_mesHoje;
+            var badgeV = function(v, positiveIsGood){
+              if(v===null) return '';
+              var isGood = positiveIsGood?(v>0):(v<0);
+              return '<div style="font-size:9px;font-weight:800;color:'+(isGood?'#15803D':'#B91C1C')+';margin-top:2px;text-align:center">'+(v>0?'▲':'▼')+Math.abs(v)+'%</div>';
+            };
+            return '<div style="flex:1;min-width:60px;display:flex;flex-direction:column;align-items:center;opacity:'+op+';cursor:pointer;transition:.3s" onclick="toggleMes('+i+')">'+
+              '<div style="display:flex;align-items:flex-end;gap:2px;height:210px;width:100%;justify-content:center">'+
+              // Receitas: anoAnt (claro) + ano (vivo)
+              (showRec?
+                '<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">'+
+                  (mA.rec>0&&!futuro?'<div style="font-size:9px;font-weight:700;color:#86EFAC;margin-bottom:2px;white-space:nowrap">'+fmtVal(mA.rec)+'</div>':'')+
+                  '<div style="width:16px;height:'+bH(mA.rec)+'px;background:#16A34A;opacity:.35;border-radius:3px 3px 0 0" title="Rec. '+anoAnt+' '+MESES_ABREV[i]+': '+brl(mA.rec)+'"></div>'+
+                '</div>'+
+                '<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">'+
+                  (mAt.rec>0&&!futuro?'<div style="font-size:9px;font-weight:800;color:#15803D;margin-bottom:2px;white-space:nowrap">'+fmtVal(mAt.rec)+'</div>':'')+
+                  '<div style="width:16px;height:'+bH(mAt.rec)+'px;background:#16A34A;border-radius:3px 3px 0 0;'+(futuro?'opacity:.2':'')+'" title="Rec. '+ano+' '+MESES_ABREV[i]+': '+brl(mAt.rec)+'"></div>'+
+                  badgeV(vR,true)+
+                '</div>'
+              : '')+
+              // Separador fino
+              '<div style="width:1px;height:8px;background:var(--border);align-self:center;margin:0 1px"></div>'+
+              // Despesas: anoAnt (claro) + ano (vivo)
+              (showDes?
+                '<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">'+
+                  (mA.des>0?'<div style="font-size:9px;font-weight:700;color:#FCA5A5;margin-bottom:2px;white-space:nowrap">'+fmtVal(mA.des)+'</div>':'')+
+                  '<div style="width:16px;height:'+bH(mA.des)+'px;background:#DC2626;opacity:.35;border-radius:3px 3px 0 0" title="Des. '+anoAnt+' '+MESES_ABREV[i]+': '+brl(mA.des)+'"></div>'+
+                '</div>'+
+                '<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">'+
+                  (mAt.des>0&&!futuro?'<div style="font-size:9px;font-weight:800;color:#B91C1C;margin-bottom:2px;white-space:nowrap">'+fmtVal(mAt.des)+'</div>':'')+
+                  '<div style="width:16px;height:'+bH(mAt.des)+'px;background:#DC2626;border-radius:3px 3px 0 0;'+(futuro?'opacity:.2':'')+'" title="Des. '+ano+' '+MESES_ABREV[i]+': '+brl(mAt.des)+'"></div>'+
+                  badgeV(vD,false)+
+                '</div>'
+              : '')+
+            '</div>'+
+            '<div style="font-size:10px;font-weight:700;color:var(--text-light);text-transform:uppercase;margin-top:8px;text-align:center">'+MESES_ABREV[i]+'</div>'+
+          '</div>';
+          }).join('')+
+        '</div>';
+      }
+
+      // Modo ano único
       return '<div style="display:flex;align-items:flex-end;gap:6px;height:240px;padding-top:32px">'+
         porMes.map(function(m,i){
           var rH=Math.max(4,Math.round(m.rec/maxBar*180));
@@ -529,14 +626,21 @@ async function carregar(){
       '</div>';
     }
 
-    var isMesUnico = _mesesSel.length===1;
-    var tituloGrafico = isMesUnico ? (MESES_FULL[_mesesSel[0]]+' — '+anoAnt+' × '+ano) : ('Receitas × Despesas — '+ano);
-    var legendaGrafico = isMesUnico
-      ? '<span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#16A34A;border-radius:4px;opacity:.4"></span>'+anoAnt+'</span>'+
-        '<span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#16A34A;border-radius:4px"></span>'+ano+' Rec.</span>'+
-        '<span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#DC2626;border-radius:4px"></span>'+ano+' Des.</span>'
-      : '<span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#16A34A;border-radius:4px"></span>Receitas</span>'+
-        '<span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#DC2626;border-radius:4px"></span>Despesas</span>';
+    var isMesUnico = !modoComparativo && _mesesSel.length===1;
+    var tituloGrafico = modoComparativo
+      ? ('Comparativo '+anoAnt+' × '+ano+(_mesesSel.length>0?' — '+_mesesSel.map(function(m){return MESES_ABREV[m];}).join(', '):''))
+      : (isMesUnico ? (MESES_FULL[_mesesSel[0]]+' — '+anoAnt+' × '+ano) : ('Receitas × Despesas — '+ano));
+    var legendaGrafico = modoComparativo
+      ? '<span style="display:flex;align-items:center;gap:5px;font-weight:700"><span style="display:inline-block;width:12px;height:12px;background:#16A34A;border-radius:3px;opacity:.4"></span>Rec. '+anoAnt+'</span>'+
+        '<span style="display:flex;align-items:center;gap:5px;font-weight:700"><span style="display:inline-block;width:12px;height:12px;background:#16A34A;border-radius:3px"></span>Rec. '+ano+'</span>'+
+        '<span style="display:flex;align-items:center;gap:5px;font-weight:700"><span style="display:inline-block;width:12px;height:12px;background:#DC2626;border-radius:3px;opacity:.4"></span>Des. '+anoAnt+'</span>'+
+        '<span style="display:flex;align-items:center;gap:5px;font-weight:700"><span style="display:inline-block;width:12px;height:12px;background:#DC2626;border-radius:3px"></span>Des. '+ano+'</span>'
+      : (isMesUnico
+          ? '<span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#16A34A;border-radius:4px;opacity:.4"></span>'+anoAnt+'</span>'+
+            '<span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#16A34A;border-radius:4px"></span>'+ano+' Rec.</span>'+
+            '<span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#DC2626;border-radius:4px"></span>'+ano+' Des.</span>'
+          : '<span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#16A34A;border-radius:4px"></span>Receitas</span>'+
+            '<span style="display:flex;align-items:center;gap:7px;font-weight:700"><span style="display:inline-block;width:14px;height:14px;background:#DC2626;border-radius:4px"></span>Despesas</span>');
 
     document.getElementById('conteudo').innerHTML = `
       <!-- KPIs -->
@@ -606,7 +710,7 @@ async function carregar(){
             ${legendaGrafico}
           </div>
         </div>
-        ${isMesUnico ? buildGraficoComparativo() : buildGraficoAnual()}
+        ${buildGraficoAnual()}
       </div>
 
       <!-- COMPARATIVO CATEGORIA + SUBCATEGORIA POR MÊS -->
