@@ -326,6 +326,7 @@ function atualizarBotoesAno(){
   if(btP){ btP.style.background=_anosAtivos.includes(_anoHoje-1)?ativo:inativo; btP.style.color=_anosAtivos.includes(_anoHoje-1)?ativoC:inativoC; }
   if(btC){ btC.style.background=_anosAtivos.includes(_anoHoje)?ativo:inativo;   btC.style.color=_anosAtivos.includes(_anoHoje)?ativoC:inativoC; }
 }
+function toggleTipo(tipo){
   _tipoFiltro = _tipoFiltro === tipo ? 'ambos' : tipo;
   var btR = document.getElementById('bt-receita');
   var btD = document.getElementById('bt-despesa');
