@@ -169,6 +169,7 @@
     <div class="topbar-left">
       <h1 id="condo-nome">Dashboard</h1>
       <p id="data-hoje">Carregando...</p>
+      <p id="saudacao-usuario" style="font-size:0.8rem; font-weight:600; color:var(--gold); margin-top:2px;"></p>
     </div>
     <div class="topbar-right">
       <a href="/sindico/chamados.html" class="btn-sm btn-ghost-sm">Ver chamados</a>
@@ -263,6 +264,13 @@
   const iniciais = (perfil.nome || session.user.email).split(' ').slice(0,2).map(p=>p[0].toUpperCase()).join('')
   document.getElementById('avatar-initials').textContent = iniciais
   document.getElementById('data-hoje').textContent = new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' })
+
+  // Saudação personalizada
+  const primeiroNome = (perfil.nome || session.user.email).split(' ')[0]
+  const hora = new Date().getHours()
+  const periodo = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite'
+  document.getElementById('saudacao-usuario').textContent = `${periodo}, ${primeiroNome}! 👋`
+
   window.fazerLogout = async () => { await supabase.auth.signOut(); window.location.href = 'login.html' }
 
   // Busca condomínios onde o síndico está vinculado
